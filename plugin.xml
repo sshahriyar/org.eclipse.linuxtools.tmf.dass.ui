@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="org.eclipse.linuxtools.tmf.totalids.ui"
+            class="org.eclipse.linuxtools.tmf.totalids.ui.AnomalyDetection"
+            icon="icons/sample.gif"
+            id="org.eclipse.linuxtools.tmf.totalids.ui.ADS01"
+            name="Anomaly Detection"
+            restorable="true">
+      </view>
+      <category
+            id="org.eclipse.linuxtools.tmf.totalids.ui"
+            name="Automated Anomaly Detection">
+      </category>
+   </extension>
+
+</plugin>

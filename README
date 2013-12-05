@@ -1,0 +1,3 @@
+TotlalIDS is an intrusion detection software in Java and available as en eclipse  plugin.
+It can detect anomalous behaviour of software systems by using only nomral behaviour and by using both normal and anomalous behaviour.
+It is both an ADS and IDS for a host. 
