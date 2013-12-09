@@ -14,71 +14,98 @@ public class Controller {
 	public Controller(){
 		models= new ArrayList<IDetectionModels>();
 	}
-	/**
-	 * 
-	 * @param file
-	 * @return
-	 */
-	private StringBuilder getTrace(File file){
-		
-		 String filePath=file.getPath();
-		 StringBuilder traceBuffer= new StringBuilder();
-		 CtfTmfTrace  fTrace = new CtfTmfTrace();
-	
-		 try {
-	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
-	      } catch (TmfTraceException e) {
-	            /* Should not happen if tracesExist() passed */
-	            throw new RuntimeException(e);
-	      }
-	      
-		 	 
-    	 TraceReader input = new TraceReader(fTrace,traceBuffer);
-    	 input.readTrace();
-    	 fTrace.dispose();
-    	 return traceBuffer;
-	}
+
 	/**
 	 * 
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
 	public void trainModels(String trainDirectory) throws Exception{
-		File traces=new File(trainDirectory);
-		File []fileList;
+		
 		Boolean isLastTrace=false;
-		if (traces.isDirectory())
-	            fileList=traces.listFiles();
-	    else{
-	            fileList= new File[1];
-	            fileList[0]=traces;
-	    }
-		
-		
+		File fileList[]=getDirectoryHandler(trainDirectory);
+		 TraceReader input = new TraceReader();
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
-			 StringBuilder trace=this.getTrace(fileList[trcCnt]);
+			 StringBuilder trace=input.getTrace(fileList[trcCnt]);
 			 
-			 /** Getting char representation in memory of StringBuilder trace  
-			  * to avoid extra memory consumption and making it final to avoid 
-			  * any manipulation from models  */ 
-			 //String.class.getDeclaredField("value");
-			 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
-			 field.setAccessible(true);
-			 final char[] traceChar = (char[]) field.get(trace);
-			 
-			 if (trcCnt==fileList.length-1)
-				 isLastTrace=true;
-				 
-			 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
-				IDetectionModels model= models.get(modlCnt);
-				model.train(traceChar, isLastTrace);
-				 
-			 }
+			 if (trace.length()>0){
+					 /** Getting char representation in memory of StringBuilder trace  
+					  * to avoid extra memory consumption and making it final to avoid 
+					  * any manipulation from models  */ 
+					 //String.class.getDeclaredField("value");
+					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+					 field.setAccessible(true);
+					 final char[] traceChar = (char[]) field.get(trace);
+					 
+					 if (trcCnt==fileList.length-1)
+						 isLastTrace=true;
+						 
+					 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
+						IDetectionModels model= models.get(modlCnt);
+						model.train(traceChar, isLastTrace);
+						 
+					 }
+			}
 		}
 		
 		
 	}
+	
+public void validateModels(String validationDirectory) throws Exception{
+		
+		
+		File fileList[]=getDirectoryHandler(validationDirectory);
+		TraceReader input = new TraceReader();
+		
+		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
+			 // get the trace
+			 StringBuilder trace=input.getTrace(fileList[trcCnt]);
+			
+			 if (trace.length()>0){ 
+					 /** Getting char representation in memory of StringBuilder trace  
+					  * to avoid extra memory consumption and making it final to avoid 
+					  * any manipulation from models  */ 
+					 //String.class.getDeclaredField("value");
+					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+					 field.setAccessible(true);
+					 final char[] traceChar = (char[]) field.get(trace);
+								 
+					 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
+						IDetectionModels model= models.get(modlCnt);
+						if (model.isValidationAllowed())
+							model.validate(traceChar);
+						 
+					 }
+			}
+		}
+		
+		
+	}
+
+/**
+ * 
+ * @param traceFilePath
+ */
+public void testTraceUsingModels(String traceFilePath) throws Exception{
+	
+	 TraceReader input = new TraceReader();
+	 StringBuilder trace=input.getTrace(new File(traceFilePath));
+	 
+	 /** Getting char representation in memory of StringBuilder trace  
+	  * to avoid extra memory consumption and making it final to avoid 
+	  * any manipulation from models  */ 
+	 //String.class.getDeclaredField("value");
+	 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+	 field.setAccessible(true);
+	 final char[] traceChar = (char[]) field.get(trace);
+				 
+	 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
+		IDetectionModels model= models.get(modlCnt);
+		model.test(traceChar,traceFilePath);
+		 
+	 }
+}
 	/**
 	 * 
 	 * @param model
@@ -101,6 +128,24 @@ public class Controller {
 	public void removeAllModels(){
 		 models.clear();
 	}
+	/**
+	 * 
+	 * @param trainDirectory
+	 * @return
+	 */
+	private File[] getDirectoryHandler(String trainDirectory){
+		File traces=new File(trainDirectory);
+		File []fileList;
+		
+		
+		if (traces.isDirectory())
+	            fileList=traces.listFiles();
+	    else{
+	            fileList= new File[1];
+	            fileList[0]=traces;
+	    }
+		return fileList;
+	}
 	
 	public static void main (String args[]){
 		 //StringBuilder trace= new StringBuilder();
@@ -112,10 +157,18 @@ public class Controller {
 		//String trainDirectory="/home/umroot/experiments/workspace/tmf-ads/org.eclipse.linuxtools"
 			//	+ "/lttng/org.eclipse.linuxtools.ctf.core.tests/traces/";
 		String trainDirectory="/home/umroot/lttng-traces/trace1-session-20131121-150203/";
+		String validationDirectory="/home/umroot/experiments/workspace/tmf-ads/org.eclipse.linuxtools"
+					+ "/lttng/org.eclipse.linuxtools.ctf.core.tests/traces/kl/kernel";
         Controller ctrl=new Controller();
-        ctrl.addModels(new KernelStateModeling());
+       
         try {
-			ctrl.trainModels(trainDirectory);
+        	DBMS conn= new  DBMS();
+        	 ctrl.addModels(new KernelStateModeling(conn));
+        	// ctrl.trainModels(trainDirectory);
+        	 //ctrl.validateModels(validationDirectory);
+        	 ctrl.testTraceUsingModels(validationDirectory);
+        	 conn.closeConnection();
+        	 System.out.println("Done");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

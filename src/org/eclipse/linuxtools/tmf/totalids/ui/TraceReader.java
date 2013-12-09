@@ -1,6 +1,8 @@
 package org.eclipse.linuxtools.tmf.totalids.ui;
 
 
+import java.io.File;
+
 import org.eclipse.linuxtools.lttng2.kernel.core.*;
 import org.eclipse.linuxtools.ctf.core.trace.CTFReaderException;
 import org.eclipse.linuxtools.ctf.core.trace.CTFTrace;
@@ -20,8 +22,7 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
 public class TraceReader   {
 	
            
-    CtfTmfTrace trace=null;
-    StringBuilder traceBuffer=null;
+    
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
@@ -29,27 +30,50 @@ public class TraceReader   {
     /**
      * Instantiate a new trace reader
      *
-     * @param trace
-     *            The CTF trace
      */
-    public TraceReader(CtfTmfTrace trace, StringBuilder buffer) {
-          this.trace=trace;
-          this.traceBuffer=buffer;
+    public TraceReader() {
+          //this.trace=trace;
+          //this.traceBuffer=buffer;
     }
+
+	/**
+	 * 
+	 * @param file
+	 * @return
+	 */
+	public StringBuilder getTrace(File file) throws Exception{
+		
+		 String filePath=file.getPath();
+		 StringBuilder traceBuffer= new StringBuilder();
+		 CtfTmfTrace  fTrace = new CtfTmfTrace();
+	
+		 try {
+	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
+	      } catch (TmfTraceException e) {
+	            /* Should not happen if tracesExist() passed */
+	            throw new RuntimeException(e);
+	      }
+	      
+		 	 
+    	 //TraceReader input = new TraceReader(fTrace,traceBuffer);
+    	 readTrace(fTrace,traceBuffer);
+    	 fTrace.dispose();
+    	 return traceBuffer;
+	}
 
     
 /**
  * Reads the trace
  * 
  */
-   public void readTrace(){
+   private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer) throws Exception{
     	
     	CtfIterator traceIterator=trace.createIterator();
     	 
     	while (traceIterator.advance()){
     		
     		CtfTmfEvent event = traceIterator.getCurrentEvent();
-    		handleEvents(event);
+    		handleEvents(event, traceBuffer);
     		   		 
     		
     	}
@@ -60,15 +84,15 @@ public class TraceReader   {
     * @param event
     */			
 
-private void handleEvents(CtfTmfEvent event){
+private void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
 	String eventName=event.getEventName();
 	
-	if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)
-            || eventName.startsWith(LttngStrings.COMPAT_SYSCALL_PREFIX)) {
-					handleSysCallEntryEvent(event);
+	if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
+          //  || eventName.startsWith(LttngStrings.COMPAT_SYSCALL_PREFIX)) {
+					handleSysCallEntryEvent(event, traceBuffer);
 					
 	 }
-	/*not needed right now, may be in the future it will be cuncommented
+	/*not needed right now, may be in the future it will be uncommented
 	 * else if (eventName.equals(LttngStrings.EXIT_SYSCALL)){
 					handleSysExitEvent(event);
 	}*/
@@ -79,7 +103,7 @@ private void handleEvents(CtfTmfEvent event){
  * This is an event handler for system call exit event
  * @param event
  */
-private void handleSysExitEvent(CtfTmfEvent event){
+private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
 	ITmfEventField content = event.getContent();
 	ITmfEventField returnVal=content.getField("ret");
 	System.out.println("Ret: "+returnVal.getValue()); 
@@ -90,23 +114,15 @@ private void handleSysExitEvent(CtfTmfEvent event){
  * This is an event handler for System call events 
  * @param event
  */
-private void handleSysCallEntryEvent(CtfTmfEvent event){
+private void handleSysCallEntryEvent(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
 	String eventName=event.getEventName();
 	//System.out.println(eventName);
-	
-	traceBuffer.append(eventName).append("\n");
-}
-
-public static void main (String args[]){
-	 //StringBuilder trace= new StringBuilder();
-	 /*CtfTmfTestTrace testTrace = CtfTmfTestTrace.KERNEL;
-	 TraceReader input = new TraceReader(testTrace.getTrace(),trace);
-	 input.readTrace();
-	 System.out.println(trace.toString());*/
-	
-	
-	 
-
+	Integer id=MapSysCallNameToID.getSysCallID(eventName.trim());
+	if (id==null){
+		//throw new Exception("System call not found in the map: "+eventName);
+		id=-1;
+	}
+	traceBuffer.append(id).append("\n");
 }
 
 
