@@ -66,7 +66,7 @@ public class TraceReader   {
  * Reads the trace
  * 
  */
-   private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer) throws Exception{
+   private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer){
     	
     	CtfIterator traceIterator=trace.createIterator();
     	 
@@ -84,7 +84,7 @@ public class TraceReader   {
     * @param event
     */			
 
-private void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
+public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
 	String eventName=event.getEventName();
 	
 	if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
@@ -103,7 +103,7 @@ private void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) throws E
  * This is an event handler for system call exit event
  * @param event
  */
-private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
+private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
 	ITmfEventField content = event.getContent();
 	ITmfEventField returnVal=content.getField("ret");
 	System.out.println("Ret: "+returnVal.getValue()); 
@@ -114,7 +114,7 @@ private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) th
  * This is an event handler for System call events 
  * @param event
  */
-private void handleSysCallEntryEvent(CtfTmfEvent event, StringBuilder traceBuffer) throws Exception{
+private void handleSysCallEntryEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
 	String eventName=event.getEventName();
 	//System.out.println(eventName);
 	Integer id=MapSysCallNameToID.getSysCallID(eventName.trim());

@@ -85,7 +85,7 @@ public class KernelStateModeling implements IDetectionModels {
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
 		Boolean isAnomaly=evaluateKSM(trace, alpha, testTrcStates);
-		isAnomaly=true;
+		
 		if (isAnomaly){
 			TestTraceInfo anomalyWhereabouts= new TestTraceInfo();
 			String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());

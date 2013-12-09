@@ -95,7 +95,7 @@ public void testTraceUsingModels(String traceFilePath) throws Exception{
 	 /** Getting char representation in memory of StringBuilder trace  
 	  * to avoid extra memory consumption and making it final to avoid 
 	  * any manipulation from models  */ 
-	 //String.class.getDeclaredField("value");
+	 
 	 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
 	 field.setAccessible(true);
 	 final char[] traceChar = (char[]) field.get(trace);
@@ -103,6 +103,28 @@ public void testTraceUsingModels(String traceFilePath) throws Exception{
 	 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
 		IDetectionModels model= models.get(modlCnt);
 		model.test(traceChar,traceFilePath);
+		 
+	 }
+}
+/**
+ * 
+ * @param traceBuffer
+ *           StringBuilder
+ */
+public void testTraceUsingModels(StringBuilder traceBuffer, String tracePath) throws Exception{
+	
+	 
+	 /** Getting char representation in memory of StringBuilder trace  
+	  * to avoid extra memory consumption and making it final to avoid 
+	  * any manipulation from models  */ 
+	 
+	 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+	 field.setAccessible(true);
+	 final char[] traceChar = (char[]) field.get(traceBuffer);
+				 
+	 for (int modlCnt=0; modlCnt<models.size();modlCnt++){
+		IDetectionModels model= models.get(modlCnt);
+		model.test(traceChar,tracePath);
 		 
 	 }
 }

@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.eclipse.linuxtools.internal.lttng2.kernel.core.LttngStrings;
+import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEvent;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
+import org.eclipse.linuxtools.tmf.core.event.ITmfEventType;
 import org.eclipse.linuxtools.tmf.core.event.TmfEvent;
 import org.eclipse.linuxtools.tmf.core.request.ITmfDataRequest.ExecutionType;
 import org.eclipse.linuxtools.tmf.core.request.TmfEventRequest;
@@ -43,6 +46,7 @@ public class AnomalyDetection extends TmfView {
 	@Override
 	public void createPartControl(Composite parent) {
 		// TODO Auto-generated method stub
+	
 		chart = new Chart(parent, SWT.BORDER);
         chart.getTitle().setVisible(false);
         chart.getAxisSet().getXAxis(0).getTitle().setText(X_AXIS_TITLE);
@@ -50,24 +54,14 @@ public class AnomalyDetection extends TmfView {
         chart.getSeriesSet().createSeries(SeriesType.LINE, SERIES_NAME);
         chart.getLegend().setVisible(false);
         chart.getAxisSet().getXAxis(0).getTick().setFormat(new TmfTimestampFormat());
+        
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         }
        
-        String trainDirectory="/home/umroot/lttng-traces/trace1-session-20131121-150203/";
-        
+         
        
-        try {
-        	 Controller ctrl=new Controller();
-        	 DBMS dbConnection=new DBMS();
-             ctrl.addModels(new KernelStateModeling(dbConnection));
-			 ctrl.trainModels(trainDirectory);
-			 dbConnection.closeConnection();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -79,73 +73,73 @@ public class AnomalyDetection extends TmfView {
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
         // Don't populate the view again if we're already showing this trace
-       // if (currentTrace == signal.getTrace()) {
-        //    return;
-        //}
+        if (currentTrace == signal.getTrace()) {
+            return;
+        }
         currentTrace = signal.getTrace();
-        System.out.println("**************************Hello");
+     
         // Create the request to get data from the trace
 
         TmfEventRequest req = new TmfEventRequest(TmfEvent.class,
                 TmfTimeRange.ETERNITY, TmfEventRequest.ALL_DATA,
                 ExecutionType.BACKGROUND) {
-						        	 ArrayList<Double> xValues = new ArrayList<Double>();
-						             ArrayList<Double> yValues = new ArrayList<Double>();
-						             private double maxY = -Double.MAX_VALUE;
-						             private double minY = Double.MAX_VALUE;
-						             private double maxX = -Double.MAX_VALUE;
-						             private double minX = Double.MAX_VALUE;
+        							StringBuilder traceBuffer= new StringBuilder();
+        							TraceReader tracetoBuffer=new TraceReader();
+        							String tracePath="";
+						        	
 
 						            @Override
 						            public void handleData(ITmfEvent data) {
 						            	  super.handleData(data);
 						            	  //System.out.println("***"+data.getContent().getName());
-						            	  System.out.println("***"+data.getContent().getName()+ " "+data.getContent().getValue());
-						            	  String []fieldNames=data.getContent().getFieldNames();
-						            	  for (int i=0; i<fieldNames.length;i++)
-						            		  System.out.println("***"+fieldNames[i].toString());
+						            	  //System.out.println("***"+data.getContent().getName()+ " "+data.getContent().getValue()
+						            		//	  + " "+data.getContent().getField(FIELD));
+						            	 ITmfEventType events= data.getType();
+						            	 data.getTrace();
+						            	 tracetoBuffer.handleEvents((CtfTmfEvent)data, traceBuffer);
+						            	 
+						            	 if (tracePath.isEmpty()){
+						            		 tracePath=data.getTrace().getPath();
+						            		  System.out.println(data.getTrace().getPath());
+						            	 }
+						            		  
+						            					            	 
+						            	/*String []fieldNames=data.getContent().getFieldNames();
+						            	for (int i=0; i < fieldNames.length;i++)
+						            		System.out.println(fieldNames[i]);*/
 						            	  
-						            	  ITmfEventField field = data.getContent().getField(FIELD);
-						                //  field=null;
-						                  if (field != null) {
-						                	  System.out.println("*********"+field.getValue());
-						                      Double yValue = (Double) field.getValue();
-						                      minY = Math.min(minY, yValue);
-						                      maxY = Math.max(maxY, yValue);
-						                      yValues.add(yValue);
-
-						                      double xValue = (double) data.getTimestamp().getValue();
-						                      xValues.add(xValue);
-						                      minX = Math.min(minX, xValue);
-						                      maxX = Math.max(maxX, xValue);
-						                  }
+						            //	  ITmfEventField field = data.getContent().getField(FIELD);
+						             
+						              //    if (field != null) 
+						                //	  System.out.println("*********"+field.getValue());
+						             
+						                   
 						            }
 						
 						            @Override
 						            public void handleSuccess() {
 						            	super.handleSuccess();
-						                final double x[] = toArray(xValues);
-						                final double y[] = toArray(yValues);
-
+						               
 						                // This part needs to run on the UI thread since it updates the chart SWT control
 						                Display.getDefault().asyncExec(new Runnable() {
 
 						                    @Override
 						                    public void run() {
-						                        chart.getSeriesSet().getSeries()[0].setXSeries(x);
-						                        chart.getSeriesSet().getSeries()[0].setYSeries(y);
-
-						                        // Set the new range
-						                        if (!xValues.isEmpty() && !yValues.isEmpty()) {
-						                            chart.getAxisSet().getXAxis(0).setRange(new Range(0, x[x.length - 1]));
-						                            chart.getAxisSet().getYAxis(0).setRange(new Range(minY, maxY));
-						                        } else {
-						                            chart.getAxisSet().getXAxis(0).setRange(new Range(0, 1));
-						                            chart.getAxisSet().getYAxis(0).setRange(new Range(0, 1));
-						                        }
-						                        chart.getAxisSet().adjustRange();
-
-						                        chart.redraw();
+						                    	try{
+							                    	Controller ctrl=new Controller();
+							                    	DBMS conn= new  DBMS();
+							                   	    ctrl.addModels(new KernelStateModeling(conn));
+							                   	   // ctrl.trainModels(trainDirectory);
+							                   	   //ctrl.validateModels(validationDirectory);
+							                   	   ctrl.testTraceUsingModels(traceBuffer,tracePath);
+							                   	   conn.closeConnection();
+							                   	   System.out.println("Done");
+							                   	   
+						                    	}catch (Exception ex){
+						                    		ex.printStackTrace();
+						                    	}
+						                    	
+						                      
 						                    }
 						                });
 						            }
@@ -156,20 +150,10 @@ public class AnomalyDetection extends TmfView {
 						                super.handleFailure();
 						            }
 						            
-						            /**
-						             * Convert List<Double> to double[]
-						             */
-						            private double[] toArray(List<Double> list) {
-						                double[] d = new double[list.size()];
-						                for (int i = 0; i < list.size(); ++i) {
-						                    d[i] = list.get(i);
-						                }
-
-						                return d;
-						            }
+						          
         		};
         		
-       /// 		
+      
         ITmfTrace trace = signal.getTrace();
         trace.sendRequest(req);
     }
