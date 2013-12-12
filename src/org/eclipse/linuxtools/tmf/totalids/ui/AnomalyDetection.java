@@ -21,9 +21,13 @@ import org.eclipse.linuxtools.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.linuxtools.tmf.core.timestamp.TmfTimestampFormat;
 import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
+import org.eclipse.linuxtools.tmf.ui.views.uml2sd.DiagramToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ViewPart;
 import org.swtchart.Chart;
 import org.swtchart.ISeries.SeriesType;
@@ -37,6 +41,7 @@ public class AnomalyDetection extends TmfView {
 	    private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalids.ui.ADS01";
 	    private Chart chart;
 	    private ITmfTrace currentTrace;
+	    compDetective comp;
 	    
 	public AnomalyDetection() {
 		super(VIEW_ID);
@@ -46,14 +51,26 @@ public class AnomalyDetection extends TmfView {
 	@Override
 	public void createPartControl(Composite parent) {
 		// TODO Auto-generated method stub
-	
-		chart = new Chart(parent, SWT.BORDER);
+		//Display display=new Display(parent);
+	    //Shell shell =new Shell();
+		compDetective  comp=new compDetective(parent,SWT.NONE);
+		//comp.layout(true);
+		comp.pack();
+		//parent.pack();
+		/* Composite c = new Composite(parent, SWT.NONE);
+	        GridLayout cLayout = new GridLayout();
+	        cLayout.numColumns = 2;
+	        cLayout.marginWidth = 0;
+	        cLayout.marginHeight = 0;
+	        c.setLayout(cLayout);
+    */
+	/*	chart = new Chart(parent, SWT.BORDER);
         chart.getTitle().setVisible(false);
         chart.getAxisSet().getXAxis(0).getTitle().setText(X_AXIS_TITLE);
         chart.getAxisSet().getYAxis(0).getTitle().setText(Y_AXIS_TITLE);
         chart.getSeriesSet().createSeries(SeriesType.LINE, SERIES_NAME);
         chart.getLegend().setVisible(false);
-        chart.getAxisSet().getXAxis(0).getTick().setFormat(new TmfTimestampFormat());
+        chart.getAxisSet().getXAxis(0).getTick().setFormat(new TmfTimestampFormat());*/
         
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
@@ -67,7 +84,9 @@ public class AnomalyDetection extends TmfView {
 	@Override
 	public void setFocus() {
 		// TODO Auto-generated method stub
-		chart.setFocus();
+		//chart.setFocus();
+		//comp.setFocus();
+		//comp.setFocus();
 	}
 	
 	@TmfSignalHandler
