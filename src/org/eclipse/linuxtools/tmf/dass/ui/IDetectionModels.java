@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalids.ui;
+package org.eclipse.linuxtools.tmf.dass.ui;
 /** Each model should implement the functions of this interface*/
 public interface IDetectionModels {
 

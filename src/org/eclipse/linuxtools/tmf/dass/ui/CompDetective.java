@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalids.ui;
+package org.eclipse.linuxtools.tmf.dass.ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,7 +40,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.TableItem;
 
-public class compDetective extends Composite {
+public class CompDetective extends Composite {
 	private Table tblDetailsAnomHist;
 	private Text txtDetailsIdentify;
 	private Text txtDetailsAnomalyDetails;
@@ -59,7 +59,7 @@ public class compDetective extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	public compDetective(Composite parent, int style) {
+	public CompDetective(Composite parent, int style) {
 		super(parent, style);
 		setLayout(new FillLayout(SWT.HORIZONTAL));
 		
@@ -390,7 +390,7 @@ public class compDetective extends Composite {
 	        shell.setSize(250, 200);
 
 	       //center(shell);
-	        compDetective det=new compDetective(shell, SWT.BORDER);
+	        CompDetective det=new CompDetective(shell, SWT.BORDER);
 	      
 	        /// centre
 	        org.eclipse.swt.graphics.Rectangle bds = shell.getDisplay().getBounds();

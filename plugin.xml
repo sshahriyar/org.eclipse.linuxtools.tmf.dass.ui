@@ -5,7 +5,7 @@
          point="org.eclipse.ui.views">
       <view
             category="org.eclipse.linuxtools.tmf.totalids.ui"
-            class="org.eclipse.linuxtools.tmf.totalids.ui.AnomalyDetection"
+            class="org.eclipse.linuxtools.tmf.dass.ui.AnomalyDetection"
             icon="icons/sample.gif"
             id="org.eclipse.linuxtools.tmf.totalids.ui.ADS01"
             name="Anomaly Detection"

@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalids.ui;
+package org.eclipse.linuxtools.tmf.dass.ui;
 
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
@@ -12,8 +12,9 @@ import org.eclipse.linuxtools.tmf.core.event.ITmfEvent;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventType;
 import org.eclipse.linuxtools.tmf.core.event.TmfEvent;
-import org.eclipse.linuxtools.tmf.core.request.ITmfDataRequest.ExecutionType;
+import org.eclipse.linuxtools.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.linuxtools.tmf.core.request.TmfEventRequest;
+//import org.eclipse.linuxtools.tmf.tests.stubs.request.TmfEventRequestStub;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTimestampFormatUpdateSignal;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
@@ -41,7 +42,7 @@ public class AnomalyDetection extends TmfView {
 	    private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalids.ui.ADS01";
 	    private Chart chart;
 	    private ITmfTrace currentTrace;
-	    compDetective comp;
+	    CompDetective comp;
 	    
 	public AnomalyDetection() {
 		super(VIEW_ID);
@@ -53,7 +54,7 @@ public class AnomalyDetection extends TmfView {
 		// TODO Auto-generated method stub
 		//Display display=new Display(parent);
 	    //Shell shell =new Shell();
-		compDetective  comp=new compDetective(parent,SWT.NONE);
+		CompDetective  comp=new CompDetective(parent,SWT.NONE);
 		//comp.layout(true);
 		comp.pack();
 		//parent.pack();
@@ -100,8 +101,10 @@ public class AnomalyDetection extends TmfView {
         // Create the request to get data from the trace
 
         TmfEventRequest req = new TmfEventRequest(TmfEvent.class,
-                TmfTimeRange.ETERNITY, TmfEventRequest.ALL_DATA,
-                ExecutionType.BACKGROUND) {
+                TmfTimeRange.ETERNITY, 0, TmfEventRequest.ALL_DATA,
+                ExecutionType.BACKGROUND)
+        //TmfEventRequest req = new TmfEventRequest(TmfEvent.class)
+        							{
         							StringBuilder traceBuffer= new StringBuilder();
         							TraceReader tracetoBuffer=new TraceReader();
         							String tracePath="";

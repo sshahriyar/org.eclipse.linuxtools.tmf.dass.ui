@@ -1,0 +1,13 @@
+GUI development--automatic resizing
+
+
+Help Install New Software
+Install Maven for Eclipse (not web)
+Install MyMylyn-Wikitext plugin
+
+Product Run
+org.eclipse.linuxtools.tracing.rcp.product
+Go to RUn Configurations
+Click on tracing.product 
+clink on pluginds tab
+Select all workspace and enabled target-plugins
