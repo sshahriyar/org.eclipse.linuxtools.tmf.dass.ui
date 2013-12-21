@@ -56,7 +56,7 @@ public class AnomalyDetection extends TmfView {
 	    //Shell shell =new Shell();
 		CompDetective  comp=new CompDetective(parent,SWT.NONE);
 		//comp.layout(true);
-		comp.pack();
+		//comp.pack();
 		//parent.pack();
 		/* Composite c = new Composite(parent, SWT.NONE);
 	        GridLayout cLayout = new GridLayout();
