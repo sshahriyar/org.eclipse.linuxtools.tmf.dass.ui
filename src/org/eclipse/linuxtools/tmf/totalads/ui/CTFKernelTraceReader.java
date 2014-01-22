@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 
 import java.io.File;
@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
  * Class to read CTF traces by using CtfTmfTrace class.
  * @author Syed Shariyar Murtaza 
  */
-public class TraceReader   {
+public class CTFKernelTraceReader implements ITraceTypeReader   {
 	
            
     
@@ -31,11 +31,27 @@ public class TraceReader   {
      * Instantiate a new trace reader
      *
      */
-    public TraceReader() {
+    public CTFKernelTraceReader() {
           //this.trace=trace;
           //this.traceBuffer=buffer;
     }
 
+    @Override
+    public ITraceTypeReader createInstance(){
+    	return null;
+    }
+    /**
+     * 
+     */
+    public static void registerTraceTypeReader(){
+    	
+    }
+    /**
+     * 
+     */
+    public String getName(){
+    	return "CTF Kernel Reader";
+    }
 	/**
 	 * 
 	 * @param file

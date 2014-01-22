@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 import java.util.HashMap;;
 public class MapSysCallNameToID {
 private static HashMap<String, Integer> sysCallToID;

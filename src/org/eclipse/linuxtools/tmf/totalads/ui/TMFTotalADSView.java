@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
@@ -34,17 +34,17 @@ import org.swtchart.Chart;
 import org.swtchart.ISeries.SeriesType;
 import org.swtchart.Range;
 
-public class AnomalyDetection extends TmfView {
+public class TMFTotalADSView extends TmfView {
 		private static final String SERIES_NAME = "Series";
 	    private static final String Y_AXIS_TITLE = "Signal";
 	    private static final String X_AXIS_TITLE = "Time";
 	    private static final String FIELD = "val"; // The name of the field that we want to display on the Y axis
-	    private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalids.ui.ADS01";
+	    private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.ADS01";
 	    private Chart chart;
 	    private ITmfTrace currentTrace;
-	    CompDetective comp;
+	    TotalADS comp;
 	    
-	public AnomalyDetection() {
+	public TMFTotalADSView() {
 		super(VIEW_ID);
 		// TODO Auto-generated constructor stub
 	}
@@ -54,7 +54,7 @@ public class AnomalyDetection extends TmfView {
 		// TODO Auto-generated method stub
 		//Display display=new Display(parent);
 	    //Shell shell =new Shell();
-		CompDetective  comp=new CompDetective(parent,SWT.NONE);
+		TotalADS  comp=new TotalADS(parent,SWT.NONE);
 		//comp.layout(true);
 		//comp.pack();
 		//parent.pack();

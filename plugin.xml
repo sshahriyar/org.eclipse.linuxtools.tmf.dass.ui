@@ -4,15 +4,15 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            category="org.eclipse.linuxtools.tmf.totalids.ui"
-            class="org.eclipse.linuxtools.tmf.dass.ui.AnomalyDetection"
+            category="org.eclipse.linuxtools.tmf.totalads.ui"
+            class="org.eclipse.linuxtools.tmf.totalads.ui.TMFTotalADSView"
             icon="icons/sample.gif"
-            id="org.eclipse.linuxtools.tmf.totalids.ui.ADS01"
-            name="Anomaly Detection"
+            id="org.eclipse.linuxtools.tmf.totalads.ui.ADS01"
+            name="Total Anomaly Detection System"
             restorable="true">
       </view>
       <category
-            id="org.eclipse.linuxtools.tmf.totalids.ui"
+            id="org.eclipse.linuxtools.tmf.totalads.ui"
             name="Automated Anomaly Detection">
       </category>
    </extension>

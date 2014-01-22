@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;

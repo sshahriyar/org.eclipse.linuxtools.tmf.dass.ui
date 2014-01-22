@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;

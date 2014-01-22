@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.dass.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Arrays;
 
 import org.eclipse.ui.testing.TestableObject;
+
+import sun.font.CreatedFontTracker;
 
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -71,7 +73,7 @@ public class KernelStateModeling implements IDetectionModels {
 						 break; // no need to increment alpha as there is no anomaly
 		    alpha+=0.02;
 	  }
-	   System.out.println("alpha"+alpha);
+	   System.out.println("alpha "+alpha);
 	}
 
 	@Override
@@ -96,6 +98,37 @@ public class KernelStateModeling implements IDetectionModels {
 		
 	}
 	
+	/**
+	 * Returns textual result
+	 */
+	public String textResult(){
+		return "";
+	}
+	/**
+	 * 
+	 */
+	public String getName(){
+		return "Kernel State Modeling (KSM)";
+	}
+	
+	/**
+	 * Returns chart object
+	 */
+	public org.swtchart.Chart graphicalResults(){
+		return null;
+	}
+	/** Returns an instance of KSM **/
+	public IDetectionModels createInstance() {
+		return new KernelStateModeling(Configuration.connection);
+	}
+	
+	/** Self registration of the model with the modelFactory **/
+	
+	public static void registerModel(){
+		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
+		KernelStateModeling ksm=new KernelStateModeling(Configuration.connection);
+		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,ksm);
+	}
 	/**
 	 * 
 	 * @param trace
