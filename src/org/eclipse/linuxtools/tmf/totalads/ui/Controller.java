@@ -24,7 +24,7 @@ public class Controller {
 		
 		Boolean isLastTrace=false;
 		File fileList[]=getDirectoryHandler(trainDirectory);
-		 TraceReader input = new TraceReader();
+		ITraceTypeReader input = new CTFKernelTraceReader();////------------------
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
 			 StringBuilder trace=input.getTrace(fileList[trcCnt]);
@@ -56,7 +56,7 @@ public void validateModels(String validationDirectory) throws Exception{
 		
 		
 		File fileList[]=getDirectoryHandler(validationDirectory);
-		TraceReader input = new TraceReader();
+		ITraceTypeReader input = new CTFKernelTraceReader();////------------------
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
@@ -89,7 +89,7 @@ public void validateModels(String validationDirectory) throws Exception{
  */
 public void testTraceUsingModels(String traceFilePath) throws Exception{
 	
-	 TraceReader input = new TraceReader();
+	 ITraceTypeReader input = new CTFKernelTraceReader();////------------------
 	 StringBuilder trace=input.getTrace(new File(traceFilePath));
 	 
 	 /** Getting char representation in memory of StringBuilder trace  

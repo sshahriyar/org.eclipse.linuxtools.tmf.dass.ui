@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 public class Diagnosis {
+	Table tblAnalysisTraceList;
 
 	public Diagnosis(CTabFolder tabFolderDetector){
 		
@@ -170,7 +171,7 @@ public class Diagnosis {
 		comptblTraceList.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,3,1));
 		
 		
-		Table tblAnalysisTraceList = new Table(comptblTraceList, SWT.BORDER | SWT.FULL_SELECTION|SWT.H_SCROLL|SWT.V_SCROLL);
+		tblAnalysisTraceList = new Table(comptblTraceList, SWT.BORDER | SWT.FULL_SELECTION|SWT.H_SCROLL|SWT.V_SCROLL);
 		tblAnalysisTraceList.setHeaderVisible(true);
 		tblAnalysisTraceList.setLinesVisible(true);
 		//tblAnalysisTraceList.setLayoutData(new GridData(400,tblAnalysisTraceList.getit*3));
@@ -213,5 +214,27 @@ public class Diagnosis {
 		 * End group trace selection
 		 */
 	}
+	
+	
+	/**
+	 * 
+	 * @param traceBuffer
+	 * @param tracePath
+	 * @param traceTypeName
+	 */
+	public void updateOnTraceSelection(StringBuilder traceBuffer,String tracePath, String traceTypeName){
+		tblAnalysisTraceList.removeAll();
+		String traceName=tracePath.substring(tracePath.lastIndexOf('/')+1, tracePath.length());
+		TableItem tableItemAnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
+		tableItemAnalysisAnomHistory.setText(new String[] {tracePath,  traceName});
+	
+//		Controller ctrl=new Controller();
+    	//DBMS conn= new  DBMS();
+   	    //ctrl.addModels(new KernelStateModeling(conn));
+   	    //ctrl.testTraceUsingModels(traceBuffer,tracePath);
+   	    //conn.closeConnection();
+   	
+	}
+
 
 }

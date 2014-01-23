@@ -36,19 +36,24 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
           //this.traceBuffer=buffer;
     }
 
+   // @Override
+    //public ITraceTypeReader createInstance(){
+   // 	return new CTFKernelTraceReader();
+    //}
+   /**
+    * 
+    * @throws Exception
+    */
+    
+    public static void registerTraceTypeReader() throws Exception{
+    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
+    	CTFKernelTraceReader kernelTraceReader=new CTFKernelTraceReader();
+    	trcTypFactory.registerModelWithFactory(kernelTraceReader.getName(), kernelTraceReader);
+    }
+    /**
+     * 
+     */
     @Override
-    public ITraceTypeReader createInstance(){
-    	return null;
-    }
-    /**
-     * 
-     */
-    public static void registerTraceTypeReader(){
-    	
-    }
-    /**
-     * 
-     */
     public String getName(){
     	return "CTF Kernel Reader";
     }
@@ -57,6 +62,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
 	 * @param file
 	 * @return
 	 */
+    @Override
 	public StringBuilder getTrace(File file) throws Exception{
 		
 		 String filePath=file.getPath();
@@ -82,6 +88,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
  * Reads the trace
  * 
  */
+    
    private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer){
     	
     	CtfIterator traceIterator=trace.createIterator();
@@ -99,7 +106,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     * This function dispatches each event to its appropriate handle
     * @param event
     */			
-
+@Override
 public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
 	String eventName=event.getEventName();
 	

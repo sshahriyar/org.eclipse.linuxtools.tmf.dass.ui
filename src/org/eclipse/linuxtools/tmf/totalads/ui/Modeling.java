@@ -28,7 +28,9 @@ public class Modeling {
 		comptbtmModeling.setLayout(gridTwoColumns);
 		
 		tbtmModeling.setControl(scrolCompModel);
+		
 		tracesAndModelingType(comptbtmModeling);
+		
 		ModelSelector mdlSelector=new ModelSelector(comptbtmModeling);
 			
 	    
@@ -74,5 +76,5 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
-
+	
 }

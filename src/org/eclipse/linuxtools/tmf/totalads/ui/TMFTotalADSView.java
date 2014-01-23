@@ -22,17 +22,11 @@ import org.eclipse.linuxtools.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.linuxtools.tmf.core.timestamp.TmfTimestampFormat;
 import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
-import org.eclipse.linuxtools.tmf.ui.views.uml2sd.DiagramToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.part.ViewPart;
 import org.swtchart.Chart;
-import org.swtchart.ISeries.SeriesType;
-import org.swtchart.Range;
+
 
 public class TMFTotalADSView extends TmfView {
 		private static final String SERIES_NAME = "Series";
@@ -54,7 +48,7 @@ public class TMFTotalADSView extends TmfView {
 		// TODO Auto-generated method stub
 		//Display display=new Display(parent);
 	    //Shell shell =new Shell();
-		TotalADS  comp=new TotalADS(parent,SWT.NONE);
+		 comp=new TotalADS(parent,SWT.NONE);
 		//comp.layout(true);
 		//comp.pack();
 		//parent.pack();
@@ -106,8 +100,11 @@ public class TMFTotalADSView extends TmfView {
         //TmfEventRequest req = new TmfEventRequest(TmfEvent.class)
         							{
         							StringBuilder traceBuffer= new StringBuilder();
-        							TraceReader tracetoBuffer=new TraceReader();
+        							Boolean isKernelSpace=true;
+        							ITraceTypeReader traceReader=TraceTypeFactory.getInstance().getCTFKernelorUserReader(isKernelSpace);
         							String tracePath="";
+        						
+        						
 						        	
 
 						            @Override
@@ -116,13 +113,13 @@ public class TMFTotalADSView extends TmfView {
 						            	  //System.out.println("***"+data.getContent().getName());
 						            	  //System.out.println("***"+data.getContent().getName()+ " "+data.getContent().getValue()
 						            		//	  + " "+data.getContent().getField(FIELD));
-						            	 ITmfEventType events= data.getType();
-						            	 data.getTrace();
-						            	 tracetoBuffer.handleEvents((CtfTmfEvent)data, traceBuffer);
+						            	 //ITmfEventType events= data.getType();
+						            	 //data.getTrace();
+						            	 traceReader.handleEvents((CtfTmfEvent)data, traceBuffer);
 						            	 
 						            	 if (tracePath.isEmpty()){
 						            		 tracePath=data.getTrace().getPath();
-						            		  System.out.println(data.getTrace().getPath());
+						            		 //System.out.println(data.getTrace().getPath());
 						            	 }
 						            		  
 						            					            	 
@@ -148,14 +145,8 @@ public class TMFTotalADSView extends TmfView {
 						                    @Override
 						                    public void run() {
 						                    	try{
-							                    	Controller ctrl=new Controller();
-							                    	DBMS conn= new  DBMS();
-							                   	    ctrl.addModels(new KernelStateModeling(conn));
-							                   	   // ctrl.trainModels(trainDirectory);
-							                   	   //ctrl.validateModels(validationDirectory);
-							                   	   ctrl.testTraceUsingModels(traceBuffer,tracePath);
-							                   	   conn.closeConnection();
-							                   	   System.out.println("Done");
+						                    		comp.notifyOnTraceSelection(traceBuffer, tracePath, traceReader.getName());
+							                        System.out.println("Done");
 							                   	   
 						                    	}catch (Exception ex){
 						                    		ex.printStackTrace();

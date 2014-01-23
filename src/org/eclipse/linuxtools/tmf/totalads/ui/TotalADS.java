@@ -2,45 +2,18 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.layout.FormLayout;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.layout.GridData;
-
-import swing2swt.layout.FlowLayout;
-import swing2swt.layout.BoxLayout;
-
-import org.eclipse.swt.custom.StackLayout;
-
-import swing2swt.layout.BorderLayout;
+import org.eclipse.swt.widgets.MessageBox;
 
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.widgets.Shell;
+
 //import org.eclipse.swt.custom.TableTree;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.custom.ScrolledComposite;
+
 
 //public class CompDetective extends Composite {
 public class TotalADS  {
@@ -53,8 +26,8 @@ public class TotalADS  {
 	private Text lblAnomaliesTest;
 	private Text txtAnomaliesProgress;
 	private Table tableClassificationPredictions;
-	
-	
+	private Modeling modeling=null;
+	private Diagnosis diagnosis=null;
 	
 	//GridData gridDataFullFill=new GridData(SWT.FILL, SWT.FILL, true, true );
 	//GridData gridDataHorizontalFill=new GridData(SWT.FILL, SWT.TOP, true, false );
@@ -66,27 +39,38 @@ public class TotalADS  {
 	 * @param style
 	 */
 	public TotalADS(Composite parent, int style) {
-	
-		ModelTypeFactory mod= ModelTypeFactory.getInstance();
-		mod.initialize();
 		
-		//super(parent, style);
-		parent.setLayout(new GridLayout(2,false));
+	  try{
+			ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
+			modFactory.initialize();
 		
-		leftPane(parent);
+			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
 		
-		CTabFolder tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
-		tabFolderDetector.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.horizontalSpan=1;
-		tabFolderDetector.setLayoutData(gridData);
+				trcTypeFactory.initialize();
+			
+			//super(parent, style);
+			parent.setLayout(new GridLayout(2,false));
+			
+			leftPane(parent);
+			
+			CTabFolder tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
+			tabFolderDetector.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+			GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+			gridData.horizontalSpan=1;
+			tabFolderDetector.setLayoutData(gridData);
+			
+			diagnosis=new Diagnosis(tabFolderDetector);
+			modeling =new Modeling(tabFolderDetector);	
 		
-		Diagnosis diagnosis=new Diagnosis(tabFolderDetector);
-		Modeling modeling =new Modeling(tabFolderDetector);	
-	
+			
+			tabFolderDetector.setFocus();
 		
-		tabFolderDetector.setFocus();
-
+	   } catch (Exception ex) {
+			// TODO Auto-generated catch block
+		   MessageBox msg=new MessageBox((Shell) parent,SWT.ICON_ERROR);
+		   msg.setMessage(ex.getMessage());
+		   ex.printStackTrace();
+		}
 
 	}
 	/**
@@ -107,22 +91,20 @@ public class TotalADS  {
 		
 	}
 
-	
-	//@Override
-//	protected void checkSubclass() {
-		// Disable the check that prevents subclassing of SWT components
-	//}
-	
-	//public void SWTApp(Display display) {
-	       
-	        
-	  //  }
-
+	/**
+	 * 
+	 * @param traceBuffer
+	 * @param tracePath
+	 * @param traceTypeName
+	 */
+	public void notifyOnTraceSelection(StringBuilder traceBuffer,String tracePath, String traceTypeName){
+		diagnosis.updateOnTraceSelection(traceBuffer,tracePath, traceTypeName);
+	}
 
 	   
 
 
-	    public static void main(String[] args) {
+  public static void main(String[] args) {
 	        Display display = new Display();
 	        org.eclipse.swt.widgets.Shell shell= new org.eclipse.swt.widgets.Shell(display);
 	        //shell.setText("Center");
