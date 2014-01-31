@@ -46,7 +46,7 @@ public class TotalADS  {
 		
 			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
 		
-				trcTypeFactory.initialize();
+			trcTypeFactory.initialize();
 			
 			//super(parent, style);
 			parent.setLayout(new GridLayout(2,false));
@@ -67,7 +67,7 @@ public class TotalADS  {
 		
 	   } catch (Exception ex) {
 			// TODO Auto-generated catch block
-		   MessageBox msg=new MessageBox((Shell) parent,SWT.ICON_ERROR);
+		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
 		   msg.setMessage(ex.getMessage());
 		   ex.printStackTrace();
 		}
@@ -97,8 +97,8 @@ public class TotalADS  {
 	 * @param tracePath
 	 * @param traceTypeName
 	 */
-	public void notifyOnTraceSelection(StringBuilder traceBuffer,String tracePath, String traceTypeName){
-		diagnosis.updateOnTraceSelection(traceBuffer,tracePath, traceTypeName);
+	public void notifyOnTraceSelection(char[] trace,String tracePath, String traceTypeName){
+		diagnosis.updateOnTraceSelection(trace,tracePath, traceTypeName);
 	}
 
 	   

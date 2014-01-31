@@ -9,5 +9,6 @@ public static final String collectionAnomalous="anomalousTraces";
 public static final String collectionAnomalyInfo="anomaliesHistory";
 public static final Boolean notCalledAtRuntime=true;
 public static DBMS connection;
+public static String selectedDB="";
 
 }

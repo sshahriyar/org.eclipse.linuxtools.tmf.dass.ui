@@ -9,6 +9,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class SystemController {
 
@@ -29,7 +31,21 @@ public class SystemController {
 		
 		
 		//tree
-		Tree treeAnomaliesSystems = new Tree(parent, SWT.BORDER | SWT.CHECK);
+		Tree treeAnomaliesSystems = new Tree(parent, SWT.BORDER | SWT.CHECK|SWT.SINGLE );
+		treeAnomaliesSystems.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TreeItem ti = (TreeItem) e.item;
+				int count=ti.getParent().getItemCount();
+				for (int idx=0;idx<count;idx++)
+						ti.getParent().getItem(idx).setChecked(false);
+				ti.setChecked(true);
+				Configuration.selectedDB=ti.getText();
+				
+				
+			}
+		});
+		treeAnomaliesSystems.setToolTipText("Please select one of the databases");
 		//treeAnomaliesSystems.setLayoutData(gridData);
 		treeAnomaliesSystems.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -40,7 +56,7 @@ public class SystemController {
 		TreeItem item2AnomS = new TreeItem(treeAnomaliesSystems, SWT.NONE);
 		item2AnomS.setText("Android-01s");
 		TreeItem item3AnomS = new TreeItem(treeAnomaliesSystems, SWT.NONE);
-		item3AnomS.setText("Host-Sys-01");
+		item3AnomS.setText("states");
 	}
 	
 	private Composite windowBuilderConfig(Composite parents){

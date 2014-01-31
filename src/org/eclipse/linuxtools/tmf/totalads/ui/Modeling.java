@@ -1,5 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import java.lang.reflect.Method;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -9,12 +11,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 
 public class Modeling {
 	
-	public Modeling(CTabFolder tabFolderDetector){
+	public Modeling(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		CTabItem tbtmModeling = new CTabItem(tabFolderDetector, SWT.NONE);
@@ -31,7 +34,10 @@ public class Modeling {
 		
 		tracesAndModelingType(comptbtmModeling);
 		
-		ModelSelector mdlSelector=new ModelSelector(comptbtmModeling);
+		Class []parameterTypes= new Class[1];
+		parameterTypes[0]=IDetectionModels[].class;
+		Method modelObserver=Modeling.class.getMethod("observeSelectedModels", parameterTypes);
+		ModelSelector mdlSelector=new ModelSelector(comptbtmModeling,this,modelObserver);
 			
 	    
 	    ProgressConsole progConsole=new ProgressConsole(comptbtmModeling);
@@ -77,4 +83,21 @@ public class Modeling {
 		 */
 	}
 	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public void observeSelectedModels(IDetectionModels []models){
+		
+		//TableItem []tblItem= tblAnalysisTraceList.getSelection();
+		//String trace=tblItem[0].getText(0);
+		//System.out.println(trace);
+		
+		for (int modlCount=0; modlCount<models.length;modlCount++){
+			System.out.println(models[modlCount].getName());
+		}
+		//return trace;
+		
+	}
 }

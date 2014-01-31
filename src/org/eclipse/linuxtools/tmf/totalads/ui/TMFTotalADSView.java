@@ -1,5 +1,6 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import java.lang.reflect.Field;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -145,7 +146,15 @@ public class TMFTotalADSView extends TmfView {
 						                    @Override
 						                    public void run() {
 						                    	try{
-						                    		comp.notifyOnTraceSelection(traceBuffer, tracePath, traceReader.getName());
+						                    		/** Getting char representation in memory of StringBuilder trace  
+						                    		  * to avoid extra memory consumption and making it final to avoid 
+						                    		  * any manipulation from models  */ 
+						                    		 
+						                    		 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+						                    		 field.setAccessible(true);
+						                    		 final char[] traceChar = (char[]) field.get(traceBuffer);
+						                    		 
+						                    		comp.notifyOnTraceSelection(traceChar, tracePath, traceReader.getName());
 							                        System.out.println("Done");
 							                   	   
 						                    	}catch (Exception ex){

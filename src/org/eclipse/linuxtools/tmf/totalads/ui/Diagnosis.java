@@ -1,5 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import java.lang.reflect.Method;
+
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.swt.SWT;
@@ -21,10 +23,12 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.sun.media.sound.ModelConnectionBlock;
+
 public class Diagnosis {
 	Table tblAnalysisTraceList;
 
-	public Diagnosis(CTabFolder tabFolderDetector){
+	public Diagnosis(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		
 		CTabItem tbtmAnalysis = new CTabItem(tabFolderDetector, SWT.NONE);
 		tbtmAnalysis.setText("Diagnosis");
@@ -42,8 +46,11 @@ public class Diagnosis {
 		
 		selectTracesAndDirectory(comptbtmAnalysis);
 		
+		Class []parameterTypes= new Class[1];
+		parameterTypes[0]=IDetectionModels[].class;
+		Method modelObserver=Diagnosis.class.getMethod("observeSelectedModels", parameterTypes);
 		
-		ModelSelector mdlSelector=new ModelSelector(comptbtmAnalysis);
+		ModelSelector mdlSelector=new ModelSelector(comptbtmAnalysis,this,modelObserver);
 		
 
 		resultsandFeedBack(comptbtmAnalysis);
@@ -222,7 +229,7 @@ public class Diagnosis {
 	 * @param tracePath
 	 * @param traceTypeName
 	 */
-	public void updateOnTraceSelection(StringBuilder traceBuffer,String tracePath, String traceTypeName){
+	public void updateOnTraceSelection(char []trace,String tracePath, String traceTypeName){
 		tblAnalysisTraceList.removeAll();
 		String traceName=tracePath.substring(tracePath.lastIndexOf('/')+1, tracePath.length());
 		TableItem tableItemAnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
@@ -234,6 +241,22 @@ public class Diagnosis {
    	    //ctrl.testTraceUsingModels(traceBuffer,tracePath);
    	    //conn.closeConnection();
    	
+	}
+	/**
+	 * 
+	 * @return
+	 */
+	public void observeSelectedModels(IDetectionModels []models){
+		
+		TableItem []tblItem= tblAnalysisTraceList.getSelection();
+		String trace=tblItem[0].getText(0);
+		System.out.println(trace);
+		
+		for (int modlCount=0; modlCount<models.length;modlCount++){
+			System.out.println(models[modlCount].getName());
+		}
+		//return trace;
+		
 	}
 
 
