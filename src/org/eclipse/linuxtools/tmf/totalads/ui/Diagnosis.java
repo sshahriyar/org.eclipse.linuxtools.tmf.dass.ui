@@ -117,7 +117,7 @@ public class Diagnosis {
 		Text txtAnalysisCurrentAnomaly= new Text(compResult,SWT.BORDER);
 		txtAnalysisCurrentAnomaly.setEditable(false);
 		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		txtAnalysisCurrentAnomaly.setText("Yes");
+		txtAnalysisCurrentAnomaly.setText("Stuxtnet-0XA");
 		
 		//Group "Feedback: Is it anomaly?"
 		Group grpAnalysisIdentify = new Group(grpAnalysisResults, SWT.NONE);
@@ -133,7 +133,7 @@ public class Diagnosis {
 		
 		Text txtAnalysisIdentify = new Text(grpAnalysisIdentify, SWT.BORDER);
 		txtAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		txtAnalysisIdentify.setEnabled(false);
+		txtAnalysisIdentify.setEnabled(true);
 		txtAnalysisIdentify.setText("Enter other type");
 		
 		CLabel lblAnalysisGrpEmpty = new CLabel(grpAnalysisIdentify, SWT.NONE);

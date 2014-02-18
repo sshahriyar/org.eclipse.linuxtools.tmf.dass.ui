@@ -51,7 +51,7 @@ public class TotalADS  {
 			//super(parent, style);
 			parent.setLayout(new GridLayout(2,false));
 			
-			leftPane(parent);
+			//leftPane(parent);
 			
 			CTabFolder tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
 			tabFolderDetector.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));

@@ -33,9 +33,9 @@ public class ModelSelector {
 		 */
 		
 		grpAnalysisModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
-		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
+		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,3));
 		grpAnalysisModelSelection.setLayout(new GridLayout(2,false));
-		grpAnalysisModelSelection.setText("Select Models");
+		grpAnalysisModelSelection.setText("Select a Model");
 		
 		treeAnalysisModels = new Tree(grpAnalysisModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 		treeAnalysisModels.setLinesVisible(true);
@@ -45,7 +45,7 @@ public class ModelSelector {
 		treeItmAnom.setText("Anomaly Detection");
 		
 		populateTreeItems(treeItmAnom,ModelTypeFactory.ModelTypes.Anomaly);
-		
+		treeItmAnom.setExpanded(true);
 		TreeItem treeItmClassf = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmClassf.setText("Classification");
 		populateTreeItems(treeItmClassf,ModelTypeFactory.ModelTypes.Classification);
@@ -54,7 +54,7 @@ public class ModelSelector {
 	    //item4.setText("Decision Tree");
 	    treeItmClassf.setExpanded(true);
 		
-		btnAnalysisEvaluateModels=new Button(grpAnalysisModelSelection, SWT.NONE);
+		/*btnAnalysisEvaluateModels=new Button(grpAnalysisModelSelection, SWT.NONE);
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -72,6 +72,7 @@ public class ModelSelector {
 						
 						 	 IDetectionModels [] selectedModels=new IDetectionModels[selectedModelsList.size()];
 							 selectedModels=selectedModelsList.toArray(selectedModels);
+							 
 							 Object []args= {selectedModels};// wrap an array in an array to pass an argument of array
 							 	 
 							 try {
@@ -91,8 +92,8 @@ public class ModelSelector {
 		});
 		
 		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,2,1));
-		btnAnalysisEvaluateModels.setText("Evaluate Models");
-				
+		btnAnalysisEvaluateModels.setText("Develop the Model");
+			*/	
 		/**
 		 * End group model selection 
 		*/
