@@ -129,7 +129,7 @@ public class Modeling {
 		cmbTraceTypes.add("LTTng Kernel");
 		cmbTraceTypes.add("LTTng UST");
 		cmbTraceTypes.add("Regular Expression");
-		cmbTraceTypes.select(1);
+		cmbTraceTypes.select(0);
 		
 		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
