@@ -34,13 +34,13 @@ public class ModelLoader {
 		 */
 		
 		grpAnalysisModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
-		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.CENTER,SWT.TOP,true,false,2,5));
+		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,5));
 		grpAnalysisModelSelection.setLayout(new GridLayout(2,false));
 		grpAnalysisModelSelection.setText("Select a Model");
 		
 		treeAnalysisModels = new Tree(grpAnalysisModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 		treeAnalysisModels.setLinesVisible(true);
-		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,5));
+		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,5));
 		
 		TreeItem treeItmAnom = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmAnom.setText("Anomaly Detection");
@@ -54,10 +54,13 @@ public class ModelLoader {
 		//TreeItem item4 = new TreeItem(treeItmClassf, SWT.NONE);
 	    //item4.setText("Decision Tree");
 	    treeItmClassf.setExpanded(true);
-		
-		btnAnalysisEvaluateModels=new Button(grpAnalysisModelSelection, SWT.NONE);
-		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,true,1,5));
-		btnAnalysisEvaluateModels.setText("Evaluate the Model");
+		Composite compModelSelection=new Composite(grpAnalysisModelSelection, SWT.NONE);
+	    compModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true));
+		compModelSelection.setLayout(new GridLayout(1,false));
+	    
+		btnAnalysisEvaluateModels=new Button(compModelSelection, SWT.NONE);
+		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
+		btnAnalysisEvaluateModels.setText("Evaluate");
 	
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
@@ -95,7 +98,13 @@ public class ModelLoader {
 			}
 		});
 		
+		Button btnSettings=new Button(compModelSelection, SWT.NONE);
+		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
+		btnSettings.setText("Settings");
 		
+		Button btnDelete=new Button(compModelSelection, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
+		btnDelete.setText("Delete");
 			
 		/**
 		 * End group model selection 

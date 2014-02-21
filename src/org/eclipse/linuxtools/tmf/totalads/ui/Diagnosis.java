@@ -91,33 +91,29 @@ public class Diagnosis {
 		//compResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
 		//compResult.setLayout(new GridLayout(2,false));
 		
-		CLabel lblAnalysisCurrentTrace= new CLabel(grpAnalysisResults, SWT.NONE);
+		/*CLabel lblAnalysisCurrentTrace= new CLabel(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentTrace.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
-		lblAnalysisCurrentTrace.setText("Current Trace");
+		lblAnalysisCurrentTrace.setText("Selected Trace");
 		
 		Text txtAnalysisCurrentTrace= new Text(grpAnalysisResults,SWT.BORDER);
 		txtAnalysisCurrentTrace.setEditable(false);
 		txtAnalysisCurrentTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
 		txtAnalysisCurrentTrace.setText("kernel-session-01");
-		
-		CLabel lblAnalysisCurrentModel = new CLabel(grpAnalysisResults, SWT.NONE);
+		*/
+		/*CLabel lblAnalysisCurrentModel = new CLabel(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentModel.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultsLabel
-		//lblAnalysisCurrentModel.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
-		lblAnalysisCurrentModel.setText("Current Model");
+			lblAnalysisCurrentModel.setText("Current Model");
 		
 		Combo combAnalysisCurrentModel=new Combo(grpAnalysisResults,SWT.BORDER);
 		combAnalysisCurrentModel.add("KSM");
 		combAnalysisCurrentModel.add("Decision Tree");
 		combAnalysisCurrentModel.select(0);
 		combAnalysisCurrentModel.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		//Text txtAnalysisCurrentModel= new Text(compResult,SWT.BORDER);
-		//txtAnalysisCurrentModel.setEditable(false);
-		//txtAnalysisCurrentModel.setLayoutData(gridDataResultText);
-		///txtAnalysisCurrentModel.setText("KSM");
+	   */
 		
 		CLabel lblAnalysisCurrentAnomaly = new CLabel(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
-		lblAnalysisCurrentAnomaly.setText("Anomaly");
+		lblAnalysisCurrentAnomaly.setText("Anomaly (Anomaly Type)");
 		
 		Text txtAnalysisCurrentAnomaly= new Text(grpAnalysisResults,SWT.BORDER);
 		txtAnalysisCurrentAnomaly.setEditable(false);
@@ -153,7 +149,7 @@ public class Diagnosis {
 		
 		Label lblTraceType= new Label(grpTraceSelection, SWT.BORDER);
 		lblTraceType.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		lblTraceType.setText("Select Trace Type");
+		lblTraceType.setText("Select the Trace Type");
 		
 		Combo cmbTraceTypes= new Combo(grpTraceSelection,SWT.BORDER);
 		cmbTraceTypes.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
@@ -274,9 +270,9 @@ public class Diagnosis {
 	private void detailsAndFeedBack(Composite comptbtmAnalysis){
 		//Group "Feedback: Is it anomaly?"
 				Group grpAnalysisIdentify = new Group(comptbtmAnalysis, SWT.NONE);
-				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,4));
+				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
 				grpAnalysisIdentify.setText("Results and Feedback");
-				grpAnalysisIdentify.setLayout(new GridLayout(3,false));
+				grpAnalysisIdentify.setLayout(new GridLayout(2,false));
                 
 				/// Trace list
 				Composite compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
@@ -298,12 +294,17 @@ public class Diagnosis {
 					items[i].setData("Trace "+i);
 				}
 				
-			    results(grpAnalysisIdentify);
+				Composite compResAndFeedback=new Composite(grpAnalysisIdentify, SWT.NONE);
+			    compResAndFeedback.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
+			    compResAndFeedback.setLayout(new GridLayout(1,false));
+			    
+			    results(compResAndFeedback);
 				//*** End Trace list
 				
 				//*** Group Feedback
-				Group grpFeedback= new Group(grpAnalysisIdentify,SWT.NONE);
-				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true,1,4));
+			    
+				Group grpFeedback= new Group(compResAndFeedback,SWT.NONE);
+				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,4));
 				grpFeedback.setLayout(new GridLayout(2,false));
 				grpFeedback.setText("Feedback");
 				

@@ -15,9 +15,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 
 
 public class Modeling {
+	ModelSelector modelSelector=null;
 	
 	public Modeling(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -39,7 +42,7 @@ public class Modeling {
 		Class []parameterTypes= new Class[1];
 		parameterTypes[0]=IDetectionModels[].class;
 		Method modelObserver=Modeling.class.getMethod("observeSelectedModels", parameterTypes);
-		ModelSelector mdlSelector=new ModelSelector(comptbtmModeling,this,modelObserver);
+    	modelSelector=new ModelSelector(comptbtmModeling,this,modelObserver);
 		
 		validation(comptbtmModeling);
 	    
@@ -122,7 +125,7 @@ public class Modeling {
 				
 		Label lblTraceType= new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblTraceType.setText("Select Trace Type:");
+		lblTraceType.setText("Select Trace Type");
 		
 		Combo cmbTraceTypes= new Combo(grpTraceTypesAndDB,SWT.BORDER);
 		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
@@ -133,7 +136,7 @@ public class Modeling {
 		
 		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblDB.setText("Enter DB Name (Optional):");
+		lblDB.setText("Enter DB Name (Optional)");
 		Text txtModelingTraces = new Text(grpTraceTypesAndDB, SWT.BORDER);
 		txtModelingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		
@@ -191,5 +194,12 @@ public class Modeling {
 		Button btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
 		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,4,1));
 		btnBuildModel.setText("Start Building the Model");
+		btnBuildModel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				//modelSelector.trainModels(trainDirectory, traceReader);
+			//	modelSelector.validateModels(validationDirectory, traceReader);
+			}
+		 });
 	}
 }

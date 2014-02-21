@@ -1,6 +1,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.ArrayList;
+import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -120,5 +122,110 @@ public class ModelSelector {
 			}
 			   
 		    
+	}
+	
+	/**
+	 * This function can train multiple models simultaneously
+	 * @param trainDirectory
+	 * @throws Exception
+	 */
+	public void trainModels(String trainDirectory, ITraceTypeReader traceReader ) throws Exception{
+		
+		Boolean isLastTrace=false;
+		File fileList[]=getDirectoryHandler(trainDirectory);
+		//ITraceTypeReader input = new CTFKernelTraceReader();////------------------
+		TreeItem []items= treeAnalysisModels.getSelection();
+		if (items ==null)
+			 throw new Exception ("Pleas select a model first");
+		 
+		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
+			 // get the trace
+			 StringBuilder trace=traceReader.getTrace(fileList[trcCnt]);
+			 
+			 if (trace.length()>0){
+					 /** Getting char representation in memory of StringBuilder trace  
+					  * to avoid extra memory consumption and making it final to avoid 
+					  * any manipulation from models  */ 
+					 //String.class.getDeclaredField("value");
+					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+					 field.setAccessible(true);
+					 final char[] traceChar = (char[]) field.get(trace);
+					 
+					 if (trcCnt==fileList.length-1)
+						 isLastTrace=true;
+					
+					 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
+						 // check if there is a parent of an item and it is checked
+						if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
+							 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
+							 		model.train(traceChar, isLastTrace);
+						}
+						 
+					 }
+			}
+		}
+		
+		
+	}
+
+/**
+ * It can validate multiple models simultaneously
+ * @param validationDirectory
+ * @throws Exception
+ */
+	public void validateModels(String validationDirectory, ITraceTypeReader traceReader) throws Exception{
+		
+		
+		File fileList[]=getDirectoryHandler(validationDirectory);
+		
+		TreeItem []items= treeAnalysisModels.getSelection();
+		if (items ==null)
+			 throw new Exception ("Pleas select a model first");
+		
+		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
+			 // get the trace
+			 StringBuilder trace=traceReader.getTrace(fileList[trcCnt]);
+			
+			 if (trace.length()>0){ 
+					 /** Getting char representation in memory of StringBuilder trace  
+					  * to avoid extra memory consumption and making it final to avoid 
+					  * any manipulation from models  */ 
+					 //String.class.getDeclaredField("value");
+					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
+					 field.setAccessible(true);
+					 final char[] traceChar = (char[]) field.get(trace);
+								 
+					 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
+						 // check if there is a parent of an item and it is checked
+						 if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
+								 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
+								 		model.validate(traceChar);
+						 }
+						 
+						 
+					 }
+			}
+		}
+		
+		
+	}
+	
+	/**
+	 * 
+	 * @param trainDirectory
+	 * @return
+	 */
+	private File[] getDirectoryHandler(String trainDirectory){
+		File traces=new File(trainDirectory);
+		File []fileList;
+		
+		
+		if (traces.isDirectory())
+	            fileList=traces.listFiles();
+	    else{
+	            fileList= new File[1];
+	            fileList[0]=traces;
+	    }
+		return fileList;
 	}
 }
