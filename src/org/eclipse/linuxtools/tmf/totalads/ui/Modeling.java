@@ -21,6 +21,7 @@ import org.eclipse.swt.events.MouseEvent;
 
 public class Modeling {
 	ModelSelector modelSelector=null;
+	TracingTypeSelector traceTypeSelector=null;
 	
 	public Modeling(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -125,14 +126,15 @@ public class Modeling {
 				
 		Label lblTraceType= new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblTraceType.setText("Select Trace Type");
+		lblTraceType.setText("Select the Trace Type");
 		
-		Combo cmbTraceTypes= new Combo(grpTraceTypesAndDB,SWT.BORDER);
-		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		cmbTraceTypes.add("LTTng Kernel");
-		cmbTraceTypes.add("LTTng UST");
-		cmbTraceTypes.add("Regular Expression");
-		cmbTraceTypes.select(0);
+		traceTypeSelector=new TracingTypeSelector(grpTraceTypesAndDB);
+		//Combo cmbTraceTypes= new Combo(grpTraceTypesAndDB,SWT.BORDER);
+		//cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		//cmbTraceTypes.add("LTTng Kernel");
+		//cmbTraceTypes.add("LTTng UST");
+		//cmbTraceTypes.add("Regular Expression");
+		//cmbTraceTypes.select(0);
 		
 		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
@@ -197,6 +199,7 @@ public class Modeling {
 		btnBuildModel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
+				System.out.println(traceTypeSelector.getSelectedType().getName());
 				//modelSelector.trainModels(trainDirectory, traceReader);
 			//	modelSelector.validateModels(validationDirectory, traceReader);
 			}

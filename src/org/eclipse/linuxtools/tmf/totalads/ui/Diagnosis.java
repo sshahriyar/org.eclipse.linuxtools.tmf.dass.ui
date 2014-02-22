@@ -29,7 +29,7 @@ import com.sun.media.sound.ModelConnectionBlock;
 
 public class Diagnosis {
 	Table tblAnalysisTraceList;
-
+	TracingTypeSelector traceTypeSelector;
 	public Diagnosis(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		
 		CTabItem tbtmAnalysis = new CTabItem(tabFolderDetector, SWT.NONE);
@@ -151,12 +151,8 @@ public class Diagnosis {
 		lblTraceType.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		lblTraceType.setText("Select the Trace Type");
 		
-		Combo cmbTraceTypes= new Combo(grpTraceSelection,SWT.BORDER);
-		cmbTraceTypes.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		cmbTraceTypes.add("LTTng Kernel");
-		cmbTraceTypes.add("LTTng UST");
-		cmbTraceTypes.add("Regular Expression");
-		cmbTraceTypes.select(0);
+	    traceTypeSelector=new TracingTypeSelector(grpTraceSelection);
+		
 		
 		Label lblSelTestTraces = new Label(grpTraceSelection, SWT.CHECK);
 		lblSelTestTraces.setText("Select a Trace or a Directory");

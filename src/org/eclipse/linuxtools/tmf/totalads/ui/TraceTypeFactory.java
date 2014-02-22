@@ -50,7 +50,7 @@ public class TraceTypeFactory {
 	 * @param detectionModel
 	 * @param modelType
 	 */
-	public void registerModelWithFactory(String key ,ITraceTypeReader traceReader) throws Exception{
+	public void registerModelWithFactory(String key, ITraceTypeReader traceReader) throws Exception{
 		if (!key.isEmpty()){
 			ITraceTypeReader  reader=traceTypeReadersList.get(key);
 			if (reader==null)
@@ -86,7 +86,8 @@ public class TraceTypeFactory {
 		//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 		// The following code needs to be replaced with reflection in future versions
 		CTFKernelTraceReader.registerTraceTypeReader();
-		
+		CTFUserTraceReader.registerTraceTypeReader();
+		TextLineReader.registerTraceTypeReader();
 		
 	}
 	

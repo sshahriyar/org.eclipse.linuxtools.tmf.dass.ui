@@ -141,6 +141,9 @@ public class ModelSelector {
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
 			 StringBuilder trace=traceReader.getTrace(fileList[trcCnt]);
+			 // convert trce reader to trace iterator object
+			 // pas it to the algorithm
+			 // trace iterator. next(string) has next,
 			 
 			 if (trace.length()>0){
 					 /** Getting char representation in memory of StringBuilder trace  
