@@ -22,7 +22,63 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
 public class CTFKernelTraceReader implements ITraceTypeReader   {
 	
            
+     class CTFKerenelIterator implements ITraceIterator {   
+    	 CtfIterator traceIterator=null;
+    	 CtfTmfTrace  trace=null;
+    	 Boolean isDispose=false;
+    	   public CTFKerenelIterator(CtfTmfTrace  tmfTrace){
+    		   trace=tmfTrace;
+    		   traceIterator=tmfTrace.createIterator();
+    	   }
+    	  /** Moves Iterator to the next event, and returns true if the iterator can advance or false if the iterator cannot advance **/ 
+    	   @Override
+    	    public boolean advance(){
+    			boolean isAdvance=traceIterator.advance();
+    		
+    			if (!isAdvance){
+    				isDispose=true;
+    				trace.dispose();
+    			}
+    				
+    			return isAdvance;
+    					
+    		}
+    		/** Returns the event for the location of the iterator  **/ 
+    		@Override
+    	    public String getCurrentEvent(){
+    			
+    			String syscall="";
+    			do{
+    				CtfTmfEvent event = traceIterator.getCurrentEvent();
+    				syscall=handleSysEntryEvent(event);
+        		} while (syscall.isEmpty() && advance());
+    			
+    			return syscall;
+    			
+    		}
+    	
+    		/** Closes the event **/
+    		@Override
+    		public void close(){
+    			if (!isDispose)
+    				trace.dispose();
+    		}
+
+    		private String handleSysEntryEvent(CtfTmfEvent event) {
+    			String eventName=event.getEventName();
+    			String syscall="";
+    			if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
+    				Integer id=MapSysCallNameToID.getSysCallID(eventName.trim());
+    				if (id==null) id=-1;
+    				syscall=id.toString();
+    			 }
+    			return syscall;
+    			
+    		} 
     
+
+     }
+     
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
@@ -37,9 +93,9 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     }
 
    // @Override
-    //public ITraceTypeReader createInstance(){
-   // 	return new CTFKernelTraceReader();
-    //}
+    public ITraceTypeReader createInstance(){
+    	return new CTFKernelTraceReader();
+    }
    /**
     * 
     * @throws Exception
