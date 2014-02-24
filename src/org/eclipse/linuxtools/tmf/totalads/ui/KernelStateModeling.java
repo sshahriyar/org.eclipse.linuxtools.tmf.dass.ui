@@ -55,7 +55,7 @@ public class KernelStateModeling implements IDetectionModels {
     }
 	
     @Override
-	public void train(char[] trace, Boolean isLastTrace) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace) throws Exception {
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
 		connection.insert(states, database,Configuration.collectionNormal);
@@ -63,7 +63,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void validate(char[] trace) throws Exception {
+	public void validate(ITraceIterator trace) throws Exception {
 		// TODO Auto-generated method stub
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
@@ -77,7 +77,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void test(char[] trace, String traceName) throws Exception {
+	public void test(ITraceIterator trace, String traceName) throws Exception {
 		// TODO Auto-generated method stub
 		class TestTraceInfo{
 			String time;
@@ -86,7 +86,7 @@ public class KernelStateModeling implements IDetectionModels {
 		
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
-		Boolean isAnomaly=evaluateKSM(trace, alpha, testTrcStates);
+		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates);
 		
 		if (isAnomaly){
 			TestTraceInfo anomalyWhereabouts= new TestTraceInfo();
@@ -135,7 +135,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 * @param alpha
 	 * @return
 	 */
-	private Boolean evaluateKSM(char[] testTrace, Double alpha, TraceStates testStates){
+	private Boolean evaluateKSM(Double alpha, TraceStates testStates){
 		Boolean isAnomalous=false;
 		Double maxFS=0.0;
 		//measureStateProbabilities(testTrace, testStates);
@@ -199,24 +199,17 @@ public class KernelStateModeling implements IDetectionModels {
 	 * @param trace
 	 * @param states
 	 */
-	private void measureStateProbabilities(char[] trace, TraceStates states){
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states){
 		
 		Double totalSysCalls=0.0;
 		
-		StringBuilder syscallID= new StringBuilder();
-	
-		for (int cnt=0;cnt<trace.length;cnt++){
-			
-			if (trace[cnt]=='\n'){
-				//System.out.println("\n"+cnt+ " " +syscallID.toString());
-				mapStates(syscallID.toString(),states);
-				syscallID.delete(0, syscallID.length());
-				cnt++;
-			}
-			//if (cnt<trace.length)
-			 syscallID.append(trace[cnt]);
-			 
+		while (trace.advance()){
+			 	String systemCall= trace.getCurrentEvent();
+			 	
+			 	if (systemCall != null)
+			 		mapStates(systemCall,states);
 		}
+			
 		
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
 		states.FS= round(states.FS/totalSysCalls,2);

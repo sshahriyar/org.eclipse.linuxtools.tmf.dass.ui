@@ -5,7 +5,7 @@ public interface ITraceIterator {
 	public boolean advance();
 	/** Returns an event for the location of the iterator **/ 
 	public String getCurrentEvent();
-	/** Closes the event **/
+	/** Closes the iterator stream **/
 	public void close();
 
 }

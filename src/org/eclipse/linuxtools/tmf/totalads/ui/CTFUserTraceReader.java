@@ -23,7 +23,7 @@ public class CTFUserTraceReader implements ITraceTypeReader {
 	    }
 	 
 	@Override
-	public StringBuilder getTrace(File file) throws Exception {
+	public ITraceIterator getTraceIterator(File file) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

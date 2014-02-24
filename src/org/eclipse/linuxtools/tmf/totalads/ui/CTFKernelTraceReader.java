@@ -21,12 +21,13 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
  */
 public class CTFKernelTraceReader implements ITraceTypeReader   {
 	
-           
+     // inner class      
      class CTFKerenelIterator implements ITraceIterator {   
     	 CtfIterator traceIterator=null;
     	 CtfTmfTrace  trace=null;
     	 Boolean isDispose=false;
-    	   public CTFKerenelIterator(CtfTmfTrace  tmfTrace){
+    	  
+    	 public CTFKerenelIterator(CtfTmfTrace  tmfTrace){
     		   trace=tmfTrace;
     		   traceIterator=tmfTrace.createIterator();
     	   }
@@ -53,17 +54,24 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     				syscall=handleSysEntryEvent(event);
         		} while (syscall.isEmpty() && advance());
     			
-    			return syscall;
+    			if (syscall.isEmpty())
+    				return null;
+    			else 
+    				return syscall;
     			
     		}
     	
-    		/** Closes the event **/
+    		/** Closes the iterator stream **/
     		@Override
     		public void close(){
     			if (!isDispose)
     				trace.dispose();
     		}
-
+    		/**
+    		 * Returns System Call
+    		 * @param event
+    		 * @return
+    		 */
     		private String handleSysEntryEvent(CtfTmfEvent event) {
     			String eventName=event.getEventName();
     			String syscall="";
@@ -114,30 +122,51 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     	return "CTF Kernel Reader";
     }
 	/**
-	 * 
+	 * Return the iterator to go over the trace file
 	 * @param file
 	 * @return
 	 */
-    @Override
-	public StringBuilder getTrace(File file) throws Exception{
-		
-		 String filePath=file.getPath();
-		 StringBuilder traceBuffer= new StringBuilder();
+    public ITraceIterator getTraceIterator(File file){
+    	
+    	 String filePath=file.getPath();
 		 CtfTmfTrace  fTrace = new CtfTmfTrace();
 	
 		 try {
 	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
+	            
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
 	            throw new RuntimeException(e);
 	      }
-	      
-		 	 
-    	 //TraceReader input = new TraceReader(fTrace,traceBuffer);
-    	 readTrace(fTrace,traceBuffer);
-    	 fTrace.dispose();
-    	 return traceBuffer;
-	}
+		 
+		 return new CTFKerenelIterator(fTrace);
+    }
+    
+    /**
+	 * 
+	 * @param file
+	 * @return
+	 */
+//    
+//	public StringBuilder getTrace(File file) throws Exception{
+//		
+//		 String filePath=file.getPath();
+//		 StringBuilder traceBuffer= new StringBuilder();
+//		 CtfTmfTrace  fTrace = new CtfTmfTrace();
+//	
+//		 try {
+//	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
+//	      } catch (TmfTraceException e) {
+//	            /* Should not happen if tracesExist() passed */
+//	            throw new RuntimeException(e);
+//	      }
+//	      
+//		 	 
+//    	 //TraceReader input = new TraceReader(fTrace,traceBuffer);
+//    	 readTrace(fTrace,traceBuffer);
+//    	 fTrace.dispose();
+//    	 return traceBuffer;
+//	}
 
     
 /**

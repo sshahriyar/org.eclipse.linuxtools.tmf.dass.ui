@@ -140,32 +140,20 @@ public class ModelSelector {
 		 
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
-			 StringBuilder trace=traceReader.getTrace(fileList[trcCnt]);
-			 // convert trce reader to trace iterator object
-			 // pas it to the algorithm
-			 // trace iterator. next(string) has next,
-			 
-			 if (trace.length()>0){
-					 /** Getting char representation in memory of StringBuilder trace  
-					  * to avoid extra memory consumption and making it final to avoid 
-					  * any manipulation from models  */ 
-					 //String.class.getDeclaredField("value");
-					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
-					 field.setAccessible(true);
-					 final char[] traceChar = (char[]) field.get(trace);
-					 
+						 
 					 if (trcCnt==fileList.length-1)
 						 isLastTrace=true;
 					
 					 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
 						 // check if there is a parent of an item and it is checked
 						if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
+							 		ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 							 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
-							 		model.train(traceChar, isLastTrace);
+							 		model.train(trace, isLastTrace);
 						}
 						 
 					 }
-			}
+			
 		}
 		
 		
@@ -187,27 +175,17 @@ public class ModelSelector {
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
-			 StringBuilder trace=traceReader.getTrace(fileList[trcCnt]);
 			
-			 if (trace.length()>0){ 
-					 /** Getting char representation in memory of StringBuilder trace  
-					  * to avoid extra memory consumption and making it final to avoid 
-					  * any manipulation from models  */ 
-					 //String.class.getDeclaredField("value");
-					 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
-					 field.setAccessible(true);
-					 final char[] traceChar = (char[]) field.get(trace);
-								 
-					 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
+			
+			    	 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
 						 // check if there is a parent of an item and it is checked
 						 if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
+							 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 								 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
-								 		model.validate(traceChar);
+								 		model.validate(trace);
 						 }
-						 
-						 
-					 }
-			}
+		             }
+			
 		}
 		
 		

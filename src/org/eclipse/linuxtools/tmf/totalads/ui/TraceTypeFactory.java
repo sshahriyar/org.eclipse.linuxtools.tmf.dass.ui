@@ -87,7 +87,7 @@ public class TraceTypeFactory {
 		// The following code needs to be replaced with reflection in future versions
 		CTFKernelTraceReader.registerTraceTypeReader();
 		CTFUserTraceReader.registerTraceTypeReader();
-		TextLineReader.registerTraceTypeReader();
+		TextLineTraceReader.registerTraceTypeReader();
 		
 	}
 	
