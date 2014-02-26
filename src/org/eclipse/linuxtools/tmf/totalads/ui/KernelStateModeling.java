@@ -58,6 +58,7 @@ public class KernelStateModeling implements IDetectionModels {
 	public void train(ITraceIterator trace, Boolean isLastTrace) throws Exception {
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
+		System.out.println(states + " "+database+ " "+Configuration.collectionNormal);
 		connection.insert(states, database,Configuration.collectionNormal);
 	
 	}
@@ -68,7 +69,7 @@ public class KernelStateModeling implements IDetectionModels {
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
 	  while (alpha< maxAlpha){
-		    Boolean isAnomaly=evaluateKSM(trace, alpha, valTrcStates);
+		    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates);
 			if (isAnomaly==false)
 						 break; // no need to increment alpha as there is no anomaly
 		    alpha+=0.02;

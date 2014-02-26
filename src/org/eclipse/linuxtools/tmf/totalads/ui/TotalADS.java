@@ -41,12 +41,15 @@ public class TotalADS  {
 	public TotalADS(Composite parent, int style) {
 		
 	  try{
-			ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
+			
+		  	Configuration.connection=new DBMS(Configuration.host, Configuration.port);
+		    ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
 			modFactory.initialize();
 		
 			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
-		
 			trcTypeFactory.initialize();
+			
+			
 			
 			//super(parent, style);
 			parent.setLayout(new GridLayout(2,false));
@@ -68,7 +71,8 @@ public class TotalADS  {
 	   } catch (Exception ex) {
 			// TODO Auto-generated catch block
 		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-		   msg.setMessage(ex.getMessage());
+		   if (ex.getCause()!=null)
+		      msg.setMessage(ex.getCause().getMessage());
 		   ex.printStackTrace();
 		}
 

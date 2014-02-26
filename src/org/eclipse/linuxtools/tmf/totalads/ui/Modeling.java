@@ -13,17 +13,25 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 
 public class Modeling {
 	ModelSelector modelSelector=null;
 	TracingTypeSelector traceTypeSelector=null;
+	Text txtTrainingTraces;
+	Text txtValidationTraces=null;
+	MessageBox msgBox;
 	
-	public Modeling(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
+	public Modeling(CTabFolder tabFolderDetector){
+		
+		
 		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		CTabItem tbtmModeling = new CTabItem(tabFolderDetector, SWT.NONE);
@@ -38,12 +46,14 @@ public class Modeling {
 		
 		tbtmModeling.setControl(scrolCompModel);
 		
-		selectTraces(comptbtmModeling);
-		slectTraceTypeandDatabase(comptbtmModeling);
-		Class []parameterTypes= new Class[1];
-		parameterTypes[0]=IDetectionModels[].class;
-		Method modelObserver=Modeling.class.getMethod("observeSelectedModels", parameterTypes);
-    	modelSelector=new ModelSelector(comptbtmModeling,this,modelObserver);
+		selectTrainingTraces(comptbtmModeling);
+		selectTraceTypeandDatabase(comptbtmModeling);
+		
+		
+		//Class []parameterTypes= new Class[1];
+		//parameterTypes[0]=IDetectionModels[].class;
+		//Method modelObserver=Modeling.class.getMethod("observeSelectedModels", parameterTypes);
+    	modelSelector=new ModelSelector(comptbtmModeling);
 		
 		validation(comptbtmModeling);
 	    
@@ -56,13 +66,18 @@ public class Modeling {
 	    // Expand both horizontally and vertically
 		scrolCompModel.setExpandHorizontal(true);
 		scrolCompModel.setExpandVertical(true);
-
+		
+		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+			           ,SWT.ICON_ERROR|SWT.OK);
+	
 	}
 	/**
 	 * 
 	 * @param comptbtmModeling
 	 */
-	public void selectTraces(Composite comptbtmModeling){
+	//StringBuilder trainingTracePath=new StringBuilder();
+	
+	public void selectTrainingTraces(Composite comptbtmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
@@ -71,58 +86,35 @@ public class Modeling {
 		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 		grpTracesModeling.setLayout(new GridLayout(1,false));//gridTwoColumns);
 		
-		//Button btnModelingTrain = new Button(grpTracesModeling, SWT.CHECK);
-		//btnModelingTrain.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
-		//btnModelingTrain.setText("Training");
-		
-		//Button btnModelingValidation = new Button(grpTracesModeling, SWT.CHECK);
-		//btnModelingValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
-		//btnModelingValidation.setText("Validation");
-		
-		Text txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
+
+		txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
 		txtTrainingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		Button btnTrainingBrowse =new Button(grpTracesModeling, SWT.NONE);
-		btnTrainingBrowse.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
-		btnTrainingBrowse.setText("Browse Directory");
 		
-		//---------
-		MultipleTracesLoader multLoader=new MultipleTracesLoader();
-		/**
-		 * End group modeling type and traces
-		 */
+		new TraceBrowser(grpTracesModeling,txtTrainingTraces,new GridData(SWT.LEFT,SWT.TOP,false,false));
+		
+		//Button btnTrainingBrowse =new Button(grpTracesModeling, SWT.NONE);
+		//btnTrainingBrowse.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
+		//btnTrainingBrowse.setText("Browse Directory");
+		
+		
 	}
 	
 	
-	/**
-	 * 
-	 * @return
-	 */
-	public void observeSelectedModels(IDetectionModels []models){
-		
-		//TableItem []tblItem= tblAnalysisTraceList.getSelection();
-		//String trace=tblItem[0].getText(0);
-		//System.out.println(trace);
-		
-		for (int modlCount=0; modlCount<models.length;modlCount++){
-			System.out.println(models[modlCount].getName());
-		}
-		//return trace;
-		
-	}
 	
 	
 	/**
 	 * 
 	 * @param comptbtmModeling
 	 */
-	public void slectTraceTypeandDatabase(Composite comptbtmModeling){
+	//Text txtModelingTraces;
+	public void selectTraceTypeandDatabase(Composite comptbtmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
 		Group grpTraceTypesAndDB=new Group(comptbtmModeling, SWT.NONE);
 		grpTraceTypesAndDB.setText("Trace Type and DB");
 		grpTraceTypesAndDB.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
-		grpTraceTypesAndDB.setLayout(new GridLayout(2,false));//gridTwoColumns);
+		grpTraceTypesAndDB.setLayout(new GridLayout(3,false));//gridTwoColumns);
 				
 		Label lblTraceType= new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
@@ -135,12 +127,44 @@ public class Modeling {
 		//cmbTraceTypes.add("LTTng UST");
 		//cmbTraceTypes.add("Regular Expression");
 		//cmbTraceTypes.select(0);
+		Label emptyLabel=new Label(grpTraceTypesAndDB, SWT.BORDER);// An empty label for a third cell
+		emptyLabel.setVisible(false);
 		
 		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblDB.setText("Enter DB Name (Optional)");
-		Text txtModelingTraces = new Text(grpTraceTypesAndDB, SWT.BORDER);
+		lblDB.setText("Select or Enter DB Name");
+		
+		final Combo cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
+		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		cmbDBNames.add("Enter New  Name");
+		cmbDBNames.add("Hi");
+		
+		final Text txtModelingTraces = new Text(grpTraceTypesAndDB, SWT.BORDER);
 		txtModelingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		txtModelingTraces.setText("Enter");
+		txtModelingTraces.setTextLimit(7);
+		txtModelingTraces.setEnabled(false);
+		
+		
+		cmbDBNames.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//if (e.text.equalsIgnoreCase("Enter New  Name")){
+				if ( cmbDBNames.getSelectionIndex()==0){
+					txtModelingTraces.setText("");
+					txtModelingTraces.setEnabled(true);
+				}
+				
+				else {
+					
+					txtModelingTraces.setText("Enter");
+					txtModelingTraces.setEnabled(false);
+					cmbDBNames.add("Hello");
+				}
+			}
+			
+	
+		});
 		
 		//---------
 		/**
@@ -157,32 +181,36 @@ public class Modeling {
 		/**
 		 * Group modeling type and traces
 		 */
-		Group validation=new Group(comptbtmModeling, SWT.NONE);
-		validation.setText("Validation");
-		validation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
-		validation.setLayout(new GridLayout(2,false));//gridTwoColumns);
+		Group grpValidation=new Group(comptbtmModeling, SWT.NONE);
+		grpValidation.setText("Validation");
+		grpValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
+		grpValidation.setLayout(new GridLayout(2,false));//gridTwoColumns);
 				
-		Button radioBtnCrossVal=new Button(validation, SWT.RADIO);
+		Button radioBtnCrossVal=new Button(grpValidation, SWT.RADIO);
 		radioBtnCrossVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 		radioBtnCrossVal.setText("Cross Validation");
 		
 		
-		Label lblCrossVal=new Label(validation, SWT.BORDER);
+		Label lblCrossVal=new Label(grpValidation, SWT.BORDER);
 		lblCrossVal.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false,1,1));
 		lblCrossVal.setText("Specify Folds:");
-		Text txtCrossVal = new Text(validation, SWT.BORDER);
+		Text txtCrossVal = new Text(grpValidation, SWT.BORDER);
 		txtCrossVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtCrossVal.setText("3");
 		
-		Button radioBtnVal=new Button(validation, SWT.RADIO);
+		Button radioBtnVal=new Button(grpValidation, SWT.RADIO);
 		radioBtnVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 		radioBtnVal.setText("Validation");
 		
-		Button btnValidationBrowse =new Button(validation, SWT.NONE);
-		btnValidationBrowse.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false));
-		btnValidationBrowse.setText("Browse Directory");
-		Text txtValidationTraces = new Text(validation, SWT.BORDER);
+		
+		TraceBrowser traceBrowser= new TraceBrowser(grpValidation,new GridData(SWT.RIGHT,SWT.TOP,false,false));
+		//Button btnValidationBrowse =new Button(grpValidation, SWT.NONE);
+		//btnValidationBrowse.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false));
+		//btnValidationBrowse.setText("Browse Directory");
+		
+		txtValidationTraces = new Text(grpValidation, SWT.BORDER);
 		txtValidationTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		traceBrowser.setTextBox(txtValidationTraces);
 		
 	
 		
@@ -191,17 +219,50 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
-	
+	/**
+	 * Method to handle model building button
+	 * @param comptbtmModeling
+	 */
 	public void buildModel(Composite comptbtmModeling){
+		
 		Button btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
 		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,4,1));
 		btnBuildModel.setText("Start Building the Model");
 		btnBuildModel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				System.out.println(traceTypeSelector.getSelectedType().getName());
-				//modelSelector.trainModels(trainDirectory, traceReader);
-			//	modelSelector.validateModels(validationDirectory, traceReader);
+				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
+				System.out.println(traceReader.getName());
+				
+				try {
+					String trainingTraces=txtTrainingTraces.getText().trim();
+					String validationTraces=txtValidationTraces.getText().trim();
+					
+					if (trainingTraces.isEmpty() || validationTraces.isEmpty()){
+					
+						msgBox.setMessage("Please, select training and validation traces.");
+						msgBox.open();
+
+					}
+						
+					else{
+						modelSelector.trainModels(trainingTraces, traceReader);
+						modelSelector.validateModels(validationTraces, traceReader);
+					}
+				} catch (Exception ex) {
+					// TODO Auto-generated catch block
+					String msg=null;
+					
+					if (ex.getCause()==null)
+						msg="Severe Error: See Log.";	
+					else
+						msg=ex.getCause().toString();
+					
+					msgBox.setMessage(msg);
+					msgBox.open();
+					ex.printStackTrace();
+				}
+				
 			}
 		 });
 	}

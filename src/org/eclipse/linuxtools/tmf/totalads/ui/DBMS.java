@@ -22,7 +22,7 @@ public class DBMS {
 	
 	public DBMS() throws UnknownHostException{
 		//DB=database;
-		HOST=Configuration.localHost;
+		HOST=Configuration.host;
 		PORT=Configuration.port;
 		connect();
 	}

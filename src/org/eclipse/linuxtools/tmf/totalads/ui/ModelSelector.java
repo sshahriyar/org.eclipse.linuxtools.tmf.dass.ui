@@ -1,10 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
-import java.util.ArrayList;
+
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -15,21 +12,21 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+
+
 
 public class ModelSelector {
 	Group grpAnalysisModelSelection=null;
 	Button btnAnalysisEvaluateModels=null;
 	Tree treeAnalysisModels=null;
-	Method listener;
-	Object instanceOfListener;
-	public ModelSelector(Composite comptbtmAnalysis, Object object, Method function){
+	MessageBox msgBox;
+	//Method listener;
+//	Object instanceOfListener;
+	public ModelSelector(Composite comptbtmAnalysis){
 		
-		this.listener=function;
-		this.instanceOfListener=object;
+		//this.listener=function;
+		//this.instanceOfListener=object;
 		/**
 		 *  Group model selection
 		 */
@@ -55,7 +52,8 @@ public class ModelSelector {
 		//TreeItem item4 = new TreeItem(treeItmClassf, SWT.NONE);
 	    //item4.setText("Decision Tree");
 	    treeItmClassf.setExpanded(true);
-		
+	    msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+		           ,SWT.ICON_ERROR|SWT.OK);
 		/*btnAnalysisEvaluateModels=new Button(grpAnalysisModelSelection, SWT.NONE);
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
@@ -101,7 +99,7 @@ public class ModelSelector {
 		*/
 	}
 	/**
-	 * 
+	 * populates the tree with the list of models from the model factory
 	 */
 	private void populateTreeItems(TreeItem treeItem,ModelTypeFactory.ModelTypes modelType){
 	///////data
@@ -124,19 +122,26 @@ public class ModelSelector {
 		    
 	}
 	
+	private void checkSelectedModels(){
+		
+	}
+
 	/**
 	 * This function can train multiple models simultaneously
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
-	public void trainModels(String trainDirectory, ITraceTypeReader traceReader ) throws Exception{
+	public void trainModels(String trainDirectory, ITraceTypeReader traceReader ) throws Exception {
 		
 		Boolean isLastTrace=false;
 		File fileList[]=getDirectoryHandler(trainDirectory);
 		//ITraceTypeReader input = new CTFKernelTraceReader();////------------------
 		TreeItem []items= treeAnalysisModels.getSelection();
-		if (items ==null)
-			 throw new Exception ("Pleas select a model first");
+		if (items ==null || items.length==0){
+			msgBox.setMessage("Please, select a model first.");
+			msgBox.open();
+	
+		}
 		 
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
@@ -164,14 +169,17 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	public void validateModels(String validationDirectory, ITraceTypeReader traceReader) throws Exception{
+	public void validateModels(String validationDirectory, ITraceTypeReader traceReader) throws Exception {
 		
 		
 		File fileList[]=getDirectoryHandler(validationDirectory);
 		
 		TreeItem []items= treeAnalysisModels.getSelection();
-		if (items ==null)
-			 throw new Exception ("Pleas select a model first");
+		if (items ==null || items.length==0){
+			msgBox.setMessage("Please, select a model first.");
+			msgBox.open();
+		}
+			 
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace

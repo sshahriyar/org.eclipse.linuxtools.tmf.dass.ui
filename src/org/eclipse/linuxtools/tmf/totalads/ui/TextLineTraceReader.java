@@ -14,6 +14,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		BufferedReader bufferedReader;
 		String event="";
 		Boolean isClose=false;
+		
 		public TextLineIterator(BufferedReader  bReader){
 			bufferedReader=bReader;
 		}
@@ -28,8 +29,10 @@ public class TextLineTraceReader implements ITraceTypeReader {
 					  isClose=true;
 					  isAdvance=false;
 				 }
-				 else
+				 else{
 					 isAdvance=true;
+					 event=event.trim();
+				 }
 				
 			} catch (IOException e) {
 				

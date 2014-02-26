@@ -213,7 +213,7 @@ public class Diagnosis {
 		//tblAnalysisTraceList.setLayoutData(new GridData(400,itemHeight*3));
 		//tblAnalysisTraceList.setItemCount(2);
 		*/
-		MultipleTracesLoader traceDispLoader= new MultipleTracesLoader();
+		//TraceBrowser traceDispLoader= new TraceBrowser();
 		
 		/**
 		 * End group trace selection

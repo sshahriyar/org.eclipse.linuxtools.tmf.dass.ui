@@ -11,6 +11,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 public class TracingTypeSelector {
 	Combo cmbTraceTypes;
@@ -26,7 +28,8 @@ public class TracingTypeSelector {
 		
 
 		
-		cmbTraceTypes= new Combo(parent,SWT.BORDER);
+		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY );
+		
 		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		//cmbTraceTypes.add("LTTng Kernel");
 		//cmbTraceTypes.add("LTTng UST");
