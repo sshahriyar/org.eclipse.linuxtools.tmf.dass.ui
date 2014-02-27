@@ -10,6 +10,8 @@ public interface ITraceTypeReader {
 	//public ITraceTypeReader createInstance();
 	/** Gets the name of the model**/
 	public String getName();
+	/** Returns the acronym of the Trace Reader; should only be three characters Long  */
+	public String getAcronym();
 	/** Gets a trace from a file */
 	public ITraceIterator getTraceIterator(File file) throws Exception;
 	/** Handle events directly from the TMF View if the trace is already loaded in TMF. This function does not require a

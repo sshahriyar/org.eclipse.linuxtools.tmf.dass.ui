@@ -41,14 +41,20 @@ public class DBMS {
 	}
 	
 	
+	public boolean createDatabase(String dataBase){
+		DB db=mongoClient.getDB(dataBase);
+		//db.createCollection(arg0, arg1)
+		return false;
+	}
+	
 	/**
 	 * Creates an index
 	 * @param database
 	 * @param collection
 	 * @param field
 	 */
-	public void createAscendingIndex(String database, String collection, String field){
-		DBCollection coll = mongoClient.getDB(database).getCollection(collection);
+	public void createAscendingIndex(String dataBase, String collection, String field){
+		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
 		coll.createIndex(new BasicDBObject(field, 1));
 	}
 	/**

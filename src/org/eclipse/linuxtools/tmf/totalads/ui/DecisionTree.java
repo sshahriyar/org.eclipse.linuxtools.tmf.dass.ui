@@ -53,9 +53,15 @@ public class DecisionTree implements IDetectionModels {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return "Decision Tree";
+		return "F007:Decision Trees";
 	}
-	
+	 /**
+     * Returns the acronym of the model
+     */
+    public String getAcronym(){
+    	
+    	return "F007";
+    }
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */

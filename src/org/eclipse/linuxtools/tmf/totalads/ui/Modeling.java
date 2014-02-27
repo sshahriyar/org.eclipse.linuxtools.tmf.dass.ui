@@ -28,6 +28,9 @@ public class Modeling {
 	Text txtTrainingTraces;
 	Text txtValidationTraces=null;
 	MessageBox msgBox;
+	String selectedDB;
+	Combo cmbDBNames;
+	Text txtNewDBName;
 	
 	public Modeling(CTabFolder tabFolderDetector){
 		
@@ -134,16 +137,16 @@ public class Modeling {
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
 		lblDB.setText("Select or Enter DB Name");
 		
-		final Combo cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
+		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
 		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		cmbDBNames.add("Enter New  Name");
 		cmbDBNames.add("Hi");
-		
-		final Text txtModelingTraces = new Text(grpTraceTypesAndDB, SWT.BORDER);
-		txtModelingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		txtModelingTraces.setText("Enter");
-		txtModelingTraces.setTextLimit(7);
-		txtModelingTraces.setEnabled(false);
+		 
+		txtNewDBName = new Text(grpTraceTypesAndDB, SWT.BORDER);
+		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		txtNewDBName.setText("Enter");
+		txtNewDBName.setTextLimit(7);
+		txtNewDBName.setEnabled(false);
 		
 		
 		cmbDBNames.addSelectionListener(new SelectionAdapter() {
@@ -151,20 +154,25 @@ public class Modeling {
 			public void widgetSelected(SelectionEvent e) {
 				//if (e.text.equalsIgnoreCase("Enter New  Name")){
 				if ( cmbDBNames.getSelectionIndex()==0){
-					txtModelingTraces.setText("");
-					txtModelingTraces.setEnabled(true);
+					txtNewDBName.setText("");
+					txtNewDBName.setEnabled(true);
+					//selectedDB="";
 				}
 				
 				else {
 					
-					txtModelingTraces.setText("Enter");
-					txtModelingTraces.setEnabled(false);
-					cmbDBNames.add("Hello");
+					txtNewDBName.setText("Enter");
+					txtNewDBName.setEnabled(false);
+					//selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
+					
 				}
 			}
 			
 	
 		});
+		
+		
+		
 		
 		//---------
 		/**
@@ -246,8 +254,26 @@ public class Modeling {
 					}
 						
 					else{
-						modelSelector.trainModels(trainingTraces, traceReader);
-						modelSelector.validateModels(validationTraces, traceReader);
+						 
+						// get the database name from the text box or combo
+						String selectedDB;
+						if (txtNewDBName.getEnabled()==false)
+							selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
+						else if (txtNewDBName.getText().isEmpty()){
+							msgBox.setMessage("Please, enter database name.");
+							msgBox.open();
+							return;
+						} else
+							 selectedDB=txtNewDBName.getText();
+							
+							 //then get the acronym of the algorithm
+							//get the acronym of the trace reader
+						    // create the name
+						   // create db
+						//open a connection to dbName pass it to the trainModels
+						modelSelector.trainModels(trainingTraces, traceReader,selectedDB);
+						modelSelector.validateModels(validationTraces, traceReader,selectedDB);
+						//close the connection
 					}
 				} catch (Exception ex) {
 					// TODO Auto-generated catch block

@@ -122,16 +122,23 @@ public class ModelSelector {
 		    
 	}
 	
-	private void checkSelectedModels(){
+	/**
+	 * 
+	 * @param dataBase
+	 * @return
+	 */
+	private boolean creatDataBase(String dataBase, String model, String reader){
+		dataBase=dataBase+"_"+model+"_"+reader;
 		
+		
+		return false;
 	}
-
 	/**
 	 * This function can train multiple models simultaneously
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
-	public void trainModels(String trainDirectory, ITraceTypeReader traceReader ) throws Exception {
+	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String dataBase ) throws Exception {
 		
 		Boolean isLastTrace=false;
 		File fileList[]=getDirectoryHandler(trainDirectory);
@@ -140,6 +147,7 @@ public class ModelSelector {
 		if (items ==null || items.length==0){
 			msgBox.setMessage("Please, select a model first.");
 			msgBox.open();
+			return;
 	
 		}
 		 
@@ -169,7 +177,7 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	public void validateModels(String validationDirectory, ITraceTypeReader traceReader) throws Exception {
+	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String dataBase) throws Exception {
 		
 		
 		File fileList[]=getDirectoryHandler(validationDirectory);

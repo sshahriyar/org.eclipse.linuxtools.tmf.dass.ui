@@ -106,11 +106,18 @@ public class KernelStateModeling implements IDetectionModels {
 		return "";
 	}
 	/**
-	 * 
+	 * Retruns the name
 	 */
 	public String getName(){
 		return "Kernel State Modeling (KSM)";
 	}
+	 /**
+     * Returns the acronym of the model
+     */
+    public String getAcronym(){
+    	
+    	return "KSM";
+    }
 	
 	/**
 	 * Returns chart object

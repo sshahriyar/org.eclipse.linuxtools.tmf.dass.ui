@@ -27,4 +27,7 @@ public IDetectionModels createInstance();
 //public  void registerModel() throws Exception;
 /** Gets the name of the model**/
 public String getName();
+
+/** Returns the acronym of the model; should only be three characters long */
+public String getAcronym();
 }

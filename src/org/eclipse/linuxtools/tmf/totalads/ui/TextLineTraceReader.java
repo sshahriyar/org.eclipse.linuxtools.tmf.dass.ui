@@ -75,6 +75,14 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		return "Text-line Reader";
 	}
 
+	 /**
+     * Returns the acronym of the text reader
+     */
+    public String getAcronym(){
+    	
+    	return "TXT";
+    }
+    
 	@Override
 	public ITraceIterator getTraceIterator(File file) throws Exception {
 		

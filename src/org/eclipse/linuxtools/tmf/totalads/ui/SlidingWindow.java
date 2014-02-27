@@ -82,13 +82,21 @@ public class SlidingWindow implements IDetectionModels {
 	}
 
 	/** 
-	 * 
+	 * Returns the name
 	 */
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
 		return "Sliding Window";
 	}
+	
+	 /**
+     * Returns the acronym of the model
+     */
+    public String getAcronym(){
+    	
+    	return "SWN";
+    }
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */

@@ -115,11 +115,18 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     	trcTypFactory.registerModelWithFactory(kernelTraceReader.getName(), kernelTraceReader);
     }
     /**
-     * 
+     * Returns the name of the model
      */
     @Override
     public String getName(){
     	return "CTF Kernel Reader";
+    }
+    /**
+     * Returns the acronym of the Kernel space reader
+     */
+    public String getAcronym(){
+    	
+    	return "KNL";
     }
 	/**
 	 * Return the iterator to go over the trace file
