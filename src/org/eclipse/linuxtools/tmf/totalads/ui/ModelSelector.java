@@ -200,7 +200,7 @@ public class ModelSelector {
 	}
 
 /**
- * It can validate multiple a model for a given database of that model
+ * It  validates a model for a given database of that model
  * @param validationDirectory
  * @throws Exception
  */

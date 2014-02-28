@@ -28,6 +28,9 @@ public class KernelStateModeling implements IDetectionModels {
     List<Integer> NET_CALLS_LIST=Arrays.asList(102,337,505,508,509,501,502,503,510);
     List<Integer> SECURITY_CALLS_LIST=Arrays.asList(286,287,288);
    
+    String TRACE_COLLECTION=Configuration.traceCollection;
+    String SETTINGS_COLLECTION=Configuration.settingsCollection;
+    
     private class TraceStates{
 	    Double FS=0.0;
 	    Double MM=0.0;
@@ -39,60 +42,63 @@ public class KernelStateModeling implements IDetectionModels {
 	    Double UN=0.0;
     }
     
-    DBMS connection;
-    String database;
+   // DBMS connection;
+   // String database;
     Double alpha=0.0;
     Double maxAlpha=0.10;
     
-    public KernelStateModeling(DBMS connection){
-    	this.connection=connection;
-    	this.database=Configuration.dbStates;
+    public KernelStateModeling(){
     	
     }
    
 	
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection) throws Exception {
+    	alpha=0.0; //initialized alpha to 0 during training
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
-		System.out.println(states + " "+database+ " "+Configuration.collectionNormal);
-		connection.insert(states, database,Configuration.collectionNormal);
+		System.out.println(states + " "+database+ " "+TRACE_COLLECTION);
+		connection.insert(states, database,TRACE_COLLECTION);
 	
 	}
 
 	@Override
-	public void validate(ITraceIterator trace, String database) throws Exception {
-
+	public void validate(ITraceIterator trace, String database, DBMS connection) throws Exception {
+	  class Threshold{
+			String time;
+			Double alpha;
+	  }
+		
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
 	  while (alpha< maxAlpha){
-		    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates);
+		    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates,connection,database);
 			if (isAnomaly==false)
 						 break; // no need to increment alpha as there is no anomaly
 		    alpha+=0.02;
 	  }
-	   System.out.println("alpha "+alpha);
+	  
+	  System.out.println("alpha "+alpha);
+	  
+	  
 	}
 
 	@Override
-	public void test(ITraceIterator trace, String traceName, String database) throws Exception {
-		// TODO Auto-generated method stub
-		class TestTraceInfo{
-			String time;
-			String traceName;
-		}
+	public void test(ITraceIterator trace, String traceName, String database,DBMS connection) throws Exception {
+		
+		
 		
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
-		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates);
+		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
 		
-		if (isAnomaly){
+		/*if (isAnomaly){
 			TestTraceInfo anomalyWhereabouts= new TestTraceInfo();
 			String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
 			anomalyWhereabouts.time=timeStamp;
 			anomalyWhereabouts.traceName=traceName;
-			connection.insert(anomalyWhereabouts, database,Configuration.collectionAnomalyInfo);
-		}
+			connection.insert(anomalyWhereabouts, database);
+		}*/
 		
 	}
 	
@@ -124,14 +130,14 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 	/** Returns an instance of KSM **/
 	public IDetectionModels createInstance() {
-		return new KernelStateModeling(Configuration.connection);
+		return new KernelStateModeling();
 	}
 	
 	/** Self registration of the model with the modelFactory **/
 	
 	public static void registerModel(){
 		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
-		KernelStateModeling ksm=new KernelStateModeling(Configuration.connection);
+		KernelStateModeling ksm=new KernelStateModeling();
 		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,ksm);
 	}
 	/**
@@ -140,11 +146,11 @@ public class KernelStateModeling implements IDetectionModels {
 	 * @param alpha
 	 * @return
 	 */
-	private Boolean evaluateKSM(Double alpha, TraceStates testStates){
+	private Boolean evaluateKSM(Double alpha, TraceStates testStates, DBMS connection, String database){
 		Boolean isAnomalous=false;
 		Double maxFS=0.0;
 		//measureStateProbabilities(testTrace, testStates);
-		String maxVal=connection.selectMax("FS", database, Configuration.collectionNormal);
+		String maxVal=connection.selectMax("FS", database, TRACE_COLLECTION);
 		
 		if(!maxVal.isEmpty())
 			maxFS=Double.parseDouble(maxVal);
@@ -155,8 +161,7 @@ public class KernelStateModeling implements IDetectionModels {
 		  else  {
 			  for (double incr=testStates.FS; incr<=maxFS ;incr+=0.01){
 					// get all those records/documents from the Collection (DB) which match FS=incr
-					DBCursor cursor=  connection.select("FS", null, incr, database, 
-							  			Configuration.collectionNormal);
+					DBCursor cursor=  connection.select("FS", null, incr, database, TRACE_COLLECTION);
 					if (cursor!=null){ 
 						 //  get the max KL and the max MM from them
 						 Double []maxKLMM=getMaxKLandMM(cursor);

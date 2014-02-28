@@ -66,8 +66,8 @@ public class DBMS {
 		DB db=mongoClient.getDB(dataBase);
 		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
 		 
-		db.createCollection(Configuration.firstCollection, options);
-		db.createCollection(Configuration.secondCollection, options);
+		db.createCollection(Configuration.traceCollection, options);
+		db.createCollection(Configuration.settingsCollection, options);
 		
 	}
 	
