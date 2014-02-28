@@ -49,13 +49,10 @@ public class KernelStateModeling implements IDetectionModels {
     	this.database=Configuration.dbStates;
     	
     }
-    @Override
-    public Boolean isValidationAllowed(){
-    	return true;
-    }
+   
 	
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database) throws Exception {
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
 		System.out.println(states + " "+database+ " "+Configuration.collectionNormal);
@@ -64,8 +61,8 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void validate(ITraceIterator trace) throws Exception {
-		// TODO Auto-generated method stub
+	public void validate(ITraceIterator trace, String database) throws Exception {
+
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
 	  while (alpha< maxAlpha){
@@ -78,7 +75,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void test(ITraceIterator trace, String traceName) throws Exception {
+	public void test(ITraceIterator trace, String traceName, String database) throws Exception {
 		// TODO Auto-generated method stub
 		class TestTraceInfo{
 			String time;

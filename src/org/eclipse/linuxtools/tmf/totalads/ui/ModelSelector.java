@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
 
 
@@ -37,6 +39,7 @@ public class ModelSelector {
 		grpAnalysisModelSelection.setText("Select a Model");
 		
 		treeAnalysisModels = new Tree(grpAnalysisModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
+		
 		treeAnalysisModels.setLinesVisible(true);
 		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,6));
 		
@@ -48,61 +51,44 @@ public class ModelSelector {
 		TreeItem treeItmClassf = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmClassf.setText("Classification");
 		populateTreeItems(treeItmClassf,ModelTypeFactory.ModelTypes.Classification);
+		treeItmClassf.setExpanded(true);
 		
-		//TreeItem item4 = new TreeItem(treeItmClassf, SWT.NONE);
-	    //item4.setText("Decision Tree");
-	    treeItmClassf.setExpanded(true);
-	    msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-		           ,SWT.ICON_ERROR|SWT.OK);
-		/*btnAnalysisEvaluateModels=new Button(grpAnalysisModelSelection, SWT.NONE);
-		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
+		
+		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void mouseUp(MouseEvent e) {
-				 TreeItem []items= treeAnalysisModels.getSelection();
-				 if (items.length > 0){
+			public void widgetSelected(SelectionEvent e) {
+				TreeItem item=(TreeItem)e.item;
+			      
+				if (item.getParentItem()==null)
+						item.setChecked(false);
+				else{
+						if (previousTreeItem!=null)
+								 previousTreeItem.setChecked(false);
+						 item.setChecked(true);
+						 previousTreeItem=item;
+				}
 					 
-					 ArrayList<IDetectionModels> selectedModelsList= new ArrayList<IDetectionModels>();
-					
-					 for (int i=0;i<items.length;i++){
-						 if (items[i].getParentItem()!=null && items[i].getChecked()){
-							 selectedModelsList.add((IDetectionModels)items[i].getData());
-						 }
-					 }
-					 if (selectedModelsList.size() > 0 ) {
 						
-						 	 IDetectionModels [] selectedModels=new IDetectionModels[selectedModelsList.size()];
-							 selectedModels=selectedModelsList.toArray(selectedModels);
-							 
-							 Object []args= {selectedModels};// wrap an array in an array to pass an argument of array
-							 	 
-							 try {
-								listener.invoke(instanceOfListener, args);
-							} catch (Exception ex) {
-								// TODO Auto-generated catch block
-								//MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-									//	           ,SWT.ICON_ERROR|SWT.OK);
-								//msgBox.setMessage(ex.getMessage());
-								//msgBox.open();
-								ex.printStackTrace();
-							}
-								 // model.test(trace, traceName);
-					 }
-				 }
+				
+			
 			}
 		});
 		
-		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,2,1));
-		btnAnalysisEvaluateModels.setText("Develop the Model");
-			*/	
+		
+		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+		           ,SWT.ICON_ERROR|SWT.OK);
+		
+	    
 		/**
 		 * End group model selection 
 		*/
 	}
+	 TreeItem previousTreeItem;
 	/**
 	 * populates the tree with the list of models from the model factory
 	 */
 	private void populateTreeItems(TreeItem treeItem,ModelTypeFactory.ModelTypes modelType){
-	///////data
+			///////data
 			ModelTypeFactory  modFac=ModelTypeFactory.getInstance();
 			
 		    // populating anomaly detection models		
@@ -123,49 +109,90 @@ public class ModelSelector {
 	}
 	
 	/**
-	 * 
+	 * Creates a new database 
 	 * @param dataBase
 	 * @return
 	 */
-	private boolean creatDataBase(String dataBase, String model, String reader){
-		dataBase=dataBase+"_"+model+"_"+reader;
+	private boolean createDatabase(String database, String model, String reader){
+		database=database+"_"+model+"_"+reader;
+		try {
+			Configuration.connection.createDatabase(database);
+		} catch (Exception ex) {
+			String message=ex.getMessage();
+			msgBox.setMessage(message);
+			msgBox.open();
+			return false;			
+		}
 		
-		
-		return false;
+		return true;
 	}
 	/**
-	 * This function can train multiple models simultaneously
-	 * @param trainDirectory
-	 * @throws Exception
+	 * Checks the selection of the model in the tree
 	 */
-	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String dataBase ) throws Exception {
+	private boolean checkItemSelection(){
 		
-		Boolean isLastTrace=false;
-		File fileList[]=getDirectoryHandler(trainDirectory);
-		//ITraceTypeReader input = new CTFKernelTraceReader();////------------------
 		TreeItem []items= treeAnalysisModels.getSelection();
 		if (items ==null || items.length==0){
 			msgBox.setMessage("Please, select a model first.");
 			msgBox.open();
-			return;
+			return false;
 	
 		}
-		 
+		else{
+				return true;
+		}
+	}
+	/** Checks if database exists or not
+	 * 
+	 * @return
+	 */
+	private boolean checkDBExistence(String database){
+		try {
+			Configuration.connection.datbaseExists(database);
+		} catch (Exception ex) {
+			String message=ex.getMessage();
+			msgBox.setMessage(message);
+			msgBox.open();
+			return false;			
+		}
+		
+		return true;
+		
+		
+	}
+	/**
+	 * This function trains a model
+	 * @param trainDirectory
+	 * @throws Exception
+	 */
+	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB ) throws Exception {
+		
+		TreeItem item= treeAnalysisModels.getSelection()[0];
+		IDetectionModels model= (IDetectionModels)item.getData();
+		
+		if (!checkItemSelection())
+			return;
+		
+		if(isCreateDB  &&	!createDatabase(database, model.getAcronym(), traceReader.getAcronym()) )
+			return;
+		else if (!checkDBExistence(database))
+			return;
+		
+			
+		Boolean isLastTrace=false;
+		File fileList[]=getDirectoryHandler(trainDirectory);
+		
+		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
-			 // get the trace
+			
 						 
-					 if (trcCnt==fileList.length-1)
+			 if (trcCnt==fileList.length-1)
 						 isLastTrace=true;
-					
-					 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
-						 // check if there is a parent of an item and it is checked
-						if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
-							 		ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
-							 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
-							 		model.train(trace, isLastTrace);
-						}
-						 
-					 }
+			 // get the trace
+			 ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
+	 		
+	 		model.train(trace, isLastTrace, database);
+				 
 			
 		}
 		
@@ -173,35 +200,26 @@ public class ModelSelector {
 	}
 
 /**
- * It can validate multiple models simultaneously
+ * It can validate multiple a model for a given database of that model
  * @param validationDirectory
  * @throws Exception
  */
-	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String dataBase) throws Exception {
+	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String database) throws Exception {
 		
-		
+		if (!checkItemSelection() || !checkDBExistence(database))
+			return;
+				
 		File fileList[]=getDirectoryHandler(validationDirectory);
-		
-		TreeItem []items= treeAnalysisModels.getSelection();
-		if (items ==null || items.length==0){
-			msgBox.setMessage("Please, select a model first.");
-			msgBox.open();
-		}
-			 
+		TreeItem item= treeAnalysisModels.getSelection()[0];
+		IDetectionModels model= (IDetectionModels)item.getData();	 
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
-			
-			
-			    	 for (int modlCnt=0; modlCnt<items.length;modlCnt++){
-						 // check if there is a parent of an item and it is checked
-						 if (items[modlCnt].getParentItem()!=null && items[modlCnt].getChecked()){
-							 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
-								 		IDetectionModels model= (IDetectionModels)items[modlCnt].getData();
-								 		model.validate(trace);
-						 }
-		             }
-			
+
+ 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
+	 		
+	 		model.validate(trace, database);
+
 		}
 		
 		

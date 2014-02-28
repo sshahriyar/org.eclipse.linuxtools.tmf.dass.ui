@@ -28,7 +28,7 @@ public class TracingTypeSelector {
 		
 
 		
-		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY );
+		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY);
 		
 		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		//cmbTraceTypes.add("LTTng Kernel");

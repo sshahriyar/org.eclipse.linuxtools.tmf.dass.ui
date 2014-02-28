@@ -22,7 +22,7 @@ public class SlidingWindow implements IDetectionModels {
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#train(char[], java.lang.Boolean)
 	 */
 	@Override
-	public void train(ITraceIterator trace, Boolean isLastTrace) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -31,7 +31,7 @@ public class SlidingWindow implements IDetectionModels {
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#validate(char[])
 	 */
 	@Override
-	public void validate(ITraceIterator trace) throws Exception {
+	public void validate(ITraceIterator trace, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -40,7 +40,7 @@ public class SlidingWindow implements IDetectionModels {
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#test(char[], java.lang.String)
 	 */
 	@Override
-	public void test(ITraceIterator trace, String traceName) throws Exception {
+	public void test(ITraceIterator trace, String traceName, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -48,11 +48,7 @@ public class SlidingWindow implements IDetectionModels {
 	/* (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#isValidationAllowed()
 	 */
-	@Override
-	public Boolean isValidationAllowed() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#textResult()

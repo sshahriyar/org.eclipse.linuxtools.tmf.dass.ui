@@ -257,21 +257,26 @@ public class Modeling {
 						 
 						// get the database name from the text box or combo
 						String selectedDB;
-						if (txtNewDBName.getEnabled()==false)
+						Boolean isNewDB;
+						if (txtNewDBName.getEnabled()==false){
 							selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
+							isNewDB=false;
+						}
 						else if (txtNewDBName.getText().isEmpty()){
-							msgBox.setMessage("Please, enter database name.");
+							msgBox.setMessage("Please, enter a database name.");
 							msgBox.open();
 							return;
-						} else
+						} else{
 							 selectedDB=txtNewDBName.getText();
+							 isNewDB=true;
+						}
 							
 							 //then get the acronym of the algorithm
 							//get the acronym of the trace reader
 						    // create the name
 						   // create db
 						//open a connection to dbName pass it to the trainModels
-						modelSelector.trainModels(trainingTraces, traceReader,selectedDB);
+						modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB);
 						modelSelector.validateModels(validationTraces, traceReader,selectedDB);
 						//close the connection
 					}

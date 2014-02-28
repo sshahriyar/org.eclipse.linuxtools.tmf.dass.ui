@@ -2,6 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
@@ -39,12 +40,35 @@ public class DBMS {
 		mongoClient = new MongoClient( HOST , PORT );
 		mongoClient.setWriteConcern(WriteConcern.JOURNALED);				
 	}
+	/**
+	 * Checks the existence of the database
+	 * @param database
+	 * @return
+	 */
+	public boolean datbaseExists(String database){
+	List<String> databaseNames = mongoClient.getDatabaseNames();
+		
+		if (databaseNames.contains(database.trim()))
+			return false;
+		else
+			return true;
+	}
+	/**
+	 * Creates a database and collections
+	 * @param dataBase
+	 * @throws Exception
+	 */
+	public void createDatabase(String dataBase) throws Exception{
 	
-	
-	public boolean createDatabase(String dataBase){
+	 if (!datbaseExists(dataBase))
+			throw new Exception ("Database exists!");
+		
 		DB db=mongoClient.getDB(dataBase);
-		//db.createCollection(arg0, arg1)
-		return false;
+		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
+		 
+		db.createCollection(Configuration.firstCollection, options);
+		db.createCollection(Configuration.secondCollection, options);
+		
 	}
 	
 	/**

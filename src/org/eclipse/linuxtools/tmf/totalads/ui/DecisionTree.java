@@ -9,29 +9,24 @@ public class DecisionTree implements IDetectionModels {
 	}
 
 	@Override
-	public void train(ITraceIterator trace, Boolean isLastTrace) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void validate(ITraceIterator trace) throws Exception {
+	public void validate(ITraceIterator trace, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void test(ITraceIterator trace, String traceName) throws Exception {
+	public void test(ITraceIterator trace, String traceName, String database) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
-	public Boolean isValidationAllowed() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	@Override
 	public String textResult() {
 		// TODO Auto-generated method stub
