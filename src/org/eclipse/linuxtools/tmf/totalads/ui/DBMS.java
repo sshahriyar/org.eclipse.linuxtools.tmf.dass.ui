@@ -188,8 +188,17 @@ public class DBMS {
 	/**
 	 * 
 	 */
-	public Boolean update(String query, String database){
+	public Boolean replaceOrInsert(String query, String database, String collection){
 		DB db = mongoClient.getDB(database);
+		DBCollection coll=db.getCollection(collection);
+		
+		BasicDBObject newDocument = new BasicDBObject();
+		newDocument.append("$set", new BasicDBObject().append("clients", 110));
+	 
+		BasicDBObject searchQuery = new BasicDBObject().append("hosting", "hostB");
+	 
+		coll.update(searchQuery, newDocument,true,false);
+		
 		return true;
 	}
 }

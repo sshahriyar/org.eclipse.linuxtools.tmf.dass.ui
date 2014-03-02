@@ -18,8 +18,7 @@ public ProgressConsole(Composite comptbtmModeling){
 	CLabel lblProgressConsole = new CLabel(comptbtmModeling, SWT.NONE);
 	lblProgressConsole.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,false,4,1));
 	lblProgressConsole.setText("Progress Console");
-	//lblProgressConsole.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
-	
+		
 	
 	Text txtAnomaliesProgress = new Text(comptbtmModeling, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
 	txtAnomaliesProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,4));
