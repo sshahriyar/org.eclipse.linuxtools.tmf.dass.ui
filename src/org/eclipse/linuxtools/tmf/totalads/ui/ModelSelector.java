@@ -165,7 +165,7 @@ public class ModelSelector {
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
-	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB ) throws Exception {
+	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB, ProgressConsole console ) throws Exception {
 		
 		TreeItem item= treeAnalysisModels.getSelection()[0];
 		IDetectionModels model= (IDetectionModels)item.getData();
@@ -191,7 +191,7 @@ public class ModelSelector {
 			 // get the trace
 			 ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 	 		
-	 		model.train(trace, isLastTrace, database);
+	 		model.train(trace, isLastTrace, database,Configuration.connection, console);
 				 
 			
 		}
@@ -204,7 +204,7 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String database) throws Exception {
+	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String database, ProgressConsole console) throws Exception {
 		
 		if (!checkItemSelection() || !checkDBExistence(database))
 			return;
@@ -212,13 +212,15 @@ public class ModelSelector {
 		File fileList[]=getDirectoryHandler(validationDirectory);
 		TreeItem item= treeAnalysisModels.getSelection()[0];
 		IDetectionModels model= (IDetectionModels)item.getData();	 
-		
+		Boolean isLastTrace=false;
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
-
+			if (trcCnt==fileList.length-1)
+					isLastTrace=true;
+			
  			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 	 		
-	 		model.validate(trace, database);
+	 		model.validate(trace, database, Configuration.connection, isLastTrace, console );
 
 		}
 		

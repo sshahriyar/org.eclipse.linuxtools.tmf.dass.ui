@@ -9,19 +9,19 @@ public class DecisionTree implements IDetectionModels {
 	}
 
 	@Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database) throws Exception {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console)  throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void validate(ITraceIterator trace, String database) throws Exception {
+	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void test(ITraceIterator trace, String traceName, String database) throws Exception {
+	public void test (ITraceIterator trace, String traceName, String database, DBMS connection) throws Exception {
 		// TODO Auto-generated method stub
 
 	}

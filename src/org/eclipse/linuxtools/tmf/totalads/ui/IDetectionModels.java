@@ -9,11 +9,14 @@ public interface IDetectionModels {
 /** Controller will pass a trace through this function. Some models can train on 
  * the traces as they come and some need to wait till the last trace. Controller 
  * will make isLastTrace true when the lastTrace will be sent.  
- * @param database TODO*/	
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection) throws Exception;
+ * @param database TODO
+ * @param console TODO*/	
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception;
 /**  Controller will pass traces for validation using this function.  
- * @param database TODO*/
-public  void validate (ITraceIterator trace, String database, DBMS connection) throws Exception;
+ * @param database TODO
+ * @param isLastTrace TODO
+ * @param console TODO*/
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception;
 /** Controller will pass traces for testing using this function 
  * @param database TODO*/
 public void test (ITraceIterator trace, String traceName, String database, DBMS connection) throws Exception;

@@ -31,7 +31,7 @@ public class Modeling {
 	String selectedDB;
 	Combo cmbDBNames;
 	Text txtNewDBName;
-	
+	ProgressConsole  progConsole;
 	public Modeling(CTabFolder tabFolderDetector){
 		
 		
@@ -62,8 +62,9 @@ public class Modeling {
 	    
 		buildModel(comptbtmModeling);
 		
-	    ProgressConsole progConsole=new ProgressConsole(comptbtmModeling);
-		scrolCompModel.setContent(comptbtmModeling);
+	    progConsole=new ProgressConsole(comptbtmModeling);
+		
+	    scrolCompModel.setContent(comptbtmModeling);
 		 // Set the minimum size
 		scrolCompModel.setMinSize(600, 600);
 	    // Expand both horizontally and vertically
@@ -271,13 +272,10 @@ public class Modeling {
 							 isNewDB=true;
 						}
 							
-							 //then get the acronym of the algorithm
-							//get the acronym of the trace reader
-						    // create the name
-						   // create db
+							 
 						//open a connection to dbName pass it to the trainModels
-						modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB);
-						modelSelector.validateModels(validationTraces, traceReader,selectedDB);
+						modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
+						modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
 						//close the connection
 					}
 				} catch (Exception ex) {

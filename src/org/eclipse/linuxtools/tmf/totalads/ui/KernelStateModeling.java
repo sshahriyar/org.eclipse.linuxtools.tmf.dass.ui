@@ -53,22 +53,17 @@ public class KernelStateModeling implements IDetectionModels {
    
 	
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection) throws Exception {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception {
     	alpha=0.0; //initialized alpha to 0 during training
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
-		System.out.println(states + " "+database+ " "+TRACE_COLLECTION);
 		connection.insert(states, database,TRACE_COLLECTION);
-	
+		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 	}
 
 	@Override
-	public void validate(ITraceIterator trace, String database, DBMS connection) throws Exception {
-	  class Threshold{
-			String time;
-			Double alpha;
-	  }
-		
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
+
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
 	  while (alpha< maxAlpha){
@@ -76,9 +71,32 @@ public class KernelStateModeling implements IDetectionModels {
 			if (isAnomaly==false)
 						 break; // no need to increment alpha as there is no anomaly
 		    alpha+=0.02;
+		    console.printTextLn("Increasing alpha to "+alpha);
+		    
 	  }
 	  
-	  System.out.println("alpha "+alpha);
+	  if (isLastTrace){
+		  	 console.printTextLn("Updating database");
+			  class ReplacementFields{
+				Double alpha;
+				String updateTime;
+			  }
+			  class SearchFields{
+				  String thresholdName;
+			  }
+			  
+			  SearchFields searchFields=new SearchFields();
+			  ReplacementFields replacementFields=new ReplacementFields();
+			  searchFields.thresholdName="alpha";
+			  replacementFields.alpha=alpha;
+			  replacementFields.updateTime= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
+			  
+			  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
+			  console.printTextLn("Databse updated with final alpha: "+alpha);
+	  }
+	  
+	  
+	
 	  
 	  
 	}

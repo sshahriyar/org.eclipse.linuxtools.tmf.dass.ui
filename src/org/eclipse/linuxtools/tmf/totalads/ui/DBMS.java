@@ -87,10 +87,40 @@ public class DBMS {
 	public void closeConnection(){
 		mongoClient.close();
 	}
+	/**
+	 * Extracts keys and values from a claas's object using reflection and assign it
+	 * to the document object based on the data types
+	 * @param record
+	 * @param document
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	private void extractKeysAndValuesfromTheObject(Object record, BasicDBObject document) throws IllegalArgumentException, IllegalAccessException{
+			
+		  for (Field field : record.getClass().getDeclaredFields()) {
+					
+					 String key=field.getName();
+					
+					 if (field.getType()==String.class){
+						 String val=(String)field.get(record);
+						 document.append(key, val);
+					 } else if (field.getType()==Integer.class){
+						 Integer val=(Integer)field.get(record);
+						 document.append(key, val);
+					 } else if (field.getType()==Double.class){
+						 Double val=(Double)field.get(record);
+						 document.append(key, val);
+					 }else if (field.getType()==Boolean.class){
+						 Boolean val=(Boolean)field.get(record);
+						 document.append(key, val);
+					 }
+			}
+	}
 	
 	/**
 	 *  Insert an object's field with only one level of nesting. The object's class should  only
-	 *  have data fields when calling this function.
+	 *  have data fields when calling this function. For example, create a class A{String b; Integer b},
+	 *  assign values after instantiating the object and pass it to the function
 	 * @param query
 	 * @param database
 	 * @param collection
@@ -105,25 +135,7 @@ public class DBMS {
 	
 		
 		BasicDBObject document = new BasicDBObject();
-		for (Field field : record.getClass().getDeclaredFields()) {
-				
-				 String key=field.getName();
-				
-				 if (field.getType()==String.class){
-					 String val=(String)field.get(record);
-					 document.append(key, val);
-				 } else if (field.getType()==Integer.class){
-					 Integer val=(Integer)field.get(record);
-					 document.append(key, val);
-				 } else if (field.getType()==Double.class){
-					 Double val=(Double)field.get(record);
-					 document.append(key, val);
-				 }else if (field.getType()==Boolean.class){
-					 Boolean val=(Boolean)field.get(record);
-					 document.append(key, val);
-				 }
-		}
-				
+		extractKeysAndValuesfromTheObject(record, document);
 		    
 		 try {
 			  writeRes= coll.insert(document);
@@ -186,19 +198,42 @@ public class DBMS {
 		return cursor;
 	}
 	/**
-	 * 
+	 * This function is used to update the values of individual fields--specified by the replacementFieldsAndValue object
+	 *  in documents specified by the searchFieldsandValues object. Pass two objects of  classes that only has primitive data types
+	 *   as fields--no methods. Each object's fields' values  and their data types will be automatically extracted and used
+	 *   in the update. If no document matches the criteria then new document will be inserted
+	 * @param searchFieldsAndValues searchFields
+	 * @param replacementFieldsAndValues replacement fields
+	 * @param database database name
+	 * @param collection collection name
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
-	public Boolean replaceOrInsert(String query, String database, String collection){
-		DB db = mongoClient.getDB(database);
-		DBCollection coll=db.getCollection(collection);
+	public void replaceFields(Object searchFieldsAndValues, Object replacementFieldsAndValues,String database, String collection) 
+										throws IllegalArgumentException, IllegalAccessException, Exception{
 		
-		BasicDBObject newDocument = new BasicDBObject();
-		newDocument.append("$set", new BasicDBObject().append("clients", 110));
-	 
-		BasicDBObject searchQuery = new BasicDBObject().append("hosting", "hostB");
-	 
-		coll.update(searchQuery, newDocument,true,false);
-		
-		return true;
+			DB db = mongoClient.getDB(database);
+			DBCollection coll=db.getCollection(collection);
+			
+			BasicDBObject replacementDocument = new BasicDBObject();
+		    BasicDBObject setFieldValDocument=new BasicDBObject();
+		    
+		    extractKeysAndValuesfromTheObject(replacementFieldsAndValues, setFieldValDocument);
+		    
+			replacementDocument.append("$set", setFieldValDocument);
+		 
+			BasicDBObject searchQueryDocument = new BasicDBObject();
+			//.append("hosting", "hostB");
+			extractKeysAndValuesfromTheObject(searchFieldsAndValues, searchQueryDocument);
+		 
+			WriteResult writeRes=coll.update(searchQueryDocument, replacementDocument,true,false);
+			
+								          
+			CommandResult cmdResult = writeRes.getLastError();
+			if( !cmdResult.ok()) 
+			         throw new Exception ("Error : "+cmdResult.getErrorMessage());
+			
+			
 	}
 }
