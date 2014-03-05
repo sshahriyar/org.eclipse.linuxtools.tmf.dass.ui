@@ -28,10 +28,11 @@ public class Modeling {
 	Text txtTrainingTraces;
 	Text txtValidationTraces=null;
 	MessageBox msgBox;
-	String selectedDB;
+	//String selectedDB;
 	Combo cmbDBNames;
 	Text txtNewDBName;
 	ProgressConsole  progConsole;
+	
 	public Modeling(CTabFolder tabFolderDetector){
 		
 		
@@ -141,8 +142,9 @@ public class Modeling {
 		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
 		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		cmbDBNames.add("Enter New  Name");
-		cmbDBNames.add("Hi");
-		 
+		cmbDBNames.add("host04_KSM_TXT");
+		cmbDBNames.select(0); 
+		
 		txtNewDBName = new Text(grpTraceTypesAndDB, SWT.BORDER);
 		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtNewDBName.setText("Enter");
@@ -157,13 +159,15 @@ public class Modeling {
 				if ( cmbDBNames.getSelectionIndex()==0){
 					txtNewDBName.setText("");
 					txtNewDBName.setEnabled(true);
-					//selectedDB="";
+					
+					
 				}
 				
 				else {
 					
 					txtNewDBName.setText("Enter");
 					txtNewDBName.setEnabled(false);
+										
 					//selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
 					
 				}
@@ -173,9 +177,7 @@ public class Modeling {
 		});
 		
 		
-		
-		
-		//---------
+
 		/**
 		 * End group modeling type and traces
 		 */
@@ -210,6 +212,7 @@ public class Modeling {
 		Button radioBtnVal=new Button(grpValidation, SWT.RADIO);
 		radioBtnVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 		radioBtnVal.setText("Validation");
+		radioBtnVal.setSelection(true);
 		
 		
 		TraceBrowser traceBrowser= new TraceBrowser(grpValidation,new GridData(SWT.RIGHT,SWT.TOP,false,false));
@@ -274,8 +277,9 @@ public class Modeling {
 							
 							 
 						//open a connection to dbName pass it to the trainModels
-						modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
-						modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
+						Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
+						if (isDone)
+							modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
 						//close the connection
 					}
 				} catch (Exception ex) {

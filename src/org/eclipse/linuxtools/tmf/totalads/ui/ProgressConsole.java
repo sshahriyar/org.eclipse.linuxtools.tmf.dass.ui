@@ -10,7 +10,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class ProgressConsole {
 	private CLabel lblProgressConsole;
 	private Text txtAnomaliesProgress;
-	private int MAX_TEXT_SIZE=30;
+	private int MAX_TEXT_SIZE=1000;
 	
 	public ProgressConsole(Composite comptbtmModeling){
 	/**
@@ -22,7 +22,7 @@ public class ProgressConsole {
 		lblProgressConsole.setText("Progress Console");
 			
 		
-		txtAnomaliesProgress = new Text(comptbtmModeling, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
+		txtAnomaliesProgress = new Text(comptbtmModeling, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL |SWT.MULTI);
 		txtAnomaliesProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,4));
 		txtAnomaliesProgress.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txtAnomaliesProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));

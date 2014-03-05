@@ -23,6 +23,7 @@ public class ModelSelector {
 	Button btnAnalysisEvaluateModels=null;
 	Tree treeAnalysisModels=null;
 	MessageBox msgBox;
+	 TreeItem currentlySelectedTreeItem;
 	//Method listener;
 //	Object instanceOfListener;
 	public ModelSelector(Composite comptbtmAnalysis){
@@ -62,10 +63,10 @@ public class ModelSelector {
 				if (item.getParentItem()==null)
 						item.setChecked(false);
 				else{
-						if (previousTreeItem!=null)
-								 previousTreeItem.setChecked(false);
+						if (currentlySelectedTreeItem!=null)
+								 currentlySelectedTreeItem.setChecked(false);
 						 item.setChecked(true);
-						 previousTreeItem=item;
+						 currentlySelectedTreeItem=item;
 				}
 					 
 						
@@ -83,7 +84,7 @@ public class ModelSelector {
 		 * End group model selection 
 		*/
 	}
-	 TreeItem previousTreeItem;
+	
 	/**
 	 * populates the tree with the list of models from the model factory
 	 */
@@ -131,8 +132,9 @@ public class ModelSelector {
 	 */
 	private boolean checkItemSelection(){
 		
-		TreeItem []items= treeAnalysisModels.getSelection();
-		if (items ==null || items.length==0){
+		//TreeItem []items= treeAnalysisModels.getItems();
+		
+		if (currentlySelectedTreeItem ==null ){
 			msgBox.setMessage("Please, select a model first.");
 			msgBox.open();
 			return false;
@@ -165,23 +167,25 @@ public class ModelSelector {
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
-	public void trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB, ProgressConsole console ) throws Exception {
+	public Boolean trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB, ProgressConsole console ) throws Exception {
 		
-		TreeItem item= treeAnalysisModels.getSelection()[0];
-		IDetectionModels model= (IDetectionModels)item.getData();
+		//TreeItem item= treeAnalysisModels.getSelection()[0];
+		IDetectionModels model= (IDetectionModels)currentlySelectedTreeItem.getData();
 		
 		if (!checkItemSelection())
-			return;
+			return false;
 		
 		if(isCreateDB  &&	!createDatabase(database, model.getAcronym(), traceReader.getAcronym()) )
-			return;
+			return false;
 		else if (!checkDBExistence(database))
-			return;
+			return false;
 		
 			
 		Boolean isLastTrace=false;
 		File fileList[]=getDirectoryHandler(trainDirectory);
 		
+		console.clearText();
+		console.printTextLn("Training the model....");
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			
@@ -189,14 +193,15 @@ public class ModelSelector {
 			 if (trcCnt==fileList.length-1)
 						 isLastTrace=true;
 			 // get the trace
-			 ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
+			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 	 		
+			console.printTextLn("Processing file "+fileList[trcCnt].getName());
 	 		model.train(trace, isLastTrace, database,Configuration.connection, console);
 				 
 			
 		}
 		
-		
+		return true;
 	}
 
 /**
@@ -204,26 +209,31 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	public void validateModels(String validationDirectory, ITraceTypeReader traceReader, String database, ProgressConsole console) throws Exception {
+	public Boolean validateModels(String validationDirectory, ITraceTypeReader traceReader, String database, ProgressConsole console) throws Exception {
 		
 		if (!checkItemSelection() || !checkDBExistence(database))
-			return;
-				
+			return false;
+		
+		console.printTextLn("Starting validation....");
 		File fileList[]=getDirectoryHandler(validationDirectory);
-		TreeItem item= treeAnalysisModels.getSelection()[0];
-		IDetectionModels model= (IDetectionModels)item.getData();	 
+		//TreeItem item= treeAnalysisModels.getSelection()[0];
+		IDetectionModels model= (IDetectionModels)currentlySelectedTreeItem.getData();	 
 		Boolean isLastTrace=false;
+		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 			 // get the trace
 			if (trcCnt==fileList.length-1)
 					isLastTrace=true;
 			
  			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
-	 		
+ 		
+ 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
+ 			
 	 		model.validate(trace, database, Configuration.connection, isLastTrace, console );
 
 		}
 		
+		return true;
 		
 	}
 	
