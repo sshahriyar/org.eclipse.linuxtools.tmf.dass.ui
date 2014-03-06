@@ -4,8 +4,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
+
+import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 
 public class ProgressConsole {
 	private CLabel lblProgressConsole;
@@ -60,12 +63,29 @@ public class ProgressConsole {
 	 * @param txt
 	 */
 	
-	public void printTextLn(String txt){
+	public void printTextLn(final String txt){
+		Object wait=new Object();
 		
+		Display.getDefault().asyncExec(new DisplayText(wait, txt));
+		
+	}
+
+
+  private class DisplayText implements Runnable {
+	Object waitFor;
+	String txt;
+	public DisplayText (Object wait, String text){
+		waitFor=wait;
+		txt=text;
+	}
+	@Override
+	public void run() {
 		checksTextSize();		
 		txtAnomaliesProgress.append(txt);
 		txtAnomaliesProgress.append("\n");
+		
 	}
+  }
 	/**
 	 * Prints new line in the text box
 	 */

@@ -11,6 +11,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
@@ -221,6 +222,7 @@ public class Modeling {
 		//btnValidationBrowse.setText("Browse Directory");
 		
 		txtValidationTraces = new Text(grpValidation, SWT.BORDER);
+		//txtValidationTraces.setText("");
 		txtValidationTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		traceBrowser.setTextBox(txtValidationTraces);
 		
@@ -235,18 +237,47 @@ public class Modeling {
 	 * Method to handle model building button
 	 * @param comptbtmModeling
 	 */
+	Button btnBuildModel;
 	public void buildModel(Composite comptbtmModeling){
 		
-		Button btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
+		btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
 		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,4,1));
-		btnBuildModel.setText("Start Building the Model");
+		btnBuildModel.setText("Start building the model");
 		btnBuildModel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
-				System.out.println(traceReader.getName());
+				//new Thread(new BackgroundModel()).start();
+				btnBuildModel.setEnabled(false);
+	//			buildEventMethod();
+				Display.getDefault().asyncExec(new BackgroundModel());
+				//Th
+				/* Display.getDefault().asyncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					buildModelEventCode();
+				}
+			} );*/
+				
+			}
+		 });
+	}
+
+	private class BackgroundModel implements Runnable{
+		
+		@Override
+	//	public void run(){
+		//	buildModelEventCode();
+	//	}
+			
+		//public void buildEventMethod(){
+		public void run(){
+				
 				
 				try {
+					
+					ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
 					String trainingTraces=txtTrainingTraces.getText().trim();
 					String validationTraces=txtValidationTraces.getText().trim();
 					
@@ -254,7 +285,7 @@ public class Modeling {
 					
 						msgBox.setMessage("Please, select training and validation traces.");
 						msgBox.open();
-
+						return;
 					}
 						
 					else{
@@ -276,9 +307,8 @@ public class Modeling {
 						}
 							
 							 
-						//open a connection to dbName pass it to the trainModels
-						Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
-						if (isDone)
+						//Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
+						//if (isDone)
 							modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
 						//close the connection
 					}
@@ -295,8 +325,12 @@ public class Modeling {
 					msgBox.open();
 					ex.printStackTrace();
 				}
-				
+				finally{
+					btnBuildModel.setEnabled(true);
+				}
 			}
-		 });
 	}
+	/*** **/
+	
+	
 }

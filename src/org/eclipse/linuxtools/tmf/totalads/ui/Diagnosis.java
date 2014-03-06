@@ -28,7 +28,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.sun.media.sound.ModelConnectionBlock;
 
 public class Diagnosis {
-	Table tblAnalysisTraceList;
+	//Table tblAnalysisTraceList;
 	TracingTypeSelector traceTypeSelector;
 	public Diagnosis(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		
@@ -340,10 +340,10 @@ public class Diagnosis {
 	 * @param traceTypeName
 	 */
 	public void updateOnTraceSelection(char []trace,String tracePath, String traceTypeName){
-		tblAnalysisTraceList.removeAll();
+		//tblAnalysisTraceList.removeAll();
 		String traceName=tracePath.substring(tracePath.lastIndexOf('/')+1, tracePath.length());
-		TableItem tableItemAnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
-		tableItemAnalysisAnomHistory.setText(new String[] {tracePath,  traceName});
+		//TableItem tableItemAnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
+	//	tableItemAnalysisAnomHistory.setText(new String[] {tracePath,  traceName});
 	
 //		Controller ctrl=new Controller();
     	//DBMS conn= new  DBMS();
@@ -358,9 +358,9 @@ public class Diagnosis {
 	 */
 	public void observeSelectedModels(IDetectionModels []models){
 		
-		TableItem []tblItem= tblAnalysisTraceList.getSelection();
-		String trace=tblItem[0].getText(0);
-		System.out.println(trace);
+		//TableItem []tblItem= tblAnalysisTraceList.getSelection();
+		//String trace=tblItem[0].getText(0);
+	//	System.out.println(trace);
 		
 		for (int modlCount=0; modlCount<models.length;modlCount++){
 			System.out.println(models[modlCount].getName());
