@@ -47,13 +47,22 @@ public class KernelStateModeling implements IDetectionModels {
     Double alpha=0.0;
     Double maxAlpha=0.10;
     
-    public KernelStateModeling(){
-    	
-    }
-   
-	
+    public KernelStateModeling(){   }
+   /**
+    * Creates a database and collections to store modeling information
+    * @param databaseName
+    * @param connection
+    * @throws Exception
+    */
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception {
+    public void createDatabase(String databaseName, DBMS connection) throws TotalADSUiException{
+    	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
+    	connection.createDatabase(databaseName, collectionNames);
+    }
+	
+    
+    @Override
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception {
     	alpha=0.0; //initialized alpha to 0 during training
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
@@ -92,7 +101,7 @@ public class KernelStateModeling implements IDetectionModels {
 			  replacementFields.updateTime= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
 			  
 			  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
-			  console.printTextLn("Databse updated with final alpha: "+alpha);
+			  console.printTextLn("Database updated with final alpha: "+alpha);
 	  }
 	  
 	  

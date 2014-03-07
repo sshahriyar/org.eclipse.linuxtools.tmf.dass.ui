@@ -20,8 +20,9 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
  * @author Syed Shariyar Murtaza 
  */
 public class CTFKernelTraceReader implements ITraceTypeReader   {
-	
-     // inner class      
+	 // ------------------------------------------------------------------------
+     // inner class   
+	 // ------------------------------------------------------------------------
      class CTFKerenelIterator implements ITraceIterator {   
     	 CtfIterator traceIterator=null;
     	 CtfTmfTrace  trace=null;
@@ -100,7 +101,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
           //this.traceBuffer=buffer;
     }
 
-   // @Override
+  // @Override
     public ITraceTypeReader createInstance(){
     	return new CTFKernelTraceReader();
     }

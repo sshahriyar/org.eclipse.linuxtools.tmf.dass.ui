@@ -13,7 +13,7 @@ import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 public class ProgressConsole {
 	private CLabel lblProgressConsole;
 	private Text txtAnomaliesProgress;
-	private int MAX_TEXT_SIZE=1000;
+	private int MAX_TEXT_SIZE=20000;
 	
 	public ProgressConsole(Composite comptbtmModeling){
 	/**
@@ -29,8 +29,7 @@ public class ProgressConsole {
 		txtAnomaliesProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,4));
 		txtAnomaliesProgress.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txtAnomaliesProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
-		//txtAnomaliesProgress.setText("Reading Trace Kernel-session-27-13\nTransforming to states\nInserting into the database host-app-01\n.....................\n");
-		//txtAnomaliesProgress.
+		
 	}
 	
 	/**
@@ -53,10 +52,16 @@ public class ProgressConsole {
 	 * @param txt
 	 */
 	
-	public void printText(String txt){
+	public void printText(final String txt){
 		
-		checksTextSize();		
-		txtAnomaliesProgress.append(txt);
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				checksTextSize();		
+				txtAnomaliesProgress.append(txt);
+			
+			}
+		});
 	}
 	/**
 	 *  Prints text in the text box with a new line
@@ -64,39 +69,45 @@ public class ProgressConsole {
 	 */
 	
 	public void printTextLn(final String txt){
-		Object wait=new Object();
-		
-		Display.getDefault().asyncExec(new DisplayText(wait, txt));
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				checksTextSize();		
+				txtAnomaliesProgress.append(txt);
+				txtAnomaliesProgress.append("\n");
+				
+			}
+		});
 		
 	}
 
 
-  private class DisplayText implements Runnable {
-	Object waitFor;
-	String txt;
-	public DisplayText (Object wait, String text){
-		waitFor=wait;
-		txt=text;
-	}
-	@Override
-	public void run() {
-		checksTextSize();		
-		txtAnomaliesProgress.append(txt);
-		txtAnomaliesProgress.append("\n");
-		
-	}
-  }
 	/**
 	 * Prints new line in the text box
 	 */
 	public void printNewLine(){
-		checksTextSize();
-		txtAnomaliesProgress.append("\n");
+			Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				checksTextSize();		
+				txtAnomaliesProgress.append("\n");
+				
+			}
+		});
 	}
 	/**
 	 * clears the text box
 	 */
 	public void clearText(){
-		txtAnomaliesProgress.setText("");
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+					txtAnomaliesProgress.setText("");
+			}
+		});
+		
 	}
 }

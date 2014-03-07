@@ -7,6 +7,11 @@ public class DecisionTree implements IDetectionModels {
 	public DecisionTree(DBMS connection) {
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+    public void createDatabase(String databaseName, DBMS connection) throws Exception{
+	
+	}
 
 	@Override
 	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console)  throws Exception {

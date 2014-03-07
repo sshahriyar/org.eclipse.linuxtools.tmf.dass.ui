@@ -23,8 +23,8 @@ public class ModelSelector {
 	Button btnAnalysisEvaluateModels=null;
 	Tree treeAnalysisModels=null;
 	MessageBox msgBox;
-	 TreeItem currentlySelectedTreeItem;
-	//Method listener;
+	TreeItem currentlySelectedTreeItem=null;
+	IDetectionModels model;
 //	Object instanceOfListener;
 	public ModelSelector(Composite comptbtmAnalysis){
 		
@@ -67,6 +67,7 @@ public class ModelSelector {
 								 currentlySelectedTreeItem.setChecked(false);
 						 item.setChecked(true);
 						 currentlySelectedTreeItem=item;
+						 model= (IDetectionModels)currentlySelectedTreeItem.getData();
 				}
 					 
 						
@@ -109,24 +110,7 @@ public class ModelSelector {
 		    
 	}
 	
-	/**
-	 * Creates a new database 
-	 * @param dataBase
-	 * @return
-	 */
-	private boolean createDatabase(String database, String model, String reader){
-		database=database+"_"+model+"_"+reader;
-		try {
-			Configuration.connection.createDatabase(database);
-		} catch (Exception ex) {
-			String message=ex.getMessage();
-			msgBox.setMessage(message);
-			msgBox.open();
-			return false;			
-		}
-		
-		return true;
-	}
+
 	/**
 	 * Checks the selection of the model in the tree
 	 */
@@ -134,71 +118,70 @@ public class ModelSelector {
 		
 		//TreeItem []items= treeAnalysisModels.getItems();
 		
-		if (currentlySelectedTreeItem ==null ){
-			msgBox.setMessage("Please, select a model first.");
-			msgBox.open();
-			return false;
-	
-		}
-		else{
+		if (currentlySelectedTreeItem ==null )
+				return false;
+		else
 				return true;
-		}
+		
 	}
 	/** Checks if database exists or not
 	 * 
 	 * @return
 	 */
 	private boolean checkDBExistence(String database){
-		try {
-			Configuration.connection.datbaseExists(database);
-		} catch (Exception ex) {
-			String message=ex.getMessage();
-			msgBox.setMessage(message);
-			msgBox.open();
-			return false;			
-		}
 		
-		return true;
-		
-		
+			return Configuration.connection.datbaseExists(database);
+			
 	}
 	/**
 	 * This function trains a model
 	 * @param trainDirectory
 	 * @throws Exception
 	 */
-	public Boolean trainModels(String trainDirectory, ITraceTypeReader traceReader, String database, Boolean isCreateDB, ProgressConsole console ) throws Exception {
+	public Boolean trainModels(String trainDirectory, ITraceTypeReader traceReader, String database,
+				Boolean isCreateDB, ProgressConsole console ) throws TotalADSUiException,Exception {
 		
 		//TreeItem item= treeAnalysisModels.getSelection()[0];
-		IDetectionModels model= (IDetectionModels)currentlySelectedTreeItem.getData();
-		
+		Boolean isLastTrace=false;
+				
 		if (!checkItemSelection())
-			return false;
+			throw new TotalADSUiException("Please, select a model first!");
+       
+		// get a file and a db handler
+		File fileList[]=getDirectoryHandler(trainDirectory);
+		DBMS connection=Configuration.connection;
 		
-		if(isCreateDB  &&	!createDatabase(database, model.getAcronym(), traceReader.getAcronym()) )
-			return false;
+		//check for valid trace type reader and traces before creating a database
+		try{
+			traceReader.getTraceIterator(fileList[0]);
+		}catch (Exception ex){
+			String message="Invalid trace reader and traces: "+ex.getMessage();
+			throw new TotalADSUiException(message);
+		}
+		
+		if(isCreateDB){
+			database=database+"_"+model.getAcronym()+"_"+ traceReader.getAcronym();
+			model.createDatabase(database, connection);
+		}
 		else if (!checkDBExistence(database))
-			return false;
+			throw new TotalADSUiException("Database already exists!");
 		
 			
-		Boolean isLastTrace=false;
-		File fileList[]=getDirectoryHandler(trainDirectory);
+		
 		
 		console.clearText();
 		console.printTextLn("Training the model....");
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
-			
-						 
-			 if (trcCnt==fileList.length-1)
+	
+			if (trcCnt==fileList.length-1)
 						 isLastTrace=true;
 			 // get the trace
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 	 		
 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
-	 		model.train(trace, isLastTrace, database,Configuration.connection, console);
-				 
-			
+	 		model.train(trace, isLastTrace, database,connection, console);
+		
 		}
 		
 		return true;
@@ -209,15 +192,27 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	public Boolean validateModels(String validationDirectory, ITraceTypeReader traceReader, String database, ProgressConsole console) throws Exception {
+	public Boolean validateModels(String validationDirectory, ITraceTypeReader traceReader, String database,
+				ProgressConsole console) throws TotalADSUiException,Exception {
 		
-		if (!checkItemSelection() || !checkDBExistence(database))
-			return false;
+		if (!checkItemSelection())
+			throw new TotalADSUiException("Please, select a model first!");
+		else if (!checkDBExistence(database))
+			throw new TotalADSUiException("Database already exists!");
 		
-		console.printTextLn("Starting validation....");
 		File fileList[]=getDirectoryHandler(validationDirectory);
-		//TreeItem item= treeAnalysisModels.getSelection()[0];
-		IDetectionModels model= (IDetectionModels)currentlySelectedTreeItem.getData();	 
+		
+		//check for valid trace type reader and traces before creating a database
+		try{
+				traceReader.getTraceIterator(fileList[0]);
+		}catch (Exception ex){
+				String message="Invalid trace reader and traces: "+ex.getMessage();
+				throw new TotalADSUiException(message);
+		}
+		
+		// proccess now
+		console.printTextLn("Starting validation....");
+		
 		Boolean isLastTrace=false;
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){

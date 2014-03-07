@@ -49,25 +49,26 @@ public class DBMS {
 	List<String> databaseNames = mongoClient.getDatabaseNames();
 		
 		if (databaseNames.contains(database.trim()))
-			return false;
-		else
 			return true;
+		else
+			return false;
 	}
 	/**
 	 * Creates a database and collections
 	 * @param dataBase
 	 * @throws Exception
 	 */
-	public void createDatabase(String dataBase) throws Exception{
+	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSUiException{
 	
-	 if (!datbaseExists(dataBase))
-			throw new Exception ("Database exists!");
+	 if (datbaseExists(dataBase))
+			throw new TotalADSUiException("Database already exists!");
 		
 		DB db=mongoClient.getDB(dataBase);
 		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
 		 
-		db.createCollection(Configuration.traceCollection, options);
-		db.createCollection(Configuration.settingsCollection, options);
+		for (int j=0; j<collectionNames.length;j++)
+			db.createCollection(collectionNames[j], options);
+		//db.createCollection(Configuration.settingsCollection, options);
 		
 	}
 	

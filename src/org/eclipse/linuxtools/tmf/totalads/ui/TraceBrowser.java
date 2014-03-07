@@ -18,7 +18,7 @@ import org.eclipse.swt.events.KeyEvent;
  *
  */
 public class TraceBrowser {
-	Button btnTrainingBrowse;
+	Button btnTraceBrowser;
 	Composite parent;
 	Text txtBox;
 	/**
@@ -30,11 +30,11 @@ public class TraceBrowser {
 	public TraceBrowser(Composite parent, Text txtBox, GridData gridData ){
 		this.txtBox=txtBox;
 		this.parent=parent;
-	    btnTrainingBrowse =new Button(parent, SWT.NONE);
-		btnTrainingBrowse.setLayoutData(gridData);
-		btnTrainingBrowse.setText("Browse Traces");
-		btnTrainingBrowse.addMouseListener(new MouseUpEvent());
-		btnTrainingBrowse.addKeyListener(new KeyPressEvent());
+	    btnTraceBrowser =new Button(parent, SWT.NONE);
+		btnTraceBrowser.setLayoutData(gridData);
+		btnTraceBrowser.setText("Browse Traces");
+		btnTraceBrowser.addMouseListener(new MouseUpEvent());
+		btnTraceBrowser.addKeyListener(new KeyPressEvent());
 				
 	}
 	/**
@@ -45,11 +45,11 @@ public class TraceBrowser {
 	public TraceBrowser(Composite parent, GridData gridData ){
 		
 		this.parent=parent;
-	    btnTrainingBrowse =new Button(parent, SWT.NONE);
-		btnTrainingBrowse.setLayoutData(gridData);
-		btnTrainingBrowse.setText("Browse Traces");
-		btnTrainingBrowse.addMouseListener(new MouseUpEvent());
-		btnTrainingBrowse.addKeyListener(new KeyPressEvent());
+	    btnTraceBrowser =new Button(parent, SWT.NONE);
+		btnTraceBrowser.setLayoutData(gridData);
+		btnTraceBrowser.setText("Browse Traces");
+		btnTraceBrowser.addMouseListener(new MouseUpEvent());
+		btnTraceBrowser.addKeyListener(new KeyPressEvent());
 				
 	}
 	/**
@@ -65,7 +65,7 @@ public class TraceBrowser {
     private class MouseUpEvent extends MouseAdapter {
 	 	@Override
 	 	public void mouseUp(MouseEvent e) {
-	 		fileDialog();
+	 		directoryDialog();
 	 	}
 	 }
     
@@ -74,13 +74,13 @@ public class TraceBrowser {
     private class KeyPressEvent extends KeyAdapter{
 	 	@Override
 	 	public void keyPressed(KeyEvent e) {
-	 		fileDialog();
+	 		directoryDialog();
 	 	}
     }
     /**
      * Method to open file dialog box
      */
-    private void fileDialog(){
+    private void directoryDialog(){
         //FileDialog dD = new FileDialog(parent.getShell(), SWT.OPEN|SWT.MULTI|SWT.);
         DirectoryDialog dD=new DirectoryDialog(parent.getShell());
         dD.setText("Open");
@@ -89,7 +89,9 @@ public class TraceBrowser {
         //fd.setFilterExtensions(filterExt);
         //path.delete(0, path.length());
         //path.append(fd.open());
-        this.txtBox.setText(dD.open());
+       String path= dD.open();
+       if (path!=null)
+    	   this.txtBox.setText(path);
         //System.out.println(selected);
     }
 	

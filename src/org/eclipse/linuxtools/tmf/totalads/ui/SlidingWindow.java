@@ -17,7 +17,11 @@ public class SlidingWindow implements IDetectionModels {
 	public SlidingWindow(DBMS connection) {
 		// TODO Auto-generated constructor stub
 	}
-
+	@Override
+    public void createDatabase(String databaseName, DBMS connection) throws Exception{
+		
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#train(char[], java.lang.Boolean)
 	 */

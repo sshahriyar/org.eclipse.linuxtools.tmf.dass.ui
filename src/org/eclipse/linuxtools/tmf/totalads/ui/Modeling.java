@@ -244,89 +244,114 @@ public class Modeling {
 		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,4,1));
 		btnBuildModel.setText("Start building the model");
 		btnBuildModel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				//new Thread(new BackgroundModel()).start();
-				btnBuildModel.setEnabled(false);
-	//			buildEventMethod();
-				Display.getDefault().asyncExec(new BackgroundModel());
-				//Th
-				/* Display.getDefault().asyncExec(new Runnable() {
+		
+		@Override
+		public void mouseUp(MouseEvent e) {
 				
-				@Override
-				public void run() {
-					
-					buildModelEventCode();
-				}
-			} );*/
+						String selectedDB;
+						Boolean isNewDB;
+						btnBuildModel.setEnabled(false);
+						String trainingTraces=txtTrainingTraces.getText().trim();
+						String validationTraces=txtValidationTraces.getText().trim();
+						
+						if (trainingTraces.isEmpty()){
+						
+							msgBox.setMessage("Please, select training traces.");
+							msgBox.open();
+							btnBuildModel.setEnabled(true);
+							return;
+						}
+						else if (validationTraces.isEmpty()){
+							
+							msgBox.setMessage("Please, select validation traces.");
+							msgBox.open();
+							btnBuildModel.setEnabled(true);
+							return;
+						}
+						
+						   // get the database name from the text box or combo
+						 else if (txtNewDBName.getEnabled()==false){
+								selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
+								isNewDB=false;
+						 }
+						 else if (txtNewDBName.getText().isEmpty()){
+								msgBox.setMessage("Please, enter a database name.");
+								msgBox.open();
+								btnBuildModel.setEnabled(true);
+								return;
+						} else{
+								 selectedDB=txtNewDBName.getText();
+								 isNewDB=true;
+						}
+						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
+						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, selectedDB, isNewDB, validationTraces,traceReader);
+						modeling.start();
+				
 				
 			}
 		 });
 	}
 
-	private class BackgroundModel implements Runnable{
-		
-		@Override
-	//	public void run(){
-		//	buildModelEventCode();
-	//	}
+	private class BackgroundModeling extends Thread{
+		String trainingTraces;
+		String selectedDB;
+		Boolean isNewDB;
+		String validationTraces;
+		ITraceTypeReader traceReader;
+
+		public BackgroundModeling(String trainingTraces,String selectedDB, Boolean isNewDB, String validationTraces,ITraceTypeReader traceReader){
+			this.trainingTraces=trainingTraces;
+			this.selectedDB=selectedDB;
+			this.isNewDB=isNewDB;
+			this.validationTraces=validationTraces;
+			this.traceReader=traceReader;
+		}
 			
-		//public void buildEventMethod(){
+		@Override
 		public void run(){
-				
+				String msg=null;
 				
 				try {
 					
-					ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
-					String trainingTraces=txtTrainingTraces.getText().trim();
-					String validationTraces=txtValidationTraces.getText().trim();
-					
-					if (trainingTraces.isEmpty() || validationTraces.isEmpty()){
-					
-						msgBox.setMessage("Please, select training and validation traces.");
-						msgBox.open();
-						return;
-					}
+											
 						
-					else{
-						 
-						// get the database name from the text box or combo
-						String selectedDB;
-						Boolean isNewDB;
-						if (txtNewDBName.getEnabled()==false){
-							selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
-							isNewDB=false;
-						}
-						else if (txtNewDBName.getText().isEmpty()){
-							msgBox.setMessage("Please, enter a database name.");
-							msgBox.open();
-							return;
-						} else{
-							 selectedDB=txtNewDBName.getText();
-							 isNewDB=true;
-						}
-							
-							 
-						//Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
-						//if (isDone)
+						Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
+						if (isDone)
 							modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
-						//close the connection
-					}
-				} catch (Exception ex) {
-					// TODO Auto-generated catch block
-					String msg=null;
 					
-					if (ex.getCause()==null)
-						msg="Severe Error: See Log.";	
+				} 
+				catch(TotalADSUiException ex){// handle UI exceptions here
+					if (ex.getMessage()==null)
+						msg="Severe error: see log.";	
 					else
-						msg=ex.getCause().toString();
-					
-					msgBox.setMessage(msg);
-					msgBox.open();
+						msg=ex.getMessage();
+				}
+				catch (Exception ex) { // handle all other exceptions here and log them too.
+										//UI exceptions are simply notifications--no need to log them
+										
+					if (ex.getMessage()==null)
+						msg="Severe error: see log.";	
+					else
+						msg=ex.getMessage();
 					ex.printStackTrace();
 				}
 				finally{
-					btnBuildModel.setEnabled(true);
+					final String exception=msg;
+					
+					
+					 Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (exception!=null){ // if there has been any exception then show its message
+								msgBox.setMessage(exception);
+								msgBox.open();
+							}
+							btnBuildModel.setEnabled(true);
+							
+						}
+					});
+					
+					
 				}
 			}
 	}
