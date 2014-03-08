@@ -2,6 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.lang.reflect.Field;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.mongodb.BasicDBObject;
@@ -20,6 +21,7 @@ public class DBMS {
 	private Integer PORT;
 	private MongoClient mongoClient;
 	//private String DB;
+	ArrayList<Observer> observers=new ArrayList<Observer>();
 	
 	public DBMS() throws UnknownHostException{
 		//DB=database;
@@ -41,17 +43,30 @@ public class DBMS {
 		mongoClient.setWriteConcern(WriteConcern.JOURNALED);				
 	}
 	/**
+	 * Get database list
+	 * @return
+	 */
+	public List<String> getDatabaseList(){
+		List <String> dbList=mongoClient.getDatabaseNames();
+		// remove system databases
+		dbList.remove("admin");
+		dbList.remove("local");
+		return dbList;
+		
+	}
+	/**
 	 * Checks the existence of the database
 	 * @param database
 	 * @return
 	 */
 	public boolean datbaseExists(String database){
-	List<String> databaseNames = mongoClient.getDatabaseNames();
-		
-		if (databaseNames.contains(database.trim()))
+	List<String> databaseNames = getDatabaseList();
+	
+	for (int j=0; j<databaseNames.size();j++) // For a case insensitive comparison, we have to iterate manually
+		if (databaseNames.get(j).equalsIgnoreCase(database))
 			return true;
-		else
-			return false;
+	return false;
+		
 	}
 	/**
 	 * Creates a database and collections
@@ -69,7 +84,7 @@ public class DBMS {
 		for (int j=0; j<collectionNames.length;j++)
 			db.createCollection(collectionNames[j], options);
 		//db.createCollection(Configuration.settingsCollection, options);
-		
+		notifyObservers();
 	}
 	
 	/**
@@ -87,6 +102,14 @@ public class DBMS {
 	 */
 	public void closeConnection(){
 		mongoClient.close();
+	}
+	/**
+	 * 
+	 * @param database
+	 */
+	public void deleteDatabase(String database){
+		mongoClient.dropDatabase(database);
+		notifyObservers();
 	}
 	/**
 	 * Extracts keys and values from a claas's object using reflection and assign it
@@ -237,4 +260,20 @@ public class DBMS {
 			
 			
 	}
+	//// observer methods implemented without any interface
+	public void addObserver(Observer observer){
+		observers.add(observer);
+		
+	}
+	public void removeObserver(Observer observer){
+		observers.remove(observer);
+		
+	}
+	
+	public void notifyObservers(){
+		for (Observer ob: observers)
+			ob.update();
+	}
+	
+	
 }

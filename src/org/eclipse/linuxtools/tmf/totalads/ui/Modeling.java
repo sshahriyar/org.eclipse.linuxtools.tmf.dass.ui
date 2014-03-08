@@ -1,6 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -138,19 +139,20 @@ public class Modeling {
 		
 		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
 		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblDB.setText("Select or Enter DB Name");
+		lblDB.setText("Select or Enter a DB Name");
 		
 		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
 		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		cmbDBNames.add("Enter New  Name");
-		cmbDBNames.add("host04_KSM_TXT");
-		cmbDBNames.select(0); 
+		
+		
+		populateComboWithDatabaseList();
+		 
 		
 		txtNewDBName = new Text(grpTraceTypesAndDB, SWT.BORDER);
 		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		txtNewDBName.setText("Enter");
+		//txtNewDBName.setText("Enter");
 		txtNewDBName.setTextLimit(7);
-		txtNewDBName.setEnabled(false);
+		//txtNewDBName.setEnabled(false);
 		
 		
 		cmbDBNames.addSelectionListener(new SelectionAdapter() {
@@ -173,17 +175,41 @@ public class Modeling {
 					
 				}
 			}
-			
-	
 		});
 		
+	
+	   Configuration.connection.addObserver(new Observer() {
+				@Override
+				public void update() {
+					Display.getDefault().asyncExec(new Runnable(){
+						@Override
+						public void run(){
+							populateComboWithDatabaseList();
+						}
+					});
+			
+				}
+	   });
 		
 
 		/**
 		 * End group modeling type and traces
 		 */
 	}
-	
+	/**
+	 * Populates the combo box with models (database) list
+	 */
+	private void populateComboWithDatabaseList(){
+		
+				cmbDBNames.removeAll(); // first clear it
+				cmbDBNames.add("Enter a new  name");
+				//Populate combo box
+				List<String> modelsList=Configuration.connection.getDatabaseList();
+				for (int j=0; j<modelsList.size();j++)
+					cmbDBNames.add(modelsList.get(j));
+				// slect the first item in the combo box		
+				cmbDBNames.select(0);
+	}
 	
 	/**
 	 * 
@@ -283,6 +309,7 @@ public class Modeling {
 								 selectedDB=txtNewDBName.getText();
 								 isNewDB=true;
 						}
+						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
 						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, selectedDB, isNewDB, validationTraces,traceReader);
 						modeling.start();
@@ -313,11 +340,8 @@ public class Modeling {
 				
 				try {
 					
-											
+						modelSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
 						
-						Boolean isDone=modelSelector.trainModels(trainingTraces, traceReader,selectedDB,isNewDB,progConsole);
-						if (isDone)
-							modelSelector.validateModels(validationTraces, traceReader,selectedDB, progConsole);
 					
 				} 
 				catch(TotalADSUiException ex){// handle UI exceptions here
@@ -347,6 +371,8 @@ public class Modeling {
 								msgBox.open();
 							}
 							btnBuildModel.setEnabled(true);
+							//if (isNewDB)
+								//populateComboWithDatabaseList(); //refresh the combo box with new database list
 							
 						}
 					});

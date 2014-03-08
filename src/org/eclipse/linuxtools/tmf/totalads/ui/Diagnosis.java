@@ -54,7 +54,7 @@ public class Diagnosis {
 		parameterTypes[0]=IDetectionModels[].class;
 		Method modelObserver=Diagnosis.class.getMethod("observeSelectedModels", parameterTypes);
 		
-		ModelLoader mdlLoader=new ModelLoader(comptbtmAnalysis,this,modelObserver);
+		ModelLoader mdlLoader=new ModelLoader(comptbtmAnalysis);
 		
 
 	//	results(comptbtmAnalysis);
