@@ -30,10 +30,10 @@ import org.swtchart.Chart;
 
 
 public class TMFTotalADSView extends TmfView {
-		private static final String SERIES_NAME = "Series";
-	    private static final String Y_AXIS_TITLE = "Signal";
-	    private static final String X_AXIS_TITLE = "Time";
-	    private static final String FIELD = "val"; // The name of the field that we want to display on the Y axis
+	//	private static final String SERIES_NAME = "Series";
+	  //  private static final String Y_AXIS_TITLE = "Signal";
+	   // private static final String X_AXIS_TITLE = "Time";
+	    //private static final String FIELD = "val"; // The name of the field that we want to display on the Y axis
 	    private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.ADS01";
 	    private Chart chart;
 	    private ITmfTrace currentTrace;

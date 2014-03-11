@@ -177,7 +177,8 @@ public class Modeling {
 			}
 		});
 		
-	
+	  // Add an observer to DBMS connection to automatically update 
+	 //the list of databases when new ones are created and old ones are deleted
 	   Configuration.connection.addObserver(new Observer() {
 				@Override
 				public void update() {

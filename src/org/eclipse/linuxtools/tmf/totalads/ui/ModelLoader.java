@@ -33,6 +33,8 @@ public class ModelLoader {
 	Button btnDelete;
 	TreeItem currentlySelectedTreeItem=null;
 	MessageBox msgBox;
+	StringBuilder tracePath;
+	TracingTypeSelector traceTypeSelector;
 	
 	public ModelLoader(Composite comptbtmAnalysis ){
 		
@@ -81,7 +83,10 @@ public class ModelLoader {
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-			
+				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
+				//ModelTypeFactory.getInstance().getModels(modTypes)
+				System.out.println(tracePath.toString());
+				System.out.println(traceReader.toString());
 			}
 		});
 		
@@ -125,7 +130,7 @@ public class ModelLoader {
 				});
 		
 			}
-   });
+		});
 		
 		/**
 		 * End group model selection 
@@ -162,5 +167,12 @@ public class ModelLoader {
 				return true;
 		
 	}
+	
+	public void setTrace(StringBuilder tracePath){
+		this.tracePath=tracePath;
+	}
 
+	public void setTraceTypeSelector(TracingTypeSelector traceTypeSelector){
+		this.traceTypeSelector= traceTypeSelector;
+	}
 }

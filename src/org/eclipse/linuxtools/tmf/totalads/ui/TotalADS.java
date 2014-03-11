@@ -26,8 +26,8 @@ public class TotalADS  {
 	private Text lblAnomaliesTest;
 	private Text txtAnomaliesProgress;
 	private Table tableClassificationPredictions;
-	private Modeling modeling=null;
-	private Diagnosis diagnosis=null;
+	private Modeling modeling;
+	private Diagnosis diagnosis;
 	
 	//GridData gridDataFullFill=new GridData(SWT.FILL, SWT.FILL, true, true );
 	//GridData gridDataHorizontalFill=new GridData(SWT.FILL, SWT.TOP, true, false );
@@ -77,10 +77,8 @@ public class TotalADS  {
 		}
 
 	}
-	/**
-	 * 
-	 * @param parent
-	 */
+	/*
+	 	 
 	private void leftPane(Composite parent){
 			
 		Composite compLeftPane=new Composite(parent,SWT.BORDER);
@@ -94,7 +92,7 @@ public class TotalADS  {
 		
 		
 	}
-
+*/
 	/**
 	 * 
 	 * @param traceBuffer
@@ -106,8 +104,8 @@ public class TotalADS  {
 	}
 
 	   
-
-
+// For testing
+/*
   public static void main(String[] args) {
 	        Display display = new Display();
 	        org.eclipse.swt.widgets.Shell shell= new org.eclipse.swt.widgets.Shell(display);
@@ -140,5 +138,5 @@ public class TotalADS  {
 	        }
 	        
 	        display.dispose();
-	    }
+	    }*/
 }

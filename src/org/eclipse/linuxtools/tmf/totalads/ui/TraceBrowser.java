@@ -2,6 +2,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 
 
+import java.io.File;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -20,7 +22,9 @@ import org.eclipse.swt.events.KeyEvent;
 public class TraceBrowser {
 	Button btnTraceBrowser;
 	Composite parent;
-	Text txtBox;
+	Text txtPath;
+	Text txtTraceID,txtTraceSource,txtTraceCounter;
+	
 	/**
 	 * 
 	 * @param parent
@@ -28,7 +32,7 @@ public class TraceBrowser {
 	 * @param gridData
 	 */
 	public TraceBrowser(Composite parent, Text txtBox, GridData gridData ){
-		this.txtBox=txtBox;
+		this.txtPath=txtBox;
 		this.parent=parent;
 	    btnTraceBrowser =new Button(parent, SWT.NONE);
 		btnTraceBrowser.setLayoutData(gridData);
@@ -57,7 +61,7 @@ public class TraceBrowser {
 	 * @param text
 	 */
 	public void setTextBox(Text text){
-		this.txtBox=text;
+		this.txtPath=text;
 	}
 	
 	/** inner class for mouse up event on the button
@@ -77,6 +81,13 @@ public class TraceBrowser {
 	 		directoryDialog();
 	 	}
     }
+    
+    public void setTextSelectedTraceFields(Text txtTraceID,Text txtTraceSource,Text txtTraceCount){
+    	this.txtTraceID=txtTraceID;
+    	this.txtTraceSource=txtTraceSource;
+    	this.txtTraceCounter=txtTraceCount;
+    }
+    
     /**
      * Method to open file dialog box
      */
@@ -90,9 +101,20 @@ public class TraceBrowser {
         //path.delete(0, path.length());
         //path.append(fd.open());
        String path= dD.open();
-       if (path!=null)
-    	   this.txtBox.setText(path);
-        //System.out.println(selected);
+       
+       if (path!=null){
+    	   this.txtPath.setText(path);
+    	   
+    	   if (txtTraceID!=null && txtTraceSource !=null && txtTraceCounter !=null){
+	    	   File files=new File(path);
+	    	   Integer fileCounts=files.listFiles().length;
+	    	   txtTraceCounter.setText(fileCounts.toString());
+	    	   txtTraceID.setText("Multiple Traces");
+	    	   txtTraceSource.setText("Directory Reader");
+	    	   
+    	   }
+       }
+        
     }
 	
     

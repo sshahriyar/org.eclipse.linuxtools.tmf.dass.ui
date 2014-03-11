@@ -64,5 +64,17 @@ public class TracingTypeSelector {
 		return traceFac.getTraceReader(key);
 	}
 
-
+	/**
+	 * Selects a trace type reader in the combo box
+	 * @param traceTypeName
+	 */
+	public void selectTraceType(String traceTypeName){
+		for (int i=0;i<cmbTraceTypes.getItemCount();i++)
+			if (cmbTraceTypes.getItem(i).equalsIgnoreCase(traceTypeName)){
+				cmbTraceTypes.select(i);
+				break;
+			}
+				
+		
+	}
 }
