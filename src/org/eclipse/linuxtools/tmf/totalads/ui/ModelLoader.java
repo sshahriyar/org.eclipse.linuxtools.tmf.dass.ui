@@ -2,6 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -35,6 +36,7 @@ public class ModelLoader {
 	MessageBox msgBox;
 	StringBuilder tracePath;
 	TracingTypeSelector traceTypeSelector;
+	ResultsAndFeedback resultsAndFeedback;
 	
 	public ModelLoader(Composite comptbtmAnalysis ){
 		
@@ -83,10 +85,22 @@ public class ModelLoader {
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
+				
 				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
-				//ModelTypeFactory.getInstance().getModels(modTypes)
-				System.out.println(tracePath.toString());
-				System.out.println(traceReader.toString());
+				
+				ModelTypeFactory modFac= ModelTypeFactory.getInstance();
+				String database=currentlySelectedTreeItem.getText();
+				String modelKey=database.split("_")[1];
+				IDetectionModels model= modFac.getModelyByAcronym(modelKey);
+				
+				resultsAndFeedback.clearTree();
+				btnAnalysisEvaluateModels.setEnabled(false);
+				btnSettings.setEnabled(false);
+				btnDelete.setEnabled(false);
+				
+				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, model, database);
+				testTheModel.start();
+				
 			}
 		});
 		
@@ -149,8 +163,7 @@ public class ModelLoader {
 				for (int i=0;i <items.length;i++){
 					items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
 					items[i].setText(modelsList.get(i));
-					//items[i].setData(models[i]);
-					
+									
 				}
 			}
 		    currentlySelectedTreeItem=null;
@@ -167,12 +180,175 @@ public class ModelLoader {
 				return true;
 		
 	}
-	
+	/**
+	 * Assigns TracePath object from Diagnosis class to a local variable
+	 * @param tracePath
+	 */
 	public void setTrace(StringBuilder tracePath){
 		this.tracePath=tracePath;
 	}
-
+	/**
+	 *  Assigns TraceTypeSelector object from Diagnosis class to a local object
+	 * @param traceTypeSelector
+	 */
 	public void setTraceTypeSelector(TracingTypeSelector traceTypeSelector){
 		this.traceTypeSelector= traceTypeSelector;
 	}
+	
+	/**
+	 * Assigns ResultsAndFeddback object from Diagnosis class to a local variable
+	 * @param resultsAndFeedback
+	 */
+	public void setResultsAndFeedback(ResultsAndFeedback resultsAndFeedback){
+		this.resultsAndFeedback=resultsAndFeedback;
+	}
+	
+	/**
+	 * This calss tests a model by launching a thread
+	 * @param testDirectory
+	 * @throws Exception
+	 */
+	
+	private class BackgroundTesting extends Thread{
+		String testDirectory;
+		ITraceTypeReader traceReader;
+		IDetectionModels model;
+		String database;
+		
+		public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionModels model, String database){
+			this.testDirectory=testDirectory;
+			this.traceReader=traceReader;
+			this.model=model;
+			this.database=database;
+		}
+		
+		
+			
+		@Override
+		public void run(){
+				String msg=null;
+				
+				try {
+					
+					testTheModel(testDirectory, traceReader, model, database);
+								
+				} 
+				catch(TotalADSUiException ex){// handle UI exceptions here
+					if (ex.getMessage()==null)
+						msg="Severe error: see log.";	
+					else
+						msg=ex.getMessage();
+				}
+				catch (Exception ex) { // handle all other exceptions here and log them too.
+										//UI exceptions are simply notifications--no need to log them
+										
+					if (ex.getMessage()==null)
+						msg="Severe error: see log.";	
+					else
+						msg=ex.getMessage();
+					ex.printStackTrace();
+				}
+				finally{
+					
+					final String exception=msg;
+							
+					 Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							if (exception!=null){ // if there has been any exception then show its message
+								msgBox.setMessage(exception);
+								msgBox.open();
+							}
+							btnAnalysisEvaluateModels.setEnabled(true);
+							btnSettings.setEnabled(true);
+							btnDelete.setEnabled(true);
+							
+						}
+					});
+					
+					
+				}//End finally
+		}
+				
+		/**
+		 * Tests the model
+		 * @param testDirectory
+		 * @param traceReader
+		 * @param model
+		 * @param database
+		 * @throws TotalADSUiException
+		 * @throws Exception
+		 */
+		public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionModels model, String database ) throws TotalADSUiException,Exception {
+					
+					
+				// First verify selections
+				Boolean isLastTrace=false;
+						
+				if (!checkItemSelection())
+					throw new TotalADSUiException("Please, first select a model!");
+		       
+				
+				File fileList[]=getDirectoryHandler(testDirectory);// Get a file and a db handler
+				DBMS connection=Configuration.connection;
+				
+				
+				try{ //Check for valid trace type reader and traces before creating a database
+					traceReader.getTraceIterator(fileList[0]);
+				}catch (Exception ex){
+					String message="Invalid trace reader and traces: "+ex.getMessage();
+					throw new TotalADSUiException(message);
+				}
+				
+				
+				// Second, start testing
+				
+				for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
+			
+					if (trcCnt==fileList.length-1)
+								 isLastTrace=true;
+					 
+					ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
+			 					
+			 		final IDetectionModels.Results results= model.test(trace, database, connection);
+			 		final String traceName=fileList[trcCnt].getName();
+			 		
+			 		Display.getDefault().syncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							resultsAndFeedback.addTraceResult(traceName, results);
+							
+						}
+					});
+			 		
+				}
+		
+		
+		
+		}
+		
+		/**
+		 * Get a Directory handle, if there is only one file it returns an array of size one
+		 * @param trainDirectory
+		 * @return File[]
+		 */
+		private File[] getDirectoryHandler(String trainDirectory){
+			File traces=new File(trainDirectory);
+			File []fileList;
+			
+			
+			if (traces.isDirectory())
+		            fileList=traces.listFiles();
+		    else{
+		            fileList= new File[1];
+		            fileList[0]=traces;
+		    }
+			return fileList;
+		}
+		
+	// End of BackgroundTesting class	
+	}
+	
+//End of ModelLoader class	
 }

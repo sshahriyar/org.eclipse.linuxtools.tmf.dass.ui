@@ -15,17 +15,22 @@ public class CTFUserTraceReader implements ITraceTypeReader {
 		// TODO Auto-generated method stub
 		return "CTF User-space Reader";
 	}
-	 /**
+	@Override
+	public ITraceTypeReader createInstance(){
+		return new  CTFUserTraceReader();
+	}
+	
+	/**
      * Returns the acronym of the User space Reader
      */
     public String getAcronym(){
     	
     	return "USR";
     }
-	 public static void registerTraceTypeReader() throws Exception{
+	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	CTFUserTraceReader userTraceReader=new CTFUserTraceReader();
-	    	trcTypFactory.registerModelWithFactory(userTraceReader.getName(), userTraceReader);
+	    	trcTypFactory.registerTraceReaderWithFactory(userTraceReader.getName(), userTraceReader);
 	    }
 	 
 	@Override

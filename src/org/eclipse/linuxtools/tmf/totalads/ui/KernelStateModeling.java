@@ -111,7 +111,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void test(ITraceIterator trace, String traceName, String database,DBMS connection) throws Exception {
+	public Results test(ITraceIterator trace, String database,DBMS connection) throws Exception {
 		
 		
 		
@@ -119,14 +119,20 @@ public class KernelStateModeling implements IDetectionModels {
 		measureStateProbabilities(trace, testTrcStates);
 		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
 		
-		/*if (isAnomaly){
-			TestTraceInfo anomalyWhereabouts= new TestTraceInfo();
-			String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
-			anomalyWhereabouts.time=timeStamp;
-			anomalyWhereabouts.traceName=traceName;
-			connection.insert(anomalyWhereabouts, database);
-		}*/
+		Results results= new Results();
+		results.isAnomaly=isAnomaly;
+		results.anomalyType=null;
+		results.details.append("FS ").append(testTrcStates.FS).append("\n");
+		results.details.append("KL ").append(testTrcStates.KL).append("\n");
+		results.details.append("MM ").append(testTrcStates.MM).append("\n");
+		results.details.append("AC ").append(testTrcStates.AC).append("\n");
+		results.details.append("IPC ").append(testTrcStates.IPC).append("\n");
+		results.details.append("NT ").append(testTrcStates.NT).append("\n");
+		results.details.append("SC ").append(testTrcStates.SC).append("\n");
+		results.details.append("UN ").append(testTrcStates.UN).append("\n");
 		
+		return results;
+				
 	}
 	
 	/**
@@ -162,7 +168,7 @@ public class KernelStateModeling implements IDetectionModels {
 	
 	/** Self registration of the model with the modelFactory **/
 	
-	public static void registerModel(){
+	public static void registerModel() throws TotalADSUiException{
 		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
 		KernelStateModeling ksm=new KernelStateModeling();
 		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,ksm);

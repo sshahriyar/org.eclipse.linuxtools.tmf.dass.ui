@@ -4,7 +4,15 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 /** Each model should implement the functions of this interface and, in addition, a static function registerModel*/
 public interface IDetectionModels {
-
+/**Inner class that returns results */
+public class Results{
+	/** Assign yes or no */
+	Boolean isAnomaly; 
+	/** Assign anomaly type iff  any */ 
+	String anomalyType;
+	/** Assign details separated by new line '\n' */
+	StringBuilder details=new StringBuilder();
+}
 public void createDatabase(String databaseName, DBMS connection) throws Exception; 
 
 /** Controller will pass a trace through this function. Some models can train on 
@@ -37,7 +45,7 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param connection
  * @throws Exception
  */
-public void test (ITraceIterator trace, String traceName, String database, DBMS connection) throws Exception;
+public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception;
 
 /** Returns the textual representation of the details of the results for a trace **/
 public String textResult();

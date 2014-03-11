@@ -39,6 +39,7 @@ public class Diagnosis {
 	TraceBrowser traceBrowser;
 	StringBuilder tracePath=new StringBuilder();
 	ModelLoader modelLoader;
+	ResultsAndFeedback resultsAndFeedback;
 	
 	public Diagnosis(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
 		
@@ -69,8 +70,8 @@ public class Diagnosis {
 		modelLoader.setTraceTypeSelector(traceTypeSelector);
 
 	//	results(comptbtmAnalysis);
-		detailsAndFeedBack(comptbtmAnalysis);
-	//	ModelDetailsRenderer modRenderer=new ModelDetailsRenderer(comptbtmAnalysis);
+		resultsAndFeedback=new ResultsAndFeedback(comptbtmAnalysis);
+		modelLoader.setResultsAndFeedback(resultsAndFeedback);
 		
 		scrolCompAnom.setContent(comptbtmAnalysis);
 		 // Set the minimum size
@@ -177,7 +178,7 @@ public class Diagnosis {
 	private void currentlySelectedTrace(Composite comptbtmAnalysis){
 		 
 			Group grpCurrentTrace = new Group(comptbtmAnalysis, SWT.NONE);
-			grpCurrentTrace.setText("Currently Slected Trace(s)");
+			grpCurrentTrace.setText("Currently Selected Trace(s)");
 			
 			grpCurrentTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
 			grpCurrentTrace.setLayout(new GridLayout(2,false));
@@ -213,119 +214,7 @@ public class Diagnosis {
 			
 	}
 	
-	/**
-	 * 
-	 * @param comptbtmAnalysis
-	 */
-	private void detailsAndFeedBack(Composite comptbtmAnalysis){
-		//Group "Feedback: Is it anomaly?"
-				Group grpAnalysisIdentify = new Group(comptbtmAnalysis, SWT.NONE);
-				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
-				grpAnalysisIdentify.setText("Results and Feedback");
-				grpAnalysisIdentify.setLayout(new GridLayout(2,false));
-                
-				/// Trace list
-				Composite compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
-				compTraceList.setLayout(new GridLayout(1,false));
-				compTraceList.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
-				
-				Label lblTreeTraceResult=new Label(compTraceList,SWT.NONE);
-				lblTreeTraceResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
-				lblTreeTraceResult.setText("Trace List (Select to see results)");
-				
-				Tree treeTraceResults=new Tree(compTraceList , SWT.BORDER |  SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
-				treeTraceResults.setLinesVisible(true);
-				treeTraceResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,5));
-				
-				TreeItem []items=new TreeItem[5];
-				for (int i=0;i <items.length;i++){
-					items[i]=new TreeItem(treeTraceResults,SWT.NONE);
-					items[i].setText("Trace "+i);
-					items[i].setData("Trace "+i);
-				}
-				
-				Composite compResAndFeedback=new Composite(grpAnalysisIdentify, SWT.NONE);
-			    compResAndFeedback.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
-			    compResAndFeedback.setLayout(new GridLayout(1,false));
-			    
-			    results(compResAndFeedback);
-				//*** End Trace list
-				
-				//*** Group Feedback
-			    
-				Group grpFeedback= new Group(compResAndFeedback,SWT.NONE);
-				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,4));
-				grpFeedback.setLayout(new GridLayout(2,false));
-				grpFeedback.setText("Feedback");
-				
-				Button btnYes=new Button(grpFeedback,SWT.RADIO);
-				btnYes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true,2,1));
-				btnYes.setText("Yes");
-				
-				Button btnNo=new Button(grpFeedback,SWT.RADIO);
-				btnNo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true,2,1));
-				btnNo.setText("No");
-				
-				Button btnOtherwise=new Button(grpFeedback,SWT.RADIO);
-				btnOtherwise.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
-				btnOtherwise.setText("Otherwise");
-				
-				Text txtAnalysisIdentify = new Text(grpFeedback, SWT.BORDER);
-				txtAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-				txtAnalysisIdentify.setEnabled(false);
 
-				Button btnSubmit = new Button(grpFeedback, SWT.NONE);
-				btnSubmit.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true,2,1));
-				btnSubmit.setText("Submit");
-			  //**** End of group Feedback
-			
-			
-				//new Label(grpAnalysisIdentify,SWT.None);// Empty Label
-				//Button btnVisualize = new Button(grpFeedback, SWT.NONE);
-				//btnVisualize.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, true,2,1));
-				//btnVisualize.setText("Visualize");
-				
-
-	}
-	/**
-	 * 
-	 * @param comptbtmAnalysis
-	 */
-	private void results(Composite comptbtmAnalysis ){
-		/**
-		 * Result
-		 *
-		 */
-		Group grpAnalysisResults=new Group(comptbtmAnalysis,SWT.NONE);
-		GridData gridDataResult=new GridData(SWT.FILL,SWT.FILL,true,true);
-		gridDataResult.horizontalSpan=1;
-		grpAnalysisResults.setLayoutData(gridDataResult);
-		grpAnalysisResults.setLayout(new GridLayout(2,false));
-		grpAnalysisResults.setText("Results");
-
-		
-		CLabel lblAnalysisCurrentAnomaly = new CLabel(grpAnalysisResults, SWT.NONE);
-		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
-		lblAnalysisCurrentAnomaly.setText("Anomaly (Anomaly Type)");
-		
-		Text txtAnalysisCurrentAnomaly= new Text(grpAnalysisResults,SWT.BORDER);
-		txtAnalysisCurrentAnomaly.setEditable(false);
-		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		txtAnalysisCurrentAnomaly.setText("Stuxtnet-0XA");
-		
-		Label lblDetails=new Label(grpAnalysisResults,SWT.NONE);
-		lblDetails.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
-		lblDetails.setText("Details");
-		
-		Text txtAnalysisDetails = new Text(grpAnalysisResults, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
-		txtAnalysisDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,2));
-		txtAnalysisDetails.setText("\"FS\" : 0.53\n \"MM\" : 0.12\n \"KL\" : 0.18\n \"AC\" : 0.01 \n\"IPC\" : 0\n \"NT\" : 0.01\n \"SC\" : 0\n \"UN\" : 0.18");
-		txtAnalysisDetails.setMessage("Details");
-				/**
-		 * End result group
-		 * 
-		 */
-	}
 	/**
 	 * 
 	 * @param traceBuffer

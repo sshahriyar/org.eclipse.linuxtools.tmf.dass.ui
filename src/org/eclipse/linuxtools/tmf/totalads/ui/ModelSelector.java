@@ -137,7 +137,7 @@ public class ModelSelector {
 	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader, String database,
 				Boolean isCreateDB, ProgressConsole console ) throws TotalADSUiException,Exception {
 		
-		// First verify selections
+		// First, verify selections
 		Boolean isLastTrace=false;
 				
 		if (!checkItemSelection())
@@ -156,14 +156,18 @@ public class ModelSelector {
 		}
 		
 		if(isCreateDB){
-			database=database.trim()+"_"+currentlySelectedModel.getAcronym()+"_"+ traceReader.getAcronym();
-			database=database.toUpperCase();
-			currentlySelectedModel.createDatabase(database, connection);// throws TotalADSUiException
+			if (database.contains("_"))
+				throw new TotalADSUiException("Databse name cannot contain underscore \"_\"");
+			else{
+				database=database.trim()+"_"+currentlySelectedModel.getAcronym()+"_"+ traceReader.getAcronym();
+				database=database.toUpperCase();
+				currentlySelectedModel.createDatabase(database, connection);// throws TotalADSUiException
+			}
 		}
 		else if (!checkDBExistence(database))
 			throw new TotalADSUiException("Database does not exist!");
 							
-		// Second start training
+		// Second, start training
 		console.clearText();
 		console.printTextLn("Training the model....");
 		
@@ -178,7 +182,7 @@ public class ModelSelector {
 	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console);
 		
 		}
-		//third start Validation
+		//Third, start Validation
 		validateModels(validationDirectory, traceReader, database, console);
 	}
 

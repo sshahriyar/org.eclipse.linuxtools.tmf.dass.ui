@@ -66,12 +66,16 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	 * Constructor
 	 */
 	public TextLineTraceReader() {
-		// TODO Auto-generated constructor stub
+	
 	}
-
+	
+	@Override
+	public ITraceTypeReader createInstance(){
+		return new TextLineTraceReader();
+	}
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+	
 		return "Text-line Reader";
 	}
 
@@ -97,9 +101,9 @@ public class TextLineTraceReader implements ITraceTypeReader {
 
 	}
 	
-	 public static void registerTraceTypeReader() throws Exception{
+	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
-	    	trcTypFactory.registerModelWithFactory(textFileReader.getName(), textFileReader);
+	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);
 	    }
 }

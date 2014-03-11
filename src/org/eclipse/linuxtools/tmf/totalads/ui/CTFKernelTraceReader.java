@@ -101,7 +101,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
           //this.traceBuffer=buffer;
     }
 
-  // @Override
+   @Override
     public ITraceTypeReader createInstance(){
     	return new CTFKernelTraceReader();
     }
@@ -110,10 +110,10 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     * @throws Exception
     */
     
-    public static void registerTraceTypeReader() throws Exception{
+    public static void registerTraceTypeReader() throws TotalADSUiException{
     	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
     	CTFKernelTraceReader kernelTraceReader=new CTFKernelTraceReader();
-    	trcTypFactory.registerModelWithFactory(kernelTraceReader.getName(), kernelTraceReader);
+    	trcTypFactory.registerTraceReaderWithFactory(kernelTraceReader.getName(), kernelTraceReader);
     }
     /**
      * Returns the name of the model

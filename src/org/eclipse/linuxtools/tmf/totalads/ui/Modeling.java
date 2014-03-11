@@ -208,7 +208,7 @@ public class Modeling {
 				List<String> modelsList=Configuration.connection.getDatabaseList();
 				for (int j=0; j<modelsList.size();j++)
 					cmbDBNames.add(modelsList.get(j));
-				// slect the first item in the combo box		
+				// select the first item in the combo box		
 				cmbDBNames.select(0);
 	}
 	
@@ -342,8 +342,7 @@ public class Modeling {
 				try {
 					
 						modelSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
-						
-					
+								
 				} 
 				catch(TotalADSUiException ex){// handle UI exceptions here
 					if (ex.getMessage()==null)

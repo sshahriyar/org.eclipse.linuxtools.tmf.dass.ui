@@ -1,6 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class TraceTypeFactory {
@@ -27,16 +28,34 @@ public class TraceTypeFactory {
 		return traceTypes;
 	}
 	/**
-	 * 
+	 * Returns a trace type reader based on the key
 	 * @return
 	 */
 	public ITraceTypeReader getTraceReader(String key){
 		ITraceTypeReader reader= traceTypeReadersList.get(key);
-		return reader;
+		return reader.createInstance();
+		
+	}
+	
+	/**
+	 * Get all trace type readers
+	 * @return
+	 */
+	public ITraceTypeReader[] getAllTraceReaders(){
+		ITraceTypeReader [] traceReaders=new ITraceTypeReader[traceTypeReadersList.size()]; 
+		int indx=0;
+		
+		for (Map.Entry<String, ITraceTypeReader> list:traceTypeReadersList.entrySet()){
+			traceReaders[indx]=list.getValue();
+			indx++;
+		}
+		
+		
+		return traceReaders;
 		
 	}
 	/**
-	 * 
+	 * Get all trace type reader keys
 	 * @return
 	 */
 	public String[] getAllTraceTypeReaderKeys(){
@@ -50,16 +69,16 @@ public class TraceTypeFactory {
 	 * @param detectionModel
 	 * @param modelType
 	 */
-	public void registerModelWithFactory(String key, ITraceTypeReader traceReader) throws Exception{
+	public void registerTraceReaderWithFactory(String key, ITraceTypeReader traceReader) throws TotalADSUiException{
 		if (!key.isEmpty()){
 			ITraceTypeReader  reader=traceTypeReadersList.get(key);
 			if (reader==null)
 				traceTypeReadersList.put(key, traceReader);
 			else
-				throw new Exception("Duplicate Key!");
+				throw new TotalADSUiException("Duplicate Key!");
 		}
 		else 
-			 throw new Exception("Key is Empty!");
+			 throw new TotalADSUiException("Key is Empty!");
 		
 			
 	}
@@ -79,7 +98,7 @@ public class TraceTypeFactory {
 	 * 
 	 * @throws Exception
 	 */
-	public void initialize() throws Exception{
+	public void initialize() throws TotalADSUiException{
 		
 	    //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
 	    //java.util.Set<Class<? extends IDetectionModels>> modules = reflections.getSubTypesOf

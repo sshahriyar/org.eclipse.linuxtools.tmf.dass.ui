@@ -4,8 +4,8 @@ import org.swtchart.Chart;
 
 public class DecisionTree implements IDetectionModels {
 
-	public DecisionTree(DBMS connection) {
-		// TODO Auto-generated constructor stub
+	public DecisionTree() {
+		
 	}
 	
 	@Override
@@ -26,8 +26,8 @@ public class DecisionTree implements IDetectionModels {
 	}
 
 	@Override
-	public void test (ITraceIterator trace, String traceName, String database, DBMS connection) throws Exception {
-		// TODO Auto-generated method stub
+	public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception {
+		return null;
 
 	}
 
@@ -46,8 +46,8 @@ public class DecisionTree implements IDetectionModels {
 
 	@Override
 	public IDetectionModels createInstance() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return new DecisionTree();
 	}
 
 	@Override
@@ -65,9 +65,9 @@ public class DecisionTree implements IDetectionModels {
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel(){
+	public static void registerModel() throws TotalADSUiException{
 		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
-		DecisionTree decisionTree =new DecisionTree(Configuration.connection);
+		DecisionTree decisionTree =new DecisionTree();
 		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Classification,decisionTree);
 	}
 

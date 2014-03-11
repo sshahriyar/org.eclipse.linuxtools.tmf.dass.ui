@@ -14,8 +14,8 @@ public class SlidingWindow implements IDetectionModels {
 	/**
 	 * 
 	 */
-	public SlidingWindow(DBMS connection) {
-		// TODO Auto-generated constructor stub
+	public SlidingWindow() {
+		
 	}
 	@Override
     public void createDatabase(String databaseName, DBMS connection) throws Exception{
@@ -44,9 +44,9 @@ public class SlidingWindow implements IDetectionModels {
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#test(char[], java.lang.String)
 	 */
 	@Override
-	public void test (ITraceIterator trace, String traceName, String database, DBMS connection) throws Exception {
+	public Results test (ITraceIterator trace,  String database, DBMS connection) throws Exception {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 	/* (non-Javadoc)
@@ -77,8 +77,8 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public IDetectionModels createInstance() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return new SlidingWindow();
 	}
 
 	/** 
@@ -100,9 +100,9 @@ public class SlidingWindow implements IDetectionModels {
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel(){
+	public static void registerModel() throws TotalADSUiException{
 		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
-		SlidingWindow sldWin=new SlidingWindow(Configuration.connection);
-		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,sldWin);
+		SlidingWindow sldWin=new SlidingWindow();
+		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,  sldWin);
 	}
 }
