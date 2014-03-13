@@ -119,7 +119,9 @@ public class Diagnosis {
 			public void modifyText(ModifyEvent e) {
 				tracePath.delete(0, tracePath.length());
 				tracePath.append(txtTestTraceDir.getText());
-				
+				txtTraceID.setText("Manually typed!");
+				txtTraceSource.setText("Manually typed!");
+				txtTraceCount.setText("Manually typed!");
 			}
 		});	
 		
@@ -222,7 +224,7 @@ public class Diagnosis {
 	 * @param traceTypeName
 	 */
 	
-	public void updateOnTraceSelection(char []trace,String traceLocation, String traceTypeName){
+	public void updateOnTraceSelection(String traceLocation, String traceTypeName){
 		txtTestTraceDir.setText("");
 		tracePath.delete(0, tracePath.length());
 		tracePath.append(traceLocation);

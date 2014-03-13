@@ -137,8 +137,7 @@ public class ResultsAndFeedback {
 		
 		txtAnalysisDetails = new Text(grpAnalysisResults, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
 		txtAnalysisDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,2));
-		//txtAnalysisDetails.setText("\"FS\" : 0.53\n \"MM\" : 0.12\n \"KL\" : 0.18\n \"AC\" : 0.01 \n\"IPC\" : 0\n \"NT\" : 0.01\n \"SC\" : 0\n \"UN\" : 0.18");
-		//txtAnalysisDetails.setMessage("Details");
+	
 				/**
 		 * End result group
 		 * 
@@ -173,7 +172,9 @@ public class ResultsAndFeedback {
 	/** Clears the tree 
 	 * 
 	 */
-	public void clearTree(){
+	public void clearData(){
 		treeTraceResults.removeAll();
+		txtAnalysisCurrentAnomaly.setText("");
+		txtAnalysisDetails.setText("");
 	}
 }

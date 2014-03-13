@@ -89,9 +89,9 @@ public class TraceTypeFactory {
 	 */
 	public ITraceTypeReader getCTFKernelorUserReader(Boolean isKernel){
 		if (isKernel)
-			return new CTFKernelTraceReader();
+			return new CTFSysCallTraceReader();
 		else
-			return new CTFUserTraceReader();
+			return new CTFFunctionEntryExitTraceReader();
 	}
 	
 	/**
@@ -104,8 +104,8 @@ public class TraceTypeFactory {
 	    //java.util.Set<Class<? extends IDetectionModels>> modules = reflections.getSubTypesOf
 		//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 		// The following code needs to be replaced with reflection in future versions
-		CTFKernelTraceReader.registerTraceTypeReader();
-		CTFUserTraceReader.registerTraceTypeReader();
+		CTFSysCallTraceReader.registerTraceTypeReader();
+		CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
 		TextLineTraceReader.registerTraceTypeReader();
 		
 	}

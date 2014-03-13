@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 
 //public class CompDetective extends Composite {
 public class TotalADS  {
-	private Table tblAnalysisTraceList;
+	/*private Table tblAnalysisTraceList;
 	private Text txtAnalysisIdentify;
 	private Text txtAnalysisDetails;
 	private Text txtTraceTypeRegularExpression;
@@ -25,7 +25,7 @@ public class TotalADS  {
 	private Text lblAnomaliesValidate;
 	private Text lblAnomaliesTest;
 	private Text txtAnomaliesProgress;
-	private Table tableClassificationPredictions;
+	private Table tableClassificationPredictions;*/
 	private Modeling modeling;
 	private Diagnosis diagnosis;
 	
@@ -69,7 +69,7 @@ public class TotalADS  {
 			tabFolderDetector.setFocus();
 		
 	   } catch (Exception ex) {
-			// TODO Auto-generated catch block
+			
 		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
 		   if (ex.getCause()!=null)
 		      msg.setMessage(ex.getCause().getMessage());
@@ -99,8 +99,8 @@ public class TotalADS  {
 	 * @param tracePath
 	 * @param traceTypeName
 	 */
-	public void notifyOnTraceSelection(char[] trace,String tracePath, String traceTypeName){
-		diagnosis.updateOnTraceSelection(trace,tracePath, traceTypeName);
+	public void notifyOnTraceSelection(String tracePath, String traceTypeName){
+		diagnosis.updateOnTraceSelection(tracePath, traceTypeName);
 	}
 
 	   

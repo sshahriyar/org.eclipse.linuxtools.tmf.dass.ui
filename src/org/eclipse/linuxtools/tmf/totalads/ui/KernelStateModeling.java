@@ -62,7 +62,7 @@ public class KernelStateModeling implements IDetectionModels {
 	
     
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws TotalADSUiException, Exception {
     	alpha=0.0; //initialized alpha to 0 during training
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
@@ -71,7 +71,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUiException, Exception {
 
 	  TraceStates valTrcStates=new TraceStates();
 	  measureStateProbabilities(trace, valTrcStates);
@@ -111,7 +111,7 @@ public class KernelStateModeling implements IDetectionModels {
 	}
 
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection) throws Exception {
+	public Results test(ITraceIterator trace, String database,DBMS connection) throws TotalADSUiException, Exception {
 		
 		
 		
@@ -242,7 +242,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 * @param trace
 	 * @param states
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states){
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUiException{
 		
 		Double totalSysCalls=0.0;
 		
@@ -255,6 +255,9 @@ public class KernelStateModeling implements IDetectionModels {
 			
 		
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
+		if (totalSysCalls<=0)
+			throw new TotalADSUiException("No system calls found in the trace!");
+		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);
 		states.KL=round(states.KL/totalSysCalls,2);

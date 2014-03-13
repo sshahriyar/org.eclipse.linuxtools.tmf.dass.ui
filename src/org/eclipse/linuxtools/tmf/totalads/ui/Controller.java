@@ -24,7 +24,7 @@
 //		
 //		Boolean isLastTrace=false;
 //		File fileList[]=getDirectoryHandler(trainDirectory);
-//		ITraceTypeReader input = new CTFKernelTraceReader();////------------------
+//		ITraceTypeReader input = new CTFSysCallTraceReader();////------------------
 //		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 //			 // get the trace
 //			 StringBuilder trace=input.getTrace(fileList[trcCnt]);
@@ -56,7 +56,7 @@
 //		
 //		
 //		File fileList[]=getDirectoryHandler(validationDirectory);
-//		ITraceTypeReader input = new CTFKernelTraceReader();////------------------
+//		ITraceTypeReader input = new CTFSysCallTraceReader();////------------------
 //		
 //		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 //			 // get the trace
@@ -89,7 +89,7 @@
 // */
 //public void testTraceUsingModels(String traceFilePath) throws Exception{
 //	
-//	 ITraceTypeReader input = new CTFKernelTraceReader();////------------------
+//	 ITraceTypeReader input = new CTFSysCallTraceReader();////------------------
 //	 StringBuilder trace=input.getTrace(new File(traceFilePath));
 //	 
 //	 /** Getting char representation in memory of StringBuilder trace  

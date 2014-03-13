@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
  * Class to read CTF traces by using CtfTmfTrace class.
  * @author Syed Shariyar Murtaza 
  */
-public class CTFKernelTraceReader implements ITraceTypeReader   {
+public class CTFSysCallTraceReader implements ITraceTypeReader   {
 	 // ------------------------------------------------------------------------
      // inner class   
 	 // ------------------------------------------------------------------------
@@ -76,10 +76,11 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     		private String handleSysEntryEvent(CtfTmfEvent event) {
     			String eventName=event.getEventName();
     			String syscall="";
+    			//System.out.println(eventName);
     			if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
-    				Integer id=MapSysCallNameToID.getSysCallID(eventName.trim());
-    				if (id==null) id=-1;
-    				syscall=id.toString();
+    				//Integer id=MapSysCallIDToName.getSysCallID(eventName.trim());
+    				//if (id==null) id=-1;
+    				syscall=eventName.trim();
     			 }
     			return syscall;
     			
@@ -96,14 +97,14 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
      * Instantiate a new trace reader
      *
      */
-    public CTFKernelTraceReader() {
+    public CTFSysCallTraceReader() {
           //this.trace=trace;
           //this.traceBuffer=buffer;
     }
 
    @Override
     public ITraceTypeReader createInstance(){
-    	return new CTFKernelTraceReader();
+    	return new CTFSysCallTraceReader();
     }
    /**
     * 
@@ -112,7 +113,7 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     
     public static void registerTraceTypeReader() throws TotalADSUiException{
     	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-    	CTFKernelTraceReader kernelTraceReader=new CTFKernelTraceReader();
+    	CTFSysCallTraceReader kernelTraceReader=new CTFSysCallTraceReader();
     	trcTypFactory.registerTraceReaderWithFactory(kernelTraceReader.getName(), kernelTraceReader);
     }
     /**
@@ -120,14 +121,14 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
      */
     @Override
     public String getName(){
-    	return "CTF Kernel Reader";
+    	return "CTF System Call Reader";
     }
     /**
      * Returns the acronym of the Kernel space reader
      */
     public String getAcronym(){
     	
-    	return "KNL";
+    	return "SYS";
     }
 	/**
 	 * Return the iterator to go over the trace file
@@ -149,38 +150,13 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
 		 
 		 return new CTFKerenelIterator(fTrace);
     }
-    
-    /**
-	 * 
-	 * @param file
-	 * @return
-	 */
-//    
-//	public StringBuilder getTrace(File file) throws Exception{
-//		
-//		 String filePath=file.getPath();
-//		 StringBuilder traceBuffer= new StringBuilder();
-//		 CtfTmfTrace  fTrace = new CtfTmfTrace();
-//	
-//		 try {
-//	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
-//	      } catch (TmfTraceException e) {
-//	            /* Should not happen if tracesExist() passed */
-//	            throw new RuntimeException(e);
-//	      }
-//	      
-//		 	 
-//    	 //TraceReader input = new TraceReader(fTrace,traceBuffer);
-//    	 readTrace(fTrace,traceBuffer);
-//    	 fTrace.dispose();
-//    	 return traceBuffer;
-//	}
+  
 
     
 /**
  * Reads the trace
  * 
- */
+ 
     
    private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer){
     	
@@ -194,12 +170,12 @@ public class CTFKernelTraceReader implements ITraceTypeReader   {
     		
     	}
    
-    }
+    }*/
    /**
     * This function dispatches each event to its appropriate handle
     * @param event
     */			
-@Override
+/*@Override
 public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
 	String eventName=event.getEventName();
 	
@@ -213,34 +189,34 @@ public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
 					handleSysExitEvent(event);
 	}*/
 	
-}
-
+/*}
+*/
 /**
  * This is an event handler for system call exit event
  * @param event
- */
+ 
 private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
 	ITmfEventField content = event.getContent();
 	ITmfEventField returnVal=content.getField("ret");
 	System.out.println("Ret: "+returnVal.getValue()); 
   //  accumulator.add(event.getTimestamp(), field);// whatever internal storage you want to use.
 }
-
+*/
 /**
  * This is an event handler for System call events 
  * @param event
- */
+ 
 private void handleSysCallEntryEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
 	String eventName=event.getEventName();
 	//System.out.println(eventName);
-	Integer id=MapSysCallNameToID.getSysCallID(eventName.trim());
+	Integer id=MapSysCallIDToName.getSysCallID(eventName.trim());
 	if (id==null){
 		//throw new Exception("System call not found in the map: "+eventName);
 		id=-1;
 	}
 	traceBuffer.append(id).append("\n");
 }
-
+*/
 
     
 }

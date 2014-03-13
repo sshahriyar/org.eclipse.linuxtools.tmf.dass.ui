@@ -25,6 +25,7 @@ import org.eclipse.swt.events.TreeAdapter;
 import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class ModelLoader {
 	Group grpAnalysisModelSelection=null;
@@ -35,6 +36,7 @@ public class ModelLoader {
 	TreeItem currentlySelectedTreeItem=null;
 	MessageBox msgBox;
 	StringBuilder tracePath;
+	Label lblProgress;
 	TracingTypeSelector traceTypeSelector;
 	ResultsAndFeedback resultsAndFeedback;
 	
@@ -78,6 +80,12 @@ public class ModelLoader {
 	    compModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true));
 		compModelSelection.setLayout(new GridLayout(1,false));
 	    
+		lblProgress= new Label(compModelSelection, SWT.NONE);
+		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
+		lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+		lblProgress.setText("Prossing....");
+		lblProgress.setVisible(false);
+		
 		btnAnalysisEvaluateModels=new Button(compModelSelection, SWT.NONE);
 		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
 		btnAnalysisEvaluateModels.setText("Evaluate");
@@ -93,11 +101,12 @@ public class ModelLoader {
 				String modelKey=database.split("_")[1];
 				IDetectionModels model= modFac.getModelyByAcronym(modelKey);
 				
-				resultsAndFeedback.clearTree();
+				resultsAndFeedback.clearData();
+				
 				btnAnalysisEvaluateModels.setEnabled(false);
 				btnSettings.setEnabled(false);
 				btnDelete.setEnabled(false);
-				
+				lblProgress.setVisible(true);
 				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, model, database);
 				testTheModel.start();
 				
@@ -262,6 +271,7 @@ public class ModelLoader {
 							btnAnalysisEvaluateModels.setEnabled(true);
 							btnSettings.setEnabled(true);
 							btnDelete.setEnabled(true);
+							lblProgress.setVisible(false);
 							
 						}
 					});
@@ -287,9 +297,10 @@ public class ModelLoader {
 						
 				if (!checkItemSelection())
 					throw new TotalADSUiException("Please, first select a model!");
-		       
+		       if (testDirectory.isEmpty())
+		    	   throw new TotalADSUiException("Please, first select a trace!");
 				
-				File fileList[]=getDirectoryHandler(testDirectory);// Get a file and a db handler
+				File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 				DBMS connection=Configuration.connection;
 				
 				
@@ -304,9 +315,11 @@ public class ModelLoader {
 				// Second, start testing
 				
 				for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
-			
-					if (trcCnt==fileList.length-1)
-								 isLastTrace=true;
+					final int counter=trcCnt+1;
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {lblProgress.setText("Processing trace #"+counter+"..."); }
+					});
 					 
 					ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 			 					
@@ -317,7 +330,9 @@ public class ModelLoader {
 						
 						@Override
 						public void run() {
+							
 							resultsAndFeedback.addTraceResult(traceName, results);
+							
 							
 						}
 					});
@@ -329,21 +344,37 @@ public class ModelLoader {
 		}
 		
 		/**
-		 * Get a Directory handle, if there is only one file it returns an array of size one
+		 * Get a directory handle, if there is only one file it returns an array of size one
 		 * @param trainDirectory
 		 * @return File[]
 		 */
-		private File[] getDirectoryHandler(String trainDirectory){
-			File traces=new File(trainDirectory);
+		private File[] getDirectoryHandler(String testDirectory, ITraceTypeReader traceReader){
+			
+			File traces=new File(testDirectory);
+			String kernelCTF=TraceTypeFactory.getInstance().getCTFKernelorUserReader(true).getName();
+			String userCTF=TraceTypeFactory.getInstance().getCTFKernelorUserReader(false).getName();
 			File []fileList;
+		
+			if (traces.isDirectory())// Returns the list of files in a directory
+	            fileList=traces.listFiles();
+			else{
+	            fileList= new File[1];// if there is only one file then assigns it
+	            fileList[0]=traces;
+			}
+			// CTF readers read directories only. If it is a file, CTF reader will throw an error.
+			//Adding checks for this process
+			if ( traceReader.getName().equals(kernelCTF) || traceReader.getName().equals(userCTF)){
+				
+				if (!fileList[0].isDirectory()){ // if the inner files are not directory;i.e., only one folder--it means return a directory 
+						fileList= new File[1];
+						fileList[0]=traces; //Return the directory;
+				}
+				 //else return the directory list
+				 // if the list is a combination of files and directories then this will result in an exception in the testTheModel function
+			}
 			
 			
-			if (traces.isDirectory())
-		            fileList=traces.listFiles();
-		    else{
-		            fileList= new File[1];
-		            fileList[0]=traces;
-		    }
+			
 			return fileList;
 		}
 		

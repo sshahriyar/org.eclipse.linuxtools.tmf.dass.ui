@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 
-public class TextLineTraceReader implements ITraceTypeReader {
+public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 
 	//inner class
 	class TextLineIterator implements ITraceIterator{
@@ -31,7 +31,9 @@ public class TextLineTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
-					 event=event.trim();
+					 String syscall=MapSysCallIDToName.getSysCallName(event.trim());
+					 event=syscall;
+					 
 				 }
 				
 			} catch (IOException e) {
@@ -65,18 +67,18 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	/**
 	 * Constructor
 	 */
-	public TextLineTraceReader() {
+	public TextSysIDtoNameTraceReader() {
 	
 	}
 	
 	@Override
 	public ITraceTypeReader createInstance(){
-		return new TextLineTraceReader();
+		return new TextSysIDtoNameTraceReader();
 	}
 	@Override
 	public String getName() {
-	
-		return "Text-line Reader";
+		// This is for lab experiments only
+		return "Text-Syscall ID to Name Reader";
 	}
 
 	 /**
@@ -99,7 +101,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	
 	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
+	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);
 	    }
 }

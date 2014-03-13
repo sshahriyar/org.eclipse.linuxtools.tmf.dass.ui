@@ -4,20 +4,21 @@ import java.io.File;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 
-public class CTFUserTraceReader implements ITraceTypeReader {
-
-	public CTFUserTraceReader() {
-		// TODO Auto-generated constructor stub
+public class CTFFunctionEntryExitTraceReader implements ITraceTypeReader {
+	// It is difficult to implement this as this requires mapping of symbol files because lttng generates only addresses
+	// not the function names. This is just a structure for future
+	public CTFFunctionEntryExitTraceReader() {
+		
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
-		return "CTF User-space Reader";
+		
+		return "CTF Function Entry/Exit Reader";
 	}
 	@Override
 	public ITraceTypeReader createInstance(){
-		return new  CTFUserTraceReader();
+		return new  CTFFunctionEntryExitTraceReader();
 	}
 	
 	/**
@@ -25,24 +26,20 @@ public class CTFUserTraceReader implements ITraceTypeReader {
      */
     public String getAcronym(){
     	
-    	return "USR";
+    	return "FUN";
     }
 	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-	    	CTFUserTraceReader userTraceReader=new CTFUserTraceReader();
+	    	CTFFunctionEntryExitTraceReader userTraceReader=new CTFFunctionEntryExitTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(userTraceReader.getName(), userTraceReader);
 	    }
 	 
 	@Override
 	public ITraceIterator getTraceIterator(File file) throws Exception {
-		// TODO Auto-generated method stub
+	
 		return null;
 	}
 
-	@Override
-	public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
-		// TODO Auto-generated method stub
 
-	}
 
 }

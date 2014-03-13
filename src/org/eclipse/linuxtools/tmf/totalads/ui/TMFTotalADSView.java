@@ -95,7 +95,7 @@ public class TMFTotalADSView extends TmfView {
      
         // Create the request to get data from the trace
 
-        TmfEventRequest req = new TmfEventRequest(TmfEvent.class,
+     /*   TmfEventRequest req = new TmfEventRequest(TmfEvent.class,
                 TmfTimeRange.ETERNITY, 0, TmfEventRequest.ALL_DATA,
                 ExecutionType.BACKGROUND)
         //TmfEventRequest req = new TmfEventRequest(TmfEvent.class)
@@ -105,12 +105,10 @@ public class TMFTotalADSView extends TmfView {
         							ITraceTypeReader traceReader=TraceTypeFactory.getInstance().getCTFKernelorUserReader(isKernelSpace);
         							String tracePath="";
         						
-        						
-						        	
-
-						            @Override
+        						        @Override
 						            public void handleData(ITmfEvent data) {
 						            	  super.handleData(data);
+						            	  comp.notifyOnTraceSelection( tracePath, traceReader.getName());
 						            	  //System.out.println("***"+data.getContent().getName());
 						            	  //System.out.println("***"+data.getContent().getName()+ " "+data.getContent().getValue()
 						            		//	  + " "+data.getContent().getField(FIELD));
@@ -120,50 +118,17 @@ public class TMFTotalADSView extends TmfView {
 						            	 
 						            	 if (tracePath.isEmpty()){
 						            		 tracePath=data.getTrace().getPath();
-						            		 //System.out.println(data.getTrace().getPath());
+						            		
 						            	 }
-						            		  
-						            					            	 
-						            	/*String []fieldNames=data.getContent().getFieldNames();
-						            	for (int i=0; i < fieldNames.length;i++)
-						            		System.out.println(fieldNames[i]);*/
-						            	  
-						            //	  ITmfEventField field = data.getContent().getField(FIELD);
-						             
-						              //    if (field != null) 
-						                //	  System.out.println("*********"+field.getValue());
-						             
-						                   
+						                        					            	 
+						           					                   
 						            }
 						
 						            @Override
 						            public void handleSuccess() {
 						            	super.handleSuccess();
 						               
-						                // This part needs to run on the UI thread since it updates the chart SWT control
-						                Display.getDefault().asyncExec(new Runnable() {
-
-						                    @Override
-						                    public void run() {
-						                    	try{
-						                    		/** Getting char representation in memory of StringBuilder trace  
-						                    		  * to avoid extra memory consumption and making it final to avoid 
-						                    		  * any manipulation from models  */ 
-						                    		 
-						                    		 Field field = StringBuilder.class.getSuperclass().getDeclaredField("value");
-						                    		 field.setAccessible(true);
-						                    		 final char[] traceChar = (char[]) field.get(traceBuffer);
-						                    		 
-						                    		comp.notifyOnTraceSelection(traceChar, tracePath, traceReader.getName());
-							                        System.out.println("Done");
-							                   	   
-						                    	}catch (Exception ex){
-						                    		ex.printStackTrace();
-						                    	}
-						                    	
-						                      
-						                    }
-						                });
+						              
 						            }
 						
 						            @Override
@@ -171,16 +136,21 @@ public class TMFTotalADSView extends TmfView {
 						                // Request failed, not more data available
 						                super.handleFailure();
 						            }
-						            
-						          
+						        				          
         		};
-        		
+        	*/	
       
         ITmfTrace trace = signal.getTrace();
-        trace.sendRequest(req);
+    	// Right now we are not sure how to determine whether a trace is a user space trace or kernel space trace
+        // so we are only considering kernel space traces
+        Boolean isKernelSpace=true;
+		ITraceTypeReader traceReader=TraceTypeFactory.getInstance().getCTFKernelorUserReader(isKernelSpace);
+
+        comp.notifyOnTraceSelection(trace.getPath(), traceReader.getName());
+        // trace.sendRequest(req);
     }
 	///class
-  public class TmfChartTimeStampFormat extends SimpleDateFormat {
+  /*public class TmfChartTimeStampFormat extends SimpleDateFormat {
 	        private static final long serialVersionUID = 1L;
 	        @Override
 	        public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
@@ -195,6 +165,6 @@ public class TMFTotalADSView extends TmfView {
 	        // Called when the time stamp preference is changed
 	        chart.getAxisSet().getXAxis(0).getTick().setFormat(new TmfChartTimeStampFormat());
 	        chart.redraw();
-	    }
+	    }*/
 
 }
