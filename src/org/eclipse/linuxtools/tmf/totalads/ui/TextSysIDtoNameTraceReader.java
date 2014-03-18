@@ -31,7 +31,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
-					 String syscall=MapSysCallIDToName.getSysCallName(event.trim());
+					 String syscall=MapSysCallIDToName.getSysCallName(Integer.parseInt(event));
 					 event=syscall;
 					 
 				 }

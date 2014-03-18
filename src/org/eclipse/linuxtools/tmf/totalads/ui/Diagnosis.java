@@ -41,7 +41,7 @@ public class Diagnosis {
 	ModelLoader modelLoader;
 	ResultsAndFeedback resultsAndFeedback;
 	
-	public Diagnosis(CTabFolder tabFolderDetector) throws SecurityException, NoSuchMethodException{
+	public Diagnosis(CTabFolder tabFolderDetector) throws Exception{
 		
 		CTabItem tbtmAnalysis = new CTabItem(tabFolderDetector, SWT.NONE);
 		tbtmAnalysis.setText("Diagnosis");

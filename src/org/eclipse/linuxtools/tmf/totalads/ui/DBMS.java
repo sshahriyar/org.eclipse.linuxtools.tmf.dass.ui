@@ -40,7 +40,8 @@ public class DBMS {
 	private void connect() throws UnknownHostException{
 		
 		mongoClient = new MongoClient( HOST , PORT );
-		mongoClient.setWriteConcern(WriteConcern.JOURNALED);				
+		mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+		
 	}
 	/**
 	 * Get database list

@@ -3,8 +3,8 @@ import java.util.HashMap;;
 public class MapSysCallIDToName {
 private static HashMap< Integer, String> sysCallIDToName;
 
-public static Integer getSysCallName(Integer id){
-	return sysCallIDToName.get(name);
+public static String getSysCallName(Integer id){
+	return sysCallIDToName.get(id);
 }
  static{
 	sysCallIDToName=new HashMap<Integer, String>();
