@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders;
 
 
 import java.io.File;
@@ -14,12 +14,16 @@ import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
 
 /**
  * Class to read CTF traces by using CtfTmfTrace class.
  * @author Syed Shariyar Murtaza 
  */
-public class CTFEventsTraceReader implements ITraceTypeReader   {
+public class CTFSysCallTraceReader implements ITraceTypeReader   {
 	 // ------------------------------------------------------------------------
      // inner class   
 	 // ------------------------------------------------------------------------
@@ -49,13 +53,16 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
     		@Override
     	    public String getCurrentEvent(){
     			
-    			CtfTmfEvent event = traceIterator.getCurrentEvent();
-    			String eventName=event.getEventName().trim();
-        		System.out.println(eventName);
-    			if (eventName.isEmpty())
+    			String syscall="";
+    			do{
+    				CtfTmfEvent event = traceIterator.getCurrentEvent();
+    				syscall=handleSysEntryEvent(event);
+        		} while (syscall.isEmpty() && advance());
+    			
+    			if (syscall.isEmpty())
     				return null;
     			else 
-    				return null;
+    				return syscall;
     			
     		}
     	
@@ -65,7 +72,24 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
     			if (!isDispose)
     				trace.dispose();
     		}
-      
+    		/**
+    		 * Returns System Call
+    		 * @param event
+    		 * @return
+    		 */
+    		private String handleSysEntryEvent(CtfTmfEvent event) {
+    			String eventName=event.getEventName();
+    			String syscall="";
+    			//System.out.println(eventName);
+    			if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
+    				//Integer id=MapSysCallIDToName.getSysCallID(eventName.trim());
+    				//if (id==null) id=-1;
+    				syscall=eventName.trim();
+    			 }
+    			return syscall;
+    			
+    		} 
+    
 
      }
      
@@ -77,14 +101,14 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
      * Instantiate a new trace reader
      *
      */
-    public CTFEventsTraceReader() {
+    public CTFSysCallTraceReader() {
           //this.trace=trace;
           //this.traceBuffer=buffer;
     }
 
    @Override
     public ITraceTypeReader createInstance(){
-    	return new CTFEventsTraceReader();
+    	return new CTFSysCallTraceReader();
     }
    /**
     * 
@@ -93,7 +117,7 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
     
     public static void registerTraceTypeReader() throws TotalADSUiException{
     	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-    	CTFEventsTraceReader kernelTraceReader=new CTFEventsTraceReader();
+    	CTFSysCallTraceReader kernelTraceReader=new CTFSysCallTraceReader();
     	trcTypFactory.registerTraceReaderWithFactory(kernelTraceReader.getName(), kernelTraceReader);
     }
     /**
@@ -101,14 +125,14 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
      */
     @Override
     public String getName(){
-    	return "CTF All Events Reader";
+    	return "CTF System Call Reader";
     }
     /**
      * Returns the acronym of the Kernel space reader
      */
     public String getAcronym(){
     	
-    	return "EVN";
+    	return "SYS";
     }
 	/**
 	 * Return the iterator to go over the trace file

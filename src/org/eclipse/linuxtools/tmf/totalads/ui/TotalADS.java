@@ -41,8 +41,18 @@ public class TotalADS  {
 	public TotalADS(Composite parent, int style) {
 		
 	  try{
+		    	Configuration.connection=new DBMS();
 			
-		  	Configuration.connection=new DBMS(Configuration.host, Configuration.port);
+			//  (Configuration.host, Configuration.port);
+			//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
+				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
+		  	
+			if (!error.isEmpty()){
+					MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+				    msg.setMessage(error);
+				    msg.open();
+			}	    
+		  	
 		    ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
 			modFactory.initialize();
 		
@@ -71,8 +81,10 @@ public class TotalADS  {
 	   } catch (Exception ex) {
 			
 		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-		   if (ex.getCause()!=null)
-		      msg.setMessage(ex.getCause().getMessage());
+		   if (ex.getMessage()!=null){
+		      msg.setMessage(ex.getMessage());
+		      msg.open();
+		   }
 		   ex.printStackTrace();
 		}
 

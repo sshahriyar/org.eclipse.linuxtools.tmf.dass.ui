@@ -1,4 +1,6 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.ksm;
+import org.eclipse.linuxtools.tmf.totalads.ui.*;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -124,7 +126,25 @@ public class KernelStateModeling implements IDetectionModels {
 	  
 	  
 	}
-
+	/**
+	 * Cross validate the model
+	 */
+	@Override
+	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console) throws Exception{
+		// totalTraces=get the record count in the database
+		// patitionSize=divide it by folds
+		//repeat untill j=0  to folds and j++
+			// validationFoldStart=1+j*partitionSize
+			// validationFoldEnd=partitionSize+j*partitionSize;
+			// trainingFirstFoldStart=1
+			// trainingFirstFoldEnd=validationFoldStart-1
+			// trainingRemainingFoldStart=validationFoldEnd+1
+			// trainingRemainingFoldEnd=totalTraces
+		    // take one record from each validationFoldStart to validationFoldEnd 
+	}
+	/**
+	 * Tests the model
+	 */
 	@Override
 	public Results test(ITraceIterator trace, String database,DBMS connection) throws TotalADSUiException, Exception {
 		
@@ -134,7 +154,7 @@ public class KernelStateModeling implements IDetectionModels {
 		measureStateProbabilities(trace, testTrcStates);
 		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
 		
-		Results results= new Results();
+		IDetectionModels.Results results= new IDetectionModels.Results();
 		results.isAnomaly=isAnomaly;
 		results.anomalyType=null;
 		results.details.append("FS ").append(testTrcStates.FS).append("\n");

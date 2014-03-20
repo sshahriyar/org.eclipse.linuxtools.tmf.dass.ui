@@ -24,7 +24,10 @@ public class DecisionTree implements IDetectionModels {
 		// TODO Auto-generated method stub
 
 	}
-
+	@Override
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception{
+		
+	}
 	@Override
 	public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception {
 		return null;

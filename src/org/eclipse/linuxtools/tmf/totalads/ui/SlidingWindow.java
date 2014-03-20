@@ -39,6 +39,10 @@ public class SlidingWindow implements IDetectionModels {
 		// TODO Auto-generated method stub
 
 	}
+	@Override
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception{
+		
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#test(char[], java.lang.String)

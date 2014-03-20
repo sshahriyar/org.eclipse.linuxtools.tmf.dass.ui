@@ -128,12 +128,7 @@ public class Modeling {
 		lblTraceType.setText("Select the Trace Type");
 		
 		traceTypeSelector=new TracingTypeSelector(grpTraceTypesAndDB);
-		//Combo cmbTraceTypes= new Combo(grpTraceTypesAndDB,SWT.BORDER);
-		//cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		//cmbTraceTypes.add("LTTng Kernel");
-		//cmbTraceTypes.add("LTTng UST");
-		//cmbTraceTypes.add("Regular Expression");
-		//cmbTraceTypes.select(0);
+	
 		Label emptyLabel=new Label(grpTraceTypesAndDB, SWT.BORDER);// An empty label for a third cell
 		emptyLabel.setVisible(false);
 		
@@ -202,14 +197,19 @@ public class Modeling {
 	 */
 	private void populateComboWithDatabaseList(){
 		
-				cmbDBNames.removeAll(); // first clear it
+				cmbDBNames.removeAll(); // First clear it
 				cmbDBNames.add("Enter a new  name");
+
 				//Populate combo box
-				List<String> modelsList=Configuration.connection.getDatabaseList();
-				for (int j=0; j<modelsList.size();j++)
-					cmbDBNames.add(modelsList.get(j));
-				// select the first item in the combo box		
-				cmbDBNames.select(0);
+				if (Configuration.connection.isConnected()){
+					
+					List<String> modelsList=Configuration.connection.getDatabaseList();
+					for (int j=0; j<modelsList.size();j++)
+						cmbDBNames.add(modelsList.get(j));
+				
+					// Select the first item in the combo box		
+					cmbDBNames.select(0);
+				}
 	}
 	
 	/**

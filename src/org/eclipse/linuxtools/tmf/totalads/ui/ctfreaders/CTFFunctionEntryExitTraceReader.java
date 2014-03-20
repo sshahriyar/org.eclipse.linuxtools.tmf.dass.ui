@@ -1,8 +1,12 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders;
 
 import java.io.File;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
 
 public class CTFFunctionEntryExitTraceReader implements ITraceTypeReader {
 	// It is difficult to implement this as this requires mapping of symbol files because lttng generates only addresses

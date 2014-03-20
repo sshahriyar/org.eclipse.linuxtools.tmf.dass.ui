@@ -1,6 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.lang.reflect.Field;
+import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,40 +9,76 @@ import java.util.List;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
+import com.mongodb.DBAddress;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 
 public class DBMS {
-	private String HOST;
-	private Integer PORT;
+	//private String HOST;
+	//private Integer PORT;
 	private MongoClient mongoClient;
+	private Boolean isConnected=false;
 	//private String DB;
 	ArrayList<Observer> observers=new ArrayList<Observer>();
 	
-	public DBMS() throws UnknownHostException{
-		//DB=database;
-		HOST=Configuration.host;
-		PORT=Configuration.port;
-		connect();
-	}
-	
-	public DBMS(String host, Integer port) throws UnknownHostException{
-		HOST=host;
-		PORT=port;
-		//DB=dataBase;
-		connect();
-	}
-	
-	private void connect() throws UnknownHostException{
+	public DBMS() {
 		
-		mongoClient = new MongoClient( HOST , PORT );
+	}
+	
+	
+	
+	public String connect(String host, Integer port) throws UnknownHostException{
+		String message="";
+		mongoClient = new MongoClient( host , port );
 		mongoClient.setWriteConcern(WriteConcern.JOURNALED);
 		
+				
+		try {
+			
+			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
+											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
+		} catch (Exception ex){
+			isConnected=false;
+			message="Unable to connect to MongoDB.";
+			return message;
+		}
+		isConnected=true;// if it reaches here then it is connected
+		return message;
+	}
+	/**
+	 * 
+	 * @param host
+	 * @param port
+	 * @param username
+	 * @param password
+	 * @return Empty message if connected or error message
+	 * @throws UnknownHostException
+	 */
+	public String connect(String host, Integer port, String username, String password) throws UnknownHostException{
+		
+		String message=connect(host,port);
+		if (message.isEmpty()){
+			// if there is a running db then check this
+			DB db=mongoClient.getDB("admin");
+		
+			if (db.authenticate(username, password.toCharArray())==false){
+				isConnected=false;
+				message="Invalid user name or password.";
+			}
+			else
+				isConnected=true;// if it reaches here then everything is fine
+		}
+		return message;
+	}
+	
+	Boolean isConnected(){
+		return isConnected;
 	}
 	/**
 	 * Get database list

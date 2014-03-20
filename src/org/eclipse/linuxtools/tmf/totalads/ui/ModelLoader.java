@@ -94,6 +94,12 @@ public class ModelLoader {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				
+				if (!checkItemSelection()){
+					msgBox.setMessage("Please, select a model first!");
+					msgBox.open();
+					return;
+				} 
+				
 				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
 				
 				ModelTypeFactory modFac= ModelTypeFactory.getInstance();
@@ -164,17 +170,19 @@ public class ModelLoader {
 	 */
 	private void populateTreeWithModels(){
 	///////data
+		if (Configuration.connection.isConnected() ){ // if there is a running DB instance
 			
 			List <String> modelsList= Configuration.connection.getDatabaseList();
-			treeAnalysisModels.removeAll();
-		    if (modelsList!=null || modelsList.size()>0){
-				TreeItem []items=new TreeItem[modelsList.size()];
-				for (int i=0;i <items.length;i++){
-					items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
-					items[i].setText(modelsList.get(i));
-									
+				treeAnalysisModels.removeAll();
+			    if (modelsList!=null || modelsList.size()>0){
+					TreeItem []items=new TreeItem[modelsList.size()];
+					for (int i=0;i <items.length;i++){
+						items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
+						items[i].setText(modelsList.get(i));
+										
+					}
 				}
-			}
+		}
 		    currentlySelectedTreeItem=null;
 	}
 

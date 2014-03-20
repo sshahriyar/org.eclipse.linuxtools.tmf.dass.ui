@@ -1,10 +1,10 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import org.eclipse.linuxtools.tmf.totalads.ui.ksm.KernelStateModeling;
 
-import org.reflections.Reflections;
 
 public class ModelTypeFactory {
 private static ModelTypeFactory modelTypes=null;

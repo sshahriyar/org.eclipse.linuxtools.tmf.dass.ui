@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.textreaders;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,8 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
 
-public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
+public class TextLineTraceReader implements ITraceTypeReader {
 
 	//inner class
 	class TextLineIterator implements ITraceIterator{
@@ -31,9 +35,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
-					 String syscall=MapSysCallIDToName.getSysCallName(Integer.parseInt(event));
-					 event=syscall;
-					 
+					 event=event.trim();
 				 }
 				
 			} catch (IOException e) {
@@ -67,18 +69,18 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	/**
 	 * Constructor
 	 */
-	public TextSysIDtoNameTraceReader() {
+	public TextLineTraceReader() {
 	
 	}
 	
 	@Override
 	public ITraceTypeReader createInstance(){
-		return new TextSysIDtoNameTraceReader();
+		return new TextLineTraceReader();
 	}
 	@Override
 	public String getName() {
-		// This is for lab experiments only
-		return "Text-Syscall ID to Name Reader";
+	
+		return "Text-line Reader";
 	}
 
 	 /**
@@ -101,7 +103,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	
 	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
+	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);
 	    }
 }

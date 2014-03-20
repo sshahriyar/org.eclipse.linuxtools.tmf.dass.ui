@@ -16,11 +16,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.wb.swt.SWTResourceManager;
 
 public class ResultsAndFeedback {
 	Tree treeTraceResults;
 	Text txtAnalysisCurrentAnomaly;
 	Text txtAnalysisDetails;
+	IDetectionModels.Results currentTraceResults=null;
 	
 	public ResultsAndFeedback(Composite parent) {
 		detailsAndFeedBack(parent);
@@ -55,7 +57,7 @@ public class ResultsAndFeedback {
 					public void widgetSelected(SelectionEvent e) {
 						TreeItem item =(TreeItem)e.item;
 						IDetectionModels.Results results=(IDetectionModels.Results)item.getData();
-						
+						currentTraceResults=results;
 						if (results.isAnomaly && (results.anomalyType!=null && !results.anomalyType.isEmpty()))
 							txtAnalysisCurrentAnomaly.setText(results.anomalyType);
 						else
@@ -76,11 +78,11 @@ public class ResultsAndFeedback {
 				//*** Group Feedback
 			    
 				Group grpFeedback= new Group(compResAndFeedback,SWT.NONE);
-				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,4));
+				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 				grpFeedback.setLayout(new GridLayout(2,false));
 				grpFeedback.setText("Feedback");
 				
-				Button btnYes=new Button(grpFeedback,SWT.RADIO);
+				/*Button btnYes=new Button(grpFeedback,SWT.RADIO);
 				btnYes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true,2,1));
 				btnYes.setText("Yes");
 				
@@ -91,14 +93,42 @@ public class ResultsAndFeedback {
 				Button btnOtherwise=new Button(grpFeedback,SWT.RADIO);
 				btnOtherwise.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 				btnOtherwise.setText("Otherwise");
+				*/
+				Label lblFeedback= new Label(grpFeedback,SWT.NONE);
+				lblFeedback.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
+				lblFeedback.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+				lblFeedback.setText("If anomaly, name its type and save it");
 				
-				Text txtAnalysisIdentify = new Text(grpFeedback, SWT.BORDER);
-				txtAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-				txtAnalysisIdentify.setEnabled(false);
-
+				Text txtFeedback = new Text(grpFeedback, SWT.BORDER);
+				txtFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
+				txtFeedback.setTextLimit(15);
+				
 				Button btnSubmit = new Button(grpFeedback, SWT.NONE);
-				btnSubmit.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, true,2,1));
-				btnSubmit.setText("Submit");
+				btnSubmit.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, true,1,1));
+				btnSubmit.setText("      Save      ");
+				btnSubmit.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						// if there is a selected trace then process, else do nothing
+						if (currentTraceResults !=null){
+								//currentTraceResults.tracePath;
+								//if (!txtFeedback.getText().isEmpty());
+								//     disable save
+								//		start a thread
+								//      get the same reader, pass it to the classification model
+							    //        in classification model
+								//           extract events and their frequencies, store trace id in another collection
+							    //            in the same db
+								//     
+							    // else
+								// 		
+						}
+						
+					}
+					
+				});
+				
 			  //**** End of group Feedback
 			
 			

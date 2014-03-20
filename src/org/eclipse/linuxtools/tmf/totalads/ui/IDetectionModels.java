@@ -7,11 +7,11 @@ public interface IDetectionModels {
 /**Inner class that returns results */
 public class Results{
 	/** Assign yes or no */
-	Boolean isAnomaly; 
+	public Boolean isAnomaly; 
 	/** Assign anomaly type iff  any */ 
-	String anomalyType;
+	public String anomalyType;
 	/** Assign details separated by new line '\n' */
-	StringBuilder details=new StringBuilder();
+	public StringBuilder details=new StringBuilder();
 }
 public void createDatabase(String databaseName, DBMS connection) throws Exception; 
 
@@ -46,7 +46,14 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @throws Exception
  */
 public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception;
-
+/**
+ * This function is used to do the cross validation on the training data in the database
+ * @param database
+ * @param connection
+ * @param console
+ * @throws Exception
+ */
+public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception;
 /** Returns the textual representation of the details of the results for a trace **/
 public String textResult();
 /** Returns the graphical result in the form of a chart if any for a trace **/

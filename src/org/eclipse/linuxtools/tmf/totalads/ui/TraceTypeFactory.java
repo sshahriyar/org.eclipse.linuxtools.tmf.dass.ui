@@ -3,6 +3,12 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFEventsTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFFunctionEntryExitTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFSysCallTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.textreaders.TextLineTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.textreaders.TextSysIDtoNameTraceReader;
+
 
 public class TraceTypeFactory {
 
@@ -105,8 +111,10 @@ public class TraceTypeFactory {
 		//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 		// The following code needs to be replaced with reflection in future versions
 		CTFSysCallTraceReader.registerTraceTypeReader();
-		CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
+		CTFEventsTraceReader.registerTraceTypeReader();
+		//CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
 		TextLineTraceReader.registerTraceTypeReader();
+		TextSysIDtoNameTraceReader.registerTraceTypeReader();
 		
 	}
 	

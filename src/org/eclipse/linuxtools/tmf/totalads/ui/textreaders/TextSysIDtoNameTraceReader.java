@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.textreaders;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,8 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.MapSysCallIDToName;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
 
-public class TextLineTraceReader implements ITraceTypeReader {
+public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 
 	//inner class
 	class TextLineIterator implements ITraceIterator{
@@ -31,7 +36,9 @@ public class TextLineTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
-					 event=event.trim();
+					 String syscall=MapSysCallIDToName.getSysCallName(Integer.parseInt(event));
+					 event=syscall;
+					 
 				 }
 				
 			} catch (IOException e) {
@@ -65,18 +72,18 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	/**
 	 * Constructor
 	 */
-	public TextLineTraceReader() {
+	public TextSysIDtoNameTraceReader() {
 	
 	}
 	
 	@Override
 	public ITraceTypeReader createInstance(){
-		return new TextLineTraceReader();
+		return new TextSysIDtoNameTraceReader();
 	}
 	@Override
 	public String getName() {
-	
-		return "Text-line Reader";
+		// This is for lab experiments only
+		return "Text-Syscall ID to Name Reader";
 	}
 
 	 /**
@@ -99,7 +106,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	
 	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
+	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);
 	    }
 }
