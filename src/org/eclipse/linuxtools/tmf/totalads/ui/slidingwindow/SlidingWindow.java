@@ -6,6 +6,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.eclipse.linuxtools.tmf.totalads.ui.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.ui.DBMS;
@@ -49,7 +50,8 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console)  throws Exception {
-	      int totalLines=0, winWidth=0;
+	      sysCallSequences.clear();
+		  int totalLines=0, winWidth=0;
 	      int maxWin=5;
 	      //String [] newSequence=new String[5];
 	      LinkedList<String> newSequence=new LinkedList<String>();
@@ -61,13 +63,13 @@ public class SlidingWindow implements IDetectionModels {
 	    	  //newSequence[winWidth]=trace.getCurrentEvent();
 	    	 // console.printText(newSequence[winWidth]+" ");
 	    	  newSequence.add(trace.getCurrentEvent());
-	    	  console.printText(newSequence.get(winWidth)+" ");
+	    	  //console.printText(newSequence.get(winWidth)+" ");
 	    	  winWidth++;
 	    	      	  
 	    	  if(winWidth >= maxWin){
 	    		  		
 	    		  winWidth--;
-	    		  console.printNewLine();
+	    		  //console.printNewLine();
 	    		  String[] seq=new String[maxWin];
 	    		  seq=newSequence.toArray(seq);
 	    		  searchAndAddSequence(seq);
@@ -90,13 +92,10 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
-		console.printNewLine();
+		printSequence(console);
 
 	}
-	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception{
-		
-	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#test(char[], java.lang.String)
@@ -172,10 +171,10 @@ public class SlidingWindow implements IDetectionModels {
 	private void searchAndAddSequence(String []newSequence){
 		Integer seqSize=newSequence.length;
 		Event[] eventSequence= sysCallSequences.get(newSequence[0]);
-		if (eventSequence==null){ // if there is no such starting event then add sequence to the one 
+		if (eventSequence==null){ // if there is no such starting event then add sequence to such an event
 			
 			eventSequence=new Event[seqSize+1];
-			for (int j=0;j<seqSize-1;j++){
+			for (int j=0;j<seqSize;j++){
 				eventSequence[j]=new Event();
 				eventSequence[j].event=newSequence[j];
 			}
@@ -184,9 +183,9 @@ public class SlidingWindow implements IDetectionModels {
 			
 		}else{
 			
-			Event[] seq=searchAndAppendSequence(eventSequence, newSequence);// search in graph from this node/sequence
+			Boolean isFound=searchAndAppendSequence(eventSequence, newSequence);// search in graph from this node/sequence
 			
-			if (seq==null){// if not found then add on 0 branch 
+			if (isFound==false){// if not found then add on 0 branch 
 				eventSequence[0].branches=new ArrayList<Event[]>();
 				Event[] newBranchSeq=new Event[seqSize+1];
 				for (int j=0;j<seqSize-1;j++){
@@ -221,11 +220,11 @@ public class SlidingWindow implements IDetectionModels {
 	 * @param newSeq   a sequence of events that requires to be appended
 	 * @return
 	 */
-	private Event[] searchAndAppendSequence(Event[] eventSeq, String []newSeq){
+	private Boolean searchAndAppendSequence(Event[] eventSeq, String []newSeq){
 		
-	Integer seqSize=eventSeq.length-1;
+	Integer seqSize=newSeq.length;
 	Integer j;
-	for (j=0; j < seqSize-1;j++){
+	for (j=0; j < seqSize;j++){
 	 	
 		if (!eventSeq[j].event.equals(newSeq[j]))
 				break;
@@ -234,18 +233,18 @@ public class SlidingWindow implements IDetectionModels {
 	Integer matchIdx=j-1;
 	 
 	if (matchIdx>=seqSize-1){
-	 	Integer counter= Integer.parseInt(eventSeq[seqSize+1].event)+1;
-	 	eventSeq[seqSize+1].event=counter.toString();
-		return eventSeq;	
+	 	Integer counter= Integer.parseInt(eventSeq[seqSize].event)+1;
+	 	eventSeq[seqSize].event=counter.toString();
+		return true;	
 	}
 	else if (matchIdx <0){
-			return null; // return null lf mismatch on the first idx
+			return false; // return null if mismatch on the first idx
 	}
 	
 	else {
 		 Event []newEventSeq= new Event[seqSize-matchIdx];//+1 for the count
-		 String [] newTmpSeq= new String [seqSize-matchIdx];
-	     Event []returnSeq=null;      
+		 String [] newTmpSeq= new String [seqSize-matchIdx-1];
+	     Boolean isFound=false;      
 	     Integer i;
 		 for ( i=0; i <newEventSeq.length-1; i++){
 			 		newEventSeq[i]=new Event();
@@ -259,30 +258,79 @@ public class SlidingWindow implements IDetectionModels {
 	//      When there are no more branches then we shall automatically 
 	//       add a new branch by skipping the if block
 		if (branches!=null){
-	          //if the branches exist then we need to recursovely go through the remaining branches to find 
+	          //if the branches exist then we need to recursively go through the remaining branches to find 
 				// a possible location to append the new sequence
 				
 				for (int bCount=0; bCount<branches.size(); bCount++){
 					Event []branchEventSeq=branches.get(bCount);
 					/// ****** recursive call
-					returnSeq=searchAndAppendSequence(branchEventSeq,newTmpSeq);
+					isFound=searchAndAppendSequence(branchEventSeq,newTmpSeq);
 					/// ****** recursive call
-					if (returnSeq!=null)// there is no need to iterate more branches, we have found a match
+					if (isFound==true){//{// there is no need to iterate more branches, we have found a match
+						branches.set(bCount, branchEventSeq);
+						//branches.add(returnSeq);
 						break;
+					}
 		        }
+		}else{
+			branches= new ArrayList<Event[]>();
 		}
 	    //We have just found out where to append a branch in the graph
 	 	  //add a new branch to the event and return the eventSeq.   
-		branches= new ArrayList<Event[]>();
-		if (returnSeq!=null)
-					branches.add(returnSeq);
-		else
-				branches.add(newEventSeq);
+		
+		if (isFound==false)
+			branches.add(newEventSeq);
 	
 		eventSeq[matchIdx].branches=branches;
-		return eventSeq;
+		return true;
 		   
 	}
 	// End of function searchAndAddSequence
    }
+	
+	/**
+	 * Prints the graph of sequence
+	 * @param console
+	 */
+	private void printSequence(ProgressConsole console){
+		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
+			printRecursive(nodes.getValue(),"", console);
+			
+		}
+	}
+	/**
+	 * This function goes through the graph ov Events and print the sequences in a human readable
+	 * manner
+	 * @param nodes
+	 * @param prefix
+	 * @param console
+	 */
+	private void printRecursive(Event[] nodes,String prefix, ProgressConsole console){
+	      
+		Boolean isPrefixPrinted=false;
+		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
+			      
+				  ArrayList<Event[]> branches=nodes[nodeCount].branches;
+				   if (branches!= null){
+					 prefix=prefix+nodes[nodeCount].event+"-";
+					 for(int i=0;i<branches.size(); i++){
+							printRecursive(branches.get(i),prefix,console);
+					   }   
+					}
+				    else{
+				     
+					    if (!isPrefixPrinted){
+							  console.printText(prefix);
+							  isPrefixPrinted=true;	
+				    		}
+					 		console.printText(nodes[nodeCount].event+"-");
+				}
+		}
+	  	console.printNewLine();	    
+	}
+	
+	@Override
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception{
+		
+	}
 }
