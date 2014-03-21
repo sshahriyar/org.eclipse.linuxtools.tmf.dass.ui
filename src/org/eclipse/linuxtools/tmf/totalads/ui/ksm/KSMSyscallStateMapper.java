@@ -7,7 +7,7 @@
  * Follow these instructions to extract the mappings:
  * 1. Install ctags 
  * 		> sudo apt-get install ctags
- * 2.  Get the Ubuntu (or any other distribution) from the version control
+ * 2.  Get the Ubuntu (or any other Linux distribution) from the version control
  * 		> git clone git://kernel.ubuntu.com/ubuntu-DISTRIBUTION_NAME.git 
  * 			e.g., > git clone git://kernel.ubuntu.com/ubuntu-precise.git 
  * 3. cd ubuntu-DISTRIBUTION_NAME and type the following
@@ -184,18 +184,23 @@ public class KSMSyscallStateMapper {
 			//temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/nametocomponent_32_u10.04_2.6.32.csv");
 			//temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/nametocomponent_64_u10.04_2.6.32.csv");
 			//1% conflict with above n all below
-			//--
-			/*temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u10.10_2.6.35.csv");
+			//---
+			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u10.10_2.6.35.csv");
 			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u10.10_2.6.35.csv");
 			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u12.04_3.2.csv");
 			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u12.04_3.2.csv");
-			//---
+			
 			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u12.10_3.5.csv");
 			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u12.10_3.5.csv");
-			*/
-			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u14.04_3.13.csv");
-			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u14.04_3.13.csv");
 			
+			/*temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u13.04_3.8.0.csv");
+			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u13.04_3.8.0.csv");
+			
+			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u13.10_3.11.csv");
+			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u13.10_3.11.csv");
+			/*temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_32_u14.04_3.13.csv");
+			temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/script-mapping/nametocomponent_64_u14.04_3.13.csv");
+			*/
 	
 			//temp.extractStatesAndCalls("/home/umroot/experiments/syscallmappings/nametocomponent_m32r_u10.04_2.6.32.csv");
 			//

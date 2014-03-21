@@ -3,7 +3,9 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.eclipse.linuxtools.tmf.totalads.ui.ksm.KernelStateModeling;
+import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
 
 
 public class ModelTypeFactory {
