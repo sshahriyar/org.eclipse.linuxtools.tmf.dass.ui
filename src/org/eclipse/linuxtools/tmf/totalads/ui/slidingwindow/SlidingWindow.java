@@ -267,7 +267,7 @@ public class SlidingWindow implements IDetectionModels {
 					isFound=searchAndAppendSequence(branchEventSeq,newTmpSeq);
 					/// ****** recursive call
 					if (isFound==true){//{// there is no need to iterate more branches, we have found a match
-						branches.set(bCount, branchEventSeq);
+						//branches.set(bCount, branchEventSeq);
 						//branches.add(returnSeq);
 						break;
 					}
@@ -299,8 +299,8 @@ public class SlidingWindow implements IDetectionModels {
 		}
 	}
 	/**
-	 * This function goes through the graph ov Events and print the sequences in a human readable
-	 * manner
+	 * This function goes through the graph of Events and print the sequences in a human readable
+	 * form
 	 * @param nodes
 	 * @param prefix
 	 * @param console
@@ -308,22 +308,27 @@ public class SlidingWindow implements IDetectionModels {
 	private void printRecursive(Event[] nodes,String prefix, ProgressConsole console){
 	      
 		Boolean isPrefixPrinted=false;
-		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
+ 		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
 			      
 				  ArrayList<Event[]> branches=nodes[nodeCount].branches;
-				   if (branches!= null){
-					 prefix=prefix+nodes[nodeCount].event+"-";
+				  if (nodeCount==nodes.length-1)
+						prefix=prefix+"-:"+nodes[nodeCount].event;// the last element is the count of the sequence
+				  else	
+				  		prefix=prefix+nodes[nodeCount].event+"-";// just append the events 
+				  
+				  if (branches!= null){
+					 
 					 for(int i=0;i<branches.size(); i++){
 							printRecursive(branches.get(i),prefix,console);
 					   }   
 					}
 				    else{
 				     
-					    if (!isPrefixPrinted){
-							  console.printText(prefix);
-							  isPrefixPrinted=true;	
-				    		}
-					 		console.printText(nodes[nodeCount].event+"-");
+				    	// Print only when we reach a leaf of a branch
+				    	if (nodeCount==nodes.length-1)
+				    		   		console.printText(prefix);
+				    	
+				    		//console.printText(nodes[nodeCount].event+"-");
 				}
 		}
 	  	console.printNewLine();	    
