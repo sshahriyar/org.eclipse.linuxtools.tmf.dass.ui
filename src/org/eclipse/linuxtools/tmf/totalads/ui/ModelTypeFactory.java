@@ -97,7 +97,7 @@ public IDetectionModels getModelyByAcronym(String key){
 	if (model==null)
 		return null;
 	else
-		return model.createInstance();
+		return model;//.createInstance();
 }
 /**
  * Get all models to register with the factory
