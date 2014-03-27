@@ -14,7 +14,7 @@ public class DecisionTree implements IDetectionModels {
 	}
 
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console)  throws Exception {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws Exception {
 		// TODO Auto-generated method stub
 
 	}
@@ -29,11 +29,26 @@ public class DecisionTree implements IDetectionModels {
 		
 	}
 	@Override
-	public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception {
+	public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws Exception {
 		return null;
 
 	}
-
+	/**
+     * Returns the settings of an algorithm as option name at index i and value at index i+1
+     * @return String[]
+     */
+    @Override
+    public String[] getOptions(){
+    	return null;
+    }
+    /**
+     * Set the settings of an algorithm as option name at index i and value ate index i+1
+     * @param options
+     */
+    @Override
+    public void setOptions(String []options){
+    	
+    }
 	
 	@Override
 	public String textResult() {

@@ -1,11 +1,17 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+
+
+import com.google.gson.JsonObject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
@@ -18,6 +24,7 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 
 public class DBMS {
 	//private String HOST;
@@ -215,6 +222,43 @@ public class DBMS {
 		
 	}
 	/**
+	 * Inserts an object in the form of json representation into the database. Any kind of complex
+	 *  data structure can be converted to JSON  using gson library and passed to this function 
+	 * @param database
+	 * @param jsonObject
+	 * @param collection
+	 */
+	public void insertUsingJSON(String database, JsonObject jsonObject, String collection){
+		   DB db = mongoClient.getDB(database);
+		   DBCollection coll = db.getCollection(collection);
+		   BasicDBObject obj = (BasicDBObject)JSON.parse(jsonObject.toString());
+		   coll.insert(obj);
+	}
+
+	/**
+	 * Inserts or updates (if already exists) an object in the form of json representation into the database. Any kind of complex
+	 *  data structure can be converted to JSON  using gson library and passed to this function 
+	 * @param database
+	 * @param jsonObject
+	 * @param collection
+	 */
+	public void insertOrUpdateUsingJSON(String database, JsonObject keytoSearch, 
+						JsonObject jsonObjectToUpdate, String collection) throws Exception{
+		   DB db = mongoClient.getDB(database);
+		   DBCollection coll = db.getCollection(collection);
+		   
+		   BasicDBObject docToUpdate = (BasicDBObject)JSON.parse(jsonObjectToUpdate.toString());
+		   
+		   BasicDBObject keyToSearch = (BasicDBObject)JSON.parse(keytoSearch.toString());
+		   		   
+		   WriteResult writeRes=coll.update(keyToSearch, docToUpdate,true,false);
+			          
+		   CommandResult cmdResult = writeRes.getLastError();
+		   if( !cmdResult.ok()) 
+			         throw new Exception ("Error : "+cmdResult.getErrorMessage());
+		
+	}
+	/**
 	 * 
 	 * @param query
 	 * @param database
@@ -234,7 +278,7 @@ public class DBMS {
 		return maxVal;
 	}
 	/**
-	 * 
+	 * Returns a set of documents based on a key search
 	 * @param key
 	 * @param operator
 	 * @param value
@@ -260,11 +304,60 @@ public class DBMS {
 		return cursor;
 	}
 	/**
-	 * This function is used to update the values of individual fields--specified by the replacementFieldsAndValue object
-	 *  in documents specified by the searchFieldsandValues object. Pass two objects of  classes that only has primitive data types
+	 * Returns a set of documents based on a key search
+	 * @param key
+	 * @param operator
+	 * @param value
+	 * @param database
+	 * @param collection
+	 * @return
+	 */
+	public DBCursor select(String key, String operator,String value,String database, String collection ){
+		DBCursor cursor;
+		BasicDBObject query;
+		
+		DB db =mongoClient.getDB(database);
+		DBCollection coll = db.getCollection(collection);
+		
+		if ( operator==null || operator.isEmpty() )
+			query=new BasicDBObject(key,value);
+		else
+			query=new BasicDBObject(key, new BasicDBObject(operator, value));
+		
+		cursor= coll.find(query);
+		if (!cursor.hasNext())
+			cursor=null;
+		return cursor;
+	}
+	
+	/**
+	 * Returns a set of documents based on a key search
+	 * @param key
+	 * @param operator
+	 * @param value
+	 * @param database
+	 * @param collection
+	 * @return
+	 */
+	
+	public DBCursor selectAll(String database, String collection ){
+		DBCursor cursor;
+		BasicDBObject query;
+		
+		DB db =mongoClient.getDB(database);
+		DBCollection coll = db.getCollection(collection);
+				
+		cursor= coll.find();
+		if (!cursor.hasNext())
+			cursor=null;
+		return cursor;
+	}
+	/**
+	 * This function is used to update the values of individual fields--specified by the replacementFieldsAndValue object--
+	 *  in documents--specified by the searchFieldsandValues object. Pass two objects of  classes that only has primitive data types
 	 *   as fields--no methods. Each object's fields' values  and their data types will be automatically extracted and used
 	 *   in the update. If no document matches the criteria then new document will be inserted
-	 * @param searchFieldsAndValues searchFields
+	 * @param searchKeyAndItsValue searchFields
 	 * @param replacementFieldsAndValues replacement fields
 	 * @param database database name
 	 * @param collection collection name
@@ -272,7 +365,7 @@ public class DBMS {
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
-	public void replaceFields(Object searchFieldsAndValues, Object replacementFieldsAndValues,String database, String collection) 
+	public void replaceFields(Object searchKeyAndItsValue, Object replacementFieldsAndValues,String database, String collection) 
 										throws IllegalArgumentException, IllegalAccessException, Exception{
 		
 			DB db = mongoClient.getDB(database);
@@ -287,7 +380,7 @@ public class DBMS {
 		 
 			BasicDBObject searchQueryDocument = new BasicDBObject();
 			//.append("hosting", "hostB");
-			extractKeysAndValuesfromTheObject(searchFieldsAndValues, searchQueryDocument);
+			extractKeysAndValuesfromTheObject(searchKeyAndItsValue, searchQueryDocument);
 		 
 			WriteResult writeRes=coll.update(searchQueryDocument, replacementDocument,true,false);
 			

@@ -4,8 +4,10 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow;
 
 import java.io.Console;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -21,6 +23,13 @@ import org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.Results;
 import org.eclipse.linuxtools.tmf.totalads.ui.ModelTypeFactory.ModelTypes;
 import org.swtchart.Chart;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
+
 /**
  * @author Syed Shariyar Murtaza
  * This class models a sliding window algorithm over traces of events
@@ -29,16 +38,68 @@ public class SlidingWindow implements IDetectionModels {
 	 
 	String TRACE_COLLECTION=Configuration.traceCollection;
 	String SETTINGS_COLLECTION=Configuration.settingsCollection;
-	class Event{ String event; ArrayList<Event[]> branches= null;  }
-	HashMap<String, Event[]> sysCallSequences= new HashMap<String, Event[]>();
-	int maxWin=5;
+		
+	HashMap<String, Event[]> sysCallSequences;
+	String []options={"Max Win","5", "Max Hamming Distance","0"};
+	Integer maxWin=5;
+	Integer maxHamDis=0;
+    Integer validationTraceCount=0;
+	Boolean intialize=false;
+	Boolean isTestStarted=true;
 	/**
 	 * Constructor
 	 * 	 */
 	public SlidingWindow() {
+		sysCallSequences= new HashMap<String, Event[]>();
+	}
+	/**
+	 * Initializes the model if already exists in the database
+	 * @param connection
+	 * @param database
+	 */
+	private void initialize(DBMS connection,String database) throws Exception{
+		DBCursor cursor=connection.selectAll(database, this.TRACE_COLLECTION);
+		if (cursor !=null){
+			while (cursor.hasNext()){
+				DBObject dbObject=cursor.next();
+				Gson gson =new Gson();
+				String key=dbObject.get("_id").toString();
+				
+				Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
+				sysCallSequences.put(key, event);
+			}
+		cursor.close();
+		}
+		// get the maxwin
+		cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
+		if (cursor !=null){
+			while (cursor.hasNext()){
+				DBObject dbObject=cursor.next();
+				
+				maxWin=Integer.parseInt(dbObject.get(maxWin.getClass().getName()).toString());
+				maxHamDis=Integer.parseInt(dbObject.get(maxHamDis.getClass().getName()).toString());
+			}
+			cursor.close();
+		}
 		
 	}
 	
+	/**
+     * Returns the settings of an algorithm as option name at index i and value at index i+1
+     * @return String[]
+     */
+    @Override
+    public String[] getOptions(){
+    	return options;
+    }
+    /**
+     * Set the settings of an algorithm as option name at index i and value ate index i+1
+     * @param options
+     */
+    @Override
+    public void setOptions(String []options){
+    	this.options=options;
+    }
 	/**
 	 * Creates a database to store models
 	 */
@@ -52,11 +113,24 @@ public class SlidingWindow implements IDetectionModels {
 	 * 
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console)  throws Exception {
-	      sysCallSequences.clear();
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws Exception {
+	    
+		 if (!intialize){
+	    	  intialize=true;
+	    	  initialize(connection,database);
+	    	  // if the option name is same and databse has no model then take the maxwin from user
+	    	  // else maxwin aleady exists in the database. We cannot change it
+	    	  if (options!=null && options[0].equals(this.options[0]) && sysCallSequences.size() ==0)
+	    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
+	    	  //max hamming distance can be modified, so accept it
+	    	  if (options!=null && options[2].equals(this.options[2]) )
+	    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+	    	  
+	      }
+	    	  
+	    	  
 		  int totalLines=0, winWidth=0;
-	      //int maxWin=5;
-	      //String [] newSequence=new String[5];
+	      
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	     
 	      while (trace.advance()) {
@@ -77,35 +151,75 @@ public class SlidingWindow implements IDetectionModels {
 	    	  }
 	    		  
 	     }
-	 
+	     if (isLastTrace) 
+	    	 saveinDatabase(console, database, connection);
 
 	}
 
 	/* 
-	 * 
+	 * Validates the model
 	 */
 	@Override
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
-		printSequence(console);
+	  
+		 validationTraceCount++;// count the number of traces
+		 Integer totalAnomalies=0;
+		 //Integer []hammAnomalies=new Integer[maxWin];
+	     Results result= test(trace, database, connection, null);
+	     if (result.isAnomaly){
+	    	 String details=result.details.toString();
+	    	 console.printTextLn(details);
+	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
+	    	 //hammAnomalies[hamming]++;
+	    	 totalAnomalies++;
+	    	 
+	     }
+	    
+	     if (isLastTrace){
+	    	 
+	    	 //for (int hamCount=1; hamCount < hammAnomalies.length; hamCount++){
+	    	//	    console.printTextLn("Anomalies at hamming "+ hamCount + ":" +hammAnomalies[hamCount]);
+	    	//	    totalAnomalies+=hammAnomalies[hamCount];
+	    	// }
+	    	console.printTextLn("Total traces in validation folder: "+validationTraceCount); 
+	    	Double anomalyPrcentage=(totalAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
+	    	console.printTextLn("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
+	    	Double normalPercentage=(100-anomalyPrcentage);
+	    	console.printTextLn("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
+	    	
+	    	// Update the settings collection for maxwin and maxhamm
+	    	 saveSettings(database, connection);
+	    	 console.printTextLn("Database updated..");
+	     }
 
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#test(char[], java.lang.String)
+	/**
+	 * Tests the model
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection) throws Exception {
-		int totalLines=0, winWidth=0;
-	    
+	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws Exception {
+		  int winWidth=0;
+	      
+		// Get max hamming distance if set and just once
+    	  if (options!=null && options[2].equals(this.options[2]) && isTestStarted){
+    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+    	        saveSettings(database, connection); // save maxHamm
+    	        isTestStarted=false;
+    	  }
+		  
 		  IDetectionModels.Results results= new IDetectionModels.Results();
 		  results.anomalyType="";
 		  results.isAnomaly=false;
+		
+		  
+		  
 		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	     
 	      while (trace.advance()) {
-	    	  totalLines++;
+	    	 
 	    	
 	    	  newSequence.add(trace.getCurrentEvent());
 	    	 
@@ -120,55 +234,79 @@ public class SlidingWindow implements IDetectionModels {
 	    		  
 	    		  Event[] nodes=null;
 	    		  int counter=0;
-	    		  do {
+	    		 
+	    		  do {// This loop searches for the tree that starts with the first event of a new sequences, 
+	    			  // if not found it starts with a second event, then the third event and so on. Each time
+	    			  //it keeps on increasing the hamming distnace
 	    			   nodes=sysCallSequences.get(seq[counter]);
 	    			   counter++;
 	    		  }while (nodes==null && counter <seq.length);
 	    		  
-	    		  Boolean isNormal=false;
-	    		  Integer hammDis=counter-1;
-	    		  if (nodes!=null){
-	    			   String []tmp;
-	    			    if (hammDis >= 1){
+	    		  //Boolean isNormal=false;
+	    		  Integer hammDis=counter-1; // we assign hamming distance 
+	    		 
+	    		  if (nodes!=null){ // if a tree has been found then we go inside this condition
+	    			   
+	    			  String []tmp;
+	    			   
+	    			    if (hammDis >= 1){// if we have found a tree that does not start with the 
+	    			    				 // first event of a new sequence in the above loop then we pass the sequence 
+	    			    				// from where it matched with the root of the tree in the above loop
 	    			    	tmp=new String[seq.length-counter-1];
 	    			    	for (int i=counter-1; i<tmp.length;i++)
 	    			    			tmp[i]=seq[i+1];
-	    			    	hammDis=hammDis+getHammingAndSearch(nodes, tmp)-1;
+	    			    	hammDis=hammDis+getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
+	    			    	                                      // because one extra distance is reported from the function
+	    			    										  // getHammingAndSearch
 	    			    }
 	    			    else	
-	    			  	  hammDis=getHammingAndSearch(nodes, seq);
+	    			  	  hammDis=getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
 	    		  }
 	    				//isNormal=searchMatchingSequenceInTree(nodes, seq);
 	    		  
-	    		  if (hammDis > 0) {// It is not normal, it is actually an anomaly
+	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
 	    			  results.isAnomaly=true;
-	    			  results.details.append(Arrays.toString(seq)).append(hammDis).append("\n");
+	    			  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");
 	    		  }
-	    		  /*if (isNormal==false){// It is not normal, it is actually an anomaly
-	    			  results.isAnomaly=true;
-	    			  results.details.append(Arrays.toString(seq)).append("\n"); 
-	    		  }*/
-	    		  
-	    		  
-	    		  newSequence.remove(0);
+	    		     		  
+	    		  newSequence.remove(0);// remove the top event and slide a window
 	    	  }
 	    		  
 	     }
 	     
-	    
-		
-		
-		
+	  		
 	    return results;  
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#isValidationAllowed()
+	/**
+	 * Updates settings collection
+	 * @param datatbase
+	 * @param connection
 	 */
+	public void saveSettings(String database,DBMS connection) throws Exception{
+		   class ReplacementFields{
+			public Integer maxWin;
+			public Integer maxHamDis;
+			
+		  }
+
+		  class SearchFields{
+			  public String key;
+		  }
+		  
+		  SearchFields searchFields=new SearchFields();
+		  ReplacementFields replacementFields=new ReplacementFields();
+		  searchFields.key="SWN";
+		  replacementFields.maxHamDis=maxHamDis;
+		  replacementFields.maxWin=maxWin;
+		  
+		  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
+		 
+	}
 	
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#textResult()
+	/* 
+	 * Text Results
 	 */
 	@Override
 	public String textResult() {
@@ -176,8 +314,8 @@ public class SlidingWindow implements IDetectionModels {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#graphicalResults()
+	/* 
+	 * graphicalResults
 	 */
 	@Override
 	public Chart graphicalResults() {
@@ -185,8 +323,8 @@ public class SlidingWindow implements IDetectionModels {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels#createInstance()
+	/* 
+	 * Creates Instance
 	 */
 	@Override
 	public IDetectionModels createInstance() {
@@ -199,7 +337,7 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
+
 		return "Sliding Window";
 	}
 	
@@ -343,16 +481,80 @@ public class SlidingWindow implements IDetectionModels {
 	}
 	// End of function searchAndAddSequence
    }
-	
+	/**
+	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
+	 * @param console
+	 * @param database
+	 * @param connection
+	 * @throws Exception
+	 */
+	private void saveinDatabase(ProgressConsole console, String database, DBMS connection) throws Exception{
+		console.printTextLn("Saving in database.....");
+		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
+			
+					
+			Event []events=nodes.getValue(); 
+			DBMS db=Configuration.connection;
+			
+			com.google.gson.Gson gson = new com.google.gson.Gson();
+			
+			JsonElement jsonArray= gson.toJsonTree(events);
+			JsonObject jsonObject= new JsonObject();
+			jsonObject.addProperty("_id", nodes.getKey());
+			jsonObject.add("tree", jsonArray);
+			
+			JsonObject jsonKey=new JsonObject();
+			jsonKey.addProperty("_id", nodes.getKey());
+			
+			//console.printTextLn(jsonObject.toString());
+			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, this.TRACE_COLLECTION);
+			
+			
+		
+		
+			
+		}
+	}
 	/**
 	 * Prints the graph of sequence
 	 * @param console
 	 */
-	private void printSequence(ProgressConsole console){
+	private void printSequence(ProgressConsole console, String database) {
 		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
+			// create root: nodes.getKey
+			
+			//console.printTextLn(JSONserialize(events[0]));
 			printRecursive(nodes.getValue(),"", console);
+		/*
+		 Event []events=nodes.getValue(); 
+		 DBMS db=Configuration.connection;
+		
+		com.google.gson.Gson gson = new com.google.gson.Gson();
+		
+		JsonElement jsonArray= gson.toJsonTree(events);
+		JsonObject jsonObject= new JsonObject();
+		jsonObject.addProperty("_id", nodes.getKey());
+		jsonObject.add("tree", jsonArray);
+		
+		JsonObject jsonKey=new JsonObject();
+		jsonKey.addProperty("_id", nodes.getKey());//_id
+		
+		console.printTextLn(jsonObject.toString());
+		DBMS connection=Configuration.connection;
+		
+		//connection.insertUsingJSON(database, jsonObject, this.TRACE_COLLECTION);
+		try {
+			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, this.TRACE_COLLECTION);
+		} catch (Exception e) {
+			
+			e.printStackTrace();
+		}
+		System.out.println(jsonObject.toString());
+		
+		*/
 			
 		}
+		
 	}
 	/**
 	 * This function goes through the tree of Events and print the sequences in a human readable
@@ -370,7 +572,8 @@ public class SlidingWindow implements IDetectionModels {
 				  if (nodeCount==nodes.length-1)
 						prefix=prefix+"-:"+nodes[nodeCount].event;// the last element is the count of the sequence
 				  else	
-				  		prefix=prefix+nodes[nodeCount].event+"-";// just append the events 
+				  		prefix=prefix+nodes[nodeCount].event+"-";// just append the events
+				  		//create a two dimesnion key Tree as an array and node as event name 
 				  
 				  if (branches!= null){ // if there are branches on an event then keep
 					 
@@ -378,7 +581,7 @@ public class SlidingWindow implements IDetectionModels {
 							printRecursive(branches.get(i),prefix,console);
 					   }   
 				  } else {
-				     
+				       // create tee withnull
 				    	// Print only when we reach a leaf of a branch
 				    	if (nodeCount==nodes.length-1)
 				    		   		console.printText(prefix);

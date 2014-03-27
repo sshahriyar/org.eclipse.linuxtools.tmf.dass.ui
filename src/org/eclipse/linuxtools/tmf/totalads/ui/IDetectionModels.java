@@ -13,7 +13,23 @@ public class Results{
 	/** Assign details separated by new line '\n' */
 	public StringBuilder details=new StringBuilder();
 }
+/**
+ * Creates a database where an algorithm would store its model
+ * @param databaseName
+ * @param connection
+ * @throws Exception
+ */
 public void createDatabase(String databaseName, DBMS connection) throws Exception; 
+/**
+ * Returns the settings of an algorithm as option name at index i and value at index i+1
+ * @return String[]
+ */
+public String[] getOptions();
+/**
+ * Set the settings of an algorithm as option name at index i and value ate index i+1
+ * @param options
+ */
+public void setOptions(String []options);
 
 /** Controller will pass a trace through this function. Some models can train on 
  * the traces as they come and some need to wait till the last trace. Controller 
@@ -24,9 +40,10 @@ public void createDatabase(String databaseName, DBMS connection) throws Exceptio
  * @param database
  * @param connection
  * @param console
+ * @param options TODO
  * @throws Exception
  */
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws Exception;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws Exception;
 /**
  * Controller will pass traces for validation using this function.  
  * @param trace
@@ -40,12 +57,13 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
 /**
  * Controller will pass traces for testing using this function 
  * @param trace
- * @param traceName
  * @param database
  * @param connection
+ * @param options TODO
+ * @param traceName
  * @throws Exception
  */
-public Results test (ITraceIterator trace, String database, DBMS connection) throws Exception;
+public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws Exception;
 /**
  * This function is used to do the cross validation on the training data in the database
  * @param database

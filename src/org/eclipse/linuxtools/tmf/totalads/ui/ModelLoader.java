@@ -331,7 +331,7 @@ public class ModelLoader {
 					 
 					ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 			 					
-			 		final IDetectionModels.Results results= model.test(trace, database, connection);
+			 		final IDetectionModels.Results results= model.test(trace, database, connection, null);
 			 		final String traceName=fileList[trcCnt].getName();
 			 		
 			 		Display.getDefault().syncExec(new Runnable() {

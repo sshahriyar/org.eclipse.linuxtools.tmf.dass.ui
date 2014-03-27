@@ -76,10 +76,25 @@ public class KernelStateModeling implements IDetectionModels {
     	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
     	connection.createDatabase(databaseName, collectionNames);
     }
-	
+    /**
+     * Returns the settings of an algorithm as option name at index i and value at index i+1
+     * @return String[]
+     */
+    @Override
+    public String[] getOptions(){
+    	return null;
+    }
+    /**
+     * Set the settings of an algorithm as option name at index i and value ate index i+1
+     * @param options
+     */
+    @Override
+    public void setOptions(String []options){
+    	
+    }
     
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console) throws TotalADSUiException, Exception {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUiException, Exception {
     	alpha=0.0; //initialized alpha to 0 during training
 		TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
@@ -146,7 +161,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 * Tests the model
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection) throws TotalADSUiException, Exception {
+	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUiException, Exception {
 		
 		
 		

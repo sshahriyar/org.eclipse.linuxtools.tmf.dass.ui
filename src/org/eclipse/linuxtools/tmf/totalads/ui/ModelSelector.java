@@ -179,7 +179,7 @@ public class ModelSelector {
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
-	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console);
+	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console, null);
 		
 		}
 		//Third, start Validation
