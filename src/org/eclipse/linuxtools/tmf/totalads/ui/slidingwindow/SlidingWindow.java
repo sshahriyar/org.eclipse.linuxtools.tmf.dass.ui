@@ -247,7 +247,7 @@ public class SlidingWindow implements IDetectionModels {
 		  
 		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
-	     
+	     System.out.println(maxWin);
 	      while (trace.advance()) {
 	    	 
 	    	
@@ -291,9 +291,10 @@ public class SlidingWindow implements IDetectionModels {
 	    			    }
 	    			    else	
 	    			  	  hammDis=getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
+	    			     
 	    		  }
 	    				//isNormal=searchMatchingSequenceInTree(nodes, seq);
-	    		  
+	    		 // System.out.println(hammDis+ " "+maxHamDis);
 	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
 	    			  results.isAnomaly=true;
 	    			  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");

@@ -200,7 +200,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 */
 	@Override
 	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUiException, Exception {
-		if  (!isTestStarted)
+		if  (!isTestStarted){
 			if (options!=null && options[1]!=null){
 				alpha= Double.parseDouble(options[1]);
 				saveAlphaInDatabase(alpha, database, connection);
@@ -209,6 +209,8 @@ public class KernelStateModeling implements IDetectionModels {
 				Double alphaVal=getAlphaFromDatabase(database, connection);
 				if(alphaVal!=null)
 					 alpha=alphaVal;
+		}
+			this.intializeStates();
 		}
 		
 		TraceStates testTrcStates= new TraceStates();
@@ -370,6 +372,8 @@ public class KernelStateModeling implements IDetectionModels {
 	 */
 	private void mapStates(String syscall, TraceStates states){
 		//Integer sysID=Integer.parseInt(syscallID);
+		//if (syscall==null)
+			//return;
 		  if (MM_CALLS_LIST.contains(syscall))
 			  states.MM++;// keep track of the last sys_entry function id and
 		  else if (FS_CALLS_LIST.contains(syscall))

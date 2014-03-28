@@ -13,7 +13,7 @@ import org.eclipse.linuxtools.tmf.core.event.ITmfEvent;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventType;
 import org.eclipse.linuxtools.tmf.core.event.TmfEvent;
-import org.eclipse.linuxtools.tmf.core.request.ITmfEventRequest.ExecutionType;
+//import org.eclipse.linuxtools.tmf.core.request.ITmfEventRequest.ExecutionType;
 import org.eclipse.linuxtools.tmf.core.request.TmfEventRequest;
 //import org.eclipse.linuxtools.tmf.tests.stubs.request.TmfEventRequestStub;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
