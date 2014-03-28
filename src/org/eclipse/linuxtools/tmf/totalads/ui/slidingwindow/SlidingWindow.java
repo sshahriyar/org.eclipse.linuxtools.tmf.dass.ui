@@ -32,20 +32,33 @@ import com.mongodb.util.JSON;
 
 /**
  * @author Syed Shariyar Murtaza
+ *         syed.shariyar@gmail.com
  * This class models a sliding window algorithm over traces of events
  */
 public class SlidingWindow implements IDetectionModels {
 	 
 	String TRACE_COLLECTION=Configuration.traceCollection;
 	String SETTINGS_COLLECTION=Configuration.settingsCollection;
-		
-	HashMap<String, Event[]> sysCallSequences;
-	String []options={"Max Win","5", "Max Hamming Distance","0"};
 	Integer maxWin=5;
 	Integer maxHamDis=0;
+	String warningMessage="";
+	/**Fields of settings collection (table in a traditional database)
+	 */ 
+	
+	private static final class SETTINGS_COLL_FIELDS{
+		static final String KEY="_id";
+		static final String MAX_WIN="maxWIN";
+		static final String MAX_HAM_DIS="maxHamDis";
+	}
+	
+	HashMap<String, Event[]> sysCallSequences;
+	
+	String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
+	String []testingOptions={"Max Hamming Distance","0"};
+		
     Integer validationTraceCount=0;
 	Boolean intialize=false;
-	Boolean isTestStarted=true;
+	Boolean isTestStarted=false;
 	/**
 	 * Constructor
 	 * 	 */
@@ -75,9 +88,8 @@ public class SlidingWindow implements IDetectionModels {
 		if (cursor !=null){
 			while (cursor.hasNext()){
 				DBObject dbObject=cursor.next();
-				
-				maxWin=Integer.parseInt(dbObject.get(maxWin.getClass().getName()).toString());
-				maxHamDis=Integer.parseInt(dbObject.get(maxHamDis.getClass().getName()).toString());
+				maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
+				maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
 			}
 			cursor.close();
 		}
@@ -89,16 +101,24 @@ public class SlidingWindow implements IDetectionModels {
      * @return String[]
      */
     @Override
-    public String[] getOptions(){
-    	return options;
+    public String[] getOptions(Boolean isTrainingTesting){
+    	if (isTrainingTesting)// when it is true return training options
+    		return trainingOptions;
+    	else
+    		return testingOptions;
     }
     /**
      * Set the settings of an algorithm as option name at index i and value ate index i+1
      * @param options
      */
     @Override
-    public void setOptions(String []options){
-    	this.options=options;
+    public void setOptions(String []options, Boolean isTrainingTesting){
+    	if (isTrainingTesting)
+    		this.trainingOptions=options;
+    	else
+    		this.testingOptions=options;
+    	
+    	
     }
 	/**
 	 * Creates a database to store models
@@ -110,20 +130,24 @@ public class SlidingWindow implements IDetectionModels {
 	}
 	
 	/* 
-	 * 
+	 * Trains the model
 	 */
+	
 	@Override
 	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws Exception {
 	    
 		 if (!intialize){
 	    	  intialize=true;
 	    	  initialize(connection,database);
-	    	  // if the option name is same and databse has no model then take the maxwin from user
+	    	  // If the option name is the same and databse has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
-	    	  if (options!=null && options[0].equals(this.options[0]) && sysCallSequences.size() ==0)
+	    	  if (options!=null && options[0].equals(this.trainingOptions[0]) && sysCallSequences.size() ==0)
 	    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
+	    	  else
+	    		  warningMessage="Warning: window size was not changed because the model already exists.";
+	    	  
 	    	  //max hamming distance can be modified, so accept it
-	    	  if (options!=null && options[2].equals(this.options[2]) )
+	    	  if (options!=null && options[2].equals(this.trainingOptions[2]) )
 	    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
 	    	  
 	      }
@@ -153,6 +177,8 @@ public class SlidingWindow implements IDetectionModels {
 	     }
 	     if (isLastTrace) 
 	    	 saveinDatabase(console, database, connection);
+	    	
+	     
 
 	}
 
@@ -166,6 +192,7 @@ public class SlidingWindow implements IDetectionModels {
 		 Integer totalAnomalies=0;
 		 //Integer []hammAnomalies=new Integer[maxWin];
 	     Results result= test(trace, database, connection, null);
+	   
 	     if (result.isAnomaly){
 	    	 String details=result.details.toString();
 	    	 console.printTextLn(details);
@@ -190,6 +217,9 @@ public class SlidingWindow implements IDetectionModels {
 	    	// Update the settings collection for maxwin and maxhamm
 	    	 saveSettings(database, connection);
 	    	 console.printTextLn("Database updated..");
+	    	 
+	    	 if (!warningMessage.isEmpty())
+	    		 console.printTextLn(warningMessage);
 	     }
 
 	}
@@ -203,10 +233,10 @@ public class SlidingWindow implements IDetectionModels {
 		  int winWidth=0;
 	      
 		// Get max hamming distance if set and just once
-    	  if (options!=null && options[2].equals(this.options[2]) && isTestStarted){
-    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+    	  if (options!=null && options[0].equals(this.testingOptions[0]) && !isTestStarted){
+    		  	maxHamDis=Integer.parseInt(options[1]);// on error exception will be thrown automatically
     	        saveSettings(database, connection); // save maxHamm
-    	        isTestStarted=false;
+    	        isTestStarted=true;
     	  }
 		  
 		  IDetectionModels.Results results= new IDetectionModels.Results();
@@ -283,24 +313,26 @@ public class SlidingWindow implements IDetectionModels {
 	 * @param datatbase
 	 * @param connection
 	 */
-	public void saveSettings(String database,DBMS connection) throws Exception{
-		   class ReplacementFields{
-			public Integer maxWin;
-			public Integer maxHamDis;
+	private void saveSettings(String database,DBMS connection) throws Exception{
+		
+	  
+		  String settingsKey ="SWN_SETTINGS";
+		 
+		  
+		  JsonObject jsonKey=new JsonObject();
+		  jsonKey.addProperty("_id",settingsKey);
+				  
+		  JsonObject jsonObjToUpdate= new JsonObject();
+		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.KEY, settingsKey);
+		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.MAX_WIN, maxWin);
+		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.MAX_HAM_DIS, maxHamDis);
 			
-		  }
-
-		  class SearchFields{
-			  public String key;
-		  }
+	
+		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, this.SETTINGS_COLLECTION);
+			
 		  
-		  SearchFields searchFields=new SearchFields();
-		  ReplacementFields replacementFields=new ReplacementFields();
-		  searchFields.key="SWN";
-		  replacementFields.maxHamDis=maxHamDis;
-		  replacementFields.maxWin=maxWin;
 		  
-		  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
+		 
 		 
 	}
 	
@@ -338,7 +370,7 @@ public class SlidingWindow implements IDetectionModels {
 	@Override
 	public String getName() {
 
-		return "Sliding Window";
+		return "Sliding Window (SWN)";
 	}
 	
 	 /**
@@ -494,7 +526,7 @@ public class SlidingWindow implements IDetectionModels {
 			
 					
 			Event []events=nodes.getValue(); 
-			DBMS db=Configuration.connection;
+
 			
 			com.google.gson.Gson gson = new com.google.gson.Gson();
 			

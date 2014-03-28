@@ -21,15 +21,19 @@ public class Results{
  */
 public void createDatabase(String databaseName, DBMS connection) throws Exception; 
 /**
- * Returns the settings of an algorithm as option name at index i and value at index i+1
+ * Returns the settings of an algorithm as option name at index i and value at index i+1.
+ * Pass true to get training options and false to get testing options
+ * @param isTrainingTesting true for training and false for testing
  * @return String[]
  */
-public String[] getOptions();
+public String[] getOptions(Boolean isTrainingTesting);
 /**
- * Set the settings of an algorithm as option name at index i and value ate index i+1
+ * Set the settings of an algorithm as option name at index i and value ate index i+1.
+ * Pass true to get training options and false to get testing options
  * @param options
+ * @param isTrainingTesting true for training and false for testing
  */
-public void setOptions(String []options);
+public void setOptions(String []options, Boolean isTrainingTesting);
 
 /** Controller will pass a trace through this function. Some models can train on 
  * the traces as they come and some need to wait till the last trace. Controller 

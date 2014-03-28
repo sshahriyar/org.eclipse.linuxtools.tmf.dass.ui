@@ -25,6 +25,8 @@ public class ModelSelector {
 	MessageBox msgBox;
 	TreeItem currentlySelectedTreeItem=null;
 	IDetectionModels currentlySelectedModel;
+	Settings settingsDialog;
+	String []modelOptions;
 //	Object instanceOfListener;
 	public ModelSelector(Composite comptbtmAnalysis){
 		
@@ -108,6 +110,7 @@ public class ModelSelector {
 		    
 	}
 	
+	
 
 	/**
 	 * Checks  selection of a model in the tree
@@ -129,6 +132,19 @@ public class ModelSelector {
 			return Configuration.connection.datbaseExists(database);
 			
 	}
+	/**
+	 * Shows the settings dialog box
+	 * @throws TotalADSUiException
+	 */
+	public void showSettingsDialog() throws TotalADSUiException{
+		if (!checkItemSelection())
+			throw new TotalADSUiException("Please, first select an algorithm!");
+		Boolean isTraining=true;// getting training options
+		settingsDialog= new Settings(currentlySelectedModel.getOptions(isTraining));
+		settingsDialog.showForm();
+		modelOptions=settingsDialog.getOptions();
+	}
+	
 	/**
 	 * This function trains a model
 	 * @param trainDirectory
@@ -179,7 +195,7 @@ public class ModelSelector {
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
-	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console, null);
+	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console, modelOptions);
 		
 		}
 		//Third, start Validation

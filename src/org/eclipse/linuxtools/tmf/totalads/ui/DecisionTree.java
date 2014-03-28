@@ -38,7 +38,7 @@ public class DecisionTree implements IDetectionModels {
      * @return String[]
      */
     @Override
-    public String[] getOptions(){
+    public String[] getOptions(Boolean isTrainingTesting){
     	return null;
     }
     /**
@@ -46,7 +46,7 @@ public class DecisionTree implements IDetectionModels {
      * @param options
      */
     @Override
-    public void setOptions(String []options){
+    public void setOptions(String []options, Boolean isTrainingTesting){
     	
     }
 	

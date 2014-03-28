@@ -1,6 +1,6 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
+import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
@@ -169,7 +169,7 @@ public class DBMS {
 		  for (Field field : record.getClass().getDeclaredFields()) {
 					
 					 String key=field.getName();
-					
+					 field.setAccessible(true);
 					 if (field.getType()==String.class){
 						 String val=(String)field.get(record);
 						 document.append(key, val);

@@ -33,6 +33,7 @@ public class Modeling {
 	Combo cmbDBNames;
 	Text txtNewDBName;
 	ProgressConsole  progConsole;
+	Button btnBuildModel;
 	
 	public Modeling(CTabFolder tabFolderDetector){
 		
@@ -52,7 +53,7 @@ public class Modeling {
 		tbtmModeling.setControl(scrolCompModel);
 		
 		selectTrainingTraces(comptbtmModeling);
-		selectTraceTypeandDatabase(comptbtmModeling);
+		selectTraceTypeAndDatabase(comptbtmModeling);
 		
 		
 		//Class []parameterTypes= new Class[1];
@@ -62,6 +63,7 @@ public class Modeling {
 		
 		validation(comptbtmModeling);
 	    
+		adjustSettings(comptbtmModeling);
 		buildModel(comptbtmModeling);
 		
 	    progConsole=new ProgressConsole(comptbtmModeling);
@@ -113,7 +115,7 @@ public class Modeling {
 	 * @param comptbtmModeling
 	 */
 	//Text txtModelingTraces;
-	public void selectTraceTypeandDatabase(Composite comptbtmModeling){
+	public void selectTraceTypeAndDatabase(Composite comptbtmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
@@ -157,14 +159,12 @@ public class Modeling {
 					txtNewDBName.setText("");
 					txtNewDBName.setEnabled(true);
 					
-					
 				}
 				
 				else {
 					
 					txtNewDBName.setText("Enter");
 					txtNewDBName.setEnabled(false);
-										
 					//selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
 					
 				}
@@ -259,15 +259,40 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
+   /**
+    * Shows setting dialog for a selected algorithm
+    * @param comptbtmModeling
+    */
+	public void adjustSettings(Composite comptbtmModeling){
+		
+		Button btnSettings=new Button(comptbtmModeling,SWT.NONE);
+		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+		btnSettings.setText("Adjust Settings");
+		btnSettings.addMouseListener(new MouseAdapter() {
+		
+		@Override
+		public void mouseUp(MouseEvent e) {
+				try {
+					modelSelector.showSettingsDialog();
+				} catch (TotalADSUiException ex) {
+					msgBox.setMessage(ex.getMessage());
+					msgBox.open();
+				}
+				
+			}
+		 });
+	}
+
+	
 	/**
 	 * Method to handle model building button
 	 * @param comptbtmModeling
 	 */
-	Button btnBuildModel;
+	
 	public void buildModel(Composite comptbtmModeling){
 		
 		btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
-		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,4,1));
+		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
 		btnBuildModel.setText("Start building the model");
 		btnBuildModel.addMouseListener(new MouseAdapter() {
 		
