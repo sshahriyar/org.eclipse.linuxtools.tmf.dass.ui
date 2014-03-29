@@ -139,16 +139,26 @@ public class SlidingWindow implements IDetectionModels {
 		 if (!intialize){
 	    	  intialize=true;
 	    	  initialize(connection,database);
-	    	  // If the option name is the same and databse has no model then take the maxwin from user
+	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
-	    	  if (options!=null && options[0].equals(this.trainingOptions[0]) && sysCallSequences.size() ==0)
-	    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
-	    	  else
-	    		  warningMessage="Warning: window size was not changed because the model already exists.";
+	    	  if ( options!=null){
+	    		  
+	    		  if (sysCallSequences.size()==0)
+	    			  warningMessage="Warning: window size was not changed because the model already exists.";
+	    		  else if (options[0].equals(this.trainingOptions[0]))
+		    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
+	    		  
+	    		  //check for hamming distance
+	    		  if (options[2].equals(this.trainingOptions[2]) )
+		    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+	    		  
+	    	  }
+	    		
+	    	  
+	    		
 	    	  
 	    	  //max hamming distance can be modified, so accept it
-	    	  if (options!=null && options[2].equals(this.trainingOptions[2]) )
-	    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+	    	 
 	    	  
 	      }
 	    	  
@@ -175,9 +185,10 @@ public class SlidingWindow implements IDetectionModels {
 	    	  }
 	    		  
 	     }
-	     if (isLastTrace) 
+	     if (isLastTrace){ 
 	    	 saveinDatabase(console, database, connection);
-	    	
+	    	 intialize=false;
+	     }
 	     
 
 	}

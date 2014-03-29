@@ -69,7 +69,7 @@ public class ModelSelector {
 								 currentlySelectedTreeItem.setChecked(false);
 						 item.setChecked(true);
 						 currentlySelectedTreeItem=item;
-						 currentlySelectedModel= (IDetectionModels)currentlySelectedTreeItem.getData();
+						 currentlySelectedModel= ((IDetectionModels)currentlySelectedTreeItem.getData()).createInstance();
 				}
 					 
 						
