@@ -36,21 +36,22 @@ public class ResultsAndFeedback {
 		//Group "Feedback: Is it anomaly?"
 				Group grpAnalysisIdentify = new Group(comptbtmAnalysis, SWT.NONE);
 				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
-				grpAnalysisIdentify.setText("Results and Feedback");
+				//grpAnalysisIdentify.setText("Results and Feedback");
+				grpAnalysisIdentify.setText("Results");
 				grpAnalysisIdentify.setLayout(new GridLayout(2,false));
                 
 				/// Trace list
 				Composite compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
 				compTraceList.setLayout(new GridLayout(1,false));
-				compTraceList.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
+				compTraceList.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
 				
 				Label lblTreeTraceResult=new Label(compTraceList,SWT.NONE);
-				lblTreeTraceResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+				lblTreeTraceResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
 				lblTreeTraceResult.setText("Trace List (Select to see results)");
 				
 				treeTraceResults=new Tree(compTraceList , SWT.BORDER |  SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 				treeTraceResults.setLinesVisible(true);
-				treeTraceResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,5));
+				treeTraceResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,1,5));
 				
 				treeTraceResults.addSelectionListener(new SelectionAdapter() {
 					@Override
@@ -75,25 +76,14 @@ public class ResultsAndFeedback {
 			    results(compResAndFeedback);
 				//*** End Trace list
 				
-				//*** Group Feedback
-			    
+				//*** Group Feedback: To be included in the next version.The code is commented at the moment.
+			    /*
 				Group grpFeedback= new Group(compResAndFeedback,SWT.NONE);
 				grpFeedback.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 				grpFeedback.setLayout(new GridLayout(2,false));
 				grpFeedback.setText("Feedback");
 				
-				/*Button btnYes=new Button(grpFeedback,SWT.RADIO);
-				btnYes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true,2,1));
-				btnYes.setText("Yes");
-				
-				Button btnNo=new Button(grpFeedback,SWT.RADIO);
-				btnNo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true,2,1));
-				btnNo.setText("No");
-				
-				Button btnOtherwise=new Button(grpFeedback,SWT.RADIO);
-				btnOtherwise.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
-				btnOtherwise.setText("Otherwise");
-				*/
+			
 				Label lblFeedback= new Label(grpFeedback,SWT.NONE);
 				lblFeedback.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 				lblFeedback.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
@@ -128,7 +118,7 @@ public class ResultsAndFeedback {
 					}
 					
 				});
-				
+				*/
 			  //**** End of group Feedback
 			
 			
@@ -149,7 +139,7 @@ public class ResultsAndFeedback {
 		gridDataResult.horizontalSpan=1;
 		grpAnalysisResults.setLayoutData(gridDataResult);
 		grpAnalysisResults.setLayout(new GridLayout(2,false));
-		grpAnalysisResults.setText("Results");
+		//grpAnalysisResults.setText("");
 
 		
 		CLabel lblAnalysisCurrentAnomaly = new CLabel(grpAnalysisResults, SWT.NONE);

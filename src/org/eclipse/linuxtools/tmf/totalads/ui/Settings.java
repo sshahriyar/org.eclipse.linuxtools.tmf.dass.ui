@@ -34,9 +34,7 @@ public class Settings {
 		 dialogShel = new Shell(display, SWT.BORDER | SWT.CLOSE | SWT.APPLICATION_MODAL|SWT.V_SCROLL);
 		
 		 dialogShel.setLayout(new GridLayout(4, false));
-		// composite =new Composite(dialogShel, SWT.BORDER);
-		// composite.setLayout(new GridLayout(4,false));
-		 //composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,true,true));
+	
 		 modelOptions=options;
 		 Integer widgetsCount=options.length/2;
 		 lblOption=new Label[widgetsCount];
@@ -67,7 +65,7 @@ public class Settings {
 		 btnCancel=new Button(dialogShel,SWT.NONE);
 		 btnCancel.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,false,false,1,1));
 		 btnCancel.setText("   Cancel   ");
-		 dialogShel.setSize(500, 200);
+		 dialogShel.setSize(500, 150);
 		 addListeners();
 		 
 	}

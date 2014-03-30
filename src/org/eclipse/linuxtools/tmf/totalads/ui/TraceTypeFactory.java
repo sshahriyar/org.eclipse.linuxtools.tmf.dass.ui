@@ -77,11 +77,15 @@ public class TraceTypeFactory {
 	 */
 	public void registerTraceReaderWithFactory(String key, ITraceTypeReader traceReader) throws TotalADSUiException{
 		if (!key.isEmpty()){
-			ITraceTypeReader  reader=traceTypeReadersList.get(key);
-			if (reader==null)
+			// If TotalADS plugin is "repoened" in running Eclipse, then the error is thrown
+			   // which is not what I expected. The exception was only intended to notify
+			   // trace reader developer about the duplicate key with another model. The code is therefore
+			   // commented out
+			//ITraceTypeReader  reader=traceTypeReadersList.get(key);
+			//if (reader==null)
 				traceTypeReadersList.put(key, traceReader);
-			else
-				throw new TotalADSUiException("Duplicate Key!");
+			//else
+				//throw new TotalADSUiException("Duplicate Key!");
 		}
 		else 
 			 throw new TotalADSUiException("Key is Empty!");
@@ -111,10 +115,10 @@ public class TraceTypeFactory {
 		//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 		// The following code needs to be replaced with reflection in future versions
 		CTFSysCallTraceReader.registerTraceTypeReader();
-		CTFEventsTraceReader.registerTraceTypeReader();
+		//CTFEventsTraceReader.registerTraceTypeReader();
 		//CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
 		TextLineTraceReader.registerTraceTypeReader();
-		TextSysIDtoNameTraceReader.registerTraceTypeReader();
+		//TextSysIDtoNameTraceReader.registerTraceTypeReader();
 		
 	}
 	

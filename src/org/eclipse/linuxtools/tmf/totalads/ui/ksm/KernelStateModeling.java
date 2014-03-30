@@ -45,10 +45,14 @@ public class KernelStateModeling implements IDetectionModels {
 	List<String> IPC_CALLS_LIST;
 	List<String> SECURITY_CALLS_LIST;
 	Boolean intialize=false;
-	
+	Boolean isTestStarted=false;
+	Integer validationTraceCount=0;
+    Integer validationAnaomalyCount=0;
     String TRACE_COLLECTION=Configuration.traceCollection;
     String SETTINGS_COLLECTION=Configuration.settingsCollection;
-    
+    /*
+     * Class to store trace states
+     */
     private class TraceStates{
 	    Double FS=0.0;
 	    Double MM=0.0;
@@ -136,14 +140,17 @@ public class KernelStateModeling implements IDetectionModels {
 	    	 this.intializeStates();
 	    	  
 	    }
+    	if (isLastTrace)
+			intialize=false;
 			
     	TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
+		// if everything is fine up till now then carry on and insert it into the database
 		connection.insert(states, database,TRACE_COLLECTION);
 		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
+		
 	}
-     Integer validationTraceCount=0;
-     Integer validationAnaomalyCount=0;
+
 	@Override
 	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUiException, Exception {
 	  
@@ -170,7 +177,6 @@ public class KernelStateModeling implements IDetectionModels {
 			  	console.printTextLn("Database updated with final alpha: "+alpha);
 				Double anomalyPercentage= (validationAnaomalyCount.doubleValue()/validationTraceCount)*100;
 				  
-				  
 				console.printTextLn("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
 				console.printTextLn("Total traces "+validationTraceCount);
 		  }
@@ -194,7 +200,7 @@ public class KernelStateModeling implements IDetectionModels {
 			// trainingRemainingFoldEnd=totalTraces
 		    // take one record from each validationFoldStart to validationFoldEnd 
 	}
-	Boolean isTestStarted=false;
+
 	/**
 	 * Tests the model
 	 */
@@ -240,7 +246,7 @@ public class KernelStateModeling implements IDetectionModels {
 		return "";
 	}
 	/**
-	 * Retruns the name
+	 * Returns the name
 	 */
 	public String getName(){
 		return "Kernel State Modeling (KSM)";//:2.6.35-3.2.x
@@ -353,8 +359,9 @@ public class KernelStateModeling implements IDetectionModels {
 			
 		
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
-		if (totalSysCalls<=0)
-			throw new TotalADSUiException("No system calls found in the trace!");
+		// If correct system call names do not exist in the trace, throw an exception
+		if (totalSysCalls<=0 || totalSysCalls.equals(states.UN))
+			throw new TotalADSUiException("No system call names found in the trace!");
 		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);
@@ -372,8 +379,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 */
 	private void mapStates(String syscall, TraceStates states){
 		//Integer sysID=Integer.parseInt(syscallID);
-		//if (syscall==null)
-			//return;
+		
 		  if (MM_CALLS_LIST.contains(syscall))
 			  states.MM++;// keep track of the last sys_entry function id and
 		  else if (FS_CALLS_LIST.contains(syscall))

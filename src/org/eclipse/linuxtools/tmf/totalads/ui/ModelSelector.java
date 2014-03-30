@@ -51,11 +51,13 @@ public class ModelSelector {
 		
 		populateTreeItems(treeItmAnom,ModelTypeFactory.ModelTypes.Anomaly);
 		treeItmAnom.setExpanded(true);
+		
+		/*//This code will be available in the next version. It has been commented out in this version
 		TreeItem treeItmClassf = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmClassf.setText("Classification");
 		populateTreeItems(treeItmClassf,ModelTypeFactory.ModelTypes.Classification);
 		treeItmClassf.setExpanded(true);
-		
+		*/
 		
 		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -69,7 +71,7 @@ public class ModelSelector {
 								 currentlySelectedTreeItem.setChecked(false);
 						 item.setChecked(true);
 						 currentlySelectedTreeItem=item;
-						 currentlySelectedModel= ((IDetectionModels)currentlySelectedTreeItem.getData()).createInstance();
+						 currentlySelectedModel= ((IDetectionModels)currentlySelectedTreeItem.getData());
 				}
 					 
 						
@@ -78,9 +80,7 @@ public class ModelSelector {
 			}
 		});
 		
-		
-		
-	    
+	
 		/**
 		 * End group model selection 
 		*/
@@ -154,11 +154,12 @@ public class ModelSelector {
 				Boolean isCreateDB, ProgressConsole console ) throws TotalADSUiException,Exception {
 		
 		// First, verify selections
-		Boolean isLastTrace=false;
-				
 		if (!checkItemSelection())
 			throw new TotalADSUiException("Please, first select an algorithm!");
        
+		Boolean isLastTrace=false;
+		IDetectionModels theModel=currentlySelectedModel.createInstance();
+		
 		
 		File fileList[]=getDirectoryHandler(trainDirectory);// Get a file and a db handler
 		DBMS connection=Configuration.connection;
@@ -175,9 +176,9 @@ public class ModelSelector {
 			if (database.contains("_"))
 				throw new TotalADSUiException("Databse name cannot contain underscore \"_\"");
 			else{
-				database=database.trim()+"_"+currentlySelectedModel.getAcronym()+"_"+ traceReader.getAcronym();
+				database=database.trim()+"_"+theModel.getAcronym()+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();
-				currentlySelectedModel.createDatabase(database, connection);// throws TotalADSUiException
+				theModel.createDatabase(database, connection);// throws TotalADSUiException
 			}
 		}
 		else if (!checkDBExistence(database))
@@ -195,11 +196,11 @@ public class ModelSelector {
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
-	 		currentlySelectedModel.train(trace, isLastTrace, database,connection, console, modelOptions);
+	 		theModel.train(trace, isLastTrace, database,connection, console, modelOptions);
 		
 		}
-		//Third, start Validation
-		validateModels(validationDirectory, traceReader, database, console);
+		//Third, start validation
+		validateModels(validationDirectory, traceReader,theModel, database, console);
 	}
 
 /**
@@ -207,8 +208,8 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	private void validateModels(String validationDirectory, ITraceTypeReader traceReader, String database,
-				ProgressConsole console) throws TotalADSUiException,Exception {
+	private void validateModels(String validationDirectory, ITraceTypeReader traceReader, IDetectionModels theModel,
+			String database,ProgressConsole console) throws TotalADSUiException,Exception {
 		
 	
 		
@@ -229,7 +230,7 @@ public class ModelSelector {
  		
  			console.printTextLn("Processing file "+fileList[trcCnt].getName());
  			
-	 		currentlySelectedModel.validate(trace, database, Configuration.connection, isLastTrace, console );
+	 		theModel.validate(trace, database, Configuration.connection, isLastTrace, console );
 
 		}
 		

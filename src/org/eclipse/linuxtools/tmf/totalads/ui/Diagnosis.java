@@ -60,18 +60,13 @@ public class Diagnosis {
 		selectTraceTypeAndTraces(comptbtmAnalysis);
 		currentlySelectedTrace(comptbtmAnalysis);
 		
-		
-		//Class []parameterTypes= new Class[1];
-		//parameterTypes[0]=IDetectionModels[].class;
-		//Method modelObserver=Diagnosis.class.getMethod("observeSelectedModels", parameterTypes);
-		
 		modelLoader=new ModelLoader(comptbtmAnalysis);
 		modelLoader.setTrace(tracePath);
 		modelLoader.setTraceTypeSelector(traceTypeSelector);
 
 	//	results(comptbtmAnalysis);
-		resultsAndFeedback=new ResultsAndFeedback(comptbtmAnalysis);
-		modelLoader.setResultsAndFeedback(resultsAndFeedback);
+		//resultsAndFeedback=new ResultsAndFeedback(comptbtmAnalysis);
+		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
 		
 		scrolCompAnom.setContent(comptbtmAnalysis);
 		 // Set the minimum size
@@ -111,7 +106,7 @@ public class Diagnosis {
 		txtTestTraceDir.setEnabled(true);
 		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
 		
-		traceBrowser= new TraceBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,true,false));
+		traceBrowser= new TraceBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
 		
 		txtTestTraceDir.addModifyListener(new ModifyListener() {
 			

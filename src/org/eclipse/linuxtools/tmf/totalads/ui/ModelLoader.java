@@ -49,47 +49,48 @@ public class ModelLoader {
 		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 		
 		grpAnalysisModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
-		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,5));
+		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,2,5));
 		grpAnalysisModelSelection.setLayout(new GridLayout(2,false));
-		grpAnalysisModelSelection.setText("Select a Model");
+		grpAnalysisModelSelection.setText("Evaluate a Model");
 		
-		treeAnalysisModels = new Tree(grpAnalysisModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
-		treeAnalysisModels.setLinesVisible(true);
-		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,5));
-		
-		populateTreeWithModels();
-		
-	
-		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				TreeItem item=(TreeItem)e.item;
-	     		if (currentlySelectedTreeItem!=null)
-						 currentlySelectedTreeItem.setChecked(false);
-				item.setChecked(true);
-				currentlySelectedTreeItem=item;
-				
-			}
-			
-		});
-		
-		
-	  
+					
 		Composite compModelSelection=new Composite(grpAnalysisModelSelection, SWT.NONE);
-	    compModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true));
-		compModelSelection.setLayout(new GridLayout(1,false));
-	    
-		lblProgress= new Label(compModelSelection, SWT.NONE);
-		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
-		lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
-		lblProgress.setText("Prossing....");
-		lblProgress.setVisible(false);
+	    compModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true,1,2));
+		compModelSelection.setLayout(new GridLayout(3,false));
+	    	
 		
 		btnAnalysisEvaluateModels=new Button(compModelSelection, SWT.NONE);
-		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
-		btnAnalysisEvaluateModels.setText("Evaluate");
-	
+		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnAnalysisEvaluateModels.setText(" Evaluate ");
+	   
+		btnSettings=new Button(compModelSelection, SWT.NONE);
+		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnSettings.setText(" Settings ");
+		
+		btnDelete=new Button(compModelSelection, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnDelete.setText("   Delete   ");
+		
+		treeAnalysisModels = new Tree(compModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
+		treeAnalysisModels.setLinesVisible(true);
+		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,3,5));
+		
+		
+		Composite statusAndResults=new Composite(grpAnalysisModelSelection, SWT.NONE);
+		statusAndResults.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,2));
+		statusAndResults.setLayout(new GridLayout(1,false));
+		
+		lblProgress= new Label(statusAndResults, SWT.NONE);
+		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+		lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+		lblProgress.setText("Processing........");
+		lblProgress.setVisible(false);
+		
+		resultsAndFeedback=new ResultsAndFeedback(statusAndResults);
+		
+		
+		populateTreeWithModels();
+				
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -118,15 +119,19 @@ public class ModelLoader {
 				
 			}
 		});
-		
-		btnSettings=new Button(compModelSelection, SWT.NONE);
-		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
-		btnSettings.setText("Settings");
-		
-		btnDelete=new Button(compModelSelection, SWT.NONE);
-		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,true,1,1));
-		btnDelete.setText("Delete");
+		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
 			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				TreeItem item=(TreeItem)e.item;
+	     		if (currentlySelectedTreeItem!=null)
+						 currentlySelectedTreeItem.setChecked(false);
+				item.setChecked(true);
+				currentlySelectedTreeItem=item;
+				
+			}
+			
+		});	
 		btnDelete.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {

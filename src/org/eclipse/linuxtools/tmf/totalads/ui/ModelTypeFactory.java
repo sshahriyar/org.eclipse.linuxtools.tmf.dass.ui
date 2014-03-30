@@ -55,14 +55,17 @@ private void registerModelWithAcronym(String key, IDetectionModels detectionMode
 	if (key.isEmpty())
 		throw new TotalADSUiException("Empty key/acronym!");
 	else if (key.contains("_"))
-			throw new TotalADSUiException("Acronym cannot contain unerscore");
+			throw new TotalADSUiException("Acronym cannot contain underscore");
 	else {
 		
 		IDetectionModels model =acronymModels.get(key);
-		if (model==null)
+		//if (model==null) // If TotalADS plugin is repoened in Eclipse, then the error is thrown
+						   // which is not what I expected. The exception was only intended to notify
+						   // algorithm developer about the duplicate key with another model. The code is therefore
+						   // commented out
 			acronymModels.put(key, detectionModel);
-		else
-			throw new TotalADSUiException("Duplicate key/acronym!");
+		//else
+			//throw new TotalADSUiException("Duplicate key/acronym!");
 	}
 		
 		
@@ -110,7 +113,7 @@ public void initialize() throws TotalADSUiException{
 	// The following code needs to be replaced with reflection in future versions
 	KernelStateModeling.registerModel();
 	SlidingWindow.registerModel();
-	DecisionTree.registerModel();
+	//DecisionTree.registerModel();
 	
 }
 

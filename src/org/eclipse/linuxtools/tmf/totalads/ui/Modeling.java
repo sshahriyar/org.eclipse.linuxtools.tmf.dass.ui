@@ -55,11 +55,7 @@ public class Modeling {
 		selectTrainingTraces(comptbtmModeling);
 		selectTraceTypeAndDatabase(comptbtmModeling);
 		
-		
-		//Class []parameterTypes= new Class[1];
-		//parameterTypes[0]=IDetectionModels[].class;
-		//Method modelObserver=Modeling.class.getMethod("observeSelectedModels", parameterTypes);
-    	modelSelector=new ModelSelector(comptbtmModeling);
+		modelSelector=new ModelSelector(comptbtmModeling);
 		
 		validation(comptbtmModeling);
 	    
@@ -138,7 +134,7 @@ public class Modeling {
 		lblDB.setText("Select or Enter a DB Name");
 		
 		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
-		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		
 		
 		populateComboWithDatabaseList();
@@ -197,7 +193,7 @@ public class Modeling {
 	private void populateComboWithDatabaseList(){
 		
 				cmbDBNames.removeAll(); // First clear it
-				cmbDBNames.add("Enter a new  name");
+				cmbDBNames.add("Enter a new database name");
 
 				//Populate combo box
 				if (Configuration.connection.isConnected()){
