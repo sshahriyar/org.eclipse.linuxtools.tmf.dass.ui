@@ -1,7 +1,6 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.ksm;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
 
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -94,22 +93,20 @@ public class KernelStateModeling implements IDetectionModels {
      * @return String[]
      */
     @Override
-    public String[] getOptions(Boolean isTrainingTesting){
-    	if (isTrainingTesting) // if it is training
+    public String[] getTrainingOptions(){
     		return trainingOptions;
-    	else 
-    		return testingOptions;
+    	
     }
     /**
      * Set the settings of an algorithm as option name at index i and value ate index i+1
-     * @param options
      */
     @Override
-    public void setOptions(String []options, Boolean isTrainingTesting){
-    	if (isTrainingTesting) // if it is training
-    		trainingOptions=options;
-    	else 
-    		testingOptions=options;
+    public String[] getTestingOptions(String database, DBMS connection){
+    	Double alphaVal=getAlphaFromDatabase(database, connection);
+		if(alphaVal!=null)
+			 alpha=alphaVal;
+		testingOptions[1]=alpha.toString();
+		return testingOptions;
     }
     
     @Override
@@ -131,9 +128,12 @@ public class KernelStateModeling implements IDetectionModels {
 	    			  			throw new TotalADSUiException("Please, select only one option as true.");
 	    			  		}
 	    			 }
-	    			 else // if it is not true then it must be false
+	    			 else  if (options[count].equals("false")) // if it is not true then it must be false
 	    				    trainingOptions[count]="false";
-	  		    if (trueCount==0)	  
+	    			 else
+	    				 throw new TotalADSUiException("Please, type true or false only.");
+	  		      
+	    			if (trueCount==0)	  
 	    		      throw new TotalADSUiException("Please, type true for one of the options.");
 	    		  	    			  	
 	    	  }
@@ -208,7 +208,11 @@ public class KernelStateModeling implements IDetectionModels {
 	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUiException, Exception {
 		if  (!isTestStarted){
 			if (options!=null && options[1]!=null){
-				alpha= Double.parseDouble(options[1]);
+				try {
+					alpha= Double.parseDouble(options[1]);
+				}catch (Exception ex){
+					throw new TotalADSUiException("Please, enter only decimal values.");
+				}
 				saveAlphaInDatabase(alpha, database, connection);
 			}
 		else{

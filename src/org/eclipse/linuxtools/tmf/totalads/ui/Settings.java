@@ -26,7 +26,7 @@ public class Settings {
 	//Composite composite;
 	public Settings(String []options) throws TotalADSUiException {
 		
-		if (options.length%2==1)
+		if (options.length % 2==1)
 			 throw new TotalADSUiException("Options must be even: key and value pairs.");
 		
 		
@@ -97,10 +97,11 @@ public class Settings {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
-				
-				   for (int i=0; i<txtOption.length;i++)
-					   modelOptions[i+1]=txtOption[i].getText();
-				   
+				   int optionCount=-1;
+				   for (int i=0; i<txtOption.length;i++){
+					   optionCount=optionCount+2;
+					   modelOptions[optionCount]=txtOption[i].getText();
+				   }
 				
 					dialogShel.dispose();
 				}
@@ -112,7 +113,7 @@ public class Settings {
 			@Override
 			public void mouseUp(MouseEvent e) {
 					
-					modelOptions=null;
+					//modelOptions=null;
 					dialogShel.dispose();
 				}
 	 });

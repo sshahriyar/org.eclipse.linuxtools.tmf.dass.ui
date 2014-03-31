@@ -38,16 +38,15 @@ public class DecisionTree implements IDetectionModels {
      * @return String[]
      */
     @Override
-    public String[] getOptions(Boolean isTrainingTesting){
+    public String[] getTrainingOptions(){
     	return null;
     }
     /**
      * Set the settings of an algorithm as option name at index i and value ate index i+1
-     * @param options
      */
     @Override
-    public void setOptions(String []options, Boolean isTrainingTesting){
-    	
+    public String[] getTestingOptions(String database, DBMS connection){
+    	return null;
     }
 	
 	@Override

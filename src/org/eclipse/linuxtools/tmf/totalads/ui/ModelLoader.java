@@ -39,7 +39,11 @@ public class ModelLoader {
 	Label lblProgress;
 	TracingTypeSelector traceTypeSelector;
 	ResultsAndFeedback resultsAndFeedback;
-	
+	Settings settingsDialog=null;
+	String []modelOptions=null;
+	/*
+	 * Constructor
+	 */
 	public ModelLoader(Composite comptbtmAnalysis ){
 		
 
@@ -90,7 +94,39 @@ public class ModelLoader {
 		
 		
 		populateTreeWithModels();
-				
+		addEventHandlers();		
+			
+		/**
+		 * End group model selection 
+		*/
+	}
+	/**
+	 * Populates the tree with the list of models (databases) from the database
+	 */
+	private void populateTreeWithModels(){
+	///////data
+		if (Configuration.connection.isConnected() ){ // if there is a running DB instance
+			
+			List <String> modelsList= Configuration.connection.getDatabaseList();
+				treeAnalysisModels.removeAll();
+			    if (modelsList!=null || modelsList.size()>0){
+					TreeItem []items=new TreeItem[modelsList.size()];
+					for (int i=0;i <items.length;i++){
+						items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
+						items[i].setText(modelsList.get(i));
+										
+					}
+				}
+		}
+		    currentlySelectedTreeItem=null;
+	}
+	/**
+	 * Adds Event Handlers to different widgets
+	 */
+	private void addEventHandlers(){
+		/**
+		 * Event handler for the Evaluate button
+		 */
 		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -119,6 +155,9 @@ public class ModelLoader {
 				
 			}
 		});
+		/**
+		 * Event handler for the tree selection event
+		 */
 		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -132,6 +171,39 @@ public class ModelLoader {
 			}
 			
 		});	
+		/** 
+		 * Event handler for Settings button
+		 * 
+		 */
+		btnSettings.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if (!checkItemSelection()){
+					msgBox.setMessage("Please, select a model first!");
+					msgBox.open();
+				} else{
+					try {
+							ModelTypeFactory modFac= ModelTypeFactory.getInstance();
+							String database=currentlySelectedTreeItem.getText();
+							String modelKey=database.split("_")[1];
+							IDetectionModels model= modFac.getModelyByAcronym(modelKey);
+							//
+							
+							settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
+						
+							settingsDialog.showForm();
+							modelOptions=settingsDialog.getOptions();
+						
+					} catch (TotalADSUiException ex) {
+						msgBox.setMessage(ex.getMessage());
+						msgBox.open();
+					}
+				}
+			}
+		});
+		/**
+		 * Event handler for Delete button
+		 */
 		btnDelete.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -152,7 +224,7 @@ public class ModelLoader {
 				}
 			}
 		});
-		
+		//
 		Configuration.connection.addObserver(new Observer() {
 			@Override
 			public void update() {
@@ -165,32 +237,8 @@ public class ModelLoader {
 		
 			}
 		});
-		
-		/**
-		 * End group model selection 
-		*/
+	 // end of function addEventHandler
 	}
-	/**
-	 * Populates the tree with the list of models (databases) from the database
-	 */
-	private void populateTreeWithModels(){
-	///////data
-		if (Configuration.connection.isConnected() ){ // if there is a running DB instance
-			
-			List <String> modelsList= Configuration.connection.getDatabaseList();
-				treeAnalysisModels.removeAll();
-			    if (modelsList!=null || modelsList.size()>0){
-					TreeItem []items=new TreeItem[modelsList.size()];
-					for (int i=0;i <items.length;i++){
-						items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
-						items[i].setText(modelsList.get(i));
-										
-					}
-				}
-		}
-		    currentlySelectedTreeItem=null;
-	}
-
 	/**
 	* Checks selection of a model in the tree
 	*/
@@ -336,7 +384,7 @@ public class ModelLoader {
 					 
 					ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 			 					
-			 		final IDetectionModels.Results results= model.test(trace, database, connection, null);
+			 		final IDetectionModels.Results results= model.test(trace, database, connection, modelOptions);
 			 		final String traceName=fileList[trcCnt].getName();
 			 		
 			 		Display.getDefault().syncExec(new Runnable() {

@@ -52,15 +52,19 @@ public class TotalADS  {
 				    msg.setMessage(error);
 				    msg.open();
 			}	    
-		  	
-		    ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
+		  
+			// This code deinitializes the  Factory instance. It was necessary because
+			// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
+			// deinitialized on previous close of the plugin. 
+			ModelTypeFactory.destroyInstance();
+			TraceTypeFactory.destroyInstance();
+			
+			ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
 			modFactory.initialize();
 		
 			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
 			trcTypeFactory.initialize();
-			
-			
-			
+						
 			//super(parent, style);
 			parent.setLayout(new GridLayout(2,false));
 			

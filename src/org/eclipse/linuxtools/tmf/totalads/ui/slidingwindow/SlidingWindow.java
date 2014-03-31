@@ -3,7 +3,7 @@
  */
 package org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow;
 
-import java.io.Console;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
+//import com.mongodb.util.JSON;
 
 /**
  * @author Syed Shariyar Murtaza
@@ -101,22 +101,26 @@ public class SlidingWindow implements IDetectionModels {
      * @return String[]
      */
     @Override
-    public String[] getOptions(Boolean isTrainingTesting){
-    	if (isTrainingTesting)// when it is true return training options
+    public String[] getTrainingOptions(){
     		return trainingOptions;
-    	else
-    		return testingOptions;
+    	
     }
     /**
      * Set the settings of an algorithm as option name at index i and value ate index i+1
-     * @param options
      */
     @Override
-    public void setOptions(String []options, Boolean isTrainingTesting){
-    	if (isTrainingTesting)
-    		this.trainingOptions=options;
-    	else
-    		this.testingOptions=options;
+    public String[] getTestingOptions(String database, DBMS connection){
+    	DBCursor cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
+		if (cursor !=null){
+			while (cursor.hasNext()){
+				DBObject dbObject=cursor.next();
+				//maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
+				maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
+			}
+			cursor.close();
+		}
+    	testingOptions[1]=maxHamDis.toString(); 		
+    	return testingOptions;
     	
     	
     }
@@ -142,34 +146,31 @@ public class SlidingWindow implements IDetectionModels {
 	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
+	    		  try{
+		    		  if (sysCallSequences.size()!=0)
+		    			  warningMessage="Warning: window size was not changed because the model already exists.";
+		    		  else if (options[0].equals(this.trainingOptions[0]))
+			    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
+		    		  
+		    		  //check for hamming distance
+		    		  if (options[2].equals(this.trainingOptions[2]) )
+			    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
 	    		  
-	    		  if (sysCallSequences.size()==0)
-	    			  warningMessage="Warning: window size was not changed because the model already exists.";
-	    		  else if (options[0].equals(this.trainingOptions[0]))
-		    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
-	    		  
-	    		  //check for hamming distance
-	    		  if (options[2].equals(this.trainingOptions[2]) )
-		    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
-	    		  
+	    		  }catch (Exception ex){
+	    			  throw new TotalADSUiException("Please, enter integer numbers only in options.");
+	    		  }
 	    	  }
 	    		
-	    	  
-	    		
-	    	  
-	    	  //max hamming distance can be modified, so accept it
-	    	 
-	    	  
+	    		    	  
 	      }
 	    	  
 	    	  
-		  int totalLines=0, winWidth=0;
+		  int  winWidth=0;
 	      
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	     
 	      while (trace.advance()) {
-	    	  totalLines++;
-	    	
+	    	  	    	
 	    	  newSequence.add(trace.getCurrentEvent());
 	    	 
 	    	  winWidth++;
@@ -177,7 +178,6 @@ public class SlidingWindow implements IDetectionModels {
 	    	  if(winWidth >= maxWin){
 	    		  		
 	    		  winWidth--;
-	    		  //console.printNewLine();
 	    		  String[] seq=new String[maxWin];
 	    		  seq=newSequence.toArray(seq);
 	    		  searchAndAddSequence(seq);
@@ -202,7 +202,7 @@ public class SlidingWindow implements IDetectionModels {
 		 validationTraceCount++;// count the number of traces
 		 Integer totalAnomalies=0;
 		 //Integer []hammAnomalies=new Integer[maxWin];
-	     Results result= test(trace, database, connection, null);
+	     Results result= evaluateTrace(trace, database, connection);
 	   
 	     if (result.isAnomaly){
 	    	 String details=result.details.toString();
@@ -241,24 +241,40 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws Exception {
-		  int winWidth=0;
+		  
 	      
 		// Get max hamming distance if set and just once
-    	  if (options!=null && options[0].equals(this.testingOptions[0]) && !isTestStarted){
-    		  	maxHamDis=Integer.parseInt(options[1]);// on error exception will be thrown automatically
-    	        saveSettings(database, connection); // save maxHamm
-    	        isTestStarted=true;
-    	  }
-		  
-		  IDetectionModels.Results results= new IDetectionModels.Results();
-		  results.anomalyType="";
-		  results.isAnomaly=false;
+		  if (!isTestStarted){
+	    	  initialize(connection, database);
+			  if (options!=null && options[0].equals(this.testingOptions[0]) ){
+	    		  	try {
+	    		  		maxHamDis=Integer.parseInt(options[1]);
+	    		  	}catch (Exception ex){
+	    		  		throw new TotalADSUiException("Please, enter an integer value.");
+	    		  	}
+	    	        saveSettings(database, connection); // save maxHamm
+	    	   }
+			  isTestStarted=true;
+		  }
+		  return evaluateTrace(trace, database, connection);
+	}
+
+/**
+ * 
+ * @param trace
+ * @param database
+ * @param connection
+ * @return
+ */
+ private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection){
+	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=5;
+	     IDetectionModels.Results results= new IDetectionModels.Results();
+		 results.anomalyType="";
+		 results.isAnomaly=false;
 		
 		  
-		  
-		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
-	     System.out.println(maxWin);
+	      //System.out.println(maxWin);
 	      while (trace.advance()) {
 	    	 
 	    	
@@ -309,8 +325,11 @@ public class SlidingWindow implements IDetectionModels {
 	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
 	    			  results.isAnomaly=true;
 	    			  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");
+	    			  anomalousSequencesToReturn++;
 	    		  }
-	    		     		  
+	    		  if (anomalousSequencesToReturn >= maxAnomalousSequencesToReturn)
+	    		     		  break;// No need to extract all the anomalous sequences in a trace;
+	    		                     // just return and break
 	    		  newSequence.remove(0);// remove the top event and slide a window
 	    	  }
 	    		  
@@ -318,8 +337,9 @@ public class SlidingWindow implements IDetectionModels {
 	     
 	  		
 	    return results;  
-	}
 
+	}
+	
 	/**
 	 * Updates settings collection
 	 * @param datatbase

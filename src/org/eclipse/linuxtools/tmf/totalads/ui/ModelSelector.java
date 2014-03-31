@@ -27,11 +27,10 @@ public class ModelSelector {
 	IDetectionModels currentlySelectedModel;
 	Settings settingsDialog;
 	String []modelOptions;
-//	Object instanceOfListener;
+
 	public ModelSelector(Composite comptbtmAnalysis){
 		
-		//this.listener=function;
-		//this.instanceOfListener=object;
+
 		/**
 		 *  Group model selection
 		 */
@@ -50,8 +49,10 @@ public class ModelSelector {
 		treeItmAnom.setText("Anomaly Detection");
 		
 		populateTreeItems(treeItmAnom,ModelTypeFactory.ModelTypes.Anomaly);
-		treeItmAnom.setExpanded(true);
 		
+		treeItmAnom.setExpanded(true);
+		//TreeItem itm= new TreeItem(treeItmAnom, SWT.NONE);
+		//TreeItem itm2= new TreeItem(treeItmAnom, SWT.NONE);
 		/*//This code will be available in the next version. It has been commented out in this version
 		TreeItem treeItmClassf = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmClassf.setText("Classification");
@@ -140,7 +141,7 @@ public class ModelSelector {
 		if (!checkItemSelection())
 			throw new TotalADSUiException("Please, first select an algorithm!");
 		Boolean isTraining=true;// getting training options
-		settingsDialog= new Settings(currentlySelectedModel.getOptions(isTraining));
+		settingsDialog= new Settings(currentlySelectedModel.getTrainingOptions());
 		settingsDialog.showForm();
 		modelOptions=settingsDialog.getOptions();
 	}

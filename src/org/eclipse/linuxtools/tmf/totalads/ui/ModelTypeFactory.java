@@ -3,6 +3,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.eclipse.linuxtools.tmf.totalads.ui.ksm.KernelStateModeling;
 import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
@@ -11,14 +13,14 @@ import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
 public class ModelTypeFactory {
 private static ModelTypeFactory modelTypes=null;
 public static enum ModelTypes {Anomaly, Classification};
-private HashMap<ModelTypes,ArrayList<IDetectionModels>> modelList=null;
+private HashMap<ModelTypes,HashSet<String>> modelList=null;
 private HashMap<String,IDetectionModels> acronymModels=null;
 /**
  * 
  */
 
 private ModelTypeFactory( ){
-	modelList=new HashMap<ModelTypes,ArrayList<IDetectionModels>>();
+	modelList=new HashMap<ModelTypes,HashSet<String>>();
 	acronymModels=new HashMap<String, IDetectionModels>();
 }
 /**
@@ -30,17 +32,31 @@ public static ModelTypeFactory getInstance(){
 		modelTypes=new ModelTypeFactory();
 	return modelTypes;
 }
+
 /**
- * 
+ * Destroys the instance of factory if already exists
+ * This code is necessary because when Eclipse is running and TotalADS window is closed and reopened, the static
+ * object is not recreated on the creation of new Object of TotalADS
+ */
+public static void destroyInstance(){
+	if (modelTypes!=null)
+		modelTypes=null;
+}
+/**
+ * Gets the list of models by a type; e.g., classifiaction, clustering, etc.
  * @return
  */
 public IDetectionModels[] getModels(ModelTypes modTypes){
-	ArrayList<IDetectionModels> list= modelList.get(modTypes);
+	HashSet<String> list= modelList.get(modTypes);
 	if (list==null)
 		return null;
 	else{	
 		IDetectionModels []models=new IDetectionModels[list.size()];
-		models=list.toArray(models);
+		Iterator<String> it=list.iterator();
+		int count=0;
+		while (it.hasNext()){
+			models[count++]= getModelyByAcronym(it.next());
+		}
 		return models;
 	}
 }
@@ -59,13 +75,10 @@ private void registerModelWithAcronym(String key, IDetectionModels detectionMode
 	else {
 		
 		IDetectionModels model =acronymModels.get(key);
-		//if (model==null) // If TotalADS plugin is repoened in Eclipse, then the error is thrown
-						   // which is not what I expected. The exception was only intended to notify
-						   // algorithm developer about the duplicate key with another model. The code is therefore
-						   // commented out
+		if (model==null) 
 			acronymModels.put(key, detectionModel);
-		//else
-			//throw new TotalADSUiException("Duplicate key/acronym!");
+		else
+			throw new TotalADSUiException("Duplicate key/acronym!");
 	}
 		
 		
@@ -79,15 +92,15 @@ public void registerModelWithFactory(ModelTypes modelType,  IDetectionModels det
 																	throws TotalADSUiException{
 	
 	registerModelWithAcronym(detectionModel.getAcronym(), detectionModel);
-	ArrayList<IDetectionModels>  list=modelList.get(modelType);
+	HashSet<String>  list=modelList.get(modelType);
 	
 	if (list==null)
-		list=new ArrayList<IDetectionModels>();
+		list=new HashSet<String>();
 	
-	list.add(detectionModel);
+	list.add(detectionModel.getAcronym());
 	
 	modelList.put(modelType, list);
-	//modelList.put(modelType,detectionModel);
+	
 		
 }
 /**

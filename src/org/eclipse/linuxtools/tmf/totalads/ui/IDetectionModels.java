@@ -23,17 +23,17 @@ public void createDatabase(String databaseName, DBMS connection) throws Exceptio
 /**
  * Returns the settings of an algorithm as option name at index i and value at index i+1.
  * Pass true to get training options and false to get testing options
- * @param isTrainingTesting true for training and false for testing
  * @return String[]
  */
-public String[] getOptions(Boolean isTrainingTesting);
+public String[] getTrainingOptions();
 /**
  * Set the settings of an algorithm as option name at index i and value ate index i+1.
  * Pass true to get training options and false to get testing options
- * @param options
- * @param isTrainingTesting true for training and false for testing
+ * @param database TODO
+ * @param connection TODO
+ * @return TODO
  */
-public void setOptions(String []options, Boolean isTrainingTesting);
+public String[] getTestingOptions(String database, DBMS connection);
 
 /** Controller will pass a trace through this function. Some models can train on 
  * the traces as they come and some need to wait till the last trace. Controller 
