@@ -127,6 +127,8 @@ public void initialize() throws TotalADSUiException{
 	KernelStateModeling.registerModel();
 	SlidingWindow.registerModel();
 	//DecisionTree.registerModel();
+	HiddenMarkovModel.registerModel();
+	
 	
 }
 

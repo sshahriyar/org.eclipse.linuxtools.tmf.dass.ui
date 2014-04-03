@@ -95,7 +95,8 @@ public class TraceBrowser {
         //FileDialog dD = new FileDialog(parent.getShell(), SWT.OPEN|SWT.MULTI|SWT.);
         DirectoryDialog dD=new DirectoryDialog(parent.getShell());
         dD.setText("Open");
-       // dD.setFilterPath("/home");
+        if (!txtPath.getText().isEmpty())
+         dD.setFilterPath(txtPath.getText());
        // String[] filterExt = { "*.txt", "*.doc", ".rtf", "*.*" };
         //fd.setFilterExtensions(filterExt);
         //path.delete(0, path.length());

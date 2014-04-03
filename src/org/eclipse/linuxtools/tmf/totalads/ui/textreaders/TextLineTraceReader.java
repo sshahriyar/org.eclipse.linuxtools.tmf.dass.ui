@@ -18,9 +18,10 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		BufferedReader bufferedReader;
 		String event="";
 		Boolean isClose=false;
-		
+		String regEx="";
 		public TextLineIterator(BufferedReader  bReader){
 			bufferedReader=bReader;
+			regEx=""; //[| ]+([a-zA-Z0-9_:-]+)[ ]+.*"; //function call extraction pattern
 		}
 
 		@Override
@@ -28,6 +29,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		   boolean isAdvance=false;
 		   try {
 				 event=bufferedReader.readLine();
+				
 				 if (event==null){
 					  bufferedReader.close();
 					  isClose=true;
@@ -35,6 +37,8 @@ public class TextLineTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
+					 if(!regEx.isEmpty())
+						 event= event.replaceAll(regEx, "$1");
 					 event=event.trim();
 				 }
 				

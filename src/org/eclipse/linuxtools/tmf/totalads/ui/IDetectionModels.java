@@ -77,7 +77,7 @@ public Results test (ITraceIterator trace, String database, DBMS connection, Str
  */
 public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception;
 /** Returns the textual representation of the details of the results for a trace **/
-public String textResult();
+public String getSummaryOfTestResults();
 /** Returns the graphical result in the form of a chart if any for a trace **/
 public org.swtchart.Chart graphicalResults();
 /** Returns a self created instance of the model**/

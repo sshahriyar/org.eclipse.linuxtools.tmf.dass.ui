@@ -136,16 +136,12 @@ public class Modeling {
 		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
 		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		
-		
-		populateComboWithDatabaseList();
-		 
-		
 		txtNewDBName = new Text(grpTraceTypesAndDB, SWT.BORDER);
 		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		//txtNewDBName.setText("Enter");
 		txtNewDBName.setTextLimit(7);
 		//txtNewDBName.setEnabled(false);
-		
+		populateComboWithDatabaseList(null);
 		
 		cmbDBNames.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -167,20 +163,22 @@ public class Modeling {
 			}
 		});
 		
+	 // traceTypeSelector.addObserver(new Observer());
+		
 	  // Add an observer to DBMS connection to automatically update 
-	 //the list of databases when new ones are created and old ones are deleted
-	   Configuration.connection.addObserver(new Observer() {
-				@Override
-				public void update() {
-					Display.getDefault().asyncExec(new Runnable(){
-						@Override
-						public void run(){
-							populateComboWithDatabaseList();
-						}
-					});
-			
-				}
-	   });
+	  //the list of databases when new ones are created and old ones are deleted
+	   Configuration.connection.addObserver( new IObserver() {
+			@Override
+			public void update() {
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run(){
+						populateComboWithDatabaseList(null);
+					}
+				});
+		
+			}
+		 });
 		
 
 		/**
@@ -190,7 +188,7 @@ public class Modeling {
 	/**
 	 * Populates the combo box with models (database) list
 	 */
-	private void populateComboWithDatabaseList(){
+	private void populateComboWithDatabaseList(String filter){
 		
 				cmbDBNames.removeAll(); // First clear it
 				cmbDBNames.add("Enter a new database name");
@@ -200,10 +198,15 @@ public class Modeling {
 					
 					List<String> modelsList=Configuration.connection.getDatabaseList();
 					for (int j=0; j<modelsList.size();j++)
-						cmbDBNames.add(modelsList.get(j));
+					    if (filter ==null)
+						  cmbDBNames.add(modelsList.get(j));
+					    else if (modelsList.get(j).contains(filter)){
+					    	cmbDBNames.add(modelsList.get(j));
+					    }
 				
 					// Select the first item in the combo box		
 					cmbDBNames.select(0);
+					txtNewDBName.setEnabled(true);
 				}
 	}
 	
@@ -401,7 +404,8 @@ public class Modeling {
 				}
 			}
 	}
-	/*** **/
 	
-	
+
+		
 }
+

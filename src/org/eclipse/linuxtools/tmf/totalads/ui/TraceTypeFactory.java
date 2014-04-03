@@ -80,8 +80,9 @@ public class TraceTypeFactory {
 	}
 	/**
 	 * 
-	 * @param detectionModel
-	 * @param modelType
+	 * @param key Acronym of the trace reader
+	 * @param traceReader Instance of the trace reader
+	 * @throws TotalADSUiException Exception 
 	 */
 	public void registerTraceReaderWithFactory(String key, ITraceTypeReader traceReader) throws TotalADSUiException{
 		if (!key.isEmpty()){
@@ -122,7 +123,7 @@ public class TraceTypeFactory {
 		//CTFEventsTraceReader.registerTraceTypeReader();
 		//CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
 		TextLineTraceReader.registerTraceTypeReader();
-		//TextSysIDtoNameTraceReader.registerTraceTypeReader();
+		TextSysIDtoNameTraceReader.registerTraceTypeReader();
 		
 	}
 	

@@ -21,6 +21,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class ResultsAndFeedback {
 	Tree treeTraceResults;
 	Text txtAnalysisCurrentAnomaly;
+	Text txtSummary;
 	Text txtAnalysisDetails;
 	IDetectionModels.Results currentTraceResults=null;
 	
@@ -142,14 +143,21 @@ public class ResultsAndFeedback {
 		//grpAnalysisResults.setText("");
 
 		
-		CLabel lblAnalysisCurrentAnomaly = new CLabel(grpAnalysisResults, SWT.NONE);
+		Label lblAnalysisCurrentAnomaly = new Label(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
 		lblAnalysisCurrentAnomaly.setText("Anomaly (Anomaly Type)");
 		
 		txtAnalysisCurrentAnomaly= new Text(grpAnalysisResults,SWT.BORDER);
 		txtAnalysisCurrentAnomaly.setEditable(false);
 		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		//txtAnalysisCurrentAnomaly.setText("Stuxtnet-0XA");
+		
+		Label lblSummary = new Label(grpAnalysisResults, SWT.NONE);
+		lblSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
+		lblSummary.setText("Total Anomalies");
+		
+		txtSummary= new Text(grpAnalysisResults,SWT.BORDER);
+		txtSummary.setEditable(false);
+		txtSummary.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
 		
 		Label lblDetails=new Label(grpAnalysisResults,SWT.NONE);
 		lblDetails.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
@@ -196,5 +204,12 @@ public class ResultsAndFeedback {
 		treeTraceResults.removeAll();
 		txtAnalysisCurrentAnomaly.setText("");
 		txtAnalysisDetails.setText("");
+		txtSummary.setText("");
+	}
+	/**
+	 * Sets the sumamry of results
+	 */
+	public void setSummary(String summary){
+		txtSummary.setText(summary);
 	}
 }

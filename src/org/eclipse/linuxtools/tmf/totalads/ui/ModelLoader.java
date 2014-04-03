@@ -22,7 +22,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TreeAdapter;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
+//import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -153,6 +153,7 @@ public class ModelLoader {
 				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, model, database);
 				testTheModel.start();
 				
+				
 			}
 		});
 		/**
@@ -225,7 +226,7 @@ public class ModelLoader {
 			}
 		});
 		//
-		Configuration.connection.addObserver(new Observer() {
+		Configuration.connection.addObserver(new IObserver() {
 			@Override
 			public void update() {
 				Display.getDefault().asyncExec(new Runnable(){
@@ -236,6 +237,8 @@ public class ModelLoader {
 				});
 		
 			}
+
+			
 		});
 	 // end of function addEventHandler
 	}
@@ -362,6 +365,10 @@ public class ModelLoader {
 		    	   throw new TotalADSUiException("Please, first select a trace!");
 				
 				File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
+				
+				if (fileList.length >5000)
+					throw new TotalADSUiException("More than 5000 traces can not be tested simultaneously.");
+				
 				DBMS connection=Configuration.connection;
 				
 				
@@ -399,8 +406,16 @@ public class ModelLoader {
 					});
 			 		
 				}
-		
-		
+		       
+		     // print summary
+				final String summary=model.getSummaryOfTestResults();
+				Display.getDefault().syncExec(new Runnable() {
+					@Override
+					public void run() {
+						resultsAndFeedback.setSummary(summary);
+						
+					}
+				});
 		
 		}
 		

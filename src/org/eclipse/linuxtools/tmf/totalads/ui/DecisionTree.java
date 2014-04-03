@@ -50,7 +50,7 @@ public class DecisionTree implements IDetectionModels {
     }
 	
 	@Override
-	public String textResult() {
+	public String getSummaryOfTestResults() {
 		// TODO Auto-generated method stub
 		return null;
 	}

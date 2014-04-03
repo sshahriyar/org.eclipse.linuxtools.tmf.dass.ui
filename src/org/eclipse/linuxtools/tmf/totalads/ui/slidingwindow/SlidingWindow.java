@@ -57,6 +57,9 @@ public class SlidingWindow implements IDetectionModels {
 	String []testingOptions={"Max Hamming Distance","0"};
 		
     Integer validationTraceCount=0;
+    Integer validationAnomalies=0;
+    Integer testTraceCount=0;
+    Integer testAnomalies=0;
 	Boolean intialize=false;
 	Boolean isTestStarted=false;
 	/**
@@ -141,6 +144,9 @@ public class SlidingWindow implements IDetectionModels {
 	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws Exception {
 	    
 		 if (!intialize){
+			  validationTraceCount=0;
+			  validationAnomalies=0;
+			  int maxWinLimit=15;
 	    	  intialize=true;
 	    	  initialize(connection,database);
 	    	  // If the option name is the same and database has no model then take the maxwin from user
@@ -148,7 +154,7 @@ public class SlidingWindow implements IDetectionModels {
 	    	  if ( options!=null){
 	    		  try{
 		    		  if (sysCallSequences.size()!=0)
-		    			  warningMessage="Warning: window size was not changed because the model already exists.";
+		    			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
 		    		  else if (options[0].equals(this.trainingOptions[0]))
 			    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
 		    		  
@@ -159,6 +165,9 @@ public class SlidingWindow implements IDetectionModels {
 	    		  }catch (Exception ex){
 	    			  throw new TotalADSUiException("Please, enter integer numbers only in options.");
 	    		  }
+	    		  
+	    		  if (maxWin > maxWinLimit)
+	    			   throw new TotalADSUiException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
 	    	  }
 	    		
 	    		    	  
@@ -166,7 +175,6 @@ public class SlidingWindow implements IDetectionModels {
 	    	  
 	    	  
 		  int  winWidth=0;
-	      
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	     
 	      while (trace.advance()) {
@@ -200,7 +208,7 @@ public class SlidingWindow implements IDetectionModels {
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
 	  
 		 validationTraceCount++;// count the number of traces
-		 Integer totalAnomalies=0;
+		 
 		 //Integer []hammAnomalies=new Integer[maxWin];
 	     Results result= evaluateTrace(trace, database, connection);
 	   
@@ -209,7 +217,7 @@ public class SlidingWindow implements IDetectionModels {
 	    	 console.printTextLn(details);
 	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
 	    	 //hammAnomalies[hamming]++;
-	    	 totalAnomalies++;
+	    	 validationAnomalies++;
 	    	 
 	     }
 	    
@@ -220,7 +228,7 @@ public class SlidingWindow implements IDetectionModels {
 	    	//	    totalAnomalies+=hammAnomalies[hamCount];
 	    	// }
 	    	console.printTextLn("Total traces in validation folder: "+validationTraceCount); 
-	    	Double anomalyPrcentage=(totalAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
+	    	Double anomalyPrcentage=(validationAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
 	    	console.printTextLn("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
 	    	Double normalPercentage=(100-anomalyPrcentage);
 	    	console.printTextLn("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
@@ -235,7 +243,8 @@ public class SlidingWindow implements IDetectionModels {
 
 	}
 	
-
+    
+    
 	/**
 	 * Tests the model
 	 */
@@ -243,9 +252,11 @@ public class SlidingWindow implements IDetectionModels {
 	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws Exception {
 		  
 	      
-		// Get max hamming distance if set and just once
+		
 		  if (!isTestStarted){
-	    	  initialize(connection, database);
+			  testTraceCount=0;
+			  testAnomalies=0;
+	    	  initialize(connection, database); // get the trees from db
 			  if (options!=null && options[0].equals(this.testingOptions[0]) ){
 	    		  	try {
 	    		  		maxHamDis=Integer.parseInt(options[1]);
@@ -256,7 +267,9 @@ public class SlidingWindow implements IDetectionModels {
 	    	   }
 			  isTestStarted=true;
 		  }
+		  
 		  return evaluateTrace(trace, database, connection);
+		  
 	}
 
 /**
@@ -267,11 +280,12 @@ public class SlidingWindow implements IDetectionModels {
  * @return
  */
  private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection){
-	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=5;
+	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
+	     int displaySeqCount=0;
 	     IDetectionModels.Results results= new IDetectionModels.Results();
 		 results.anomalyType="";
 		 results.isAnomaly=false;
-		
+		 testTraceCount++;
 		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	      //System.out.println(maxWin);
@@ -309,7 +323,12 @@ public class SlidingWindow implements IDetectionModels {
 	    			    if (hammDis >= 1){// if we have found a tree that does not start with the 
 	    			    				 // first event of a new sequence in the above loop then we pass the sequence 
 	    			    				// from where it matched with the root of the tree in the above loop
-	    			    	tmp=new String[seq.length-counter-1];
+	    			    	if (seq.length==counter){
+	    			    		int a=0;
+	    			    		a++;
+	    			    	}
+	    			    		
+	    			    	tmp=new String[seq.length-(counter-1)];
 	    			    	for (int i=counter-1; i<tmp.length;i++)
 	    			    			tmp[i]=seq[i+1];
 	    			    	hammDis=hammDis+getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
@@ -320,21 +339,30 @@ public class SlidingWindow implements IDetectionModels {
 	    			  	  hammDis=getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
 	    			     
 	    		  }
-	    				//isNormal=searchMatchingSequenceInTree(nodes, seq);
+	    		  //isNormal=searchMatchingSequenceInTree(nodes, seq);
 	    		 // System.out.println(hammDis+ " "+maxHamDis);
 	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
 	    			  results.isAnomaly=true;
-	    			  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");
+	    			  
+	    			  if (anomalousSequencesToReturn % maxWin==0){ // add a new sequence when the previous events are gone
+	    				  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");
+	    			      displaySeqCount++;
+	    			  }
+	    				   
 	    			  anomalousSequencesToReturn++;
 	    		  }
-	    		  if (anomalousSequencesToReturn >= maxAnomalousSequencesToReturn)
-	    		     		  break;// No need to extract all the anomalous sequences in a trace;
+	    		  if (displaySeqCount >= maxAnomalousSequencesToReturn){
+	    			  results.details.append(".....\n.....").append(maxAnomalousSequencesToReturn).append(" or less"
+	    			  		+ " randomly selected anomalies").append("\n");
+	    			  break;// No need to extract all the anomalous sequences in a trace;
 	    		                     // just return and break
+	    		  }
 	    		  newSequence.remove(0);// remove the top event and slide a window
 	    	  }
 	    		  
 	     }
-	     
+	     if (results.isAnomaly)
+	    	 testAnomalies++;
 	  		
 	    return results;  
 
@@ -361,21 +389,18 @@ public class SlidingWindow implements IDetectionModels {
 			
 	
 		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, this.SETTINGS_COLLECTION);
-			
-		  
-		  
-		 
+	 
 		 
 	}
 	
-
+	
 	/* 
 	 * Text Results
 	 */
 	@Override
-	public String textResult() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getSummaryOfTestResults() {
+		Double anomalousPercentage=(testAnomalies.doubleValue()/testTraceCount.doubleValue())*100;
+		return anomalousPercentage.toString()+"%";
 	}
 
 	/* 
@@ -383,7 +408,7 @@ public class SlidingWindow implements IDetectionModels {
 	 */
 	@Override
 	public Chart graphicalResults() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

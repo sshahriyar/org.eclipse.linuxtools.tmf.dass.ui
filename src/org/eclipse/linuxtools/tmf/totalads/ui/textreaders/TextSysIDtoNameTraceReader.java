@@ -5,10 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
+import org.eclipse.linuxtools.tmf.totalads.ui.textreaders.MapSysCallIDToName;
 import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.MapSysCallIDToName;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
 

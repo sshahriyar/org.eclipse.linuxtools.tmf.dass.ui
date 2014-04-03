@@ -32,7 +32,7 @@ public class DBMS {
 	private MongoClient mongoClient;
 	private Boolean isConnected=false;
 	//private String DB;
-	ArrayList<Observer> observers=new ArrayList<Observer>();
+	ArrayList<IObserver> observers=new ArrayList<IObserver>();
 	
 	public DBMS() {
 		
@@ -391,18 +391,18 @@ public class DBMS {
 			
 			
 	}
-	//// observer methods implemented without any interface
-	public void addObserver(Observer observer){
+	//// observer without any interface of Subject/Observee 
+	public void addObserver(IObserver observer){
 		observers.add(observer);
 		
 	}
-	public void removeObserver(Observer observer){
+	public void removeObserver(IObserver observer){
 		observers.remove(observer);
 		
 	}
 	
 	public void notifyObservers(){
-		for (Observer ob: observers)
+		for (IObserver ob: observers)
 			ob.update();
 	}
 	

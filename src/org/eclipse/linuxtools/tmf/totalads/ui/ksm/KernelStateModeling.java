@@ -9,7 +9,8 @@ import java.util.Arrays;
 
 import org.eclipse.ui.testing.TestableObject;
 
-import sun.font.CreatedFontTracker;
+//import sun.font.CreatedFontTracker;
+
 
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
@@ -18,24 +19,6 @@ import com.mongodb.DBObject;
 public class KernelStateModeling implements IDetectionModels {
 	
     
-	 /*List<String> MM_CALLS_LIST=  Arrays.asList(
-			 
-			 45,87,90,91,115,125,144,150,151,152,153,163,192,218,219,257,274,275,276,294,317,504);
-	    List<String> FS_CALLS_LIST =Arrays.asList(3,4,5,6,8,9,10,12,14,15,18,19,21,22,28,30,33,36,38,39,40,41,42,52,54,55,61,62,63,82,83,84,85,86,89,92,93,94,99,100,106,107,
-	            108,111,118,131,133,134,135,140,141,142,143,145,146,148,168,169,183,187,195,196,197,198,207,212,217,220,221,226,227,228,229,230,231,
-	            232,233,234,235,236,237,239,245,246,247,248,249,254,255,256,268,269,271,289,290,291,292,293,295,296,297,298,299,300,
-	            301,302,303,304,305,306,307,308,309,313,315,316,319,320,321,322,323,325,326,327,328,329,330,331,332,333,334);
-	    List<String> KERNEL_CALLS_LIST=Arrays.asList(0,1,7,13,16,20,23,24,25,26,27,29,34,37,43,46,47,48,49,50,51,57,59,60,64,65,66,68,69,
-	            70,71,73,74,75,76,77,78,79,80,81,88,95,96,97,103,104,105,109,114,116,121,122,124,126,128,129,132,136,138,139,147,149,154,155,
-	            156,157,158,159,160,161,162,164,165,170,171,172,174,175,176,177,178,179,182,184,185,191,199,200,201,202,203,204,205,206,208,209,
-	            210,211,213,214,215,216,224,238,240,241,242,252,258,259,260,261,262,263,264,265,266,267,270,283,284,310,311,312,318,335,336);
-	    List<String> ARCH_CALLS_LIST=Arrays.asList("sys_fork","sys_execve","sys_olduname","sys_sigaction","sys_sigsuspend","sys_uname,arch",
-	    		"sys_ipc","sys_sigreturn","sys_clone","sys_rt_sigreturn","sys_sigaltstack","sys_vfork","sys_set_thread_area");
-	    List<String> IPC_CALLS_LIST=Arrays.asList(117,277,278,279,280,281,282);
-	    List<String> NET_CALLS_LIST=Arrays.asList(102,337,505,508,509,501,502,503,510);
-	    List<String> SECURITY_CALLS_LIST=Arrays.asList(286,287,288);
-	*/
-
 	List<String> ARCH_CALLS_LIST;
 	List<String> KERNEL_CALLS_LIST;
 	List<String> MM_CALLS_LIST;
@@ -46,7 +29,9 @@ public class KernelStateModeling implements IDetectionModels {
 	Boolean intialize=false;
 	Boolean isTestStarted=false;
 	Integer validationTraceCount=0;
-    Integer validationAnaomalyCount=0;
+    Integer validationAnomalyCount=0;
+    Integer testTraceCount=0;
+    Integer testAnomalyCount=0;
     String TRACE_COLLECTION=Configuration.traceCollection;
     String SETTINGS_COLLECTION=Configuration.settingsCollection;
     /*
@@ -167,7 +152,7 @@ public class KernelStateModeling implements IDetectionModels {
 		  }
 		 if (alpha>=maxAlpha)
 			 if (evaluateKSM( alpha, valTrcStates,connection,database)==true)
-				 validationAnaomalyCount++;
+				 validationAnomalyCount++;
 			 
 		  if (isLastTrace){
 			  	console.printTextLn("Updating database");
@@ -175,7 +160,7 @@ public class KernelStateModeling implements IDetectionModels {
 				saveAlphaInDatabase(alpha, database, connection); 
 				  
 			  	console.printTextLn("Database updated with final alpha: "+alpha);
-				Double anomalyPercentage= (validationAnaomalyCount.doubleValue()/validationTraceCount)*100;
+				Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
 				  
 				console.printTextLn("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
 				console.printTextLn("Total traces "+validationTraceCount);
@@ -207,7 +192,9 @@ public class KernelStateModeling implements IDetectionModels {
 	@Override
 	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUiException, Exception {
 		if  (!isTestStarted){
-			if (options!=null && options[1]!=null){
+			testTraceCount=0;
+			testAnomalyCount=0;
+			if (options!=null ){
 				try {
 					alpha= Double.parseDouble(options[1]);
 				}catch (Exception ex){
@@ -215,17 +202,21 @@ public class KernelStateModeling implements IDetectionModels {
 				}
 				saveAlphaInDatabase(alpha, database, connection);
 			}
-		else{
+			else{
 				Double alphaVal=getAlphaFromDatabase(database, connection);
 				if(alphaVal!=null)
 					 alpha=alphaVal;
-		}
+			}
 			this.intializeStates();
+			isTestStarted=true;
 		}
 		
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
 		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
+		testTraceCount++;
+		if (isAnomaly)
+			testAnomalyCount++;
 		
 		IDetectionModels.Results results= new IDetectionModels.Results();
 		results.isAnomaly=isAnomaly;
@@ -246,8 +237,11 @@ public class KernelStateModeling implements IDetectionModels {
 	/**
 	 * Returns textual result
 	 */
-	public String textResult(){
-		return "";
+	public String getSummaryOfTestResults(){
+
+		Double anomalousPercentage=(testAnomalyCount.doubleValue()/testTraceCount.doubleValue())*100;
+		return anomalousPercentage.toString()+"%";
+		
 	}
 	/**
 	 * Returns the name
@@ -350,7 +344,7 @@ public class KernelStateModeling implements IDetectionModels {
 	 * @param trace
 	 * @param states
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUiException{
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUiException, Exception{
 		
 		Double totalSysCalls=0.0;
 		
@@ -467,7 +461,7 @@ public class KernelStateModeling implements IDetectionModels {
 	    String settingsKey ="KSM_SETTINGS";
 	    Double alphaValue=null;
 		DBCursor cursor= connection.select(SETTINGS_COLL_FIELDS.KEY, "",settingsKey, database, SETTINGS_COLLECTION);
-		if (cursor.hasNext()){
+		if (cursor!=null && cursor.hasNext()){
 			DBObject dbObject=cursor.next();
 			alphaValue=Double.parseDouble(dbObject.get(SETTINGS_COLL_FIELDS.ALPHA).toString());
 		}

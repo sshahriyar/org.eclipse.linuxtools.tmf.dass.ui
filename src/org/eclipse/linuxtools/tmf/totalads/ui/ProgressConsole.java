@@ -8,7 +8,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
+//import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 
 public class ProgressConsole {
 	private CLabel lblProgressConsole;

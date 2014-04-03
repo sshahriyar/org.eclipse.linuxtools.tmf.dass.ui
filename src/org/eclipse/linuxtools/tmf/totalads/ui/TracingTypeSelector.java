@@ -1,5 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,10 +15,12 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 
 public class TracingTypeSelector {
 	Combo cmbTraceTypes;
 	TraceTypeFactory  traceFac=TraceTypeFactory.getInstance();
+	//ArrayList<IObserver> observers=new ArrayList<IObserver>();
 	/**
 	 * Creates a combo box and populates it with all the trace types registered with the TraceTypeFactory
 	 * @param parent
@@ -31,11 +35,19 @@ public class TracingTypeSelector {
 		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY);
 		
 		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		//cmbTraceTypes.add("LTTng Kernel");
-		//cmbTraceTypes.add("LTTng UST");
-		//cmbTraceTypes.add("Regular Expression");
-		//cmbTraceTypes.select(0);
+	
 		populateCombo(cmbTraceTypes);
+		
+		/*cmbTraceTypes.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String key= cmbTraceTypes.getItem(cmbTraceTypes.getSelectionIndex());
+				String traceAcronym= traceFac.getTraceReader(key).getAcronym();
+			    notifyObservers(traceAcronym);
+				
+			}
+			
+		});*/
 		
 	}
 	/**
@@ -74,7 +86,21 @@ public class TracingTypeSelector {
 				cmbTraceTypes.select(i);
 				break;
 			}
-				
+		}
+	
+  //Observer methods implemented without any Subject/Observee interface
+	/*public void addObserver(IObserver observer){
+		observers.add(observer);
 		
 	}
+	public void removeObserver(IObserver observer){
+		observers.remove(observer);
+		
+	}
+	
+	public void notifyObservers(String traceAcronym){
+		for (IObserver ob: observers)
+			ob.update(traceAcronym);
+	}
+	*/
 }
