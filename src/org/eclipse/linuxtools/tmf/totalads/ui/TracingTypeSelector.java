@@ -2,6 +2,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.ArrayList;
 
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;

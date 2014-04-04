@@ -2,6 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.util.HashMap;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,7 +24,7 @@ public class ResultsAndFeedback {
 	Text txtAnalysisCurrentAnomaly;
 	Text txtSummary;
 	Text txtAnalysisDetails;
-	IDetectionModels.Results currentTraceResults=null;
+	IDetectionAlgorithm.Results currentTraceResults=null;
 	
 	public ResultsAndFeedback(Composite parent) {
 		detailsAndFeedBack(parent);
@@ -58,7 +59,7 @@ public class ResultsAndFeedback {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						TreeItem item =(TreeItem)e.item;
-						IDetectionModels.Results results=(IDetectionModels.Results)item.getData();
+						IDetectionAlgorithm.Results results=(IDetectionAlgorithm.Results)item.getData();
 						currentTraceResults=results;
 						if (results.isAnomaly && (results.anomalyType!=null && !results.anomalyType.isEmpty()))
 							txtAnalysisCurrentAnomaly.setText(results.anomalyType);
@@ -176,8 +177,8 @@ public class ResultsAndFeedback {
 	 * @param traceName
 	 * @param results
 	 */
-	//HashMap <String, IDetectionModels.Results> resultsList=new HashMap<String, IDetectionModels.Results>();
-	public void addTraceResult(String traceName, IDetectionModels.Results results){
+	//HashMap <String, IDetectionAlgorithm.Results> resultsList=new HashMap<String, IDetectionAlgorithm.Results>();
+	public void addTraceResult(String traceName, IDetectionAlgorithm.Results results){
 		
 		if (!traceName.isEmpty() && results!=null){
 		

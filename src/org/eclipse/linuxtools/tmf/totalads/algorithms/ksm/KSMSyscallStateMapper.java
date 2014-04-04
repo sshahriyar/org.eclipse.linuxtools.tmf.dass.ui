@@ -65,7 +65,7 @@ do
  */
 
 
-package org.eclipse.linuxtools.tmf.totalads.ui.ksm;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
 
 
 

@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.core;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;

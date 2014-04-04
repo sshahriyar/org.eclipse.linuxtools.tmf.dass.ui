@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders;
+package org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders;
 
 
 import java.io.File;
@@ -14,10 +14,10 @@ import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
-import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
-import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 
 /**
  * Class to read CTF traces by using CtfTmfTrace class.

@@ -233,7 +233,7 @@ public class Diagnosis {
 	
 	}
 	/*
-		public void observeSelectedModels(IDetectionModels []models){
+		public void observeSelectedModels(IDetectionAlgorithm []models){
 		
 		//TableItem []tblItem= tblAnalysisTraceList.getSelection();
 		//String trace=tblItem[0].getText(0);

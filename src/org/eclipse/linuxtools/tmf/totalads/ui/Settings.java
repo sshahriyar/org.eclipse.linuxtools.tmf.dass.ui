@@ -2,6 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 
 
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;

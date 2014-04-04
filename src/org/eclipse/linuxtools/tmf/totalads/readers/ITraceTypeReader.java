@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.readers;
 
 import java.io.File;
 

@@ -1,5 +1,9 @@
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
@@ -8,7 +12,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.MessageBox;
-
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Shell;
 
@@ -56,10 +59,10 @@ public class TotalADS  {
 			// This code deinitializes the  Factory instance. It was necessary because
 			// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
 			// deinitialized on previous close of the plugin. 
-			ModelTypeFactory.destroyInstance();
+			AlgorithmFactory.destroyInstance();
 			TraceTypeFactory.destroyInstance();
 			
-			ModelTypeFactory modFactory= ModelTypeFactory.getInstance();
+			AlgorithmFactory modFactory= AlgorithmFactory.getInstance();
 			modFactory.initialize();
 		
 			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();

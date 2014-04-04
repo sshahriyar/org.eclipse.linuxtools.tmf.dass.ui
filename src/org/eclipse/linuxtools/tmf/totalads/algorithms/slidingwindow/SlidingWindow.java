@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
 
 import java.text.SimpleDateFormat;
@@ -12,15 +12,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.ui.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels;
-import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ModelTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm.Results;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory.ModelTypes;
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
-import org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.Results;
-import org.eclipse.linuxtools.tmf.totalads.ui.ModelTypeFactory.ModelTypes;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
@@ -35,7 +35,7 @@ import com.mongodb.DBObject;
  *         syed.shariyar@gmail.com
  * This class models a sliding window algorithm over traces of events
  */
-public class SlidingWindow implements IDetectionModels {
+public class SlidingWindow implements IDetectionAlgorithm {
 	 
 	String TRACE_COLLECTION=Configuration.traceCollection;
 	String SETTINGS_COLLECTION=Configuration.settingsCollection;
@@ -282,7 +282,7 @@ public class SlidingWindow implements IDetectionModels {
  private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection){
 	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
 	     int displaySeqCount=0;
-	     IDetectionModels.Results results= new IDetectionModels.Results();
+	     IDetectionAlgorithm.Results results= new IDetectionAlgorithm.Results();
 		 results.anomalyType="";
 		 results.isAnomaly=false;
 		 testTraceCount++;
@@ -416,7 +416,7 @@ public class SlidingWindow implements IDetectionModels {
 	 * Creates Instance
 	 */
 	@Override
-	public IDetectionModels createInstance() {
+	public IDetectionAlgorithm createInstance() {
 		
 		return new SlidingWindow();
 	}
@@ -441,9 +441,9 @@ public class SlidingWindow implements IDetectionModels {
 	 *  Self registration of the model with the modelFactory 
 	 */
 	public static void registerModel() throws TotalADSUiException{
-		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
+		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		SlidingWindow sldWin=new SlidingWindow();
-		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,  sldWin);
+		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,  sldWin);
 	}
 	
 	/**

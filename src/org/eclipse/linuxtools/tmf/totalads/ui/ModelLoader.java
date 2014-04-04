@@ -6,6 +6,15 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -139,10 +148,10 @@ public class ModelLoader {
 				
 				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
 				
-				ModelTypeFactory modFac= ModelTypeFactory.getInstance();
+				AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 				String database=currentlySelectedTreeItem.getText();
 				String modelKey=database.split("_")[1];
-				IDetectionModels model= modFac.getModelyByAcronym(modelKey);
+				IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey);
 				
 				resultsAndFeedback.clearData();
 				
@@ -184,10 +193,10 @@ public class ModelLoader {
 					msgBox.open();
 				} else{
 					try {
-							ModelTypeFactory modFac= ModelTypeFactory.getInstance();
+							AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 							String database=currentlySelectedTreeItem.getText();
 							String modelKey=database.split("_")[1];
-							IDetectionModels model= modFac.getModelyByAcronym(modelKey);
+							IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey);
 							//
 							
 							settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
@@ -285,10 +294,10 @@ public class ModelLoader {
 	private class BackgroundTesting extends Thread{
 		String testDirectory;
 		ITraceTypeReader traceReader;
-		IDetectionModels model;
+		IDetectionAlgorithm model;
 		String database;
 		
-		public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionModels model, String database){
+		public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database){
 			this.testDirectory=testDirectory;
 			this.traceReader=traceReader;
 			this.model=model;
@@ -353,7 +362,7 @@ public class ModelLoader {
 		 * @throws TotalADSUiException
 		 * @throws Exception
 		 */
-		public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionModels model, String database ) throws TotalADSUiException,Exception {
+		public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database ) throws TotalADSUiException,Exception {
 					
 					
 				// First verify selections
@@ -391,7 +400,7 @@ public class ModelLoader {
 					 
 					ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 			 					
-			 		final IDetectionModels.Results results= model.test(trace, database, connection, modelOptions);
+			 		final IDetectionAlgorithm.Results results= model.test(trace, database, connection, modelOptions);
 			 		final String traceName=fileList[trcCnt].getName();
 			 		
 			 		Display.getDefault().syncExec(new Runnable() {

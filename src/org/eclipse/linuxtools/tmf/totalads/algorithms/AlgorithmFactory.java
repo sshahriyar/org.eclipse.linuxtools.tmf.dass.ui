@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 
 import java.util.ArrayList;
@@ -6,30 +6,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.ksm.KernelStateModeling;
-import org.eclipse.linuxtools.tmf.totalads.ui.slidingwindow.SlidingWindow;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HiddenMarkovModel;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.ksm.KernelStateModeling;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
 
 
-public class ModelTypeFactory {
-private static ModelTypeFactory modelTypes=null;
+public class AlgorithmFactory {
+private static AlgorithmFactory modelTypes=null;
 public static enum ModelTypes {Anomaly, Classification};
 private HashMap<ModelTypes,HashSet<String>> modelList=null;
-private HashMap<String,IDetectionModels> acronymModels=null;
+private HashMap<String,IDetectionAlgorithm> acronymModels=null;
 /**
  * 
  */
 
-private ModelTypeFactory( ){
+private AlgorithmFactory( ){
 	modelList=new HashMap<ModelTypes,HashSet<String>>();
-	acronymModels=new HashMap<String, IDetectionModels>();
+	acronymModels=new HashMap<String, IDetectionAlgorithm>();
 }
 /**
- * Creates the instance if ModelTypeFactory
- * @return ModelTypeFactory
+ * Creates the instance if AlgorithmFactory
+ * @return AlgorithmFactory
  */
-public static ModelTypeFactory getInstance(){
+public static AlgorithmFactory getInstance(){
 	if (modelTypes==null)
-		modelTypes=new ModelTypeFactory();
+		modelTypes=new AlgorithmFactory();
 	return modelTypes;
 }
 
@@ -46,12 +48,12 @@ public static void destroyInstance(){
  * Gets the list of models by a type; e.g., classifiaction, clustering, etc.
  * @return
  */
-public IDetectionModels[] getModels(ModelTypes modTypes){
+public IDetectionAlgorithm[] getModels(ModelTypes modTypes){
 	HashSet<String> list= modelList.get(modTypes);
 	if (list==null)
 		return null;
 	else{	
-		IDetectionModels []models=new IDetectionModels[list.size()];
+		IDetectionAlgorithm []models=new IDetectionAlgorithm[list.size()];
 		Iterator<String> it=list.iterator();
 		int count=0;
 		while (it.hasNext()){
@@ -66,7 +68,7 @@ public IDetectionModels[] getModels(ModelTypes modTypes){
  * @param detectionModel
  * @throws TotalADSUiException
  */
-private void registerModelWithAcronym(String key, IDetectionModels detectionModel) throws TotalADSUiException{
+private void registerModelWithAcronym(String key, IDetectionAlgorithm detectionModel) throws TotalADSUiException{
 	
 	if (key.isEmpty())
 		throw new TotalADSUiException("Empty key/acronym!");
@@ -74,7 +76,7 @@ private void registerModelWithAcronym(String key, IDetectionModels detectionMode
 			throw new TotalADSUiException("Acronym cannot contain underscore");
 	else {
 		
-		IDetectionModels model =acronymModels.get(key);
+		IDetectionAlgorithm model =acronymModels.get(key);
 		if (model==null) 
 			acronymModels.put(key, detectionModel);
 		else
@@ -88,7 +90,7 @@ private void registerModelWithAcronym(String key, IDetectionModels detectionMode
  * @param detectionModel
  * @param modelType
  */
-public void registerModelWithFactory(ModelTypes modelType,  IDetectionModels detectionModel)
+public void registerModelWithFactory(ModelTypes modelType,  IDetectionAlgorithm detectionModel)
 																	throws TotalADSUiException{
 	
 	registerModelWithAcronym(detectionModel.getAcronym(), detectionModel);
@@ -108,8 +110,8 @@ public void registerModelWithFactory(ModelTypes modelType,  IDetectionModels det
  * @param key
  * @return
  */
-public IDetectionModels getModelyByAcronym(String key){
-	IDetectionModels model= acronymModels.get(key);
+public IDetectionAlgorithm getModelyByAcronym(String key){
+	IDetectionAlgorithm model= acronymModels.get(key);
 	if (model==null)
 		return null;
 	else
@@ -121,7 +123,7 @@ public IDetectionModels getModelyByAcronym(String key){
 public void initialize() throws TotalADSUiException{
 	
  //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
- ////java.util.Set<Class<? extends IDetectionModels>> modules = reflections.getSubTypesOf
+ ////java.util.Set<Class<? extends IDetectionAlgorithm>> modules = reflections.getSubTypesOf
 	//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 	// The following code needs to be replaced with reflection in future versions
 	KernelStateModeling.registerModel();

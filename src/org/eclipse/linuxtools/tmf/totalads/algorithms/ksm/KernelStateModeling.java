@@ -1,4 +1,10 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.ksm;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
 
 import java.math.BigDecimal;
@@ -12,11 +18,17 @@ import org.eclipse.ui.testing.TestableObject;
 //import sun.font.CreatedFontTracker;
 
 
+
+
+
+
+
+
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-public class KernelStateModeling implements IDetectionModels {
+public class KernelStateModeling implements IDetectionAlgorithm {
 	
     
 	List<String> ARCH_CALLS_LIST;
@@ -218,7 +230,7 @@ public class KernelStateModeling implements IDetectionModels {
 		if (isAnomaly)
 			testAnomalyCount++;
 		
-		IDetectionModels.Results results= new IDetectionModels.Results();
+		IDetectionAlgorithm.Results results= new IDetectionAlgorithm.Results();
 		results.isAnomaly=isAnomaly;
 		results.anomalyType=null;
 		results.details.append("FS ").append(testTrcStates.FS).append("\n");
@@ -264,16 +276,16 @@ public class KernelStateModeling implements IDetectionModels {
 		return null;
 	}
 	/** Returns an instance of KSM **/
-	public IDetectionModels createInstance() {
+	public IDetectionAlgorithm createInstance() {
 		return new KernelStateModeling();
 	}
 	
 	/** Self registration of the model with the modelFactory **/
 	
 	public static void registerModel() throws TotalADSUiException{
-		ModelTypeFactory modelFactory= ModelTypeFactory.getInstance();
+		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		KernelStateModeling ksm=new KernelStateModeling();
-		modelFactory.registerModelWithFactory( ModelTypeFactory.ModelTypes.Anomaly,ksm);
+		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,ksm);
 	}
 	/**
 	 * 

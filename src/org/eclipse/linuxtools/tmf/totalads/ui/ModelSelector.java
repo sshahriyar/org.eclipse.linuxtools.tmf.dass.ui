@@ -3,6 +3,13 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import java.io.File;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -24,7 +31,7 @@ public class ModelSelector {
 	Tree treeAnalysisModels=null;
 	MessageBox msgBox;
 	TreeItem currentlySelectedTreeItem=null;
-	IDetectionModels currentlySelectedModel;
+	IDetectionAlgorithm currentlySelectedModel;
 	Settings settingsDialog;
 	String []modelOptions;
 
@@ -48,7 +55,7 @@ public class ModelSelector {
 		TreeItem treeItmAnom = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmAnom.setText("Anomaly Detection");
 		
-		populateTreeItems(treeItmAnom,ModelTypeFactory.ModelTypes.Anomaly);
+		populateTreeItems(treeItmAnom,AlgorithmFactory.ModelTypes.Anomaly);
 		
 		treeItmAnom.setExpanded(true);
 		//TreeItem itm= new TreeItem(treeItmAnom, SWT.NONE);
@@ -56,7 +63,7 @@ public class ModelSelector {
 		/*//This code will be available in the next version. It has been commented out in this version
 		TreeItem treeItmClassf = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmClassf.setText("Classification");
-		populateTreeItems(treeItmClassf,ModelTypeFactory.ModelTypes.Classification);
+		populateTreeItems(treeItmClassf,AlgorithmFactory.ModelTypes.Classification);
 		treeItmClassf.setExpanded(true);
 		*/
 		
@@ -72,7 +79,7 @@ public class ModelSelector {
 								 currentlySelectedTreeItem.setChecked(false);
 						 item.setChecked(true);
 						 currentlySelectedTreeItem=item;
-						 currentlySelectedModel= ((IDetectionModels)currentlySelectedTreeItem.getData());
+						 currentlySelectedModel= ((IDetectionAlgorithm)currentlySelectedTreeItem.getData());
 				}
 					 
 						
@@ -90,13 +97,13 @@ public class ModelSelector {
 	/**
 	 * populates the tree with the list of models from the model factory
 	 */
-	private void populateTreeItems(TreeItem treeItem,ModelTypeFactory.ModelTypes modelType){
+	private void populateTreeItems(TreeItem treeItem,AlgorithmFactory.ModelTypes modelType){
 			///////data
-			ModelTypeFactory  modFac=ModelTypeFactory.getInstance();
+			AlgorithmFactory  modFac=AlgorithmFactory.getInstance();
 			
 		    // populating anomaly detection models		
 		    
-			IDetectionModels []models  = modFac.getModels(modelType);
+			IDetectionAlgorithm []models  = modFac.getModels(modelType);
 			
 			if (models!=null){
 				TreeItem []items=new TreeItem[models.length];
@@ -159,7 +166,7 @@ public class ModelSelector {
 			throw new TotalADSUiException("Please, first select an algorithm!");
        
 		Boolean isLastTrace=false;
-		IDetectionModels theModel=currentlySelectedModel.createInstance();
+		IDetectionAlgorithm theModel=currentlySelectedModel.createInstance();
 		
 		
 		File fileList[]=getDirectoryHandler(trainDirectory);// Get a file and a db handler
@@ -209,7 +216,7 @@ public class ModelSelector {
  * @param validationDirectory
  * @throws Exception
  */
-	private void validateModels(String validationDirectory, ITraceTypeReader traceReader, IDetectionModels theModel,
+	private void validateModels(String validationDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm theModel,
 			String database,ProgressConsole console) throws TotalADSUiException,Exception {
 		
 	

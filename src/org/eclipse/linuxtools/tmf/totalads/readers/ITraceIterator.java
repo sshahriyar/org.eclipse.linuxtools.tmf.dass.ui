@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.readers;
 /** Iterator to move through the trace and read events one by one without loading the whole trace in memory **/
 public interface ITraceIterator {
 	/** Moves Iterator to the next event, and returns true if the iterator can advance or false if the iterator cannot advance **/ 

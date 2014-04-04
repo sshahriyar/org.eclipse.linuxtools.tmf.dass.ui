@@ -1,13 +1,14 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.readers;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFEventsTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFFunctionEntryExitTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.ctfreaders.CTFSysCallTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.textreaders.TextLineTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.textreaders.TextSysIDtoNameTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFEventsTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFFunctionEntryExitTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFSysCallTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextSysIDtoNameTraceReader;
 
 
 public class TraceTypeFactory {
@@ -116,7 +117,7 @@ public class TraceTypeFactory {
 	public void initialize() throws TotalADSUiException{
 		
 	    //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
-	    //java.util.Set<Class<? extends IDetectionModels>> modules = reflections.getSubTypesOf
+	    //java.util.Set<Class<? extends IDetectionAlgorithm>> modules = reflections.getSubTypesOf
 		//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
 		// The following code needs to be replaced with reflection in future versions
 		CTFSysCallTraceReader.registerTraceTypeReader();

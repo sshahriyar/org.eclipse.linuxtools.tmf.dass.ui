@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
  * This class defines custom UI exceptions that are thrown when a user does not select the proper configurations 
  * @author Syed Shariyar Murtaza

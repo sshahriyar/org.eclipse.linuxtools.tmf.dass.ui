@@ -1,4 +1,6 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.core;
+
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 
 public abstract class Configuration {
 public static final String dbStates="states";

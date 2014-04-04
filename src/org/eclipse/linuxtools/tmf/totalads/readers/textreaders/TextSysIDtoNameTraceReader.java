@@ -1,27 +1,26 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.textreaders;
+package org.eclipse.linuxtools.tmf.totalads.readers.textreaders;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
-import org.eclipse.linuxtools.tmf.totalads.ui.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADSUiException;
-import org.eclipse.linuxtools.tmf.totalads.ui.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.MapSysCallIDToName;
 
-public class TextLineTraceReader implements ITraceTypeReader {
+public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 
 	//inner class
 	class TextLineIterator implements ITraceIterator{
 		BufferedReader bufferedReader;
 		String event="";
 		Boolean isClose=false;
-		String regEx="";
+		
 		public TextLineIterator(BufferedReader  bReader){
 			bufferedReader=bReader;
-			regEx=""; //[| ]+([a-zA-Z0-9_:-]+)[ ]+.*"; //function call extraction pattern
 		}
 
 		@Override
@@ -29,7 +28,6 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		   boolean isAdvance=false;
 		   try {
 				 event=bufferedReader.readLine();
-				
 				 if (event==null){
 					  bufferedReader.close();
 					  isClose=true;
@@ -37,9 +35,9 @@ public class TextLineTraceReader implements ITraceTypeReader {
 				 }
 				 else{
 					 isAdvance=true;
-					 if(!regEx.isEmpty())
-						 event= event.replaceAll(regEx, "$1");
-					 event=event.trim();
+					 String syscall=MapSysCallIDToName.getSysCallName(Integer.parseInt(event));
+					 event=syscall;
+					 
 				 }
 				
 			} catch (IOException e) {
@@ -73,18 +71,18 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	/**
 	 * Constructor
 	 */
-	public TextLineTraceReader() {
+	public TextSysIDtoNameTraceReader() {
 	
 	}
 	
 	@Override
 	public ITraceTypeReader createInstance(){
-		return new TextLineTraceReader();
+		return new TextSysIDtoNameTraceReader();
 	}
 	@Override
 	public String getName() {
-	
-		return "Text-line Reader";
+		// This is for lab experiments only
+		return "Text-Syscall ID to Name Reader (for lab)";
 	}
 
 	 /**
@@ -107,7 +105,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	
 	 public static void registerTraceTypeReader() throws TotalADSUiException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
-	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
+	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);
 	    }
 }

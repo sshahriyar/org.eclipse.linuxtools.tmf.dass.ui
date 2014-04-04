@@ -1,9 +1,13 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.algorithms;
+
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 
 //import org.swtchart.Chart;
 
 /** Each model should implement the functions of this interface and, in addition, a static function registerModel*/
-public interface IDetectionModels {
+public interface IDetectionAlgorithm {
 /**Inner class that returns results */
 public class Results{
 	/** Assign yes or no */
@@ -81,8 +85,8 @@ public String getSummaryOfTestResults();
 /** Returns the graphical result in the form of a chart if any for a trace **/
 public org.swtchart.Chart graphicalResults();
 /** Returns a self created instance of the model**/
-public IDetectionModels createInstance();
-// Model Register itself with the ModelTypeFactory
+public IDetectionAlgorithm createInstance();
+// Model Register itself with the AlgorithmFactory
 //Each derived class must implement the following static method
 //public  void registerModel() throws Exception;
 /** Gets the name of the model**/

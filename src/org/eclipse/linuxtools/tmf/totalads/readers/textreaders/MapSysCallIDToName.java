@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.textreaders;
+package org.eclipse.linuxtools.tmf.totalads.readers.textreaders;
 import java.util.HashMap;;
 public class MapSysCallIDToName {
 private static HashMap< Integer, String> sysCallIDToName;
