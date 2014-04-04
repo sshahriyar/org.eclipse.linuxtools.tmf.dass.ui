@@ -10,36 +10,36 @@ Instructions for Development and Testing
 	git clone git://git.eclipse.org/gitroot/linuxtools/org.eclipse.linuxtools.git
 	git checkout stable-2.2 
 
-	Follow all the instructions there. Once finished, come back to the Step 4:
+	Follow all the instructions there. Once finished, come back to the Step 3:
 
-4.  Change your directory to the folder Lttng in Linuxtools you just cloned from the above URL in Step 1 and Step 2.
+3.  Change your directory to the folder Lttng in Linuxtools you just cloned from the above URL in Step 1 and Step 2.
     After changing the directory, clone a copy of TotalADS:
     
     cd ...../org.eclipse.linuxtools/lttng
     git clone https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads.ui.git 
 
-5.  You may have to install openjdk-6 or JDK-6 if you already do not have it installed. For Ubuntu, it is simple:
+4.  You may have to install openjdk-6 or JDK-6 if you already do not have it installed. For Ubuntu, it is simple:
 	sudo apt-get install openjdk-6-jdk
 
-6.  Now import the cloned TotalADS in Eclipse as an existing project on hard disk. Right click in the Project Explorer in Eclipse
+5.  Now import the cloned TotalADS in Eclipse as an existing project on hard disk. Right click in the Project Explorer in Eclipse
 	and click import.
 
-7. If JDK 6.0 is not already in path of Eclipse, you may encounter errors. To add JDK 6.0 to the path of Eclipse do the following:
+6. If JDK 6.0 is not already in path of Eclipse, you may encounter errors. To add JDK 6.0 to the path of Eclipse do the following:
 
-	7.1. Go to Windows->Preference->Java->Installed JRES
+	6.1. Go to Windows->Preference->Java->Installed JRES
 	     Add JDK 6.0 as an additional installed JRE
 	
-    7.2. If you don't know where JDK 6.0 is on your Ubuntu system, then look at the following path:
+    6.2. If you don't know where JDK 6.0 is on your Ubuntu system, then look at the following path:
 	     /usr/lib/jvm/java-6-openjdk-amd64
 
-	7.3. Now right click on org.eclipse.linuxtools.tmf.totalads and select project properties 
+	6.3. Now right click on org.eclipse.linuxtools.tmf.totalads and select project properties 
          Select Java Build Bath
          Select Libraries
          Select JRE System Library; (the one with the error status)
          If there is no error status just select the JRE System Library
          Click Edit and see if JRE is jdk 6 or openjdk 6; otherwise, click on Alternate JRE and select Openjdk 6.0  
 
-8.  Install MongoDB
+7.  Install MongoDB
 	Follow the instructions here on how to install MongoDB based on your OS: http://docs.mongodb.org/manual/installation/
 	Simple installation instructions for a Linux system without messing with many configuration files are as follows; you
     can skip the following and follow whichever way that is easier for you to install MongoDB on your OS from the above URL in this step:
@@ -53,11 +53,11 @@ Instructions for Development and Testing
 	And append the following ":your_path"/mongodb/bin" to PATH. Replace your_path with the actual path in the system
 	restart terminal 
 	
-9. Start MongoDB. If you installed it directly on your OS from the URL in 8 then it may have already been started or will start
+8. Start MongoDB. If you installed it directly on your OS from the URL in 8 then it may have already been started or will start
    on a reboot automatically. An alternate way to start mongodb is as follows:
  	 cd mongodb
 	 type mongod --dbpath data/db/ 
 	 mongodb is running
 	 
-10. Now run TotalADS from Eclipse to use it.	 	 
+9. Now run TotalADS from Eclipse to use it.	 	 
 	 
