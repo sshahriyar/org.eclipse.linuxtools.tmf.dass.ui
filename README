@@ -10,6 +10,7 @@ Also available on Wiki: (https://github.com/sshahriyar/org.eclipse.linuxtools.tm
 
 2.  In Step 3 of the above URL, "Get the source code for org.ec.lipse.linuxtools", clone and checkout the stable branch as follows:
 	git clone git://git.eclipse.org/gitroot/linuxtools/org.eclipse.linuxtools.git
+	cd org.eclipse.linuxtools/
 	git checkout stable-2.2 
     Follow all the instructions there and then come back to the Step 3.
 
@@ -18,6 +19,8 @@ Also available on Wiki: (https://github.com/sshahriyar/org.eclipse.linuxtools.tm
     
     cd ...../org.eclipse.linuxtools/lttng
     git clone https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads.ui.git 
+    cd org.eclipse.linuxtools.tmf.totalads.ui.git/
+    git checkout develop
 
 4.  You may have to install openjdk-6 or JDK-6 if you already do not have it installed. For Ubuntu, it is simple:
 	sudo apt-get install openjdk-6-jdk
