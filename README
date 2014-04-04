@@ -1,3 +1,62 @@
-Detective is an intrusion detection software in Java and available as an eclipse  plugin.
-It can detect anomalous behaviour of software systems by using only nomral behaviour and by using both normal and historical anomalous behaviour.
-It is both an ADS and IDS for a host; i.e., a host based anomalous beahviour detector. 
+Instructions for Development and Testing
+1. First follow the instructions on this website to setup TMF on your system. While following the instructions on the 
+website you may have to install new Eclipse plugin/dependencies. You can install new dependecies in Eclispe wither through 
+"Help->Eclipse Marketplace" or "Help -> Install New Software". One of the options should work for installation of dependencies.
+Follow the first two steps on the URL and see below for the third step.
+
+The link: http://wiki.eclipse.org/Linux_Tools_Project/LTTng_Eclipse_Plug-in_Development_Environement_Setup
+
+2. In Step 3 of the above link,  "Get the source code for org.ec.lipse.linuxtools", clone and checkout the stable branch as follows:
+git clone git://git.eclipse.org/gitroot/linuxtools/org.eclipse.linuxtools.git
+git checkout stable-2.2 
+
+3. Follow all the instructions there. Once finished, come back to the following instructions:
+
+4. Change your directory to the installation folder of the Lttng in Linuxtools you just cloned from the above link and clone
+a copy of TotalADS as below:
+cd ...../org.eclipse.linuxtools/lttng
+git clone https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads.ui.git 
+
+5. You amy have to install openjdk-6 or JDK-6 if you already do not have it. For Ubuntu, the isntructions are below:
+sudo apt-get install openjdk-6-jdk
+
+6. Now import the cloned TotalADS in Eclipse as an existing project on hard disk. Right clik in the Project Exlporer in Eclipse
+and clik import.
+
+7. If JDK 6.0 is not already in path of Eclipse, you may encounter errors. To add JSK 6.0 to the path of Eclipse do the following:
+
+	7.1. Go to Windows->Preference->Java->Installed JRES-->
+	     Add Jdk 6.0 as an additional installed JRE
+	
+    7.2. If you don't know where jdk 6.0 is on your Ubuntu system, then look at the following path:
+	     /usr/lib/jvm/java-6-openjdk-amd64
+
+	7.3. Now right click on org.eclipse.linuxtools.tmf.totalads and select project properties 
+         Select Java Build Bath
+         Select Libraries
+         Select JRE System Library; (the one with the error status)
+         If there is no error status just select the JRE System Library
+         Click Edit and see if JRE is jdk 6 or openjdk 6; otherwise, click on Alternate JRE and select Openjdk 6.0  
+
+8. Install MongoDB
+   Follow the instructions here on how to install MongoDB based on your OS: http://docs.mongodb.org/manual/installation/
+   Simple installation instructions for a Linux system without messing with many configuration files are as follows; you
+   can skip the following and follow whichever way that is easier for you to install MongoDB on your OS from the above link:
+
+	curl -O http://downloads.mongodb.org/linux/mongodb-linux-x86_64-2.4.9.tgz
+	mkdir -p $HOME/mongodb
+	cp -R -n mongodb-linux-x86_64-2.4.9/ mongodb
+	mkdir -p data/db
+
+	Type gedit ~/.bashrc 
+	And append the following ":your_path"/mongodb/bin" to PATH. Replace your_path with the actual path in the system
+	restart terminal 
+	
+9. Start MongoDB. If you installed it directly on your OS from the link in 8 then it may have already been started or will start
+   on a reboot automatically. An alternate way to start mongodb is as follows:
+ 	 cd mongodb
+	 type mongod --dbpath data/db/ 
+	 mongodb is running
+	 
+10. Now run TotalADS from Eclipse to use it.	 	 
+	 

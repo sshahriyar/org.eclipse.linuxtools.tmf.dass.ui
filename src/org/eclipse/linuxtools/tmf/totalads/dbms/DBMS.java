@@ -1,7 +1,7 @@
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
-import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
+//import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
 
 import java.lang.reflect.Field;
 import java.net.ConnectException;
@@ -88,8 +88,11 @@ public class DBMS {
 		}
 		return message;
 	}
-	
-	Boolean isConnected(){
+	/**
+	 * Determines the connected state
+	 * @return true or false
+	 */
+	public Boolean isConnected(){
 		return isConnected;
 	}
 	/**
