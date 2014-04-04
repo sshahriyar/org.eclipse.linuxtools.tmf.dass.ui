@@ -1,6 +1,4 @@
 Instructions for Development and Testing
-Also available on Wiki: (https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads/wiki/Instructions-for-Development-and-Testing)
-
 
 1.  First follow the instructions on the following URL to setup TMF on your system. While following the instructions on the URL, you may have to install new Eclipse plugins/dependencies. 
 	You can install new dependencies in Eclipse either through "Help->Eclipse Marketplace" or "Help -> Install New Software". One of the options should work for installation of dependencies.
