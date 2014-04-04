@@ -1,6 +1,5 @@
 Instructions for Development and Testing
-1.  First follow the instructions on the following URL to setup TMF on your system. While following the instructions on the 
-	URL, you may have to install new Eclipse plugins/dependencies. 
+1.  First follow the instructions on the following URL to setup TMF on your system. While following the instructions on the URL, you may have to install new Eclipse plugins/dependencies. 
 	You can install new dependencies in Eclipse either through "Help->Eclipse Marketplace" or "Help -> Install New Software". One of the options should work for installation of dependencies.
 	Follow the first two steps on the URL and see below for the third step.
 
@@ -9,8 +8,7 @@ Instructions for Development and Testing
 2.  In Step 3 of the above URL, "Get the source code for org.ec.lipse.linuxtools", clone and checkout the stable branch as follows:
 	git clone git://git.eclipse.org/gitroot/linuxtools/org.eclipse.linuxtools.git
 	git checkout stable-2.2 
-
-	Follow all the instructions there. Once finished, come back to the Step 3:
+    Follow all the instructions there and then come back to the Step 3.
 
 3.  Change your directory to the folder Lttng in Linuxtools you just cloned from the above URL in Step 1 and Step 2.
     After changing the directory, clone a copy of TotalADS:
@@ -50,8 +48,8 @@ Instructions for Development and Testing
 	mkdir -p data/db
 
 	Type gedit ~/.bashrc 
-	And append the following ":your_path"/mongodb/bin" to PATH. Replace your_path with the actual path in the system
-	restart terminal 
+	And append the following ":your_path"/mongodb/bin" to PATH. 
+	Replace your_path with the actual path in the system and restart terminal 
 	
 8. Start MongoDB. If you installed it directly on your OS from the URL in 8 then it may have already been started or will start
    on a reboot automatically. An alternate way to start mongodb is as follows:
