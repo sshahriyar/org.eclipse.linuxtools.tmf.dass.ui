@@ -1,55 +1,72 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-
 import org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HiddenMarkovModel;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.ksm.KernelStateModeling;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 
-
-public class AlgorithmFactory {
-private static AlgorithmFactory modelTypes=null;
-public static enum ModelTypes {Anomaly, Classification};
-private HashMap<ModelTypes,HashSet<String>> modelList=null;
-private HashMap<String,IDetectionAlgorithm> acronymModels=null;
 /**
+ * This is an AlgorithmFactory class that registers all the Algorithms with itself.
+ * The class follows a factory design pattern, and it  creates a singleton object.
+ *   
+ * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  * 
  */
+public class AlgorithmFactory {
 
+//Variables used in the class that keep track of algorithms in the class
+private static AlgorithmFactory algorithmTypes=null;
+
+private HashMap<AlgorithmTypes,HashSet<String>> modelList=null;
+private HashMap<String,IDetectionAlgorithm> acronymModels=null;
+
+/**
+ * Constructor
+ */
 private AlgorithmFactory( ){
-	modelList=new HashMap<ModelTypes,HashSet<String>>();
+	modelList=new HashMap<AlgorithmTypes,HashSet<String>>();
 	acronymModels=new HashMap<String, IDetectionAlgorithm>();
 }
 /**
- * Creates the instance if AlgorithmFactory
- * @return AlgorithmFactory
+ * Creates an instance of AlgorithmFactory
+ * @return  Instance of AlgorithmFactory
  */
 public static AlgorithmFactory getInstance(){
-	if (modelTypes==null)
-		modelTypes=new AlgorithmFactory();
-	return modelTypes;
+	if (algorithmTypes==null)
+		algorithmTypes=new AlgorithmFactory();
+	return algorithmTypes;
 }
 
 /**
- * Destroys the instance of factory if already exists
- * This code is necessary because when Eclipse is running and TotalADS window is closed and reopened, the static
- * object is not recreated on the creation of new Object of TotalADS
+ * Destroys the instance of factory if already exists' This code is necessary because when Eclipse is 
+ * running and TotalADS window is closed then reopened again, the static
+ * object is not recreated on the creation of new object of TotalADS. We need to destroy all the objects.
  */
 public static void destroyInstance(){
-	if (modelTypes!=null)
-		modelTypes=null;
+	if (algorithmTypes!=null)
+		algorithmTypes=null;
 }
 /**
- * Gets the list of models by a type; e.g., classifiaction, clustering, etc.
- * @return
+ * Gets the list of algorithms by a type; e.g., classification, clustering, etc.
+ * @param algorithmTypes  an enum of AlgorithmTypes
+ * @return Array of Algorithms 
  */
-public IDetectionAlgorithm[] getModels(ModelTypes modTypes){
-	HashSet<String> list= modelList.get(modTypes);
+public IDetectionAlgorithm[] getModels(AlgorithmTypes algorithmTypes){
+	HashSet<String> list= modelList.get(algorithmTypes);
 	if (list==null)
 		return null;
 	else{	
@@ -63,52 +80,52 @@ public IDetectionAlgorithm[] getModels(ModelTypes modTypes){
 	}
 }
 /**
- * 
- * @param key
- * @param detectionModel
- * @throws TotalADSUiException
+ * This function registers an algorithm by using its acronym as a key
+ * @param key Acronym of the algorithm
+ * @param detectionAlgorithm The Algorithm to register
+ * @throws TotalADSUIException 
  */
-private void registerModelWithAcronym(String key, IDetectionAlgorithm detectionModel) throws TotalADSUiException{
+private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detectionAlgorithm) throws TotalADSUIException{
 	
 	if (key.isEmpty())
-		throw new TotalADSUiException("Empty key/acronym!");
+		throw new TotalADSUIException("Empty key/acronym!");
 	else if (key.contains("_"))
-			throw new TotalADSUiException("Acronym cannot contain underscore");
+			throw new TotalADSUIException("Acronym cannot contain underscore");
 	else {
 		
 		IDetectionAlgorithm model =acronymModels.get(key);
 		if (model==null) 
-			acronymModels.put(key, detectionModel);
+			acronymModels.put(key, detectionAlgorithm);
 		else
-			throw new TotalADSUiException("Duplicate key/acronym!");
+			throw new TotalADSUIException("Duplicate key/acronym!");
 	}
 		
 		
 }
 /**
- * Registers a model with the factory
- * @param detectionModel
- * @param modelType
+ * Registers an algorithm with this factory
+ * @param detectionAlgorithm The Algorithm to register
+ * @param algorithmType An enum of {@link AlgorithmTypes}
  */
-public void registerModelWithFactory(ModelTypes modelType,  IDetectionAlgorithm detectionModel)
-																	throws TotalADSUiException{
+public void registerModelWithFactory(AlgorithmTypes algorithmType,  IDetectionAlgorithm detectionAlgorithm)
+																	throws TotalADSUIException{
 	
-	registerModelWithAcronym(detectionModel.getAcronym(), detectionModel);
-	HashSet<String>  list=modelList.get(modelType);
+	registerAlgorithmWithAcronym(detectionAlgorithm.getAcronym(), detectionAlgorithm);
+	HashSet<String>  list=modelList.get(algorithmType);
 	
 	if (list==null)
 		list=new HashSet<String>();
 	
-	list.add(detectionModel.getAcronym());
+	list.add(detectionAlgorithm.getAcronym());
 	
-	modelList.put(modelType, list);
+	modelList.put(algorithmType, list);
 	
 		
 }
 /**
  * Get a model by acronym
  * @param key
- * @return
+ * @return an instance of the algorithm
  */
 public IDetectionAlgorithm getModelyByAcronym(String key){
 	IDetectionAlgorithm model= acronymModels.get(key);
@@ -118,17 +135,19 @@ public IDetectionAlgorithm getModelyByAcronym(String key){
 		return model.createInstance();
 }
 /**
- * Get all models to register with the factory
+ * Gets all algorithms to register with the factory. Currently all the algorithms
+ * are manually intialized in this function but in future versions, this code would be
+ * replace  with reflection and  will register all algorithms derived from the 
+ * interface IDetectionAlgorithms automatically
  */
-public void initialize() throws TotalADSUiException{
+public void initialize() throws TotalADSUIException{
 	
  //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
  ////java.util.Set<Class<? extends IDetectionAlgorithm>> modules = reflections.getSubTypesOf
 	//		 							(org.eclipse.linuxtools.tmf.totalads.ui.IDetectionModels.class);
-	// The following code needs to be replaced with reflection in future versions
+
 	KernelStateModeling.registerModel();
 	SlidingWindow.registerModel();
-	//DecisionTree.registerModel();
 	HiddenMarkovModel.registerModel();
 	
 	

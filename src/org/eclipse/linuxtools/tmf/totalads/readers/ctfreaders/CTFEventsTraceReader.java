@@ -14,7 +14,7 @@ import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
 import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -95,7 +95,7 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
     * @throws Exception
     */
     
-    public static void registerTraceTypeReader() throws TotalADSUiException{
+    public static void registerTraceTypeReader() throws TotalADSUIException{
     	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
     	CTFEventsTraceReader kernelTraceReader=new CTFEventsTraceReader();
     	trcTypFactory.registerTraceReaderWithFactory(kernelTraceReader.getName(), kernelTraceReader);

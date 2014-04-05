@@ -1,87 +1,103 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
-
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
-
-import org.eclipse.ui.testing.TestableObject;
-
-//import sun.font.CreatedFontTracker;
-
-
-
-
-
-
-
-
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+/**
+ * This class implements Kernel State Modeling algorithm for the detection of anomalies
+ * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
+ *
+ */
 public class KernelStateModeling implements IDetectionAlgorithm {
 	
-    
-	List<String> ARCH_CALLS_LIST;
-	List<String> KERNEL_CALLS_LIST;
-	List<String> MM_CALLS_LIST;
-	List<String> NET_CALLS_LIST;
-	List<String> FS_CALLS_LIST;
-	List<String> IPC_CALLS_LIST;
-	List<String> SECURITY_CALLS_LIST;
-	Boolean intialize=false;
-	Boolean isTestStarted=false;
-	Integer validationTraceCount=0;
-    Integer validationAnomalyCount=0;
-    Integer testTraceCount=0;
-    Integer testAnomalyCount=0;
-    String TRACE_COLLECTION=Configuration.traceCollection;
-    String SETTINGS_COLLECTION=Configuration.settingsCollection;
+    // Variables declaration
+	private List<String> ARCH_CALLS_LIST;
+	private List<String> KERNEL_CALLS_LIST;
+	private List<String> MM_CALLS_LIST;
+	private List<String> NET_CALLS_LIST;
+	private List<String> FS_CALLS_LIST;
+	private List<String> IPC_CALLS_LIST;
+	private List<String> SECURITY_CALLS_LIST;
+	private Boolean intialize;
+	private Boolean isTestStarted;
+	private Integer validationTraceCount;
+	private Integer validationAnomalyCount;
+	private Integer testTraceCount;
+	private Integer testAnomalyCount;
+	private String TRACE_COLLECTION;
+	private String SETTINGS_COLLECTION;
+	private Double alpha;
+	private Double maxAlpha;
+	private String []trainingOptions={"Kernel:2.6.35-3.2.x","true", "Kernel:3.5-3.13","false"};
+	private String []testingOptions={"Alpha","0.0"};
+	
     /*
-     * Class to store trace states
+     * Inner class to store trace states
+     * Behaves likes a structure. There is no
+     * need of getter setters here bacuse it is a 
+     * private class and getter/setters adds unnecessary complexity
      */
     private class TraceStates{
-	    Double FS=0.0;
-	    Double MM=0.0;
-	    Double KL=0.0;
-	    Double AC=0.0;
-	    Double IPC=0.0;
-	    Double NT=0.0;
-	    Double SC=0.0;
-	    Double UN=0.0;
+	    public Double FS=0.0;
+	    public Double MM=0.0;
+	    public Double KL=0.0;
+	    public Double AC=0.0;
+	    public Double IPC=0.0;
+	    public Double NT=0.0;
+	    public Double SC=0.0;
+	    public Double UN=0.0;
     }
      
     
-    Double alpha=0.0;
-    Double maxAlpha=0.10;
-    
-	String []trainingOptions={"Kernel:2.6.35-3.2.x","true", "Kernel:3.5-3.13","false"};
-	String []testingOptions={"Alpha","0.0"};
-	
-	private static final class SETTINGS_COLL_FIELDS{
-		static final String KEY="_id";
-		static final String ALPHA="alpha";
-		static final String UPDATE_TIME="update_time";
-	}
-	
-    public KernelStateModeling(){   }
+	/**
+	 * Constructor
+	 */
+    public KernelStateModeling(){
+    	TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
+    	SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
+    	intialize=false;
+    	isTestStarted=false;
+    	validationTraceCount=0;
+        validationAnomalyCount=0;
+        testTraceCount=0;
+        testAnomalyCount=0;
+        alpha=0.0;
+        maxAlpha=0.10;
+       
+    	
+    }
    /**
     * Creates a database and collections to store modeling information
     * @param databaseName
     * @param connection
-    * @throws Exception
+    * @throws TotalADSDBMSException 
     */
     @Override
-    public void createDatabase(String databaseName, DBMS connection) throws TotalADSUiException{
+    public void createDatabase(String databaseName, DBMS connection) throws  TotalADSDBMSException{
     	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
     	connection.createDatabase(databaseName, collectionNames);
     }
@@ -105,9 +121,13 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		testingOptions[1]=alpha.toString();
 		return testingOptions;
     }
-    
+    /**
+     * Trains the model
+     * @throws IllegalAccessException 
+     * @throws TotalADSDBMSException 
+     */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUiException, Exception {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException {
     	 //initialized alpha to 0 during training
     	if (!intialize){
     		  alpha=0.0;
@@ -122,16 +142,16 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	    			  		trueCount++;
 	    			  		if (trueCount>1){
 	    			  			trainingOptions[count]="false";
-	    			  			throw new TotalADSUiException("Please, select only one option as true.");
+	    			  			throw new TotalADSUIException("Please, select only one option as true.");
 	    			  		}
 	    			 }
 	    			 else  if (options[count].equals("false")) // if it is not true then it must be false
 	    				    trainingOptions[count]="false";
 	    			 else
-	    				 throw new TotalADSUiException("Please, type true or false only.");
+	    				 throw new TotalADSUIException("Please, type true or false only.");
 	  		      
 	    			if (trueCount==0)	  
-	    		      throw new TotalADSUiException("Please, type true for one of the options.");
+	    		      throw new TotalADSUIException("Please, type true for one of the options.");
 	    		  	    			  	
 	    	  }
 	    	 this.intializeStates();
@@ -143,13 +163,24 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     	TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
 		// if everything is fine up till now then carry on and insert it into the database
-		connection.insert(states, database,TRACE_COLLECTION);
+		
+		try {
+			connection.insert(states, database,TRACE_COLLECTION);
+		} catch (IllegalAccessException ex) {
+			
+			throw new TotalADSDBMSException(ex.getMessage());
+		}catch (Exception ex){ // or any other excption from DBMS
+			throw new TotalADSDBMSException(ex.getMessage());
+		}
 		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 		
 	}
-
-	@Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUiException, Exception {
+	/**
+	 * Validates the model
+	 * @throws TotalADSDBMSException 
+	 */
+    @Override
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUIException, TotalADSDBMSException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -169,7 +200,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		  if (isLastTrace){
 			  	console.printTextLn("Updating database");
 			  	
-				saveAlphaInDatabase(alpha, database, connection); 
+				
+				saveAlphaInDatabase(alpha, database, connection);
+				
 				  
 			  	console.printTextLn("Database updated with final alpha: "+alpha);
 				Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
@@ -185,7 +218,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Cross validate the model
 	 */
 	@Override
-	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console) throws Exception{
+	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException{
 		// totalTraces=get the record count in the database
 		// patitionSize=divide it by folds
 		//repeat untill j=0  to folds and j++
@@ -202,7 +235,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Tests the model
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUiException, Exception {
+	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
@@ -210,7 +243,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				try {
 					alpha= Double.parseDouble(options[1]);
 				}catch (Exception ex){
-					throw new TotalADSUiException("Please, enter only decimal values.");
+					throw new TotalADSUIException("Please, enter only decimal values.");
 				}
 				saveAlphaInDatabase(alpha, database, connection);
 			}
@@ -230,17 +263,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		if (isAnomaly)
 			testAnomalyCount++;
 		
-		IDetectionAlgorithm.Results results= new IDetectionAlgorithm.Results();
-		results.isAnomaly=isAnomaly;
-		results.anomalyType=null;
-		results.details.append("FS ").append(testTrcStates.FS).append("\n");
-		results.details.append("KL ").append(testTrcStates.KL).append("\n");
-		results.details.append("MM ").append(testTrcStates.MM).append("\n");
-		results.details.append("AC ").append(testTrcStates.AC).append("\n");
-		results.details.append("IPC ").append(testTrcStates.IPC).append("\n");
-		results.details.append("NT ").append(testTrcStates.NT).append("\n");
-		results.details.append("SC ").append(testTrcStates.SC).append("\n");
-		results.details.append("UN ").append(testTrcStates.UN).append("\n");
+		Results results= new Results();
+		results.setAnomaly(isAnomaly);
+		//results.setAnomalyType(null);
+		results.setDetails("FS "+testTrcStates.FS+"\n");
+		results.setDetails("KL "+testTrcStates.KL+"\n");
+		results.setDetails("MM "+testTrcStates.MM+"\n");
+		results.setDetails("AC "+testTrcStates.AC+"\n");
+		results.setDetails("IPC "+testTrcStates.IPC+"\n");
+		results.setDetails("NT "+testTrcStates.NT+"\n");
+		results.setDetails("SC "+testTrcStates.SC+"\n");
+		results.setDetails("UN "+testTrcStates.UN+"\n");
 		
 		return results;
 				
@@ -282,13 +315,13 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	
 	/** Self registration of the model with the modelFactory **/
 	
-	public static void registerModel() throws TotalADSUiException{
+	public static void registerModel() throws TotalADSUIException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		KernelStateModeling ksm=new KernelStateModeling();
-		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,ksm);
+		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,ksm);
 	}
 	/**
-	 * 
+	 * Evaluates KSM
 	 * @param trace
 	 * @param alpha
 	 * @return
@@ -356,7 +389,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param trace
 	 * @param states
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUiException, Exception{
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUIException{
 		
 		Double totalSysCalls=0.0;
 		
@@ -371,7 +404,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
 		// If correct system call names do not exist in the trace, throw an exception
 		if (totalSysCalls<=0 || totalSysCalls.equals(states.UN))
-			throw new TotalADSUiException("No system call names found in the trace!");
+			throw new TotalADSUIException("No system call names found in the trace!");
 		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);
@@ -425,13 +458,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param alpha
 	 * @param database
 	 * @param connection
+	 * @throws TotalADSDBMSException 
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
 	 * @throws Exception
 	 */
-	private void saveAlphaInDatabase(Double alpha, String database, DBMS connection) throws Exception{
+	private void saveAlphaInDatabase(Double alpha, String database, DBMS connection) 
+			throws  TotalADSDBMSException {
 		 String settingsKey ="KSM_SETTINGS";
 		//Both methods work 
 		 // Method 1
-		 class ReplacementFields{
+		/* class ReplacementFields{
 			Double alpha;
 			String updateTime;
 		  }
@@ -446,25 +483,25 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		  replacementFields.updateTime= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
 		  
 		  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
-		
+		*/
 		
 		 // Method 2
-		/*  
+		  
 		  JsonObject jsonKey=new JsonObject();
 		  jsonKey.addProperty("_id",settingsKey);
 				  
 		  JsonObject jsonObjToUpdate= new JsonObject();
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.KEY, settingsKey);
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.ALPHA, alpha);
+		  jsonObjToUpdate.addProperty(SettingsCollections.KEY.toString(), settingsKey);
+		  jsonObjToUpdate.addProperty(SettingsCollections.ALPHA.toString(), alpha);
 		  String time= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.UPDATE_TIME, time);
+		  jsonObjToUpdate.addProperty(SettingsCollections.UPDATE_TIME.toString(), time);
 				
 		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, this.SETTINGS_COLLECTION);
-		  */
+		  
 	}
 	
 	/**
-	 * 
+	 * Gets alpha from the database
 	 * @param database
 	 * @param connection
 	 */
@@ -472,10 +509,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	private Double getAlphaFromDatabase(String database, DBMS connection){
 	    String settingsKey ="KSM_SETTINGS";
 	    Double alphaValue=null;
-		DBCursor cursor= connection.select(SETTINGS_COLL_FIELDS.KEY, "",settingsKey, database, SETTINGS_COLLECTION);
+		DBCursor cursor= connection.select(SettingsCollections.KEY.toString(), "",settingsKey, database, SETTINGS_COLLECTION);
 		if (cursor!=null && cursor.hasNext()){
 			DBObject dbObject=cursor.next();
-			alphaValue=Double.parseDouble(dbObject.get(SETTINGS_COLL_FIELDS.ALPHA).toString());
+			alphaValue=Double.parseDouble(dbObject.get(SettingsCollections.ALPHA.toString()).toString());
 		}
 		return alphaValue;
 	}
@@ -570,7 +607,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				 );
 				 SECURITY_CALLS_LIST=Arrays.asList("sys_keyctl", "sys_request_key", "sys_add_key"); 
 		  }	 
-		 //need to eplac with 3.5 to 3.13
+		 //need to replace with 3.5 to 3.13
 		// For kernel 3.13 Ubuntu 14.04 (currently we assume it will work for Ubuntu 13.10 and 13.04
 		  else  if (trainingOptions[3].equals("true")){  
 			     ARCH_CALLS_LIST=Arrays.asList(

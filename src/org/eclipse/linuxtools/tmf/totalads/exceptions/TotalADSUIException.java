@@ -4,23 +4,23 @@ package org.eclipse.linuxtools.tmf.totalads.exceptions;
  * @author Syed Shariyar Murtaza
  *
  */
-public class TotalADSUiException extends Exception {
+public class TotalADSUIException extends Exception {
 
-	public TotalADSUiException() {
+	public TotalADSUIException() {
 		
 	}
 
-	public TotalADSUiException(String message) {
+	public TotalADSUIException(String message) {
 		super(message);
 		
 	}
 
-	public TotalADSUiException(Throwable cause) {
+	public TotalADSUIException(Throwable cause) {
 		super(cause);
 		
 	}
 
-	public TotalADSUiException(String message, Throwable cause) {
+	public TotalADSUIException(String message, Throwable cause) {
 		super(message, cause);
 		
 	}

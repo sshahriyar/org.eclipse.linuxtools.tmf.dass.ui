@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -277,7 +277,7 @@ public class Modeling {
 		public void mouseUp(MouseEvent e) {
 				try {
 					modelSelector.showSettingsDialog();
-				} catch (TotalADSUiException ex) {
+				} catch (TotalADSUIException ex) {
 					msgBox.setMessage(ex.getMessage());
 					msgBox.open();
 				}
@@ -371,7 +371,7 @@ public class Modeling {
 						modelSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
 								
 				} 
-				catch(TotalADSUiException ex){// handle UI exceptions here
+				catch(TotalADSUIException ex){// handle UI exceptions here
 					if (ex.getMessage()==null)
 						msg="Severe error: see log.";	
 					else

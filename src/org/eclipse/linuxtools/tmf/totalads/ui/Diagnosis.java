@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class Diagnosis {
 	//Table tblAnalysisTraceList;
-	TracingTypeSelector traceTypeSelector;
+	private TracingTypeSelector traceTypeSelector;
 	Text txtTraceID;
 	Text txtTraceSource;
 	Text txtTraceCount;
@@ -64,10 +64,6 @@ public class Diagnosis {
 		modelLoader.setTrace(tracePath);
 		modelLoader.setTraceTypeSelector(traceTypeSelector);
 
-	//	results(comptbtmAnalysis);
-		//resultsAndFeedback=new ResultsAndFeedback(comptbtmAnalysis);
-		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
-		
 		scrolCompAnom.setContent(comptbtmAnalysis);
 		 // Set the minimum size
 		scrolCompAnom.setMinSize(500, 500);

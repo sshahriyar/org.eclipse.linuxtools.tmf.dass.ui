@@ -1,34 +1,51 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory.ModelTypes;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 import org.swtchart.Chart;
-
+/**
+ * This class implements a Hidden Markov Model
+ * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
+ * 
+ */
 public class HiddenMarkovModel implements IDetectionAlgorithm {
-
+	/**
+	 * Constructor
+	 */
 	public HiddenMarkovModel() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel() throws TotalADSUiException{
+	public static void registerModel() throws TotalADSUIException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		HiddenMarkovModel hmm=new HiddenMarkovModel();
-		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,  hmm);
+		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  hmm);
 	}
-	
+	/**
+	 * Creates database
+	 */
 	@Override
 	public void createDatabase(String databaseName, DBMS connection)
 			throws Exception {
-		throw new TotalADSUiException("HMM is not implemented yet");
+		throw new TotalADSUIException("HMM is not implemented yet");
 
 	}
 
@@ -47,29 +64,29 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public void train(ITraceIterator trace, Boolean isLastTrace,
 			String database, DBMS connection, ProgressConsole console,
-			String[] options) throws Exception {
-		throw new TotalADSUiException("HMM is not implemented yet");
+			String[] options) throws TotalADSUIException {
+		throw new TotalADSUIException("HMM is not implemented yet");
 
 	}
 
 	@Override
 	public void validate(ITraceIterator trace, String database,
 			DBMS connection, Boolean isLastTrace, ProgressConsole console)
-			throws Exception {
-		throw new TotalADSUiException("HMM is not implemented yet");
+			throws TotalADSUIException {
+		throw new TotalADSUIException("HMM is not implemented yet");
 
 	}
 
 	@Override
 	public Results test(ITraceIterator trace, String database, DBMS connection,
-			String[] options) throws Exception {
-		throw new TotalADSUiException("HMM is not implemented yet");
+			String[] options) throws TotalADSUIException, TotalADSDBMSException {
+		throw new TotalADSUIException("HMM is not implemented yet");
 		
 	}
 
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
-			ProgressConsole console) throws Exception {
+			ProgressConsole console, ITraceIterator trace) throws TotalADSUIException {
 		// TODO Auto-generated method stub
 
 	}
@@ -82,20 +99,20 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	@Override
 	public Chart graphicalResults() {
-		// TODO Auto-generated method stub
+	
 		return null;
 	}
 
 	@Override
 	public IDetectionAlgorithm createInstance() {
-		// TODO Auto-generated method stub
+	
 		return new HiddenMarkovModel();
 	}
 
 	@Override
 	public String getName() {
 		
-		return "Hidden Markov Model";
+		return "Hidden Markov Model (HMM)";
 	}
 
 	@Override

@@ -1,29 +1,33 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 
-//import org.swtchart.Chart;
-
-/** Each model should implement the functions of this interface and, in addition, a static function registerModel*/
+/** Each model should implement the functions of this interface and, in addition, 
+ * a static function registerModel
+ * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
+ * */
 public interface IDetectionAlgorithm {
-/**Inner class that returns results */
-public class Results{
-	/** Assign yes or no */
-	public Boolean isAnomaly; 
-	/** Assign anomaly type iff  any */ 
-	public String anomalyType;
-	/** Assign details separated by new line '\n' */
-	public StringBuilder details=new StringBuilder();
-}
+
 /**
  * Creates a database where an algorithm would store its model
- * @param databaseName
+ * @param databaseName 
  * @param connection
  * @throws Exception
  */
-public void createDatabase(String databaseName, DBMS connection) throws Exception; 
+public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException; 
 /**
  * Returns the settings of an algorithm as option name at index i and value at index i+1.
  * Pass true to get training options and false to get testing options
@@ -49,9 +53,10 @@ public String[] getTestingOptions(String database, DBMS connection);
  * @param connection
  * @param console
  * @param options TODO
- * @throws Exception
+ * @throws TotalADSUIException TODO
+ * @throws TotalADSDBMSException 
  */
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws Exception;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException;
 /**
  * Controller will pass traces for validation using this function.  
  * @param trace
@@ -59,9 +64,10 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @param connection
  * @param isLastTrace
  * @param console
- * @throws Exception
+ * @throws TotalADSUIException 
+ * @throws TotalADSDBMSException 
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception;
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException;
 /**
  * Controller will pass traces for testing using this function 
  * @param trace
@@ -69,26 +75,31 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param connection
  * @param options TODO
  * @param traceName
- * @throws Exception
+ * @throws TotalADSUIException TODO
+ * @throws TotalADSDBMSException TODO
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws Exception;
+public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException;
 /**
  * This function is used to do the cross validation on the training data in the database
+ * @param folds
  * @param database
  * @param connection
  * @param console
- * @throws Exception
+ * @param trace
+ * @throws TotalADSUIException
  */
-public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception;
-/** Returns the textual representation of the details of the results for a trace **/
+public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException;
+/** Returns the summary of the results **/
 public String getSummaryOfTestResults();
 /** Returns the graphical result in the form of a chart if any for a trace **/
 public org.swtchart.Chart graphicalResults();
 /** Returns a self created instance of the model**/
 public IDetectionAlgorithm createInstance();
-// Model Register itself with the AlgorithmFactory
+///////////////////////////////////////////////////////////////////////////////////
+//An algorithm registers itself with the AlgorithmFactory
 //Each derived class must implement the following static method
-//public  void registerModel() throws Exception;
+//public static void registerModel() throws Exception;
+///////////////////////////////////////////////////////////////////////////////////
 /** Gets the name of the model**/
 public String getName();
 

@@ -7,7 +7,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.swt.SWT;
@@ -97,7 +97,7 @@ public class ModelSelector {
 	/**
 	 * populates the tree with the list of models from the model factory
 	 */
-	private void populateTreeItems(TreeItem treeItem,AlgorithmFactory.ModelTypes modelType){
+	private void populateTreeItems(TreeItem treeItem,AlgorithmFactory.AlgorithmTypes modelType){
 			///////data
 			AlgorithmFactory  modFac=AlgorithmFactory.getInstance();
 			
@@ -142,11 +142,11 @@ public class ModelSelector {
 	}
 	/**
 	 * Shows the settings dialog box
-	 * @throws TotalADSUiException
+	 * @throws TotalADSUIException
 	 */
-	public void showSettingsDialog() throws TotalADSUiException{
+	public void showSettingsDialog() throws TotalADSUIException{
 		if (!checkItemSelection())
-			throw new TotalADSUiException("Please, first select an algorithm!");
+			throw new TotalADSUIException("Please, first select an algorithm!");
 		Boolean isTraining=true;// getting training options
 		settingsDialog= new Settings(currentlySelectedModel.getTrainingOptions());
 		settingsDialog.showForm();
@@ -159,11 +159,11 @@ public class ModelSelector {
 	 * @throws Exception
 	 */
 	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader, String database,
-				Boolean isCreateDB, ProgressConsole console ) throws TotalADSUiException,Exception {
+				Boolean isCreateDB, ProgressConsole console ) throws TotalADSUIException,Exception {
 		
 		// First, verify selections
 		if (!checkItemSelection())
-			throw new TotalADSUiException("Please, first select an algorithm!");
+			throw new TotalADSUIException("Please, first select an algorithm!");
        
 		Boolean isLastTrace=false;
 		IDetectionAlgorithm theModel=currentlySelectedModel.createInstance();
@@ -177,20 +177,20 @@ public class ModelSelector {
 			traceReader.getTraceIterator(fileList[0]);
 		}catch (Exception ex){
 			String message="Invalid trace reader and traces: "+ex.getMessage();
-			throw new TotalADSUiException(message);
+			throw new TotalADSUIException(message);
 		}
 		
 		if(isCreateDB){
 			if (database.contains("_"))
-				throw new TotalADSUiException("Databse name cannot contain underscore \"_\"");
+				throw new TotalADSUIException("Databse name cannot contain underscore \"_\"");
 			else{
 				database=database.trim()+"_"+theModel.getAcronym()+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();
-				theModel.createDatabase(database, connection);// throws TotalADSUiException
+				theModel.createDatabase(database, connection);// throws TotalADSUIException
 			}
 		}
 		else if (!checkDBExistence(database))
-			throw new TotalADSUiException("Database does not exist!");
+			throw new TotalADSUIException("Database does not exist!");
 							
 		// Second, start training
 		console.clearText();
@@ -217,7 +217,7 @@ public class ModelSelector {
  * @throws Exception
  */
 	private void validateModels(String validationDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm theModel,
-			String database,ProgressConsole console) throws TotalADSUiException,Exception {
+			String database,ProgressConsole console) throws TotalADSUIException,Exception {
 		
 	
 		

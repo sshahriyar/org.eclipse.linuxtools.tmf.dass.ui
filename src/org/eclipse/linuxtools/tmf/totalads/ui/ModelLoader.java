@@ -11,7 +11,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -204,7 +204,7 @@ public class ModelLoader {
 							settingsDialog.showForm();
 							modelOptions=settingsDialog.getOptions();
 						
-					} catch (TotalADSUiException ex) {
+					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
 					}
@@ -315,7 +315,7 @@ public class ModelLoader {
 					testTheModel(testDirectory, traceReader, model, database);
 								
 				} 
-				catch(TotalADSUiException ex){// handle UI exceptions here
+				catch(TotalADSUIException ex){// handle UI exceptions here
 					if (ex.getMessage()==null)
 						msg="Severe error: see log.";	
 					else
@@ -359,24 +359,24 @@ public class ModelLoader {
 		 * @param traceReader
 		 * @param model
 		 * @param database
-		 * @throws TotalADSUiException
+		 * @throws TotalADSUIException
 		 * @throws Exception
 		 */
-		public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database ) throws TotalADSUiException,Exception {
+		public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database ) throws TotalADSUIException,Exception {
 					
 					
 				// First verify selections
 				Boolean isLastTrace=false;
 						
 				if (!checkItemSelection())
-					throw new TotalADSUiException("Please, first select a model!");
+					throw new TotalADSUIException("Please, first select a model!");
 		       if (testDirectory.isEmpty())
-		    	   throw new TotalADSUiException("Please, first select a trace!");
+		    	   throw new TotalADSUIException("Please, first select a trace!");
 				
 				File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 				
 				if (fileList.length >5000)
-					throw new TotalADSUiException("More than 5000 traces can not be tested simultaneously.");
+					throw new TotalADSUIException("More than 5000 traces can not be tested simultaneously.");
 				
 				DBMS connection=Configuration.connection;
 				
@@ -385,7 +385,7 @@ public class ModelLoader {
 					traceReader.getTraceIterator(fileList[0]);
 				}catch (Exception ex){
 					String message="Invalid trace reader and traces: "+ex.getMessage();
-					throw new TotalADSUiException(message);
+					throw new TotalADSUIException(message);
 				}
 				
 				

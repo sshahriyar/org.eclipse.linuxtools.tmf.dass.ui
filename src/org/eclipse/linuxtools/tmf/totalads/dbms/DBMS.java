@@ -1,13 +1,25 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 //import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
+
 
 import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 
 
@@ -30,21 +42,31 @@ import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
-
-public class DBMS {
-	//private String HOST;
-	//private Integer PORT;
+/**
+ * Database Management System (DBMS) class. This calss connects with MongoDB,
+ * and performs  the manipulations required in a program with MongoDB 
+ *  
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
+public class DBMS implements ISubject {
+	
 	private MongoClient mongoClient;
 	private Boolean isConnected=false;
-	//private String DB;
-	ArrayList<IObserver> observers=new ArrayList<IObserver>();
-	
+	private ArrayList<IObserver> observers;
+	/**
+	 * Constructor
+	 */
 	public DBMS() {
-		
+		observers=new ArrayList<IObserver>();
 	}
-	
-	
-	
+	/**
+	 * Connects with MongoDB
+	 * @param host
+	 * @param port
+	 * @return
+	 * @throws UnknownHostException
+	 */
 	public String connect(String host, Integer port) throws UnknownHostException{
 		String message="";
 		mongoClient = new MongoClient( host , port );
@@ -64,7 +86,7 @@ public class DBMS {
 		return message;
 	}
 	/**
-	 * 
+	 * Connects with MongoDB
 	 * @param host
 	 * @param port
 	 * @param username
@@ -126,10 +148,10 @@ public class DBMS {
 	 * @param dataBase
 	 * @throws Exception
 	 */
-	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSUiException{
+	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
 	
 	 if (datbaseExists(dataBase))
-			throw new TotalADSUiException("Database already exists!");
+			throw new TotalADSDBMSException("Database already exists!");
 		
 		DB db=mongoClient.getDB(dataBase);
 		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
@@ -141,7 +163,7 @@ public class DBMS {
 	}
 	
 	/**
-	 * Creates an index
+	 * Creates an index on a collection (table)
 	 * @param database
 	 * @param collection
 	 * @param field
@@ -157,7 +179,7 @@ public class DBMS {
 		mongoClient.close();
 	}
 	/**
-	 * 
+	 * Deletes a database
 	 * @param database
 	 */
 	public void deleteDatabase(String database){
@@ -203,7 +225,7 @@ public class DBMS {
 	 * @param collection
 	 * @throws Exception
 	 */
-	public void insert(Object record, String database, String collection) throws Exception{
+	public void insert(Object record, String database, String collection) throws TotalADSDBMSException,IllegalAccessException,IllegalAccessException{
 		
 		WriteResult writeRes=null;
 		String exception="";
@@ -225,7 +247,7 @@ public class DBMS {
               exception+="\n error : "+cmdResult.getErrorMessage();
       	  
 	     if (!exception.isEmpty())
-		   throw new Exception(exception);
+		   throw new TotalADSDBMSException(exception);
 		
 		
 	}
@@ -251,7 +273,7 @@ public class DBMS {
 	 * @param collection
 	 */
 	public void insertOrUpdateUsingJSON(String database, JsonObject keytoSearch, 
-						JsonObject jsonObjectToUpdate, String collection) throws Exception{
+						JsonObject jsonObjectToUpdate, String collection) throws TotalADSDBMSException{
 		   DB db = mongoClient.getDB(database);
 		   DBCollection coll = db.getCollection(collection);
 		   
@@ -263,11 +285,11 @@ public class DBMS {
 			          
 		   CommandResult cmdResult = writeRes.getLastError();
 		   if( !cmdResult.ok()) 
-			         throw new Exception ("Error : "+cmdResult.getErrorMessage());
+			         throw new TotalADSDBMSException ("Error : "+cmdResult.getErrorMessage());
 		
 	}
 	/**
-	 * 
+	 * Selects Max value from a collection (table)
 	 * @param query
 	 * @param database
 	 * @return
@@ -374,7 +396,7 @@ public class DBMS {
 	 * @throws IllegalAccessException
 	 */
 	public void replaceFields(Object searchKeyAndItsValue, Object replacementFieldsAndValues,String database, String collection) 
-										throws IllegalArgumentException, IllegalAccessException, Exception{
+										throws IllegalArgumentException, IllegalAccessException, TotalADSDBMSException{
 		
 			DB db = mongoClient.getDB(database);
 			DBCollection coll=db.getCollection(collection);
@@ -395,20 +417,35 @@ public class DBMS {
 								          
 			CommandResult cmdResult = writeRes.getLastError();
 			if( !cmdResult.ok()) 
-			         throw new Exception ("Error : "+cmdResult.getErrorMessage());
+			         throw new TotalADSDBMSException ("Error : "+cmdResult.getErrorMessage());
 			
 			
 	}
-	//// observer without any interface of Subject/Observee 
+	//////////////////////////////////////////////////////////////////////////////// 
+	//Implementing Subject Interface 
+	///////////////////////////////////////////////////////////////
+	/**
+	 *  Adds an observer of type {@link IObserver}
+	 * @param observer
+	 */
+	@Override
 	public void addObserver(IObserver observer){
 		observers.add(observer);
 		
 	}
+	/**
+	 * Removes an observer of type {@link IObserver}
+	 * @param observer
+	 */
+	@Override
 	public void removeObserver(IObserver observer){
 		observers.remove(observer);
 		
 	}
-	
+	/**
+	 * Notifies all observers of type {@link IObserver}
+	 */
+	@Override
 	public void notifyObservers(){
 		for (IObserver ob: observers)
 			ob.update();

@@ -2,7 +2,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui;
 
 
 
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -25,10 +25,10 @@ public class Settings {
 	Button btnOK;
 	Button btnCancel;
 	//Composite composite;
-	public Settings(String []options) throws TotalADSUiException {
+	public Settings(String []options) throws TotalADSUIException {
 		
 		if (options.length % 2==1)
-			 throw new TotalADSUiException("Options must be even: key and value pairs.");
+			 throw new TotalADSUIException("Options must be even: key and value pairs.");
 		
 		
 		 display = Display.getDefault();

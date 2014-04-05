@@ -31,13 +31,13 @@ public class TotalADS  {
 	private Table tableClassificationPredictions;*/
 	private Modeling modeling;
 	private Diagnosis diagnosis;
-	
+	private CTabFolder tabFolderDetector;
 	//GridData gridDataFullFill=new GridData(SWT.FILL, SWT.FILL, true, true );
 	//GridData gridDataHorizontalFill=new GridData(SWT.FILL, SWT.TOP, true, false );
 	//GridData gridDataVerticalFill=new GridData(SWT.TOP, SWT.FILL, false, true );
 	
 	/**
-	 * Create the composite.
+	 * Creates the composite.
 	 * @param parent
 	 * @param style
 	 */
@@ -73,7 +73,7 @@ public class TotalADS  {
 			
 			//leftPane(parent);
 			
-			CTabFolder tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
+			tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
 			tabFolderDetector.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 			GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gridData.horizontalSpan=1;
@@ -83,7 +83,7 @@ public class TotalADS  {
 			modeling =new Modeling(tabFolderDetector);	
 		
 			
-			tabFolderDetector.setFocus();
+			
 		
 	   } catch (Exception ex) {
 			
@@ -95,6 +95,12 @@ public class TotalADS  {
 		   ex.printStackTrace();
 		}
 
+	}
+	/**
+	 * Sets focus on TotalADS
+	 */
+	public void setFocus(){
+		tabFolderDetector.setFocus();
 	}
 	/*
 	 	 
@@ -113,7 +119,7 @@ public class TotalADS  {
 	}
 */
 	/**
-	 * 
+	 * Gets notifed from the {@link TMFTotalADSView} about trace selection
 	 * @param traceBuffer
 	 * @param tracePath
 	 * @param traceTypeName

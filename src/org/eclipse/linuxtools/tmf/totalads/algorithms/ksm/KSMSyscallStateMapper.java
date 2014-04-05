@@ -1,10 +1,15 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 /**
- * Author: Syed Shariyar Murtaza
- * Email: syed.shariyar@gmail.com
- */
-/**
- * This is an independent file that is used to extract system calls and their mappings to modules (states) from the source code.
- * Follow these instructions to extract the mappings:
+ * This is an independent class that is used to extract system calls and their mappings to modules (states) from the source code.
+ * Follow these instructions in Ubuntu to extract the mappings of from kernel's source code:
  * 1. Install ctags 
  * 		> sudo apt-get install ctags
  * 2.  Get the Ubuntu (or any other Linux distribution) from the version control
@@ -66,13 +71,8 @@ do
 
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
-
-
-
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -80,20 +80,28 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-
-
+/**
+ * This is an independent class that is used to extract system calls and their mappings to modules (states) from the source code's
+ * mapping files generated using the instructions written in the comments of this class.
+ * <p>@author Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class KSMSyscallStateMapper {
-	BufferedReader buffReader;
-	HashMap<String, HashSet<String>> list= new HashMap<String, HashSet<String>>();
-	
+	private BufferedReader buffReader;
+	private HashMap<String, HashSet<String>> list;
+	/**
+	 * Constructor
+	 */
 	public KSMSyscallStateMapper()  {
 		
-		
+		list= new HashMap<String, HashSet<String>>();
 		
 	}
-	
+	/**
+	 * Extracts states and system calls
+	 * @param path
+	 * @throws IOException
+	 */
 	public void extractStatesAndCalls(String path) throws IOException{
 		int uniquecounter=0;
 		String line, prevElem="";
@@ -133,7 +141,9 @@ public class KSMSyscallStateMapper {
 		System.out.println("\n******** Unique  Counter "+uniquecounter+" "+list.size());
 	}
 	
-	
+	/**
+	 * prints states
+	 */
 	public void printStatesAndCalls(){
 		System.out.println("\n ****************Print Duplicate States for Calls************");
 		for (Map.Entry<String, HashSet<String>> values: list.entrySet()){
@@ -155,7 +165,10 @@ public class KSMSyscallStateMapper {
 		printSingleStatesAndCalls("ipc");
 		printSingleStatesAndCalls("security");
 	}
-	
+	/**
+	 * Prints all the system calls in a state
+	 * @param prevState
+	 */
 	private void printSingleStatesAndCalls(String prevState){
 		
 			System.out.print("\n"+prevState+"\n ");
@@ -177,7 +190,10 @@ public class KSMSyscallStateMapper {
 		
 	
 	}
-	
+	/**
+	 * Main to run the code
+	 * @param args
+	 */
 	public static void main (String args[]){
 		try {
 			KSMSyscallStateMapper temp=new KSMSyscallStateMapper( );

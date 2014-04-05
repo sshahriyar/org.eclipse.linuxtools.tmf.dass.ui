@@ -1,47 +1,49 @@
-/**
- * 
- */
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm.Results;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory.ModelTypes;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUiException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 import org.swtchart.Chart;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-//import com.mongodb.util.JSON;
+
 
 /**
- * @author Syed Shariyar Murtaza
- *         syed.shariyar@gmail.com
- * This class models a sliding window algorithm over traces of events
+ * This class implements the Sliding Window algorithm
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
+ * 
  */
 public class SlidingWindow implements IDetectionAlgorithm {
 	 
-	String TRACE_COLLECTION=Configuration.traceCollection;
-	String SETTINGS_COLLECTION=Configuration.settingsCollection;
-	Integer maxWin=5;
-	Integer maxHamDis=0;
-	String warningMessage="";
+	private String TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
+	private String SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
+	private Integer maxWin=5;
+	private Integer maxHamDis=0;
+	private String warningMessage="";
 	/**Fields of settings collection (table in a traditional database)
 	 */ 
 	
@@ -141,7 +143,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws Exception {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws TotalADSUIException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
@@ -163,11 +165,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
 	    		  
 	    		  }catch (Exception ex){
-	    			  throw new TotalADSUiException("Please, enter integer numbers only in options.");
+	    			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
 	    		  }
 	    		  
 	    		  if (maxWin > maxWinLimit)
-	    			   throw new TotalADSUiException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
+	    			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
 	    	  }
 	    		
 	    		    	  
@@ -205,7 +207,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Validates the model
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws Exception {
+	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException {
 	  
 		 validationTraceCount++;// count the number of traces
 		 
@@ -249,7 +251,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Tests the model
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws Exception {
+	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException {
 		  
 	      
 		
@@ -261,7 +263,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  	try {
 	    		  		maxHamDis=Integer.parseInt(options[1]);
 	    		  	}catch (Exception ex){
-	    		  		throw new TotalADSUiException("Please, enter an integer value.");
+	    		  		throw new TotalADSUIException("Please, enter an integer value.");
 	    		  	}
 	    	        saveSettings(database, connection); // save maxHamm
 	    	   }
@@ -440,7 +442,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel() throws TotalADSUiException{
+	public static void registerModel() throws TotalADSUIException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		SlidingWindow sldWin=new SlidingWindow();
 		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,  sldWin);
@@ -786,7 +788,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
 	
 	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console) throws Exception{
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException{
 		
 	}
 }
