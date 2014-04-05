@@ -16,8 +16,8 @@ Instructions for Development and Testing
     After changing the directory, clone a copy of TotalADS:
     
     cd ...../org.eclipse.linuxtools/lttng
-    git clone https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads.ui.git 
-    cd org.eclipse.linuxtools.tmf.totalads.ui.git/
+    git clone https://github.com/sshahriyar/org.eclipse.linuxtools.tmf.totalads.git 
+    cd org.eclipse.linuxtools.tmf.totalads/
     git checkout develop
 
 4.  You may have to install openjdk-6 or JDK-6 if you already do not have it installed. For Ubuntu, it is simple:
