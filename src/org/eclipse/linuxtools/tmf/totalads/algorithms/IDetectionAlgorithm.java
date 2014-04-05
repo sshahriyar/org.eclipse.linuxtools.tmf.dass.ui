@@ -11,6 +11,7 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
@@ -55,8 +56,9 @@ public String[] getTestingOptions(String database, DBMS connection);
  * @param options TODO
  * @throws TotalADSUIException TODO
  * @throws TotalADSDBMSException 
+ * @throws TotalADSReaderException 
  */
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * Controller will pass traces for validation using this function.  
  * @param trace
@@ -66,8 +68,9 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @param console
  * @throws TotalADSUIException 
  * @throws TotalADSDBMSException 
+ * @throws TotalADSReaderException 
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException;
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * Controller will pass traces for testing using this function 
  * @param trace
@@ -75,10 +78,11 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param connection
  * @param options TODO
  * @param traceName
- * @throws TotalADSUIException TODO
- * @throws TotalADSDBMSException TODO
+ * @throws TotalADSUIException 
+ * @throws TotalADSDBMSException 
+ * @throws TotalADSReaderException 
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException;
+public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function is used to do the cross validation on the training data in the database
  * @param folds
@@ -87,8 +91,9 @@ public Results test (ITraceIterator trace, String database, DBMS connection, Str
  * @param console
  * @param trace
  * @throws TotalADSUIException
+ * @throws TotalADSDBMSException TODO
  */
-public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException;
+public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException;
 /** Returns the summary of the results **/
 public String getSummaryOfTestResults();
 /** Returns the graphical result in the form of a chart if any for a trace **/

@@ -12,6 +12,7 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
@@ -44,8 +45,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void createDatabase(String databaseName, DBMS connection)
-			throws Exception {
-		throw new TotalADSUIException("HMM is not implemented yet");
+			throws TotalADSDBMSException {
+		throw new TotalADSDBMSException("HMM is not implemented yet");
 
 	}
 
@@ -86,7 +87,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
-			ProgressConsole console, ITraceIterator trace) throws TotalADSUIException {
+			ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException {
 		// TODO Auto-generated method stub
 
 	}

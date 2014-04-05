@@ -1,38 +1,51 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders;
 
 
 import java.io.File;
 
-import org.eclipse.linuxtools.lttng2.kernel.core.*;
-import org.eclipse.linuxtools.ctf.core.trace.CTFReaderException;
-import org.eclipse.linuxtools.ctf.core.trace.CTFTrace;
-import org.eclipse.linuxtools.internal.lttng2.kernel.core.Attributes;
-import org.eclipse.linuxtools.internal.lttng2.kernel.core.LttngStrings;
+//import org.eclipse.linuxtools.lttng2.kernel.core.*;
+//import org.eclipse.linuxtools.ctf.core.trace.CTFReaderException;
+//import org.eclipse.linuxtools.ctf.core.trace.CTFTrace;
+//import org.eclipse.linuxtools.internal.lttng2.kernel.core.Attributes;
+//import org.eclipse.linuxtools.internal.lttng2.kernel.core.LttngStrings;
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfIterator;
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
-import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
+//import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.exceptions.TmfTraceException;
-import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
+//import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 
 /**
- * Class to read CTF traces by using CtfTmfTrace class.
- * @author Syed Shariyar Murtaza 
+ * Class to read CTF traces by using {@link CtfTmfTrace} class.
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  */
 public class CTFEventsTraceReader implements ITraceTypeReader   {
 	 // ------------------------------------------------------------------------
-     // inner class   
+     // Inner class: Implments an iterator   
 	 // ------------------------------------------------------------------------
-     class CTFKerenelIterator implements ITraceIterator {   
-    	 CtfIterator traceIterator=null;
-    	 CtfTmfTrace  trace=null;
-    	 Boolean isDispose=false;
-    	  
-    	 public CTFKerenelIterator(CtfTmfTrace  tmfTrace){
+     private class CTFEventsIterator implements ITraceIterator {   
+    	 private CtfIterator traceIterator=null;
+    	 private CtfTmfTrace  trace=null;
+    	 private Boolean isDispose=false;
+    	  /**
+    	   * Constructor
+    	   * @param tmfTrace
+    	   */
+    	 public CTFEventsIterator(CtfTmfTrace  tmfTrace){
     		   trace=tmfTrace;
     		   traceIterator=tmfTrace.createIterator();
     	   }
@@ -85,14 +98,16 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
           //this.trace=trace;
           //this.traceBuffer=buffer;
     }
-
+    /**
+     * Creates an instance of the reader
+     */
    @Override
     public ITraceTypeReader createInstance(){
     	return new CTFEventsTraceReader();
     }
    /**
-    * 
-    * @throws Exception
+    * Registers a Trace type reader
+    * @throws TotalADSUIException
     */
     
     public static void registerTraceTypeReader() throws TotalADSUIException{
@@ -116,10 +131,10 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
     }
 	/**
 	 * Return the iterator to go over the trace file
-	 * @param file
-	 * @return
+	 * @param file File obkect
+	 * @return The Iterator to iterate through a trace
 	 */
-    public ITraceIterator getTraceIterator(File file){
+    public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException{
     	
     	 String filePath=file.getPath();
 		 CtfTmfTrace  fTrace = new CtfTmfTrace();
@@ -132,76 +147,9 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
 	            throw new RuntimeException(e);
 	      }
 		 
-		 return new CTFKerenelIterator(fTrace);
+		 return new CTFEventsIterator(fTrace);
     }
   
-
-    
-/**
- * Reads the trace
- * 
- 
-    
-   private void readTrace(CtfTmfTrace  trace,StringBuilder traceBuffer){
-    	
-    	CtfIterator traceIterator=trace.createIterator();
-    	 
-    	while (traceIterator.advance()){
-    		
-    		CtfTmfEvent event = traceIterator.getCurrentEvent();
-    		handleEvents(event, traceBuffer);
-    		   		 
-    		
-    	}
    
-    }*/
-   /**
-    * This function dispatches each event to its appropriate handle
-    * @param event
-    */			
-/*@Override
-public void handleEvents(CtfTmfEvent event, StringBuilder traceBuffer) {
-	String eventName=event.getEventName();
-	
-	if (eventName.startsWith(LttngStrings.SYSCALL_PREFIX)){
-          //  || eventName.startsWith(LttngStrings.COMPAT_SYSCALL_PREFIX)) {
-					handleSysCallEntryEvent(event, traceBuffer);
-					
-	 }
-	/*not needed right now, may be in the future it will be uncommented
-	 * else if (eventName.equals(LttngStrings.EXIT_SYSCALL)){
-					handleSysExitEvent(event);
-	}*/
-	
-/*}
-*/
-/**
- * This is an event handler for system call exit event
- * @param event
- 
-private void handleSysExitEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
-	ITmfEventField content = event.getContent();
-	ITmfEventField returnVal=content.getField("ret");
-	System.out.println("Ret: "+returnVal.getValue()); 
-  //  accumulator.add(event.getTimestamp(), field);// whatever internal storage you want to use.
-}
-*/
-/**
- * This is an event handler for System call events 
- * @param event
- 
-private void handleSysCallEntryEvent(CtfTmfEvent event, StringBuilder traceBuffer) {
-	String eventName=event.getEventName();
-	//System.out.println(eventName);
-	Integer id=MapSysCallIDToName.getSysCallID(eventName.trim());
-	if (id==null){
-		//throw new Exception("System call not found in the map: "+eventName);
-		id=-1;
-	}
-	traceBuffer.append(id).append("\n");
-}
-*/
-
-    
 }
 

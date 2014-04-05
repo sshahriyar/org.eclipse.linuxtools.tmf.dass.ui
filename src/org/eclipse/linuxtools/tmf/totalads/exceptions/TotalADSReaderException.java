@@ -9,28 +9,29 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
- * This class defines custom UI exceptions that are thrown when a user does not select the proper 
- * User Interface settings
+ * This class defines custom reader exceptions that are thrown when  trace reading 
+ * encounters a problem 
+ * 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class TotalADSUIException extends Exception {
+public class TotalADSReaderException extends Exception {
 
-	public TotalADSUIException() {
+	public TotalADSReaderException() {
 		
 	}
 
-	public TotalADSUIException(String message) {
+	public TotalADSReaderException(String message) {
 		super(message);
 		
 	}
 
-	public TotalADSUIException(Throwable cause) {
+	public TotalADSReaderException(Throwable cause) {
 		super(cause);
 		
 	}
 
-	public TotalADSUIException(String message, Throwable cause) {
+	public TotalADSReaderException(String message, Throwable cause) {
 		super(message, cause);
 		
 	}

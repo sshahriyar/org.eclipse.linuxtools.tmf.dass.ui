@@ -75,30 +75,31 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @param connection
 	 * @param database
 	 */
-	private void initialize(DBMS connection,String database) throws Exception{
-		DBCursor cursor=connection.selectAll(database, this.TRACE_COLLECTION);
-		if (cursor !=null){
-			while (cursor.hasNext()){
-				DBObject dbObject=cursor.next();
-				Gson gson =new Gson();
-				String key=dbObject.get("_id").toString();
-				
-				Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
-				sysCallSequences.put(key, event);
-			}
-		cursor.close();
-		}
-		// get the maxwin
-		cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
-		if (cursor !=null){
-			while (cursor.hasNext()){
-				DBObject dbObject=cursor.next();
-				maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
-				maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
-			}
-			cursor.close();
-		}
+	private void initialize(DBMS connection,String database) {
 		
+			DBCursor cursor=connection.selectAll(database, this.TRACE_COLLECTION);
+			if (cursor !=null){
+				while (cursor.hasNext()){
+					DBObject dbObject=cursor.next();
+					Gson gson =new Gson();
+					String key=dbObject.get("_id").toString();
+					
+					Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
+					sysCallSequences.put(key, event);
+				}
+			cursor.close();
+			}
+			// get the maxwin
+			cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
+			if (cursor !=null){
+				while (cursor.hasNext()){
+					DBObject dbObject=cursor.next();
+					maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
+					maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
+				}
+				cursor.close();
+			}
+	
 	}
 	
 	/**
@@ -133,7 +134,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Creates a database to store models
 	 */
 	@Override
-	public void createDatabase(String databaseName, DBMS connection) throws Exception{
+	public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException{
 		String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
 		connection.createDatabase(databaseName, collectionNames);
 	}
@@ -143,15 +144,20 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws TotalADSUIException {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws TotalADSUIException, TotalADSDBMSException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
 			  validationAnomalies=0;
 			  int maxWinLimit=15;
 	    	  intialize=true;
-	    	  initialize(connection,database);
-	    	  // If the option name is the same and database has no model then take the maxwin from user
+	    	 // initializing 
+	    	  try{
+	    		  initialize(connection,database);
+	    	  } catch (Exception ex){
+	    		  throw new TotalADSDBMSException(ex.getMessage());
+	    	  }
+	    		  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
 	    		  try{
@@ -196,26 +202,32 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  
 	     }
 	     if (isLastTrace){ 
-	    	 saveinDatabase(console, database, connection);
+	    	 // Saving events tree in database
+	    	 try{
+	    		 saveinDatabase(console, database, connection);
+	    	 } catch (Exception ex){
+	    		 throw new TotalADSDBMSException(ex.getMessage());
+	    	 }
 	    	 intialize=false;
 	     }
 	     
-
+	
 	}
 
 	/* 
 	 * Validates the model
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException {
+	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) 
+			throws TotalADSUIException, TotalADSDBMSException {
 	  
 		 validationTraceCount++;// count the number of traces
 		 
 		 //Integer []hammAnomalies=new Integer[maxWin];
 	     Results result= evaluateTrace(trace, database, connection);
 	   
-	     if (result.isAnomaly){
-	    	 String details=result.details.toString();
+	     if (result.getAnomaly()){
+	    	 String details=result.getDetails().toString();
 	    	 console.printTextLn(details);
 	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
 	    	 //hammAnomalies[hamming]++;
@@ -262,7 +274,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			  if (options!=null && options[0].equals(this.testingOptions[0]) ){
 	    		  	try {
 	    		  		maxHamDis=Integer.parseInt(options[1]);
-	    		  	}catch (Exception ex){
+	    		  	}catch (NumberFormatException ex){
 	    		  		throw new TotalADSUIException("Please, enter an integer value.");
 	    		  	}
 	    	        saveSettings(database, connection); // save maxHamm
@@ -284,9 +296,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
  private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection){
 	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
 	     int displaySeqCount=0;
-	     IDetectionAlgorithm.Results results= new IDetectionAlgorithm.Results();
-		 results.anomalyType="";
-		 results.isAnomaly=false;
+	     Results results= new Results();
+		 results.setAnomalyType("");
+		 results.setAnomaly(false);
 		 testTraceCount++;
 		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
@@ -344,18 +356,18 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  //isNormal=searchMatchingSequenceInTree(nodes, seq);
 	    		 // System.out.println(hammDis+ " "+maxHamDis);
 	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
-	    			  results.isAnomaly=true;
+	    			  results.setAnomaly(true);
 	    			  
 	    			  if (anomalousSequencesToReturn % maxWin==0){ // add a new sequence when the previous events are gone
-	    				  results.details.append(Arrays.toString(seq)).append("::").append(hammDis).append("\n");
+	    				  results.setDetails(Arrays.toString(seq)+"::"+hammDis+"\n");
 	    			      displaySeqCount++;
 	    			  }
 	    				   
 	    			  anomalousSequencesToReturn++;
 	    		  }
 	    		  if (displaySeqCount >= maxAnomalousSequencesToReturn){
-	    			  results.details.append(".....\n.....").append(maxAnomalousSequencesToReturn).append(" or less"
-	    			  		+ " randomly selected anomalies").append("\n");
+	    			  results.setDetails(".....\n....."+maxAnomalousSequencesToReturn+" or less"
+	    			  		+ " randomly selected anomalies"+"\n");
 	    			  break;// No need to extract all the anomalous sequences in a trace;
 	    		                     // just return and break
 	    		  }
@@ -363,7 +375,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	  }
 	    		  
 	     }
-	     if (results.isAnomaly)
+	     if (results.getAnomaly())
 	    	 testAnomalies++;
 	  		
 	    return results;  
@@ -374,8 +386,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Updates settings collection
 	 * @param datatbase
 	 * @param connection
+	 * @throws TotalADSDBMSException 
 	 */
-	private void saveSettings(String database,DBMS connection) throws Exception{
+	private void saveSettings(String database,DBMS connection) throws TotalADSDBMSException {
 		
 	  
 		  String settingsKey ="SWN_SETTINGS";
@@ -445,7 +458,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	public static void registerModel() throws TotalADSUIException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		SlidingWindow sldWin=new SlidingWindow();
-		modelFactory.registerModelWithFactory( AlgorithmFactory.ModelTypes.Anomaly,  sldWin);
+		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  sldWin);
 	}
 	
 	/**
@@ -487,9 +500,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * Searches and appends a sequence to an already existing graph of sequences. 
+	 * Searches and appends a sequence(set of events) to an already existing tree of events. 
 	 * If a sequence already exists, it updates the counter 
-	 * Use the following graph-example to understand the code
+	 * Use the following tree example to understand the code
 	 * 
 	 * 108-106-5-55-45
 	 * 90
@@ -501,7 +514,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * 106
 	 * |
 	 * 5
-	 * @param eventSeq an already existing sequence of events 
+	 * @param eventSeq an already existing tree of events 
 	 * @param newSeq   a sequence of events that requires to be appended
 	 * @return
 	 */
@@ -579,7 +592,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @param connection
 	 * @throws Exception
 	 */
-	private void saveinDatabase(ProgressConsole console, String database, DBMS connection) throws Exception{
+	private void saveinDatabase(ProgressConsole console, String database, DBMS connection) throws TotalADSDBMSException{
 		console.printTextLn("Saving in database.....");
 		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
 			
@@ -684,9 +697,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 
 	/**
-	 * 
-	 * @param eventSeq
-	 * @param newSeq
+	 * Searches a matching sequence in the tree
+	 * @param eventSeq Tree
+	 * @param newSeq New sequence
 	 * @return
 	 */
 	private Boolean  searchMatchingSequenceInTree(Event[] eventSeq, String []newSeq){
@@ -743,10 +756,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	   }
 	
 	/**
-	 * 
-	 * @param nodes
-	 * @param prefix
-	 * @param console
+	 * Searches a new sequence in the tree and returns the Hamming distance.
+	 * if Hamming distance is zero then a sequence matched  otherwise  Hamming
+	 * distance is equal to the number of mismatches
+	 * @param nodes Tree of events
+	 * @param newSeq Sequence to search
 	 */
 	private Integer getHammingAndSearch(Event[] nodes,String []newSeq){
 	      
@@ -786,9 +800,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		return minHammDis;		    
 	}
 
-	
+	/**
+	 * Performs cross validation
+	 */
 	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException{
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException{
 		
 	}
 }

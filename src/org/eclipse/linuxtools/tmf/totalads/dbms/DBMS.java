@@ -62,21 +62,24 @@ public class DBMS implements ISubject {
 	}
 	/**
 	 * Connects with MongoDB
-	 * @param host
-	 * @param port
-	 * @return
+	 * @param host Host name 
+	 * @param port Port number
+	 * @return Returns an empty message if connection is made with the database, else returns the error message
 	 * @throws UnknownHostException
 	 */
-	public String connect(String host, Integer port) throws UnknownHostException{
+	public String connect(String host, Integer port) {
 		String message="";
-		mongoClient = new MongoClient( host , port );
-		mongoClient.setWriteConcern(WriteConcern.JOURNALED);
-		
-				
 		try {
+			mongoClient = new MongoClient( host , port );
+			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+		
 			
 			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
 											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
+		} catch (UnknownHostException ex) {
+			isConnected=false;
+			message=ex.getMessage();
+			return message;
 		} catch (Exception ex){
 			isConnected=false;
 			message="Unable to connect to MongoDB.";
@@ -84,26 +87,27 @@ public class DBMS implements ISubject {
 		}
 		isConnected=true;// if it reaches here then it is connected
 		return message;
+		
 	}
 	/**
-	 * Connects with MongoDB
-	 * @param host
-	 * @param port
-	 * @param username
-	 * @param password
+	 * Connects with MongoDB using authentication mecahinsm
+	 * @param host Host name
+	 * @param port Port name
+	 * @param username User name
+	 * @param password Password
 	 * @return Empty message if connected or error message
 	 * @throws UnknownHostException
 	 */
-	public String connect(String host, Integer port, String username, String password) throws UnknownHostException{
+	public String connect(String host, Integer port, String username, String password, String database) {
 		
 		String message=connect(host,port);
 		if (message.isEmpty()){
 			// if there is a running db then check this
-			DB db=mongoClient.getDB("admin");
+			DB db=mongoClient.getDB(database);
 		
 			if (db.authenticate(username, password.toCharArray())==false){
 				isConnected=false;
-				message="Invalid user name or password.";
+				message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
 			}
 			else
 				isConnected=true;// if it reaches here then everything is fine
@@ -119,7 +123,7 @@ public class DBMS implements ISubject {
 	}
 	/**
 	 * Get database list
-	 * @return
+	 * @return The list of database
 	 */
 	public List<String> getDatabaseList(){
 		List <String> dbList=mongoClient.getDatabaseNames();
@@ -137,16 +141,18 @@ public class DBMS implements ISubject {
 	public boolean datbaseExists(String database){
 	List<String> databaseNames = getDatabaseList();
 	
-	for (int j=0; j<databaseNames.size();j++) // For a case insensitive comparison, we have to iterate manually
-		if (databaseNames.get(j).equalsIgnoreCase(database))
+	for (int j=0; j<databaseNames.size();j++) // For comparison, we have to iterate manually
+		if (databaseNames.get(j).equals(database))
 			return true;
 	return false;
 		
 	}
+	
 	/**
-	 * Creates a database and collections
-	 * @param dataBase
-	 * @throws Exception
+	 * Creates a database and all collections in it
+	 * @param dataBase Database name
+	 * @param collectionNames Array of collection names
+	 * @throws TotalADSDBMSException
 	 */
 	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
 	
@@ -164,9 +170,9 @@ public class DBMS implements ISubject {
 	
 	/**
 	 * Creates an index on a collection (table)
-	 * @param database
-	 * @param collection
-	 * @param field
+	 * @param database Database name
+	 * @param collection Collection name
+	 * @param field Field name on which to create an index
 	 */
 	public void createAscendingIndex(String dataBase, String collection, String field){
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
@@ -180,17 +186,17 @@ public class DBMS implements ISubject {
 	}
 	/**
 	 * Deletes a database
-	 * @param database
+	 * @param database Database name
 	 */
 	public void deleteDatabase(String database){
 		mongoClient.dropDatabase(database);
 		notifyObservers();
 	}
 	/**
-	 * Extracts keys and values from a claas's object using reflection and assign it
+	 * Extracts keys and values from public fields of a class's object using reflection and assign it
 	 * to the document object based on the data types
-	 * @param record
-	 * @param document
+	 * @param record Object from which to extract fields
+	 * @param document Document object in a collection which will store these fields and values
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
 	 */
@@ -218,12 +224,14 @@ public class DBMS implements ISubject {
 	
 	/**
 	 *  Insert an object's field with only one level of nesting. The object's class should  only
-	 *  have data fields when calling this function. For example, create a class A{String b; Integer b},
+	 *  have public data fields when calling this function. For example, create a class A{String b; Integer b},
 	 *  assign values after instantiating the object and pass it to the function
-	 * @param query
-	 * @param database
-	 * @param collection
-	 * @throws Exception
+	 * @param record Object from which to extract fields and values
+	 * @param database Database name
+	 * @param collection Collection name
+	 * @throws TotalADSDBMSException,
+	 * @throws IllegalAccessException
+	 * @throws IllegalAccessException
 	 */
 	public void insert(Object record, String database, String collection) throws TotalADSDBMSException,IllegalAccessException,IllegalAccessException{
 		
@@ -252,25 +260,30 @@ public class DBMS implements ISubject {
 		
 	}
 	/**
-	 * Inserts an object in the form of json representation into the database. Any kind of complex
+	 * Inserts an object in the form of JSON representation into the database. Any kind of complex
 	 *  data structure can be converted to JSON  using gson library and passed to this function 
-	 * @param database
-	 * @param jsonObject
-	 * @param collection
+	 * @param database Database name
+	 * @param jsonObject JSON Object
+	 * @param collection Collection name in which to insert 
+	 * @throws TotalADSDBMSException
 	 */
-	public void insertUsingJSON(String database, JsonObject jsonObject, String collection){
+	public void insertUsingJSON(String database, JsonObject jsonObject, String collection) throws TotalADSDBMSException{
+		  try{
 		   DB db = mongoClient.getDB(database);
 		   DBCollection coll = db.getCollection(collection);
 		   BasicDBObject obj = (BasicDBObject)JSON.parse(jsonObject.toString());
 		   coll.insert(obj);
+		  } catch (Exception ex){
+			  throw new TotalADSDBMSException(ex.getMessage());
+		  }
 	}
 
 	/**
-	 * Inserts or updates (if already exists) an object in the form of json representation into the database. Any kind of complex
-	 *  data structure can be converted to JSON  using gson library and passed to this function 
-	 * @param database
-	 * @param jsonObject
-	 * @param collection
+	 * Inserts or updates (if already exists) an object in the form of JSON representation into the database. Any kind of complex
+	 *  data structure can be converted to JSON using gson library and passed to this function 
+	 * @param database Database name
+	 * @param jsonObject JSON Object
+	 * @param collection collection name
 	 */
 	public void insertOrUpdateUsingJSON(String database, JsonObject keytoSearch, 
 						JsonObject jsonObjectToUpdate, String collection) throws TotalADSDBMSException{
@@ -289,10 +302,11 @@ public class DBMS implements ISubject {
 		
 	}
 	/**
-	 * Selects Max value from a collection (table)
-	 * @param query
-	 * @param database
-	 * @return
+	 * Selects a max value from a collection (table)
+	 * @param key Field name to return the max of. Use an index key otherwise the results will be slow
+	 * @param database Database name
+	 * @param collection Collection name
+	 * @return Maximum value as a string
 	 */
 
 	public String selectMax(String key, String database, String collection){
@@ -309,12 +323,12 @@ public class DBMS implements ISubject {
 	}
 	/**
 	 * Returns a set of documents based on a key search
-	 * @param key
-	 * @param operator
-	 * @param value
-	 * @param database
-	 * @param collection
-	 * @return
+	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
+	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
+	 * @param value Double value of the field
+	 * @param database Database name
+	 * @param collection Collection name in the database
+	 * @return A DBCursor object which you can iterate through
 	 */
 	public DBCursor select(String key, String operator, Double value,String database, String collection ){
 		DBCursor cursor;
@@ -335,12 +349,12 @@ public class DBMS implements ISubject {
 	}
 	/**
 	 * Returns a set of documents based on a key search
-	 * @param key
-	 * @param operator
-	 * @param value
-	 * @param database
-	 * @param collection
-	 * @return
+	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
+	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
+	 * @param value String value of the field
+	 * @param database Database name
+	 * @param collection Collection name in the database
+	 * @return A DBCursor object which you can iterate through
 	 */
 	public DBCursor select(String key, String operator,String value,String database, String collection ){
 		DBCursor cursor;
@@ -361,15 +375,11 @@ public class DBMS implements ISubject {
 	}
 	
 	/**
-	 * Returns a set of documents based on a key search
-	 * @param key
-	 * @param operator
-	 * @param value
-	 * @param database
-	 * @param collection
-	 * @return
+	 * Selects all the documents as a DBCursor Object which can be used to iterate through them
+	 * @param database Database name
+	 * @param collection Collection name
+	 * @return DBCursor object
 	 */
-	
 	public DBCursor selectAll(String database, String collection ){
 		DBCursor cursor;
 		BasicDBObject query;
@@ -387,11 +397,10 @@ public class DBMS implements ISubject {
 	 *  in documents--specified by the searchFieldsandValues object. Pass two objects of  classes that only has primitive data types
 	 *   as fields--no methods. Each object's fields' values  and their data types will be automatically extracted and used
 	 *   in the update. If no document matches the criteria then new document will be inserted
-	 * @param searchKeyAndItsValue searchFields
-	 * @param replacementFieldsAndValues replacement fields
-	 * @param database database name
-	 * @param collection collection name
-	 * @return
+	 * @param searchKeyAndItsValue Search fields
+	 * @param replacementFieldsAndValues Replacement fields
+	 * @param database Database name
+	 * @param collection Collection name
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 */
@@ -422,10 +431,10 @@ public class DBMS implements ISubject {
 			
 	}
 	//////////////////////////////////////////////////////////////////////////////// 
-	//Implementing Subject Interface 
+	//Implementing the ISubject Interface 
 	///////////////////////////////////////////////////////////////
 	/**
-	 *  Adds an observer of type {@link IObserver}
+	 * Adds an observer of type {@link IObserver}
 	 * @param observer
 	 */
 	@Override

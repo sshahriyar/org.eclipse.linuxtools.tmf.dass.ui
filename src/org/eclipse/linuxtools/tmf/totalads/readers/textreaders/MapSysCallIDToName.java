@@ -1,6 +1,21 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.readers.textreaders;
 import java.util.HashMap;;
+/**
+ * This class is only used for lab experiments. It is a mapping of system call id to name
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class MapSysCallIDToName {
+
 private static HashMap< Integer, String> sysCallIDToName;
 
 public static String getSysCallName(Integer id){

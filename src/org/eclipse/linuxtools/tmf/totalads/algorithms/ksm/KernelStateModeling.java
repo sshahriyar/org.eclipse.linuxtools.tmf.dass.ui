@@ -15,14 +15,17 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
+
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -92,8 +95,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     }
    /**
     * Creates a database and collections to store modeling information
-    * @param databaseName
-    * @param connection
+    * @param databaseName Database name
+    * @param connection Connection for database
     * @throws TotalADSDBMSException 
     */
     @Override
@@ -123,11 +126,12 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     }
     /**
      * Trains the model
-     * @throws IllegalAccessException 
+     * @throws TotalADSUIException
      * @throws TotalADSDBMSException 
+     * @throws TotalADSReaderException 
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!intialize){
     		  alpha=0.0;
@@ -178,9 +182,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	/**
 	 * Validates the model
 	 * @throws TotalADSDBMSException 
+	 * @throws TotalADSReaderException 
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUIException, TotalADSDBMSException {
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -218,7 +223,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Cross validate the model
 	 */
 	@Override
-	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException{
+	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException{
 		// totalTraces=get the record count in the database
 		// patitionSize=divide it by folds
 		//repeat untill j=0  to folds and j++
@@ -233,9 +238,12 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 
 	/**
 	 * Tests the model
+	 * @throws TotalADSReaderException 
+	 * @thows TotalADSUIException
+	 * @throws TotalADSDBMSException
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException {
+	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
@@ -388,8 +396,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * 
 	 * @param trace
 	 * @param states
+	 * @throws TotalADSReaderException 
+	 * @throws TotalADSUIException
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUIException{
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUIException, TotalADSReaderException{
 		
 		Double totalSysCalls=0.0;
 		

@@ -9,7 +9,8 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
- * This class defines custom DBMS exceptions that are thrown when a user does not select the proper configurations 
+ * This class defines custom DBMS exceptions that are thrown when a user does not select the proper
+ * DBMS configurations 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
