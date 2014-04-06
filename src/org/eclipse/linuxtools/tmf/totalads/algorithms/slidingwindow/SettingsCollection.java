@@ -7,15 +7,15 @@
  * Contributors:
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
-package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
 
+package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 /**
  * This class represents the fields of  a settings collection in the MongoDB.
  * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-public enum SettingsCollections{
+public enum SettingsCollection{
 	/**
 	 * The Key name in the collection
 	 */
@@ -23,18 +23,18 @@ public enum SettingsCollections{
 	/**
 	 * Alpha field in the collection
 	 */
-	ALPHA("alpha"),
+	MAX_WIN("maxWIN"),
 	/**
 	 * Update_time field in the collection
 	 */
-	UPDATE_TIME("update_time");
+	MAX_HAM_DIS("maxHamDis");
 	
 	private String fieldName;
 	/**
 	 * Constructor
 	 * @param fieldName
 	 */
-	private SettingsCollections(String fieldName){
+	private SettingsCollection(String fieldName){
 		this.fieldName=fieldName;
 	}
 	/**

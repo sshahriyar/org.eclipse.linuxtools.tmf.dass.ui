@@ -49,26 +49,26 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 /**
  * This class connects with the database and loads all the model names in a tree and creates the related GUI wdigets.
- * It also instantiates ResultsAndFeedback class and shows the results of the evaluation ofthe model 
- * in that class
+ * It also instantiates ResultsAndFeedback class and shows the results of the evaluation of the model 
+ * using that class.
  * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 
 public class ModelLoader {
-	private Group grpAnalysisModelSelection=null;
-	private Button btnAnalysisEvaluateModels=null;
-	private Tree treeAnalysisModels=null;
+	private Group grpAnalysisModelSelection;
+	private Button btnAnalysisEvaluateModels;
+	private Tree treeAnalysisModels;
 	private Button btnSettings;
 	private Button btnDelete;
-	private  TreeItem currentlySelectedTreeItem=null;
+	private  TreeItem currentlySelectedTreeItem;
 	private MessageBox msgBox;
 	private StringBuilder tracePath;
 	private Label lblProgress;
 	private TracingTypeSelector traceTypeSelector;
 	private ResultsAndFeedback resultsAndFeedback;
-	private Settings settingsDialog=null;
-	private String []modelOptions=null;
+	private Settings settingsDialog;
+	private String []algorithmSettings;
 	private Composite compModelSelection;
 	private Composite statusAndResults;
 	/**
@@ -129,11 +129,12 @@ public class ModelLoader {
 		 * End group model selection 
 		*/
 	}
+	
 	/**
 	 * Populates the tree with the list of models (databases) from the database
 	 */
 	private void populateTreeWithModels(){
-	///////data
+	
 		if (Configuration.connection.isConnected() ){ // if there is a running DB instance
 			
 			List <String> modelsList= Configuration.connection.getDatabaseList();
@@ -149,8 +150,12 @@ public class ModelLoader {
 		}
 		    currentlySelectedTreeItem=null;
 	}
+	
+	
 	/**
+	 * 
 	 * Adds event handlers to different widgets
+	 * 
 	 */
 	private void addEventHandlers(){
 		/**
@@ -171,7 +176,7 @@ public class ModelLoader {
 				AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 				String database=currentlySelectedTreeItem.getText();
 				String modelKey=database.split("_")[1];
-				IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey);
+				IDetectionAlgorithm algorithm= modFac.getModelyByAcronym(modelKey);
 				
 				resultsAndFeedback.clearData();
 				
@@ -179,7 +184,8 @@ public class ModelLoader {
 				btnSettings.setEnabled(false);
 				btnDelete.setEnabled(false);
 				lblProgress.setVisible(true);
-				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, model, database);
+				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, algorithm, database,
+							lblProgress, btnDelete, btnSettings, btnAnalysisEvaluateModels, resultsAndFeedback, algorithmSettings);
 				testTheModel.start();
 				
 				
@@ -222,7 +228,7 @@ public class ModelLoader {
 							settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
 						
 							settingsDialog.showForm();
-							modelOptions=settingsDialog.getOptions();
+							algorithmSettings=settingsDialog.getOptions();
 						
 					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());
@@ -275,7 +281,9 @@ public class ModelLoader {
 	}
 	
 	/**
+	* 
 	* Checks selection of a model in the tree
+	* 
 	*/
 	private boolean checkItemSelection(){
 		
@@ -287,14 +295,14 @@ public class ModelLoader {
 	}
 	/**
 	 * Assigns tracePath object from Diagnosis class to a local variable
-	 * @param tracePath
+	 * @param tracePath Trace Path 
 	 */
 	public void setTrace(StringBuilder tracePath){
 		this.tracePath=tracePath;
 	}
 	/**
 	 *  Assigns TraceTypeSelector object from Diagnosis class to a local object
-	 * @param traceTypeSelector
+	 * @param traceTypeSelector Trace type selector
 	 */
 	public void setTraceTypeSelector(TracingTypeSelector traceTypeSelector){
 		this.traceTypeSelector= traceTypeSelector;
@@ -302,10 +310,11 @@ public class ModelLoader {
 	
 	/**
 	 * Assigns ResultsAndFeddback object from Diagnosis class to a local variable
-	 * @param resultsAndFeedback
+	 * @param resultsAndFeedback Results and Feddback object
 	 */
 	public void setResultsAndFeedback(ResultsAndFeedback resultsAndFeedback){
 		this.resultsAndFeedback=resultsAndFeedback;
 	}
 	
+	// End of class
 	}

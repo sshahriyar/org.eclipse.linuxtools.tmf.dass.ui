@@ -35,7 +35,7 @@ public class BackgroundModeling extends Thread{
 	Boolean isNewDB;
 	String validationTraces;
 	ITraceTypeReader traceReader;
-	AlgorithmSelector modelSelector;
+	AlgorithmSelector algorithmSelector;
 	ProgressConsole progConsole;
 	Button btnMain;
 	/**
@@ -50,14 +50,14 @@ public class BackgroundModeling extends Thread{
 	 * @param btnBuild Button to enable
 	 */
 	public BackgroundModeling(String trainingTraces,String selectedDB, Boolean isNewDB, 
-				String validationTraces,ITraceTypeReader traceReader, AlgorithmSelector modelSel
+				String validationTraces,ITraceTypeReader traceReader, AlgorithmSelector algSel
 				, ProgressConsole progConsole, Button btnBuild){
 		this.trainingTraces=trainingTraces;
 		this.selectedDB=selectedDB;
 		this.isNewDB=isNewDB;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
-		this.modelSelector=modelSel;
+		this.algorithmSelector=algSel;
 		this.progConsole=progConsole;
 		this.btnMain=btnBuild;
 	}
@@ -70,27 +70,27 @@ public class BackgroundModeling extends Thread{
 			
 			try {
 				
-					modelSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
+					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
 							
 			} 
 			catch(TotalADSUIException ex){// handle UI exceptions here
 				if (ex.getMessage()==null)
-					msg="Severe error: see log.";	
+					msg="UI error";	
 				else
 					msg=ex.getMessage();
 			}
 			catch(TotalADSDBMSException ex){// handle DBMS exceptions here
 				if (ex.getMessage()==null)
-					msg="Severe error: see log.";	
+					msg="DBMS error: see log.";	
 				else
-					msg=ex.getMessage();
+					msg="DBMS error: "+ex.getMessage();
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
 			}
 			catch(TotalADSReaderException ex){// handle Reader exceptions here
 				if (ex.getMessage()==null)
-					msg="Severe error: see log.";	
+					msg="Reader error: see log.";	
 				else
-					msg=ex.getMessage();
+					msg="Reader error: "+ex.getMessage();
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
 			}
 			catch (Exception ex) { // handle all other exceptions here and log them too.

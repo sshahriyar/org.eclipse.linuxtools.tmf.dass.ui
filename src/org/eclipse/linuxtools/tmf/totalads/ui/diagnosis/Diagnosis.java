@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
-//import org.eclipse.jface.viewers.ColumnWeightData;
+
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
@@ -35,14 +35,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * This class creates the GUI elements for disgnosis.
- * It creates a diagnois tab and then creates other GUI elemtns within itself.
+ * This class creates the GUI elements/widgets for diagnosis.
+ * It creates a diagnosis tab and then creates other GUI widgets by instantiating other classes and SWT widgets.
  * 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class Diagnosis {
-	//Intializes variables
+	//Initializes variables
 	private TracingTypeSelector traceTypeSelector;
 	private Text txtTraceID;
 	private Text txtTraceSource;
@@ -53,9 +53,11 @@ public class Diagnosis {
 	private ModelLoader modelLoader;
 	//private ResultsAndFeedback resultsAndFeedback;
 	/**
-	 * Constructor
+	 * Constructor of the Diagnosis class
+	 * @param tabFolderParent TabFolder object
+	 *
 	 */
-	public Diagnosis(CTabFolder tabFolderParent) throws Exception{
+	public Diagnosis(CTabFolder tabFolderParent){
 		tracePath=new StringBuilder();
 		//Diagnosis Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
@@ -88,6 +90,8 @@ public class Diagnosis {
 		scrolCompAnom.setExpandVertical(true);
 	}
 
+	
+	
 	/**
 	 * Creates GU elements for a selection of traces and trace types
 	 * @param compDiagnosis Composite of Diagnosis
@@ -137,6 +141,8 @@ public class Diagnosis {
 		 * End group trace selection
 		 */
 	}
+	
+	
 	/**
 	 * Creates GUI elements for a currently selected trace
 	 * @param compParentDaignosis

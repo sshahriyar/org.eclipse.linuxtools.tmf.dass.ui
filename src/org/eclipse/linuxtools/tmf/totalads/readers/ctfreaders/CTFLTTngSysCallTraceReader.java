@@ -163,7 +163,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
 	            
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
-	            throw new RuntimeException(e);
+	            throw new TotalADSReaderException(e.getMessage());
 	      }
 		 
 		 return new CTFSystemCallIterator(fTrace);

@@ -22,6 +22,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
@@ -46,36 +47,28 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private Integer maxWin=5;
 	private Integer maxHamDis=0;
 	private String warningMessage="";
-	/**Fields of settings collection (table in a traditional database)
-	 */ 
+	private HashMap<String, Event[]> sysCallSequences;
+	private String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
+	private String []testingOptions={"Max Hamming Distance","0"};
+	private Integer validationTraceCount=0;
+	private Integer validationAnomalies=0;
+	private Integer testTraceCount=0;
+	private Integer testAnomalies=0;
+	private Boolean intialize=false;
+	private Boolean isTestStarted=false;
+	private SlidingWindowTree treeTransformer;
 	
-	private static final class SETTINGS_COLL_FIELDS{
-		static final String KEY="_id";
-		static final String MAX_WIN="maxWIN";
-		static final String MAX_HAM_DIS="maxHamDis";
-	}
-	
-	HashMap<String, Event[]> sysCallSequences;
-	
-	String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
-	String []testingOptions={"Max Hamming Distance","0"};
-		
-    Integer validationTraceCount=0;
-    Integer validationAnomalies=0;
-    Integer testTraceCount=0;
-    Integer testAnomalies=0;
-	Boolean intialize=false;
-	Boolean isTestStarted=false;
 	/**
 	 * Constructor
-	 * 	 */
+	 **/
 	public SlidingWindow() {
 		sysCallSequences= new HashMap<String, Event[]>();
+		treeTransformer=new SlidingWindowTree();
 	}
 	/**
 	 * Initializes the model if already exists in the database
-	 * @param connection
-	 * @param database
+	 * @param connection DBMS object
+	 * @param database	Database name
 	 */
 	private void initialize(DBMS connection,String database) {
 		
@@ -96,8 +89,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			if (cursor !=null){
 				while (cursor.hasNext()){
 					DBObject dbObject=cursor.next();
-					maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
-					maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
+					maxWin=Integer.parseInt(dbObject.get(SettingsCollection.MAX_WIN.toString()).toString());
+					maxHamDis=Integer.parseInt(dbObject.get(SettingsCollection.MAX_HAM_DIS.toString()).toString());
 				}
 				cursor.close();
 			}
@@ -106,15 +99,19 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
 	/**
      * Returns the settings of an algorithm as option name at index i and value at index i+1
-     * @return String[]
+     * @return String[] Array of String
      */
     @Override
     public String[] getTrainingOptions(){
     		return trainingOptions;
     	
     }
+    
     /**
+     * 
      * Set the settings of an algorithm as option name at index i and value ate index i+1
+     * @return String[] Array of String
+     *
      */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
@@ -123,7 +120,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			while (cursor.hasNext()){
 				DBObject dbObject=cursor.next();
 				//maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
-				maxHamDis=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_HAM_DIS).toString());
+				maxHamDis=Integer.parseInt(dbObject.get(SettingsCollection.MAX_HAM_DIS.toString()).toString());
 			}
 			cursor.close();
 		}
@@ -141,25 +138,28 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		connection.createDatabase(databaseName, collectionNames);
 	}
 	
-	/* 
-	 * Trains the model
-	 */
 	
+	/**
+	 * 
+	 * Trains the model by overriding a method from the interface {@link IDetectionAlgorithm}
+	 * 
+	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options)  throws TotalADSUIException, TotalADSDBMSException {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, 
+			String[] options)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
 			  validationAnomalies=0;
 			  int maxWinLimit=15;
 	    	  intialize=true;
-	    	 // initializing 
+	    	 // Initializing 
 	    	  try{
 	    		  initialize(connection,database);
 	    	  } catch (Exception ex){
-	    		  throw new TotalADSDBMSException(ex.getMessage());
+	    		  throw new TotalADSDBMSException(ex);
 	    	  }
-	    		  // If the option name is the same and database has no model then take the maxwin from user
+	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
 	    		  try{
@@ -198,7 +198,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  winWidth--;
 	    		  String[] seq=new String[maxWin];
 	    		  seq=newSequence.toArray(seq);
-	    		  searchAndAddSequence(seq);
+	    		  // searching and adding to db
+	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
+	    		  
 	    		  newSequence.remove(0);
 	    	  }
 	    		  
@@ -206,7 +208,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
 	    	 try{
-	    		 saveinDatabase(console, database, connection);
+	    		 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TRACE_COLLECTION);
 	    	 } catch (Exception ex){
 	    		 throw new TotalADSDBMSException(ex.getMessage());
 	    	 }
@@ -216,12 +218,14 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
 	}
 
-	/* 
-	 * Validates the model
+	/**
+	 * 
+	 * Validates the model by overriding a method from the interface {@link IDetectionAlgorithm}
+	 *
 	 */
 	@Override
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) 
-			throws TotalADSUIException, TotalADSDBMSException {
+			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
 		 
@@ -262,14 +266,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
     
     
 	/**
-	 * Tests the model
+	 * Tests the model by overriding a method from the interface {@link IDetectionAlgorithm}
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException {
+	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) 
+			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		  
-	      
-		
-		  if (!isTestStarted){
+	       if (!isTestStarted){
 			  testTraceCount=0;
 			  testAnomalies=0;
 	    	  initialize(connection, database); // get the trees from db
@@ -289,13 +292,14 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 
 /**
- * 
+ * Evaluates a trace
  * @param trace
  * @param database
  * @param connection
  * @return
+ * @throws TotalADSReaderException 
  */
- private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection){
+ private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection) throws TotalADSReaderException{
 	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
 	     int displaySeqCount=0;
 	     Results results= new Results();
@@ -347,12 +351,12 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			    	tmp=new String[seq.length-(counter-1)];
 	    			    	for (int i=counter-1; i<tmp.length;i++)
 	    			    			tmp[i]=seq[i+1];
-	    			    	hammDis=hammDis+getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
+	    			    	hammDis=hammDis+treeTransformer.getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
 	    			    	                                      // because one extra distance is reported from the function
 	    			    										  // getHammingAndSearch
 	    			    }
 	    			    else	
-	    			  	  hammDis=getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
+	    			  	  hammDis=treeTransformer.getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
 	    			     
 	    		  }
 	    		  //isNormal=searchMatchingSequenceInTree(nodes, seq);
@@ -395,24 +399,22 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	  
 		  String settingsKey ="SWN_SETTINGS";
 		 
-		  
 		  JsonObject jsonKey=new JsonObject();
 		  jsonKey.addProperty("_id",settingsKey);
 				  
 		  JsonObject jsonObjToUpdate= new JsonObject();
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.KEY, settingsKey);
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.MAX_WIN, maxWin);
-		  jsonObjToUpdate.addProperty(SETTINGS_COLL_FIELDS.MAX_HAM_DIS, maxHamDis);
-			
-	
+		  jsonObjToUpdate.addProperty(SettingsCollection.KEY.toString(), settingsKey);
+		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_WIN.toString(), maxWin);
+		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_HAM_DIS.toString(), maxHamDis);
+		
 		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, this.SETTINGS_COLLECTION);
 	 
 		 
 	}
 	
 	
-	/* 
-	 * Text Results
+	/** 
+	 * Text Results, an overriden method
 	 */
 	@Override
 	public String getSummaryOfTestResults() {
@@ -421,7 +423,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 
 	/* 
-	 * graphicalResults
+	 * graphicalResults, an overriden method
 	 */
 	@Override
 	public Chart graphicalResults() {
@@ -430,7 +432,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 
 	/* 
-	 * Creates Instance
+	 * Creates Instance, an overriden method
 	 */
 	@Override
 	public IDetectionAlgorithm createInstance() {
@@ -463,345 +465,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  sldWin);
 	}
 	
-	/**
-	 * Searches and adds a sequence in the training database. 
-	 * If a sequence already exists, it updates the counter
-	 * @param sequence sequence to add
-	 */
-	private void searchAndAddSequence(String []newSequence){
-		Integer seqSize=newSequence.length;
-		Event[] eventSequence= sysCallSequences.get(newSequence[0]);
-		if (eventSequence==null){ // if there is no such starting event then add sequence to such an event
-			
-			eventSequence=new Event[seqSize+1];
-			for (int j=0;j<seqSize;j++){
-				eventSequence[j]=new Event();
-				eventSequence[j].event=newSequence[j];
-			}
-			eventSequence[seqSize]=new Event();
-			eventSequence[seqSize].event="1";
-			
-		}else{
-			
-			Boolean isFound=searchAndAppendSequence(eventSequence, newSequence);// search in graph from this node/sequence
-			
-			if (isFound==false){// if not found then add on 0 branch 
-				eventSequence[0].branches=new ArrayList<Event[]>();
-				Event[] newBranchSeq=new Event[seqSize+1];
-				for (int j=0;j<seqSize-1;j++){
-					newBranchSeq[j]=new Event();
-					newBranchSeq[j].event=newSequence[j];
-				}
-				newBranchSeq[seqSize]=new Event();
-				newBranchSeq[seqSize].event="1";
-				eventSequence[0].branches.add(newBranchSeq);
-			}
-		}
-		// putting the sequence (graph actually) to the starting event (node) as a key
-		sysCallSequences.put(newSequence[0],eventSequence);
-	}
 	
-	/**
-	 * Searches and appends a sequence(set of events) to an already existing tree of events. 
-	 * If a sequence already exists, it updates the counter 
-	 * Use the following tree example to understand the code
-	 * 
-	 * 108-106-5-55-45
-	 * 90
-	 * |
-	 * 3---9-6
-	 * | |-3-10
-	 * | |-3-6
-	 * |
-	 * 106
-	 * |
-	 * 5
-	 * @param eventSeq an already existing tree of events 
-	 * @param newSeq   a sequence of events that requires to be appended
-	 * @return
-	 */
-	private Boolean searchAndAppendSequence(Event[] eventSeq, String []newSeq){
-		
-	Integer seqSize=newSeq.length;
-	Integer j;
-	for (j=0; j < seqSize;j++){
-	 	
-		if (!eventSeq[j].event.equals(newSeq[j]))
-				break;
-	}
-	 
-	Integer matchIdx=j-1;
-	 
-	if (matchIdx>=seqSize-1){
-	 	Integer counter= Integer.parseInt(eventSeq[seqSize].event)+1;
-	 	eventSeq[seqSize].event=counter.toString();
-		return true;	
-	}
-	else if (matchIdx <0){
-			return false; // return null if mismatch on the first idx
-	}
-	
-	else {
-		 Event []newEventSeq= new Event[seqSize-matchIdx];//+1 for the count
-		 String [] newTmpSeq= new String [seqSize-matchIdx-1];
-	     Boolean isFound=false;      
-	     Integer i;
-		 for ( i=0; i <newEventSeq.length-1; i++){
-			 		newEventSeq[i]=new Event();
-					newEventSeq[i].event=newSeq[matchIdx+i+1];// that is copy from the next index of matched index
-					newTmpSeq[i]=newSeq[matchIdx+i+1];
-		 }
-		 newEventSeq[i]=new Event();
-		 newEventSeq[i].event="1";// add 1 as a counter at the leaf
-			
-		ArrayList<Event[]> branches= eventSeq[matchIdx].branches;
-	//      When there are no more branches then we shall automatically 
-	//       add a new branch by skipping the if block
-		if (branches!=null){
-	          //if the branches exist then we need to recursively go through the remaining branches to find 
-				// a possible location to append the new sequence
-				
-				for (int bCount=0; bCount<branches.size(); bCount++){
-					Event []branchEventSeq=branches.get(bCount);
-					/// ****** recursive call
-					isFound=searchAndAppendSequence(branchEventSeq,newTmpSeq);
-					/// ****** recursive call
-					if (isFound==true){//{// there is no need to iterate more branches, we have found a match
-						//branches.set(bCount, branchEventSeq);
-						//branches.add(returnSeq);
-						break;
-					}
-		        }
-		}else{
-			branches= new ArrayList<Event[]>();
-		}
-	    //We have just found out where to append a branch in the graph
-	 	  //add a new branch to the event and return the eventSeq.   
-		
-		if (isFound==false)
-			branches.add(newEventSeq);
-	
-		eventSeq[matchIdx].branches=branches;
-		return true;
-		   
-	}
-	// End of function searchAndAddSequence
-   }
-	/**
-	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
-	 * @param console
-	 * @param database
-	 * @param connection
-	 * @throws Exception
-	 */
-	private void saveinDatabase(ProgressConsole console, String database, DBMS connection) throws TotalADSDBMSException{
-		console.printTextLn("Saving in database.....");
-		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
-			
-					
-			Event []events=nodes.getValue(); 
-
-			
-			com.google.gson.Gson gson = new com.google.gson.Gson();
-			
-			JsonElement jsonArray= gson.toJsonTree(events);
-			JsonObject jsonObject= new JsonObject();
-			jsonObject.addProperty("_id", nodes.getKey());
-			jsonObject.add("tree", jsonArray);
-			
-			JsonObject jsonKey=new JsonObject();
-			jsonKey.addProperty("_id", nodes.getKey());
-			
-			//console.printTextLn(jsonObject.toString());
-			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, this.TRACE_COLLECTION);
-			
-			
-		
-		
-			
-		}
-	}
-	/**
-	 * Prints the graph of sequence
-	 * @param console
-	 */
-	private void printSequence(ProgressConsole console, String database) {
-		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
-			// create root: nodes.getKey
-			
-			//console.printTextLn(JSONserialize(events[0]));
-			printRecursive(nodes.getValue(),"", console);
-		/*
-		 Event []events=nodes.getValue(); 
-		 DBMS db=Configuration.connection;
-		
-		com.google.gson.Gson gson = new com.google.gson.Gson();
-		
-		JsonElement jsonArray= gson.toJsonTree(events);
-		JsonObject jsonObject= new JsonObject();
-		jsonObject.addProperty("_id", nodes.getKey());
-		jsonObject.add("tree", jsonArray);
-		
-		JsonObject jsonKey=new JsonObject();
-		jsonKey.addProperty("_id", nodes.getKey());//_id
-		
-		console.printTextLn(jsonObject.toString());
-		DBMS connection=Configuration.connection;
-		
-		//connection.insertUsingJSON(database, jsonObject, this.TRACE_COLLECTION);
-		try {
-			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, this.TRACE_COLLECTION);
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-		}
-		System.out.println(jsonObject.toString());
-		
-		*/
-			
-		}
-		
-	}
-	/**
-	 * This function goes through the tree of Events and print the sequences in a human readable
-	 * form
-	 * @param nodes
-	 * @param prefix
-	 * @param console
-	 */
-	private void printRecursive(Event[] nodes,String prefix, ProgressConsole console){
-	      
-		Boolean isPrefixPrinted=false;
- 		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
-			      
-				  ArrayList<Event[]> branches=nodes[nodeCount].branches;
-				  if (nodeCount==nodes.length-1)
-						prefix=prefix+"-:"+nodes[nodeCount].event;// the last element is the count of the sequence
-				  else	
-				  		prefix=prefix+nodes[nodeCount].event+"-";// just append the events
-				  		//create a two dimesnion key Tree as an array and node as event name 
-				  
-				  if (branches!= null){ // if there are branches on an event then keep
-					 
-					 for(int i=0;i<branches.size(); i++){
-							printRecursive(branches.get(i),prefix,console);
-					   }   
-				  } else {
-				       // create tee withnull
-				    	// Print only when we reach a leaf of a branch
-				    	if (nodeCount==nodes.length-1)
-				    		   		console.printText(prefix);
-				    	
-				    		//console.printText(nodes[nodeCount].event+"-");
-				}
-		}
-	  	console.printNewLine();	    
-	}
-
-	/**
-	 * Searches a matching sequence in the tree
-	 * @param eventSeq Tree
-	 * @param newSeq New sequence
-	 * @return
-	 */
-	private Boolean  searchMatchingSequenceInTree(Event[] eventSeq, String []newSeq){
-		
-		Integer seqSize=newSeq.length;
-		Integer j;
-		for (j=0; j < seqSize;j++){
-		 	if (!eventSeq[j].event.equals(newSeq[j]))
-					break;
-		}
-		 
-		Integer matchIdx=j-1;
-		 
-		if (matchIdx>=seqSize-1)
-		 			return true;	
-		else if (matchIdx <0)
-				return false; // return null if mismatch on the first idx 
-		
-		else {
-			 //Event []newEventSeq= new Event[seqSize-matchIdx];//+1 for the count
-			 String [] newTmpSeq= new String [seqSize-matchIdx-1];
-		     Boolean isFound=false;      
-		     Integer i;
-			 for ( i=0; i <newTmpSeq.length-1; i++){
-				 			// that is copy from the next index of matched index
-						newTmpSeq[i]=newSeq[matchIdx+i+1];
-			 }
-			 	
-			ArrayList<Event[]> branches= eventSeq[matchIdx].branches;
-		//      When there are no more branches then we shall automatically 
-		//       add a new branch by skipping the if block
-			if (branches!=null){
-		          //if the branches exist then we need to recursively go through the remaining branches to find 
-					// a possible location to append the new sequence
-					
-					for (int bCount=0; bCount<branches.size(); bCount++){
-						Event []branchEventSeq=branches.get(bCount);
-						/// ****** recursive call
-						isFound=searchMatchingSequenceInTree(branchEventSeq,newTmpSeq);
-						/// ****** recursive call
-						if (isFound==true)//{// there is no need to iterate more branches, we have found a match
-							break;
-						
-			        }
-			}
-			
-			if (isFound)
-				return true;
-			else
-				return false;
-			   
-		}
-		// End of function searchMatchingSequence
-	   }
-	
-	/**
-	 * Searches a new sequence in the tree and returns the Hamming distance.
-	 * if Hamming distance is zero then a sequence matched  otherwise  Hamming
-	 * distance is equal to the number of mismatches
-	 * @param nodes Tree of events
-	 * @param newSeq Sequence to search
-	 */
-	private Integer getHammingAndSearch(Event[] nodes,String []newSeq){
-	      
-		Boolean isPrefixPrinted=false;
-		Integer hammDis=0, minHammDis=100000000;//initializing minimum hamming distance with a very large number
- 		
-		for (int nodeCount=0; nodeCount<newSeq.length; nodeCount++){
-			      
-				  ArrayList<Event[]> branches=nodes[nodeCount].branches;
-				  if (!nodes[nodeCount].event.equals(newSeq[nodeCount]))	
-				  		 hammDis++;
-				  		
-				  
-				  if (branches!= null){ // if there are branches on an event then keep
-					  	 String [] newTmpSeq= new String [newSeq.length-nodeCount-1];
-					     for ( int i=0; i <newTmpSeq.length; i++)
-					    	 newTmpSeq[i]=newSeq[nodeCount+i+1];// that is copy from the next index of matched index
-									
-						
-					     for(int i=0;i<branches.size(); i++){
-						    	Integer branchHamming= getHammingAndSearch(branches.get(i),newTmpSeq);
-						    	if (branchHamming==0){ // there is no need to hceck further branches
-						    		minHammDis=0;             // we have found a match, as hamming is 0
-						    		break;
-						    	}
-						    	else{
-						    		 if (branchHamming <minHammDis)
-						    			 minHammDis=branchHamming;
-						    	}
-				 	      }   
-				  } 
-		}
-		
-		if (hammDis<minHammDis)
-			minHammDis=hammDis;
-	    
-		return minHammDis;		    
-	}
-
 	/**
 	 * Performs cross validation
 	 */

@@ -39,7 +39,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 /**
- * This class creates GUI elements for the Modeling Tab of TotalADS
+ * This class creates GUI widgets for the Modeling Tab of TotalADS
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
@@ -55,7 +55,7 @@ public class Modeling {
 	private Button btnBuildModel;
 	/**
 	 * Constructor
-	 * @param tabFolderParent Parent tab for the Modeling tab item
+	 * @param tabFolderParent Parent tabFolder object  
 	 */
 	public Modeling(CTabFolder tabFolderParent){
 		// Create a modeling tab
@@ -95,9 +95,12 @@ public class Modeling {
 			           ,SWT.ICON_ERROR|SWT.OK);
 	
 	}
+	
 	/**
-	 * Creates GUI elements for selection of training traces by a user
+	 * 	
+	 * Creates GUI widgets for selection of training traces by a user
 	 * @param comptbItmModeling Modeling composite
+	 * 
 	 */
 	private void selectTrainingTraces(Composite comptbItmModeling){
 		/**
@@ -120,8 +123,10 @@ public class Modeling {
 	
 	
 	/**
+	 * 
 	 * Creates GUI elements to select a trace type and a database
 	 * @param comptbItmModeling Modeling composite
+	 * 
 	 */
 	//Text txtModelingTraces;
 	public void selectTraceTypeAndDatabase(Composite comptbItmModeling){
@@ -200,9 +205,13 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
+	
+	
 	/**
+	 *
 	 * Populates the combo box with models (database) list
 	 * @param filter Filter as a string which needs to be excluded from the list or null for no exclusion
+	 *
 	 */
 	private void populateComboWithDatabaseList(String filter){
 		
@@ -227,7 +236,7 @@ public class Modeling {
 	}
 	
 	/**
-	 * Creates GUI elements for the selection of validation traces
+	 * Creates GUI widgets for the selection of validation traces
 	 * @param comptbItmModeling
 	 */
 	public void validation(Composite comptbItmModeling){
@@ -268,14 +277,12 @@ public class Modeling {
 		traceBrowser.setTextBox(txtValidationTraces);
 		
 	
-		
-		//---------
 		/**
 		 * End group modeling type and traces
 		 */
 	}
    /**
-    * Creates GUI elements for adjustment of settings of an algorithm
+    * Creates GUI widgets for adjustment of settings of an algorithm
     * Shows setting dialog for a selected algorithm
     * @param comptbItmModeling Composite of Modeling
     */
@@ -284,6 +291,8 @@ public class Modeling {
 		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
 		btnSettings.setText("Adjust Settings");
+		
+		//Event handler for Settings button
 		btnSettings.addMouseListener(new MouseAdapter() {
 		
 		@Override
@@ -365,70 +374,6 @@ public class Modeling {
 			}
 		 });
 	}
-/*
-	private class BackgroundModeling extends Thread{
-		String trainingTraces;
-		String selectedDB;
-		Boolean isNewDB;
-		String validationTraces;
-		ITraceTypeReader traceReader;
-
-		public BackgroundModeling(String trainingTraces,String selectedDB, Boolean isNewDB, String validationTraces,ITraceTypeReader traceReader){
-			this.trainingTraces=trainingTraces;
-			this.selectedDB=selectedDB;
-			this.isNewDB=isNewDB;
-			this.validationTraces=validationTraces;
-			this.traceReader=traceReader;
-		}
-			
-		@Override
-		public void run(){
-				String msg=null;
-				
-				try {
-					
-						modelSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
-								
-				} 
-				catch(TotalADSUIException ex){// handle UI exceptions here
-					if (ex.getMessage()==null)
-						msg="Severe error: see log.";	
-					else
-						msg=ex.getMessage();
-				}
-				catch (Exception ex) { // handle all other exceptions here and log them too.
-										//UI exceptions are simply notifications--no need to log them
-										
-					if (ex.getMessage()==null)
-						msg="Severe error: see log.";	
-					else
-						msg=ex.getMessage();
-					ex.printStackTrace();
-				}
-				finally{
-					final String exception=msg;
-					
-					
-					 Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							if (exception!=null){ // if there has been any exception then show its message
-								msgBox.setMessage(exception);
-								msgBox.open();
-							}
-							btnBuildModel.setEnabled(true);
-							
-							//if (isNewDB)
-								//populateComboWithDatabaseList(); //refresh the combo box with new database list
-							
-						}
-					});
-					
-					
-				}
-			}
-	}
-*/
 
 		
 }

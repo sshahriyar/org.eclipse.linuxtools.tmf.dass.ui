@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 //import org.eclipse.wb.swt.SWTResourceManager;
 /**
- * This class creates GUI wdigets for the results and feedback
+ * This class creates GUI wdigets for the results and feedback.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
@@ -48,7 +48,7 @@ public class ResultsAndFeedback {
 	private Composite compResAndFeedback;
 	/**
 	 * Constructor
-	 * @param parent Composite 
+	 * @param parent Composite object
 	 */
 	public ResultsAndFeedback(Composite parent) {
 		detailsAndFeedBack(parent);
@@ -57,7 +57,7 @@ public class ResultsAndFeedback {
 
 	/**
 	 * Creates widgets for details and results
-	 * @param compParent
+	 * @param compParent Composite object
 	 */
 	private void detailsAndFeedBack(Composite compParent){
 		//Group "Feedback: Is it anomaly?"
@@ -156,7 +156,7 @@ public class ResultsAndFeedback {
 	}
 	/**
 	 * Creates widgets or GUI elements for the results 
-	 * @param compParent
+	 * @param compParent Composite object
 	 */
 	
 	private void results(Composite compParent ){
@@ -202,8 +202,8 @@ public class ResultsAndFeedback {
 	}
 	/**
 	 * Assigns a trace and its results to appropriate widgets for viewing in Results and Feedback Section 
-	 * @param traceName
-	 * @param results
+	 * @param traceName Trace name
+	 * @param results Results object
 	 */
 	//HashMap <String, IDetectionAlgorithm.Results> resultsList=new HashMap<String, IDetectionAlgorithm.Results>();
 	public void addTraceResult(String traceName, Results results){
@@ -226,8 +226,9 @@ public class ResultsAndFeedback {
 		}
 		
 	}
-	/** Clears the tree 
+	/** 
 	 * 
+	 * Clears the tree 
 	 */
 	public void clearData(){
 		treeTraceResults.removeAll();
@@ -237,7 +238,7 @@ public class ResultsAndFeedback {
 	}
 	/**
 	 * Sets the summary of results
-	 * @param summary
+	 * @param summary Summary as string
 	 */
 	public void setSummary(String summary){
 		txtSummary.setText(summary);

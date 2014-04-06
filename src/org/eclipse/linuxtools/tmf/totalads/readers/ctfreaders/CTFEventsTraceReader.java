@@ -30,7 +30,8 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 
 /**
- * Class to read CTF traces by using {@link CtfTmfTrace} class.
+ * Class to read every event of  CTF traces not just system calls
+ * by using {@link CtfTmfTrace} class. This is not used right now.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  */
 public class CTFEventsTraceReader implements ITraceTypeReader   {
@@ -144,7 +145,7 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
 	            
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
-	            throw new RuntimeException(e);
+	            throw new TotalADSReaderException(e);
 	      }
 		 
 		 return new CTFEventsIterator(fTrace);

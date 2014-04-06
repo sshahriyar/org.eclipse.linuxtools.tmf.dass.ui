@@ -43,8 +43,8 @@ public class TMFTotalADSView extends TmfView {
 	@Override
 	public void createPartControl(Composite parent) {
 		
-		 comp=new TotalADS(parent,SWT.NONE);
-		
+		comp=new TotalADS(parent,SWT.NONE);
+		comp.setFocus();
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));

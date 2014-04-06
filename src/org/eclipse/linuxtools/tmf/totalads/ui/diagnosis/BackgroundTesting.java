@@ -1,42 +1,82 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.io.File;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 
 /**
- * This class tests a model by launching a thread
+ * This class evaluates an already created model by running in background as thread. it is instantiated and executed 
+ * from the {@link ModelLoader} class.
  * @author <p> Syed Shariyar Murtaza justssahry@hotmail.com </p>
  */
 
 public class BackgroundTesting extends Thread{
-	String testDirectory;
-	ITraceTypeReader traceReader;
-	IDetectionAlgorithm model;
-	String database;
+	private String testDirectory;
+	private ITraceTypeReader traceReader;
+	private IDetectionAlgorithm model;
+	private String database;
+	private Label lblProgress;
+	private Button btnDelete;
+	private Button btnSettings;
+	private Button btnAnalysisEvaluateModels;
+	private ResultsAndFeedback resultsAndFeedback;
+	String []modelOptions;
 	/**
-	 * Constructor
-	 * @param testDirectory
-	 * @param traceReader
-	 * @param model
-	 * @param database
+	 * Constructor to create an object of BackgroundTesting
+	 * @param testDirectory Test directory
+	 * @param traceReader Trace reader
+	 * @param algorithm Algorithm
+	 * @param database Database
+	 * @param lblProg Progress label
+	 * @param btnDelete Delete button
+	 * @param btnSettings Settings button
+	 * @param btnEvaluate Evaluate button
+	 * @param resultsAndFeedback Results and Feedback
+	 * @param algorithmSettings Algorithm settings
 	 */
-	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database){
+	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database,
+				Label lblProg, Button btnDelete, Button btnSettings, Button btnEvaluate, ResultsAndFeedback resultsAndFeedback
+				, String []algorithmSettings){
 		this.testDirectory=testDirectory;
 		this.traceReader=traceReader;
-		this.model=model;
+		this.model=algorithm;
 		this.database=database;
+		this.lblProgress=lblProg;
+		this.btnDelete=btnDelete;
+		this.btnSettings=btnSettings;
+		this.btnAnalysisEvaluateModels=btnEvaluate;
+		this.resultsAndFeedback=resultsAndFeedback;
+		this.modelOptions=algorithmSettings;
 	}
 	
-	
+	/**
+	 * Overridden function to run a thread
+	 */
 		
 	@Override
 	public void run(){
@@ -48,19 +88,33 @@ public class BackgroundTesting extends Thread{
 							
 			} 
 			catch(TotalADSUIException ex){// handle UI exceptions here
+										 //UI exceptions are simply notifications--no need to log them
 				if (ex.getMessage()==null)
-					msg="Severe error: see log.";	
+					msg="UI error";	
 				else
 					msg=ex.getMessage();
 			}
-			catch (Exception ex) { // handle all other exceptions here and log them too.
-									//UI exceptions are simply notifications--no need to log them
-									
+			catch(TotalADSDBMSException ex){// handle DBMS exceptions here
+				if (ex.getMessage()==null)
+					msg="DBMS error: see log.";	
+				else
+					msg="DBMS error: "+ex.getMessage();
+				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
+			}
+			catch(TotalADSReaderException ex){// handle Reader exceptions here
+				if (ex.getMessage()==null)
+					msg="Reader error: see log.";	
+				else
+					msg="Reader error:"+ex.getMessage();
+				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
+			}
+			catch (Exception ex) { // handle all other exceptions here and log them too
 				if (ex.getMessage()==null)
 					msg="Severe error: see log.";	
 				else
 					msg=ex.getMessage();
-				ex.printStackTrace();
+				Logger.getLogger(BackgroundTesting.class.getName()).log(Level.SEVERE, msg, ex);
+	
 			}
 			finally{
 				
@@ -69,7 +123,9 @@ public class BackgroundTesting extends Thread{
 				 Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
+						
 						if (exception!=null){ // if there has been any exception then show its message
+							MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 							msgBox.setMessage(exception);
 							msgBox.open();
 						}
@@ -82,26 +138,29 @@ public class BackgroundTesting extends Thread{
 				});
 				
 				
-			}//End finally
-	}
+			}//End of finally
+	}// end of function
 			
 	/**
-	 * Tests the model
-	 * @param testDirectory
-	 * @param traceReader
-	 * @param model
-	 * @param database
+	 * Tests the model agaisnt a set of traces
+	 * @param testDirectory Test directory
+	 * @param traceReader Trace reader
+	 * @param algorithm Algorithm of the model
+	 * @param database Databse
 	 * @throws TotalADSUIException
-	 * @throws Exception
+	 * @throws TotalADSReaderException 
+	 * @throws TotalADSDBMSException 
+	 * 
 	 */
-	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm model, String database ) throws TotalADSUIException,Exception {
+	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database )
+			throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
 				
 				
 			// First verify selections
 			Boolean isLastTrace=false;
 					
-			if (!checkItemSelection())
-				throw new TotalADSUIException("Please, first select a model!");
+			//if (!checkItemSelection())
+				//throw new TotalADSUIException("Please, first select a model!");
 	       if (testDirectory.isEmpty())
 	    	   throw new TotalADSUIException("Please, first select a trace!");
 			
@@ -127,12 +186,14 @@ public class BackgroundTesting extends Thread{
 				final int counter=trcCnt+1;
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
-					public void run() {lblProgress.setText("Processing trace #"+counter+"..."); }
+					public void run() {
+						lblProgress.setText("Processing trace #"+counter+"..."); 
+						}
 				});
 				 
 				ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 		 					
-		 		final Results results= model.test(trace, database, connection, modelOptions);
+		 		final Results results= algorithm.test(trace, database, connection, modelOptions);
 		 		final String traceName=fileList[trcCnt].getName();
 		 		
 		 		Display.getDefault().syncExec(new Runnable() {
@@ -148,8 +209,8 @@ public class BackgroundTesting extends Thread{
 		 		
 			}
 	       
-	     // print summary
-			final String summary=model.getSummaryOfTestResults();
+	     // Third, print summary
+			final String summary=algorithm.getSummaryOfTestResults();
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -161,9 +222,10 @@ public class BackgroundTesting extends Thread{
 	}
 	
 	/**
-	 * Get a directory handle, if there is only one file it returns an array of size one
-	 * @param trainDirectory
-	 * @return File[]
+	 *  Get a directory handle, if there is only one file it returns an array of size one
+	 * @param testDirectory Test directory
+	 * @param traceReader Trace reader
+	 * @return list of files
 	 */
 	private File[] getDirectoryHandler(String testDirectory, ITraceTypeReader traceReader){
 		

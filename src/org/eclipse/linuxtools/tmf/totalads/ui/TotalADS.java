@@ -78,7 +78,7 @@ public class TotalADS  {
 			trcTypeFactory.initialize();
 			// Intialize the logger
 			handler=null;
-			handler= new  FileHandler("log.xml");
+			handler= new  FileHandler("totaladslog.xml");
             Logger.getLogger("").addHandler(handler);
 			//super(parent, style);
             // Intialize the parent composite GUI Layout
