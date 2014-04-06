@@ -1,8 +1,19 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+
+package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 
 import java.io.File;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
@@ -10,6 +21,8 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,19 +36,23 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
 
+/**
+ * This class loads algorithms from the {@link AlgorithmFactory} and creates appropriate GUI elements
+ * @author <p> Syed Shariyar Murtaza jsutsshary@hotmail.com</p>
+ *
+ */
 
+public class AlgorithmSelector {
+	private Group grpAnalysisModelSelection=null;
+	private Button btnAnalysisEvaluateModels=null;
+	private Tree treeAnalysisModels=null;
+	private MessageBox msgBox;
+	private TreeItem currentlySelectedTreeItem=null;
+	private IDetectionAlgorithm currentlySelectedModel;
+	private Settings settingsDialog;
+	private String []modelOptions;
 
-public class ModelSelector {
-	Group grpAnalysisModelSelection=null;
-	Button btnAnalysisEvaluateModels=null;
-	Tree treeAnalysisModels=null;
-	MessageBox msgBox;
-	TreeItem currentlySelectedTreeItem=null;
-	IDetectionAlgorithm currentlySelectedModel;
-	Settings settingsDialog;
-	String []modelOptions;
-
-	public ModelSelector(Composite comptbtmAnalysis){
+	public AlgorithmSelector(Composite comptbtmAnalysis){
 		
 
 		/**
@@ -55,7 +72,7 @@ public class ModelSelector {
 		TreeItem treeItmAnom = new TreeItem(treeAnalysisModels, SWT.NONE);
 		treeItmAnom.setText("Anomaly Detection");
 		
-		populateTreeItems(treeItmAnom,AlgorithmFactory.ModelTypes.Anomaly);
+		populateTreeItems(treeItmAnom,AlgorithmTypes.ANOMALY);
 		
 		treeItmAnom.setExpanded(true);
 		//TreeItem itm= new TreeItem(treeItmAnom, SWT.NONE);
@@ -97,13 +114,13 @@ public class ModelSelector {
 	/**
 	 * populates the tree with the list of models from the model factory
 	 */
-	private void populateTreeItems(TreeItem treeItem,AlgorithmFactory.AlgorithmTypes modelType){
+	private void populateTreeItems(TreeItem treeItem,AlgorithmTypes algorithmTypes){
 			///////data
 			AlgorithmFactory  modFac=AlgorithmFactory.getInstance();
 			
 		    // populating anomaly detection models		
 		    
-			IDetectionAlgorithm []models  = modFac.getModels(modelType);
+			IDetectionAlgorithm []models  = modFac.getModels(algorithmTypes);
 			
 			if (models!=null){
 				TreeItem []items=new TreeItem[models.length];

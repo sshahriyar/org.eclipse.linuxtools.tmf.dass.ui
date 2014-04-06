@@ -1,60 +1,59 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
-import java.util.ArrayList;
-
+//import java.util.ArrayList;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+//import org.eclipse.swt.layout.GridLayout;
+//import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-
+//import org.eclipse.swt.widgets.Group;
+//import org.eclipse.swt.widgets.Label;
+//import org.eclipse.swt.widgets.Text;
+//import org.eclipse.swt.widgets.TreeItem;
+//import org.eclipse.wb.swt.SWTResourceManager;
+//import org.eclipse.swt.events.SelectionAdapter;
+//import org.eclipse.swt.events.SelectionEvent;
+//import org.eclipse.swt.events.SelectionListener;
+/**
+ * Creates a combo box and populates it with all the trace types registered with the TraceTypeFactory
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class TracingTypeSelector {
-	Combo cmbTraceTypes;
-	TraceTypeFactory  traceFac=TraceTypeFactory.getInstance();
+	private Combo cmbTraceTypes;
+	private TraceTypeFactory  traceFac;
 	//ArrayList<IObserver> observers=new ArrayList<IObserver>();
 	/**
-	 * Creates a combo box and populates it with all the trace types registered with the TraceTypeFactory
-	 * @param parent
+	 * Constructor
+	 * @param parent Composite
 	 */
 	public TracingTypeSelector(Composite parent){
 		/*
 		 * Trace Type Selection
 		 */
-		
-
-		
+		traceFac=TraceTypeFactory.getInstance();
 		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY);
-		
 		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-	
 		populateCombo(cmbTraceTypes);
-		
-		/*cmbTraceTypes.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				String key= cmbTraceTypes.getItem(cmbTraceTypes.getSelectionIndex());
-				String traceAcronym= traceFac.getTraceReader(key).getAcronym();
-			    notifyObservers(traceAcronym);
-				
-			}
-			
-		});*/
+	
 		
 	}
 	/**
-	 * 
-	 * @param combTraceTypes
+	 * Populates the combo box with the Trace readers
+	 * @param combTraceTypes Combo box which need to be populated
 	 */
 	private void populateCombo(Combo combTraceTypes){
 		
@@ -69,10 +68,9 @@ public class TracingTypeSelector {
 	}
 	/**
 	 * Returns the ITraceTypeReader for the selected trace type
-	 * @return
+	 * @return A trace reader
 	 */
 	public ITraceTypeReader getSelectedType(){
-		
 		
 		String key= cmbTraceTypes.getItem(cmbTraceTypes.getSelectionIndex());
 		return traceFac.getTraceReader(key);
@@ -80,7 +78,7 @@ public class TracingTypeSelector {
 
 	/**
 	 * Selects a trace type reader in the combo box
-	 * @param traceTypeName
+	 * @param traceTypeName Type of the trace
 	 */
 	public void selectTraceType(String traceTypeName){
 		for (int i=0;i<cmbTraceTypes.getItemCount();i++)
@@ -90,19 +88,4 @@ public class TracingTypeSelector {
 			}
 		}
 	
-  //Observer methods implemented without any Subject/Observee interface
-	/*public void addObserver(IObserver observer){
-		observers.add(observer);
-		
-	}
-	public void removeObserver(IObserver observer){
-		observers.remove(observer);
-		
-	}
-	
-	public void notifyObservers(String traceAcronym){
-		for (IObserver ob: observers)
-			ob.update(traceAcronym);
-	}
-	*/
 }

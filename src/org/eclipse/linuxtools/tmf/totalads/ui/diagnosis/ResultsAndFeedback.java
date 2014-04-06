@@ -1,77 +1,104 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 
-import java.util.HashMap;
+package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
-import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+//import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
+//import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+//import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+//import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.wb.swt.SWTResourceManager;
-
+//import org.eclipse.wb.swt.SWTResourceManager;
+/**
+ * This class creates GUI wdigets for the results and feedback
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
+ *
+ */
 public class ResultsAndFeedback {
-	Tree treeTraceResults;
-	Text txtAnalysisCurrentAnomaly;
-	Text txtSummary;
-	Text txtAnalysisDetails;
-	IDetectionAlgorithm.Results currentTraceResults=null;
-	
+	private Tree treeTraceResults;
+	private Text txtAnalysisCurrentAnomaly;
+	private Text txtSummary;
+	private Text txtAnalysisDetails;
+	private Results currentTraceResults;
+	private Label lblAnalysisCurrentAnomaly;
+	private Group grpAnalysisResults;
+	private Label lblSummary;
+	private Label lblDetails;
+	private Group grpAnalysisIdentify;
+	private Composite compTraceList;
+	private Label lblTreeTraceResult;
+	private Composite compResAndFeedback;
+	/**
+	 * Constructor
+	 * @param parent Composite 
+	 */
 	public ResultsAndFeedback(Composite parent) {
 		detailsAndFeedBack(parent);
+		currentTraceResults=null;
 	}
 
 	/**
-	 * 
-	 * @param comptbtmAnalysis
+	 * Creates widgets for details and results
+	 * @param compParent
 	 */
-	private void detailsAndFeedBack(Composite comptbtmAnalysis){
+	private void detailsAndFeedBack(Composite compParent){
 		//Group "Feedback: Is it anomaly?"
-				Group grpAnalysisIdentify = new Group(comptbtmAnalysis, SWT.NONE);
+				grpAnalysisIdentify = new Group(compParent, SWT.NONE);
 				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
 				//grpAnalysisIdentify.setText("Results and Feedback");
 				grpAnalysisIdentify.setText("Results");
 				grpAnalysisIdentify.setLayout(new GridLayout(2,false));
                 
 				/// Trace list
-				Composite compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
+				compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
 				compTraceList.setLayout(new GridLayout(1,false));
 				compTraceList.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
 				
-				Label lblTreeTraceResult=new Label(compTraceList,SWT.NONE);
+				lblTreeTraceResult=new Label(compTraceList,SWT.NONE);
 				lblTreeTraceResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
 				lblTreeTraceResult.setText("Trace List (Select to see results)");
 				
 				treeTraceResults=new Tree(compTraceList , SWT.BORDER |  SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 				treeTraceResults.setLinesVisible(true);
 				treeTraceResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,1,5));
-				
+				//
+				// Event handler for the tree
+				//
 				treeTraceResults.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
 						TreeItem item =(TreeItem)e.item;
-						IDetectionAlgorithm.Results results=(IDetectionAlgorithm.Results)item.getData();
+						Results results=(Results)item.getData();
 						currentTraceResults=results;
-						if (results.isAnomaly && (results.anomalyType!=null && !results.anomalyType.isEmpty()))
-							txtAnalysisCurrentAnomaly.setText(results.anomalyType);
+						if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
+							txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
 						else
-							txtAnalysisCurrentAnomaly.setText(results.isAnomaly.toString());
+							txtAnalysisCurrentAnomaly.setText(results.getAnomaly().toString());
 						
-					 txtAnalysisDetails.setText(results.details.toString());	
+					 txtAnalysisDetails.setText(results.getDetails().toString());	
 					}
 				});
 				
 				
-				Composite compResAndFeedback=new Composite(grpAnalysisIdentify, SWT.NONE);
+				compResAndFeedback=new Composite(grpAnalysisIdentify, SWT.NONE);
 			    compResAndFeedback.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 			    compResAndFeedback.setLayout(new GridLayout(1,false));
 			    
@@ -128,15 +155,16 @@ public class ResultsAndFeedback {
 
 	}
 	/**
-	 * 
-	 * @param comptbtmAnalysis
+	 * Creates widgets or GUI elements for the results 
+	 * @param compParent
 	 */
-	private void results(Composite comptbtmAnalysis ){
+	
+	private void results(Composite compParent ){
 		/**
 		 * Result
 		 *
 		 */
-		Group grpAnalysisResults=new Group(comptbtmAnalysis,SWT.NONE);
+		grpAnalysisResults=new Group(compParent,SWT.NONE);
 		GridData gridDataResult=new GridData(SWT.FILL,SWT.FILL,true,true);
 		gridDataResult.horizontalSpan=1;
 		grpAnalysisResults.setLayoutData(gridDataResult);
@@ -144,7 +172,7 @@ public class ResultsAndFeedback {
 		//grpAnalysisResults.setText("");
 
 		
-		Label lblAnalysisCurrentAnomaly = new Label(grpAnalysisResults, SWT.NONE);
+		lblAnalysisCurrentAnomaly = new Label(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
 		lblAnalysisCurrentAnomaly.setText("Anomaly (Anomaly Type)");
 		
@@ -152,7 +180,7 @@ public class ResultsAndFeedback {
 		txtAnalysisCurrentAnomaly.setEditable(false);
 		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
 		
-		Label lblSummary = new Label(grpAnalysisResults, SWT.NONE);
+		lblSummary = new Label(grpAnalysisResults, SWT.NONE);
 		lblSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
 		lblSummary.setText("Total Anomalies");
 		
@@ -160,14 +188,14 @@ public class ResultsAndFeedback {
 		txtSummary.setEditable(false);
 		txtSummary.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
 		
-		Label lblDetails=new Label(grpAnalysisResults,SWT.NONE);
+		lblDetails=new Label(grpAnalysisResults,SWT.NONE);
 		lblDetails.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 		lblDetails.setText("Details");
 		
 		txtAnalysisDetails = new Text(grpAnalysisResults, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
 		txtAnalysisDetails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,2,2));
 	
-				/**
+		/**
 		 * End result group
 		 * 
 		 */
@@ -178,7 +206,7 @@ public class ResultsAndFeedback {
 	 * @param results
 	 */
 	//HashMap <String, IDetectionAlgorithm.Results> resultsList=new HashMap<String, IDetectionAlgorithm.Results>();
-	public void addTraceResult(String traceName, IDetectionAlgorithm.Results results){
+	public void addTraceResult(String traceName, Results results){
 		
 		if (!traceName.isEmpty() && results!=null){
 		
@@ -187,12 +215,12 @@ public class ResultsAndFeedback {
 			item.setData(results);
 			if (treeTraceResults.getItemCount()==1){
 				
-				if (results.isAnomaly && (results.anomalyType!=null && !results.anomalyType.isEmpty()))
-					txtAnalysisCurrentAnomaly.setText(results.anomalyType);
+				if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
+					txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
 				else
-					txtAnalysisCurrentAnomaly.setText(results.isAnomaly.toString());
+					txtAnalysisCurrentAnomaly.setText(results.getAnomaly().toString());
 				
-				txtAnalysisDetails.setText(results.details.toString());
+				txtAnalysisDetails.setText(results.getDetails().toString());
 			}
 				
 		}
@@ -208,7 +236,8 @@ public class ResultsAndFeedback {
 		txtSummary.setText("");
 	}
 	/**
-	 * Sets the sumamry of results
+	 * Sets the summary of results
+	 * @param summary
 	 */
 	public void setSummary(String summary){
 		txtSummary.setText(summary);

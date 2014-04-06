@@ -1,9 +1,16 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
-
-
 import java.io.File;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -15,21 +22,21 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.KeyEvent;
 /**
- * 
- * @author Syed Shariyar Murtaza 
+ * This class takes care of the browsing capabilities of files on a hard disk
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  *
  */
 public class TraceBrowser {
-	Button btnTraceBrowser;
-	Composite parent;
-	Text txtPath;
-	Text txtTraceID,txtTraceSource,txtTraceCounter;
+	private Button btnTraceBrowser;
+	private Composite parent;
+	private Text txtPath;
+	private Text txtTraceID,txtTraceSource,txtTraceCounter;
 	
 	/**
-	 * 
-	 * @param parent
-	 * @param txtBox
-	 * @param gridData
+	 * onstructor
+	 * @param parent Composites
+	 * @param txtBox Textbox
+	 * @param gridData GriaData Layout
 	 */
 	public TraceBrowser(Composite parent, Text txtBox, GridData gridData ){
 		this.txtPath=txtBox;
@@ -42,9 +49,9 @@ public class TraceBrowser {
 				
 	}
 	/**
-	 * 
-	 * @param parent
-	 * @param gridData
+	 * Constructor
+	 * @param parent Composite
+	 * @param gridData Griddata Layout
 	 */
 	public TraceBrowser(Composite parent, GridData gridData ){
 		
@@ -57,31 +64,19 @@ public class TraceBrowser {
 				
 	}
 	/**
-	 * 
-	 * @param text
+	 * Sets the trace  path text box to a local variable, which is updated when a user clicks browse
+	 * @param text 
 	 */
 	public void setTextBox(Text text){
 		this.txtPath=text;
 	}
-	
-	/** inner class for mouse up event on the button
-	  */
-    private class MouseUpEvent extends MouseAdapter {
-	 	@Override
-	 	public void mouseUp(MouseEvent e) {
-	 		directoryDialog();
-	 	}
-	 }
-    
-    /**inner class for key press event on the button
-     */
-    private class KeyPressEvent extends KeyAdapter{
-	 	@Override
-	 	public void keyPressed(KeyEvent e) {
-	 		directoryDialog();
-	 	}
-    }
-    
+	/**
+	 *  This method takes the reference to Text boxes in the currently selected trace group and updates
+	 *  them when the a user selects the directory dialog
+	 * @param txtTraceID
+	 * @param txtTraceSource
+	 * @param txtTraceCount
+	 */
     public void setTextSelectedTraceFields(Text txtTraceID,Text txtTraceSource,Text txtTraceCount){
     	this.txtTraceID=txtTraceID;
     	this.txtTraceSource=txtTraceSource;
@@ -118,27 +113,27 @@ public class TraceBrowser {
         
     }
 	
-    
-    // code for testing only
-    /*
-	public static void main(String args[]) {
-		  org.eclipse.swt.widgets.Display display = new org.eclipse.swt.widgets.Display();
-		  org.eclipse.swt.widgets.Shell shell = new org.eclipse.swt.widgets.Shell(display);
-		  shell.setText("TreeExample");
-		  
-		  shell.setLayout(new org.eclipse.swt.layout.GridLayout(1, false));
-		  TraceBrowser tb= new TraceBrowser(shell, new StringBuilder());
-		 
-		 Button btnNewButton = new Button(shell, SWT.NONE);
-				 btnNewButton.setText("New Button");
-		  shell.open();
-		  while (!shell.isDisposed()) {
-		    if (!display.readAndDispatch()) {
-		      display.sleep();
-		    }
-		  }
-		  display.dispose();
+	/////////////////////////////////////////////////////////////////////////////////////
+	//
+	//Inner classes for listeners of GUI elements (widgets)
+	//
+	///////////////////////////////////////////////////////////////////////////////////
+	/** Inner class for mouse up event on the button  */
+	private class MouseUpEvent extends MouseAdapter {
+		@Override
+		public void mouseUp(MouseEvent e) {
+		directoryDialog();
 		}
-		*/
+	}
+	
+	/**Inner class for key press event on the button     */
+	private class KeyPressEvent extends KeyAdapter{
+		@Override
+		public void keyPressed(KeyEvent e) {
+		directoryDialog();
+		}
+	}
+
+  
 	
 }

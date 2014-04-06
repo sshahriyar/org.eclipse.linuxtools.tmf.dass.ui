@@ -1,4 +1,13 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 import java.util.List;
 
@@ -6,6 +15,9 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -26,46 +38,50 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 
-
+/**
+ * This class creates GUI elements for the Modeling Tab of TotalADS
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class Modeling {
-	ModelSelector modelSelector=null;
-	TracingTypeSelector traceTypeSelector=null;
-	Text txtTrainingTraces;
-	Text txtValidationTraces=null;
-	MessageBox msgBox;
-	//String selectedDB;
-	Combo cmbDBNames;
-	Text txtNewDBName;
-	ProgressConsole  progConsole;
-	Button btnBuildModel;
-	
-	public Modeling(CTabFolder tabFolderDetector){
-		
-		
-		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
-		
-		CTabItem tbtmModeling = new CTabItem(tabFolderDetector, SWT.NONE);
-		tbtmModeling.setText("Modeling");
+	private AlgorithmSelector modelSelector;
+	private TracingTypeSelector traceTypeSelector;
+	private Text txtTrainingTraces;
+	private Text txtValidationTraces;
+	private MessageBox msgBox;
+	private Combo cmbDBNames;
+	private Text txtNewDBName;
+	private ProgressConsole  progConsole;
+	private Button btnBuildModel;
+	/**
+	 * Constructor
+	 * @param tabFolderParent Parent tab for the Modeling tab item
+	 */
+	public Modeling(CTabFolder tabFolderParent){
+		// Create a modeling tab
+		CTabItem tbItmModeling = new CTabItem(tabFolderParent, SWT.NONE);
+		tbItmModeling.setText("Modeling");
 		
 		GridLayout gridTwoColumns=new GridLayout(4,false);
 		
-		
+		//Make it scrollable 
+		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbtmModeling = new Composite(scrolCompModel, SWT.NONE);
 		comptbtmModeling.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		comptbtmModeling.setLayout(gridTwoColumns);
 		
-		tbtmModeling.setControl(scrolCompModel);
+		tbItmModeling.setControl(scrolCompModel);
 		
 		selectTrainingTraces(comptbtmModeling);
 		selectTraceTypeAndDatabase(comptbtmModeling);
 		
-		modelSelector=new ModelSelector(comptbtmModeling);
+		modelSelector=new AlgorithmSelector(comptbtmModeling);
 		
 		validation(comptbtmModeling);
 	    
 		adjustSettings(comptbtmModeling);
 		buildModel(comptbtmModeling);
-		
+		//Initialize progress console
 	    progConsole=new ProgressConsole(comptbtmModeling);
 		
 	    scrolCompModel.setContent(comptbtmModeling);
@@ -80,16 +96,14 @@ public class Modeling {
 	
 	}
 	/**
-	 * 
-	 * @param comptbtmModeling
+	 * Creates GUI elements for selection of training traces by a user
+	 * @param comptbItmModeling Modeling composite
 	 */
-	//StringBuilder trainingTracePath=new StringBuilder();
-	
-	public void selectTrainingTraces(Composite comptbtmModeling){
+	private void selectTrainingTraces(Composite comptbItmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
-		Group grpTracesModeling=new Group(comptbtmModeling, SWT.NONE);
+		Group grpTracesModeling=new Group(comptbItmModeling, SWT.NONE);
 		grpTracesModeling.setText("Select Training Traces");
 		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 		grpTracesModeling.setLayout(new GridLayout(1,false));//gridTwoColumns);
@@ -97,29 +111,24 @@ public class Modeling {
 
 		txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
 		txtTrainingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		
+		// instantiate an object of trace browser
 		new TraceBrowser(grpTracesModeling,txtTrainingTraces,new GridData(SWT.LEFT,SWT.TOP,false,false));
-		
-		//Button btnTrainingBrowse =new Button(grpTracesModeling, SWT.NONE);
-		//btnTrainingBrowse.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
-		//btnTrainingBrowse.setText("Browse Directory");
-		
-		
+				
 	}
 	
 	
 	
 	
 	/**
-	 * 
-	 * @param comptbtmModeling
+	 * Creates GUI elements to select a trace type and a database
+	 * @param comptbItmModeling Modeling composite
 	 */
 	//Text txtModelingTraces;
-	public void selectTraceTypeAndDatabase(Composite comptbtmModeling){
+	public void selectTraceTypeAndDatabase(Composite comptbItmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
-		Group grpTraceTypesAndDB=new Group(comptbtmModeling, SWT.NONE);
+		Group grpTraceTypesAndDB=new Group(comptbItmModeling, SWT.NONE);
 		grpTraceTypesAndDB.setText("Trace Type and DB");
 		grpTraceTypesAndDB.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 		grpTraceTypesAndDB.setLayout(new GridLayout(3,false));//gridTwoColumns);
@@ -146,7 +155,9 @@ public class Modeling {
 		txtNewDBName.setTextLimit(7);
 		//txtNewDBName.setEnabled(false);
 		populateComboWithDatabaseList(null);
-		
+		//
+		//Event handler for db name combo box
+		//
 		cmbDBNames.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -191,6 +202,7 @@ public class Modeling {
 	}
 	/**
 	 * Populates the combo box with models (database) list
+	 * @param filter Filter as a string which needs to be excluded from the list or null for no exclusion
 	 */
 	private void populateComboWithDatabaseList(String filter){
 		
@@ -215,14 +227,14 @@ public class Modeling {
 	}
 	
 	/**
-	 * 
-	 * @param comptbtmModeling
+	 * Creates GUI elements for the selection of validation traces
+	 * @param comptbItmModeling
 	 */
-	public void validation(Composite comptbtmModeling){
+	public void validation(Composite comptbItmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
-		Group grpValidation=new Group(comptbtmModeling, SWT.NONE);
+		Group grpValidation=new Group(comptbItmModeling, SWT.NONE);
 		grpValidation.setText("Validation");
 		grpValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
 		grpValidation.setLayout(new GridLayout(2,false));//gridTwoColumns);
@@ -263,12 +275,13 @@ public class Modeling {
 		 */
 	}
    /**
+    * Creates GUI elements for adjustment of settings of an algorithm
     * Shows setting dialog for a selected algorithm
-    * @param comptbtmModeling
+    * @param comptbItmModeling Composite of Modeling
     */
-	public void adjustSettings(Composite comptbtmModeling){
+	private void adjustSettings(Composite comptbItmModeling){
 		
-		Button btnSettings=new Button(comptbtmModeling,SWT.NONE);
+		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
 		btnSettings.setText("Adjust Settings");
 		btnSettings.addMouseListener(new MouseAdapter() {
@@ -289,14 +302,18 @@ public class Modeling {
 	
 	/**
 	 * Method to handle model building button
-	 * @param comptbtmModeling
+	 * @param comptbItmModeling Modeling composite
 	 */
 	
-	public void buildModel(Composite comptbtmModeling){
+	public void buildModel(Composite comptbItmModeling){
 		
-		btnBuildModel=new Button(comptbtmModeling,SWT.NONE);
+		btnBuildModel=new Button(comptbItmModeling,SWT.NONE);
 		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
 		btnBuildModel.setText("Start building the model");
+		
+		//
+		//Event handler for mouse up event
+		//
 		btnBuildModel.addMouseListener(new MouseAdapter() {
 		
 		@Override
@@ -339,14 +356,16 @@ public class Modeling {
 						}
 						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
-						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, selectedDB, isNewDB, validationTraces,traceReader);
+						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, selectedDB, isNewDB, 
+												validationTraces,traceReader,modelSelector,progConsole,
+												btnBuildModel);
 						modeling.start();
 				
 				
 			}
 		 });
 	}
-
+/*
 	private class BackgroundModeling extends Thread{
 		String trainingTraces;
 		String selectedDB;
@@ -398,6 +417,7 @@ public class Modeling {
 								msgBox.open();
 							}
 							btnBuildModel.setEnabled(true);
+							
 							//if (isNewDB)
 								//populateComboWithDatabaseList(); //refresh the combo box with new database list
 							
@@ -408,7 +428,7 @@ public class Modeling {
 				}
 			}
 	}
-	
+*/
 
 		
 }

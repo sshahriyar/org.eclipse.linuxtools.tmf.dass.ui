@@ -1,9 +1,19 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
-
-
-//import org.eclipse.jface.layout.TableColumnLayout;
 //import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
+import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.swt.SWT;
 //import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
@@ -23,66 +33,70 @@ import org.eclipse.swt.widgets.Label;
 //import org.eclipse.swt.widgets.TableColumn;
 //import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-//import org.eclipse.swt.widgets.Tree;
-//import org.eclipse.swt.widgets.TreeItem;
-//import org.eclipse.wb.swt.SWTResourceManager;
 
-//import com.sun.media.sound.ModelConnectionBlock;
-
+/**
+ * This class creates the GUI elements for disgnosis.
+ * It creates a diagnois tab and then creates other GUI elemtns within itself.
+ * 
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class Diagnosis {
-	//Table tblAnalysisTraceList;
+	//Intializes variables
 	private TracingTypeSelector traceTypeSelector;
-	Text txtTraceID;
-	Text txtTraceSource;
-	Text txtTraceCount;
-	Text txtTestTraceDir;
-	TraceBrowser traceBrowser;
-	StringBuilder tracePath=new StringBuilder();
-	ModelLoader modelLoader;
-	ResultsAndFeedback resultsAndFeedback;
-	
-	public Diagnosis(CTabFolder tabFolderDetector) throws Exception{
+	private Text txtTraceID;
+	private Text txtTraceSource;
+	private Text txtTraceCount;
+	private Text txtTestTraceDir;
+	private TraceBrowser traceBrowser;
+	private StringBuilder tracePath; 
+	private ModelLoader modelLoader;
+	//private ResultsAndFeedback resultsAndFeedback;
+	/**
+	 * Constructor
+	 */
+	public Diagnosis(CTabFolder tabFolderParent) throws Exception{
+		tracePath=new StringBuilder();
+		//Diagnosis Tab Item
+		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
+		tbItmDiagnosis.setText("Diagnosis");
+		//Making scrollable tab item 
+		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
+		tbItmDiagnosis.setControl(scrolCompAnom);
 		
-		CTabItem tbtmAnalysis = new CTabItem(tabFolderDetector, SWT.NONE);
-		tbtmAnalysis.setText("Diagnosis");
-		
-		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderDetector, SWT.H_SCROLL | SWT.V_SCROLL);
-		
-		Composite comptbtmAnalysis = new Composite(scrolCompAnom,SWT.NONE);
-		tbtmAnalysis.setControl(scrolCompAnom);
-		
-		
+		//Desiging the Layout of the GUI Items  for the Diagnosis Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
-		comptbtmAnalysis.setLayoutData(gridData);
-		comptbtmAnalysis.setLayout(new GridLayout(2, false));
-		
-		selectTraceTypeAndTraces(comptbtmAnalysis);
-		currentlySelectedTrace(comptbtmAnalysis);
-		
-		modelLoader=new ModelLoader(comptbtmAnalysis);
+		comptbItmDiagnosis.setLayoutData(gridData);
+		comptbItmDiagnosis.setLayout(new GridLayout(2, false));
+		// Create GUI elements for selection of a trace type
+		selectTraceTypeAndTraces(comptbItmDiagnosis);
+		// Create GUI elements for a selection of a trace
+		currentlySelectedTrace(comptbItmDiagnosis);
+		//Initialize a class which loads model names from db and create appropriate GUI elements
+		modelLoader=new ModelLoader(comptbItmDiagnosis);
 		modelLoader.setTrace(tracePath);
 		modelLoader.setTraceTypeSelector(traceTypeSelector);
-
-		scrolCompAnom.setContent(comptbtmAnalysis);
+		
+		//Adjust settings for scrollable Diagnosis Tab Item
+		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
 		scrolCompAnom.setMinSize(500, 500);
-
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
 	}
 
-	
 	/**
-	 * 
-	 * @param comptbtmAnalysis
+	 * Creates GU elements for a selection of traces and trace types
+	 * @param compDiagnosis Composite of Diagnosis
 	 */
-	private void selectTraceTypeAndTraces(Composite comptbtmAnalysis){
+	private void selectTraceTypeAndTraces(Composite compDiagnosis){
 		/**
 		 *  Group trace selection
 		 */
-		Group grpTraceSelection = new Group(comptbtmAnalysis, SWT.NONE);
+		Group grpTraceSelection = new Group(compDiagnosis, SWT.NONE);
 		grpTraceSelection.setText("Select Traces");
 		
 		grpTraceSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
@@ -103,7 +117,9 @@ public class Diagnosis {
 		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
 		
 		traceBrowser= new TraceBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
-		
+		//
+		//Event handler for a text box modification
+		//
 		txtTestTraceDir.addModifyListener(new ModifyListener() {
 			
 			@Override
@@ -116,61 +132,18 @@ public class Diagnosis {
 			}
 		});	
 		
-		//table traceList
-		/*Composite comptblTraceList = new Composite(grpTraceSelection,  SWT.BORDER );
-		comptblTraceList.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,3,1));
-		
-		
-		tblAnalysisTraceList = new Table(comptblTraceList, SWT.BORDER | SWT.FULL_SELECTION|SWT.H_SCROLL|SWT.V_SCROLL);
-		tblAnalysisTraceList.setHeaderVisible(true);
-		tblAnalysisTraceList.setLinesVisible(true);
-		//tblAnalysisTraceList.setLayoutData(new GridData(400,tblAnalysisTraceList.getit*3));
-		
-		TableColumn tblclmnAnalysisTime = new TableColumn(tblAnalysisTraceList, SWT.NONE);
-		tblclmnAnalysisTime.setText("Time");
-		
-		TableColumn tblclmnAnalysisTraceid = new TableColumn(tblAnalysisTraceList, SWT.NONE);
-		tblclmnAnalysisTraceid.setText("Trace ID");
-		
-	    //auto adjust column width
-		TableColumnLayout tblColumnLayout = new TableColumnLayout();
-
-		comptblTraceList.setLayout( tblColumnLayout );
-		tblColumnLayout.setColumnData( tblclmnAnalysisTime, new ColumnWeightData( 50 ) );
-		tblColumnLayout.setColumnData( tblclmnAnalysisTraceid , new ColumnWeightData( 50 ) );
-		
-		//add data to columns
-		TableItem tableItemAnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
-		tableItemAnalysisAnomHistory.setText(new String[] {"07-12-2013: 2:40", "kernel-session-01-03"});
-
-		TableItem tableItem2AnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
-		tableItem2AnalysisAnomHistory.setText(new String[] {"08-12-2013: 3:45", "kernel-session-12-2013"});
-		
-//		TableItem tableItem3AnalysisAnomHistory = new TableItem(tblAnalysisTraceList, SWT.NONE);
-		//tableItem3AnalysisAnomHistory.setText(new String[] {"08-12-2013: 3:45", "kernel-session-12-2013"});
-		
-		//int desiredHeight = tblAnalysisTraceList.getItemHeight() * 2 + tblAnalysisTraceList.getHeaderHeight();
-		int itemHeight = tblAnalysisTraceList.getItemHeight();
-		GridData dataGridTable = new GridData(SWT.FILL, SWT.FILL, true, false);
-		dataGridTable.heightHint = 20 * itemHeight;
-		
-		//tblAnalysisTraceList.setLayoutData(dataGridTable);
-		//tblAnalysisTraceList.setLayoutData(new GridData(400,itemHeight*3));
-		//tblAnalysisTraceList.setItemCount(2);
-		*/
-		//TraceBrowser traceDispLoader= new TraceBrowser();
 		
 		/**
 		 * End group trace selection
 		 */
 	}
 	/**
-	 * 
-	 * @param comptbtmAnalysis
+	 * Creates GUI elements for a currently selected trace
+	 * @param compParentDaignosis
 	 */
-	private void currentlySelectedTrace(Composite comptbtmAnalysis){
+	private void currentlySelectedTrace(Composite compParentDaignosis){
 		 
-			Group grpCurrentTrace = new Group(comptbtmAnalysis, SWT.NONE);
+			Group grpCurrentTrace = new Group(compParentDaignosis, SWT.NONE);
 			grpCurrentTrace.setText("Currently Selected Trace(s)");
 			
 			grpCurrentTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
@@ -183,7 +156,7 @@ public class Diagnosis {
 			txtTraceID=new Text(grpCurrentTrace,SWT.BORDER);
 			txtTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 			txtTraceID.setEditable(false);
-		//	txtTraceID.setText("Sample trace");
+		
 			
 			Label lblTraceSource= new Label(grpCurrentTrace, SWT.BORDER);
 			lblTraceSource.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
@@ -202,19 +175,20 @@ public class Diagnosis {
 			txtTraceCount.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 			txtTraceCount.setEditable(false);
 			//txtTraceCount.setText("1"); 
-			
+			// Add a reference of the GUI elements to a trace browser; whenever, a trace browser
+			// is used by the user to browse traces, these elements will be updated to show
+			// the state of the system
 			traceBrowser.setTextSelectedTraceFields(txtTraceID,txtTraceSource,txtTraceCount);
 			
 	}
 	
 
 	/**
-	 * 
-	 * @param traceBuffer
-	 * @param tracePath
+	 * This function gets called from {@link TotalADS} and {@link TMFTotalADSView} to notify which
+	 * trace is selected by a user in the TMF
+	 * @param traceLocation
 	 * @param traceTypeName
 	 */
-	
 	public void updateOnTraceSelection(String traceLocation, String traceTypeName){
 		txtTestTraceDir.setText("");
 		tracePath.delete(0, tracePath.length());
@@ -228,19 +202,6 @@ public class Diagnosis {
 		traceTypeSelector.selectTraceType(traceTypeName);
 	
 	}
-	/*
-		public void observeSelectedModels(IDetectionAlgorithm []models){
-		
-		//TableItem []tblItem= tblAnalysisTraceList.getSelection();
-		//String trace=tblItem[0].getText(0);
-	//	System.out.println(trace);
-		
-		for (int modlCount=0; modlCount<models.length;modlCount++){
-			System.out.println(models[modlCount].getName());
-		}
-		//return trace;
-		
-	}*/
 
 
 }

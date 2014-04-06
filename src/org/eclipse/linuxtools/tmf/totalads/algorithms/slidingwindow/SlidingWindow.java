@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
@@ -23,8 +24,9 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
 import org.swtchart.Chart;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

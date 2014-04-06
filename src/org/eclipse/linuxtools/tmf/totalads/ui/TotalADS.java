@@ -1,52 +1,61 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui;
+
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
+//import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Shell;
+//import org.eclipse.swt.widgets.Table;
+//import org.eclipse.swt.widgets.Shell;
 
 //import org.eclipse.swt.custom.TableTree;
+/**
+ * This is the main class for intializing GUI elements. It instantiates two  classes
+ *  {@link Diagnosis} and {@link Modeling} which in turn further instantiate different components
+ *  of GUI elements in TotalADS
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 
-
-//public class CompDetective extends Composite {
 public class TotalADS  {
-	/*private Table tblAnalysisTraceList;
-	private Text txtAnalysisIdentify;
-	private Text txtAnalysisDetails;
-	private Text txtTraceTypeRegularExpression;
-	private Text lblAnomaliesTrain;
-	private Text lblAnomaliesValidate;
-	private Text lblAnomaliesTest;
-	private Text txtAnomaliesProgress;
-	private Table tableClassificationPredictions;*/
 	private Modeling modeling;
 	private Diagnosis diagnosis;
 	private CTabFolder tabFolderDetector;
-	//GridData gridDataFullFill=new GridData(SWT.FILL, SWT.FILL, true, true );
-	//GridData gridDataHorizontalFill=new GridData(SWT.FILL, SWT.TOP, true, false );
-	//GridData gridDataVerticalFill=new GridData(SWT.TOP, SWT.FILL, false, true );
-	
+	private Handler handler;
+	private AlgorithmFactory algFactory;
+	private TraceTypeFactory trcTypeFactory;
 	/**
-	 * Creates the composite.
-	 * @param parent
-	 * @param style
+	 * Constructor: creates the composite.
+	 * @param parent Parent composite
+	 * @param style  SWT style
 	 */
 	public TotalADS(Composite parent, int style) {
 		
 	  try{
 		    	Configuration.connection=new DBMS();
-			
-			//  (Configuration.host, Configuration.port);
 			//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
 				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
 		  	
@@ -62,13 +71,17 @@ public class TotalADS  {
 			AlgorithmFactory.destroyInstance();
 			TraceTypeFactory.destroyInstance();
 			
-			AlgorithmFactory modFactory= AlgorithmFactory.getInstance();
-			modFactory.initialize();
+			algFactory= AlgorithmFactory.getInstance();
+			algFactory.initialize();
 		
-			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
+			trcTypeFactory=TraceTypeFactory.getInstance();
 			trcTypeFactory.initialize();
-						
+			// Intialize the logger
+			handler=null;
+			handler= new  FileHandler("log.xml");
+            Logger.getLogger("").addHandler(handler);
 			//super(parent, style);
+            // Intialize the parent composite GUI Layout
 			parent.setLayout(new GridLayout(2,false));
 			
 			//leftPane(parent);
@@ -85,14 +98,14 @@ public class TotalADS  {
 			
 			
 		
-	   } catch (Exception ex) {
+	   } catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
 			
 		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
 		   if (ex.getMessage()!=null){
 		      msg.setMessage(ex.getMessage());
 		      msg.open();
 		   }
-		   ex.printStackTrace();
+		   Logger.getLogger(TotalADS.class.getName()).log(Level.SEVERE,null,ex);
 		}
 
 	}

@@ -1,30 +1,47 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui;
-
-
-
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
+//import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
+//import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-
+/**
+ * This class generates a form at runtime for training or testing settings of an algorithm
+ * by using an options array as a key value pair of elements. Even fields in options array becomes
+ * labels and odd fields become values.
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class Settings {
-	Display display;
-	Shell dialogShel;
-	Label []lblOption;
-	Text []txtOption;
-	String []modelOptions;
-	Button btnOK;
-	Button btnCancel;
+	private Display display;
+	private Shell dialogShel;
+	private Label []lblOption;
+	private Text []txtOption;
+	private String []modelOptions;
+	private Button btnOK;
+	private Button btnCancel;
 	//Composite composite;
+	/**
+	 * Constructor
+	 * @param options Array with pair of fields as keys and values
+	 * @throws TotalADSUIException
+	 */
 	public Settings(String []options) throws TotalADSUIException {
 		
 		if (options.length % 2==1)
@@ -85,7 +102,7 @@ public class Settings {
 	
 	/**
 	 * Returns selected options 
-	 * @return
+	 * @return options as array selected by the user
 	 */
 	public String[] getOptions(){
 		return modelOptions;
@@ -94,6 +111,7 @@ public class Settings {
      * Adding listeners to buttons 
      */
 	private void addListeners(){
+		//Listener for OK button
 		btnOK.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -108,7 +126,7 @@ public class Settings {
 				}
 	 });
 	 
-	 
+	 // Listener for cancel button
 	 btnCancel.addMouseListener(new MouseAdapter() {
 			
 			@Override
