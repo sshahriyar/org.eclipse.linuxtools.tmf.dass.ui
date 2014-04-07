@@ -2,19 +2,59 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.views">
-      <view
+   		   point="org.eclipse.ui.views"> 
+		<view
             category="org.eclipse.linuxtools.tmf.totalads"
             class="org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView"
             icon="icons/totalads.ico"
             id="org.eclipse.linuxtools.tmf.totalads.ADS01"
             name="Total Anomaly Detection System"
             restorable="true">
-      </view>
-      <category
+      </view> 
+       <category
             id="org.eclipse.linuxtools.tmf.totalads"
             name="Automated Anomaly Detection">
       </category>
+   
+     <!-- <extension  point="org.eclipse.ui.perspectives">
+      <perspective
+      		category="org.eclipse.linuxtools.tmf.totalads"
+            class="org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSPerspectiveFactory"
+      	    id="org.eclipse.linuxtools.tmf.totalads.ADS01"
+            name="Total Anomaly Detection System"
+            icon="icons/totalads.ico"/>
+    </extension>
+   
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.linuxtools.tmf.totalads.ADS01">
+         <view
+               id="org.eclipse.ui.views.ResourceNavigator"
+               relationship="stack"
+               relative="right"/>
+         <view
+               id="org.eclipse.ui.views.TaskList"
+               relationship="stack"
+               relative="top"/>
+         <view
+               id="org.eclipse.ui.views.BookmarkView"
+               relationship="stack"
+               relative="left"/>
+         <view
+               id="org.eclipse.ui.views.ProblemView"
+               relationship="stack"
+               relative="bottom"/>
+      </perspectiveExtension>-->
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSPerspectiveFactory"
+            icon="icons/totalads.ico"
+            id="org.eclipse.linuxtools.tmf.totalads.TotalADSPS1"
+            name="TotalADS">
+      </perspective>
    </extension>
 
 </plugin>
+ 
