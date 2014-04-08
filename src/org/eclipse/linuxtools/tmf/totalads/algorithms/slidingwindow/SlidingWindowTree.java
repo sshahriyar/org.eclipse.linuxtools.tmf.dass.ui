@@ -12,9 +12,11 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 

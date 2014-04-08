@@ -199,10 +199,28 @@ public class ModelLoader {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				TreeItem item=(TreeItem)e.item;
-	     		if (currentlySelectedTreeItem!=null)
-						 currentlySelectedTreeItem.setChecked(false);
-				item.setChecked(true);
-				currentlySelectedTreeItem=item;
+				if (currentlySelectedTreeItem==null){
+					item.setChecked(true);
+					currentlySelectedTreeItem=item;
+				}else{
+					if (item.getText(0).equalsIgnoreCase(currentlySelectedTreeItem.getText())){
+							if (currentlySelectedTreeItem.getChecked() ){
+								currentlySelectedTreeItem.setChecked(false);
+								
+							}
+							else
+								currentlySelectedTreeItem.setChecked(true);
+					
+					}else{
+						currentlySelectedTreeItem.setChecked(false);
+						item.setChecked(true);
+						currentlySelectedTreeItem=item;
+					}
+						
+					
+				}
+	     		
+				
 				
 			}
 			

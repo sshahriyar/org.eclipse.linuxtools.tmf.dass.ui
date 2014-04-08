@@ -80,7 +80,7 @@ public class DBMS implements ISubject {
 			isConnected=false;
 			message=ex.getMessage();
 			return message;
-		} catch (Exception ex){
+		} catch (Exception ex){ // Just capture an exception and don't let the sytem crash when db is not there
 			isConnected=false;
 			message="Unable to connect to MongoDB.";
 			return message;
@@ -273,7 +273,7 @@ public class DBMS implements ISubject {
 		   DBCollection coll = db.getCollection(collection);
 		   BasicDBObject obj = (BasicDBObject)JSON.parse(jsonObject.toString());
 		   coll.insert(obj);
-		  } catch (Exception ex){
+		  } catch (Exception ex){ // If there is any exception here cast it as DBMS exception
 			  throw new TotalADSDBMSException(ex.getMessage());
 		  }
 	}

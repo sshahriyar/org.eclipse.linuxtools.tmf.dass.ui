@@ -138,7 +138,7 @@ public class TraceTypeFactory {
 		//CTFEventsTraceReader.registerTraceTypeReader();
 		//CTFFunctionEntryExitTraceReader.registerTraceTypeReader();
 		TextLineTraceReader.registerTraceTypeReader();
-		TextSysIDtoNameTraceReader.registerTraceTypeReader();
+		//TextSysIDtoNameTraceReader.registerTraceTypeReader();
 		
 	}
 	

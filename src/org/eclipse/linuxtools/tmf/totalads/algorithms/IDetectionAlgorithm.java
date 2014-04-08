@@ -14,7 +14,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 
 /** Each model should implement the functions of this interface and, in addition, 
  * a static function registerModel
@@ -54,11 +54,12 @@ public String[] getTestingOptions(String database, DBMS connection);
  * @param connection
  * @param console
  * @param options TODO
+ * @param isNewDB TODO
  * @throws TotalADSUIException TODO
  * @throws TotalADSDBMSException 
  * @throws TotalADSReaderException 
  */
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * Controller will pass traces for validation using this function.  
  * @param trace

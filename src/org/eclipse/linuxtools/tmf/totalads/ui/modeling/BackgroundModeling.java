@@ -17,7 +17,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -31,30 +30,24 @@ import org.eclipse.swt.widgets.MessageBox;
 
 public class BackgroundModeling extends Thread{
 	String trainingTraces;
-	String selectedDB;
-	Boolean isNewDB;
 	String validationTraces;
 	ITraceTypeReader traceReader;
-	AlgorithmSelector algorithmSelector;
+	AlgorithmModelSelector algorithmSelector;
 	ProgressConsole progConsole;
 	Button btnMain;
 	/**
 	 *  Constructor 
 	 * @param trainingTraces Training traces
-	 * @param selectedDB Database name
-	 * @param isNewDB True if a new database is created else false
 	 * @param validationTraces Validation trace folder
 	 * @param traceReader Trace reader selected by the user
 	 * @param modelSel ModelSelector object
 	 * @param progConsole ProgressConsole object
 	 * @param btnBuild Button to enable
 	 */
-	public BackgroundModeling(String trainingTraces,String selectedDB, Boolean isNewDB, 
-				String validationTraces,ITraceTypeReader traceReader, AlgorithmSelector algSel
+	public BackgroundModeling(String trainingTraces,
+				String validationTraces,ITraceTypeReader traceReader, AlgorithmModelSelector algSel
 				, ProgressConsole progConsole, Button btnBuild){
 		this.trainingTraces=trainingTraces;
-		this.selectedDB=selectedDB;
-		this.isNewDB=isNewDB;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
 		this.algorithmSelector=algSel;
@@ -70,7 +63,7 @@ public class BackgroundModeling extends Thread{
 			
 			try {
 				
-					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,selectedDB,isNewDB,progConsole);
+					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,progConsole);
 							
 			} 
 			catch(TotalADSUIException ex){// handle UI exceptions here
@@ -81,17 +74,20 @@ public class BackgroundModeling extends Thread{
 			}
 			catch(TotalADSDBMSException ex){// handle DBMS exceptions here
 				if (ex.getMessage()==null)
-					msg="DBMS error: see log.";	
+					msg="DBMS error: see log.";
 				else
-					msg="DBMS error: "+ex.getMessage();
+					msg=ex.getMessage(); 
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
+				
 			}
 			catch(TotalADSReaderException ex){// handle Reader exceptions here
-				if (ex.getMessage()==null)
-					msg="Reader error: see log.";	
+				if (ex.getMessage()==null){
+					msg="Reader error: see log.";
+				}
 				else
-					msg="Reader error: "+ex.getMessage();
+					msg=ex.getMessage();  
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
+				
 			}
 			catch (Exception ex) { // handle all other exceptions here and log them too.
 									//UI exceptions are simply notifications--no need to log them
@@ -116,6 +112,7 @@ public class BackgroundModeling extends Thread{
 							           ,SWT.ICON_ERROR|SWT.OK);
 							msgBox.setMessage(exception);
 							msgBox.open();
+							
 						}
 						btnMain.setEnabled(true);
 						

@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -132,13 +132,13 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @throws TotalADSReaderException 
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!intialize){
     		  alpha=0.0;
 	    	  intialize=true;
 	   
-	    	   if (options!=null){
+	    	  if (options!=null){
 	    		  int trueCount=0;
 	    		  
 	    		  for (int count=1; count<trainingOptions.length; count+=2)
@@ -159,6 +159,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	    		      throw new TotalADSUIException("Please, type true for one of the options.");
 	    		  	    			  	
 	    	  }
+	    	 if (isNewDB)
+	    		 createDatabase(database, connection);
 	    	 this.intializeStates();
 	    	  
 	    }
@@ -174,9 +176,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		} catch (IllegalAccessException ex) {
 			
 			throw new TotalADSDBMSException(ex.getMessage());
-		}catch (Exception ex){ // or any other excption from DBMS
-			throw new TotalADSDBMSException(ex.getMessage());
-		}
+		}//catch (Exception ex){ // or any other excption from DBMS
+		//	throw new TotalADSDBMSException(ex.getMessage());
+	//	}
 		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 		
 	}
@@ -251,7 +253,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 			if (options!=null ){
 				try {
 					alpha= Double.parseDouble(options[1]);
-				}catch (Exception ex){
+				}catch (NumberFormatException ex){
 					throw new TotalADSUIException("Please, enter only decimal values.");
 				}
 				saveAlphaInDatabase(alpha, database, connection);

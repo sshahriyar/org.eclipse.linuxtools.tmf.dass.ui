@@ -110,7 +110,7 @@ public class Diagnosis {
 		lblTraceType.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		lblTraceType.setText("Select a trace type");
 		
-	    traceTypeSelector=new TracingTypeSelector(grpTraceSelection);
+	    traceTypeSelector=new TracingTypeSelector(grpTraceSelection,new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		
 		Label lblSelTestTraces = new Label(grpTraceSelection, SWT.CHECK);
 		lblSelTestTraces.setText("Select a folder containing traces or a single trace");

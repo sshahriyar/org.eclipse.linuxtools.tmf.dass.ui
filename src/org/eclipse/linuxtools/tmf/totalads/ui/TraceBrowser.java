@@ -43,7 +43,7 @@ public class TraceBrowser {
 		this.parent=parent;
 	    btnTraceBrowser =new Button(parent, SWT.NONE);
 		btnTraceBrowser.setLayoutData(gridData);
-		btnTraceBrowser.setText("Browse Traces");
+		btnTraceBrowser.setText("Browse...");
 		btnTraceBrowser.addMouseListener(new MouseUpEvent());
 		btnTraceBrowser.addKeyListener(new KeyPressEvent());
 				

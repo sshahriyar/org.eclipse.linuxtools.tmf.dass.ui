@@ -38,15 +38,16 @@ public class TracingTypeSelector {
 	//ArrayList<IObserver> observers=new ArrayList<IObserver>();
 	/**
 	 * Constructor
-	 * @param parent Composite
+	 * @param compParent Composite
+	 * @param gridDataComboBox Style of combo box
 	 */
-	public TracingTypeSelector(Composite parent){
+	public TracingTypeSelector(Composite compParent, GridData gridDataComboBox){
 		/*
 		 * Trace Type Selection
 		 */
 		traceFac=TraceTypeFactory.getInstance();
-		cmbTraceTypes= new Combo(parent,SWT.READ_ONLY);
-		cmbTraceTypes.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		cmbTraceTypes= new Combo(compParent,SWT.READ_ONLY);
+		cmbTraceTypes.setLayoutData(gridDataComboBox);
 		populateCombo(cmbTraceTypes);
 	
 		

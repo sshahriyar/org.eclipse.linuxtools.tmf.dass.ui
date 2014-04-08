@@ -17,7 +17,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -35,8 +34,10 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+//import org.eclipse.swt.events.SelectionAdapter;
+//import org.eclipse.swt.events.SelectionEvent;
+//import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Font;
 
 /**
  * This class creates GUI widgets for the Modeling Tab of TotalADS
@@ -44,47 +45,57 @@ import org.eclipse.swt.events.SelectionEvent;
  *
  */
 public class Modeling {
-	private AlgorithmSelector modelSelector;
+	private AlgorithmModelSelector algorithmSelector;
 	private TracingTypeSelector traceTypeSelector;
 	private Text txtTrainingTraces;
 	private Text txtValidationTraces;
 	private MessageBox msgBox;
-	private Combo cmbDBNames;
-	private Text txtNewDBName;
 	private ProgressConsole  progConsole;
 	private Button btnBuildModel;
+	
+	
 	/**
 	 * Constructor
 	 * @param tabFolderParent Parent tabFolder object  
 	 */
 	public Modeling(CTabFolder tabFolderParent){
+		
+	
 		// Create a modeling tab
 		CTabItem tbItmModeling = new CTabItem(tabFolderParent, SWT.NONE);
 		tbItmModeling.setText("Modeling");
 		
-		GridLayout gridTwoColumns=new GridLayout(4,false);
+		GridLayout gridTwoColumns=new GridLayout(2,true);
 		
 		//Make it scrollable 
 		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
-		Composite comptbtmModeling = new Composite(scrolCompModel, SWT.NONE);
-		comptbtmModeling.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
-		comptbtmModeling.setLayout(gridTwoColumns);
+		Composite comptbItmModeling = new Composite(scrolCompModel, SWT.NONE);
+		comptbItmModeling.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
+		comptbItmModeling.setLayout(gridTwoColumns);
 		
 		tbItmModeling.setControl(scrolCompModel);
 		
-		selectTrainingTraces(comptbtmModeling);
-		selectTraceTypeAndDatabase(comptbtmModeling);
+		selectTracesAndTraceTypes(comptbItmModeling);
 		
-		modelSelector=new AlgorithmSelector(comptbtmModeling);
+		Group grpAlgorithmModel=new Group(comptbItmModeling, SWT.NONE);
+		grpAlgorithmModel.setText("Select Algorithms and Models");
+		grpAlgorithmModel.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
+		grpAlgorithmModel.setLayout(new GridLayout(2,false));//gridTwoColumns);
 		
-		validation(comptbtmModeling);
+		algorithmSelector=new AlgorithmModelSelector(grpAlgorithmModel);
+		
+		
+		//
+	    Composite compSettingAndEvaluation=new Composite(comptbItmModeling,SWT.NONE);
+	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
+	    compSettingAndEvaluation.setLayout(new GridLayout(4, false));
 	    
-		adjustSettings(comptbtmModeling);
-		buildModel(comptbtmModeling);
+		adjustSettings(compSettingAndEvaluation);
+		buildModel(compSettingAndEvaluation);
 		//Initialize progress console
-	    progConsole=new ProgressConsole(comptbtmModeling);
+	    progConsole=new ProgressConsole(comptbItmModeling);
 		
-	    scrolCompModel.setContent(comptbtmModeling);
+	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size
 		scrolCompModel.setMinSize(600, 600);
 	    // Expand both horizontally and vertically
@@ -102,153 +113,68 @@ public class Modeling {
 	 * @param comptbItmModeling Modeling composite
 	 * 
 	 */
-	private void selectTrainingTraces(Composite comptbItmModeling){
+	private void selectTracesAndTraceTypes(Composite comptbItmModeling){
 		/**
 		 * Group modeling type and traces
 		 */
 		Group grpTracesModeling=new Group(comptbItmModeling, SWT.NONE);
-		grpTracesModeling.setText("Select Training Traces");
-		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
-		grpTracesModeling.setLayout(new GridLayout(1,false));//gridTwoColumns);
+		grpTracesModeling.setText("Select Traces and Trace Types");
+		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
+		grpTracesModeling.setLayout(new GridLayout(2,false));//gridTwoColumns);
+	
+		// creates widgets for the selection of trace type
+		Composite compTraceType=new Composite(grpTracesModeling, SWT.NONE);
+		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+		compTraceType.setLayout(new GridLayout(2,false));
 		
+		Label lblTraceType= new Label(compTraceType, SWT.NONE);
+		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+	    // adjusting font size which is too small
+		lblTraceType.setText("Select a Trace Type       ");
+		
+		traceTypeSelector=new TracingTypeSelector(compTraceType,new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 
+		
+		/// Training Traces selection widgets
+		Label lblTrainingTraces= new Label(grpTracesModeling, SWT.NONE);
+		lblTrainingTraces.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,2,1));
+		lblTrainingTraces.setText("Select Training Traces");
+		
 		txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
 		txtTrainingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		// instantiate an object of trace browser
-		new TraceBrowser(grpTracesModeling,txtTrainingTraces,new GridData(SWT.LEFT,SWT.TOP,false,false));
+		TraceBrowser traceBrowserTraining=new TraceBrowser(grpTracesModeling,txtTrainingTraces,
+							new GridData(SWT.LEFT,SWT.TOP,false,false));
+		
+		// Widgets for Validation traces
+		validation(grpTracesModeling);
+		
+		
 				
 	}
 	
 	
 	
-	
-	/**
-	 * 
-	 * Creates GUI elements to select a trace type and a database
-	 * @param comptbItmModeling Modeling composite
-	 * 
-	 */
-	//Text txtModelingTraces;
-	public void selectTraceTypeAndDatabase(Composite comptbItmModeling){
-		/**
-		 * Group modeling type and traces
-		 */
-		Group grpTraceTypesAndDB=new Group(comptbItmModeling, SWT.NONE);
-		grpTraceTypesAndDB.setText("Trace Type and DB");
-		grpTraceTypesAndDB.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
-		grpTraceTypesAndDB.setLayout(new GridLayout(3,false));//gridTwoColumns);
-				
-		Label lblTraceType= new Label(grpTraceTypesAndDB, SWT.BORDER);
-		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblTraceType.setText("Select the Trace Type");
-		
-		traceTypeSelector=new TracingTypeSelector(grpTraceTypesAndDB);
-	
-		Label emptyLabel=new Label(grpTraceTypesAndDB, SWT.BORDER);// An empty label for a third cell
-		emptyLabel.setVisible(false);
-		
-		Label lblDB=new Label(grpTraceTypesAndDB, SWT.BORDER);
-		lblDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		lblDB.setText("Select or Enter a DB Name");
-		
-		cmbDBNames= new Combo(grpTraceTypesAndDB,SWT.READ_ONLY | SWT.V_SCROLL);
-		cmbDBNames.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		
-		txtNewDBName = new Text(grpTraceTypesAndDB, SWT.BORDER);
-		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		//txtNewDBName.setText("Enter");
-		txtNewDBName.setTextLimit(7);
-		//txtNewDBName.setEnabled(false);
-		populateComboWithDatabaseList(null);
-		//
-		//Event handler for db name combo box
-		//
-		cmbDBNames.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				//if (e.text.equalsIgnoreCase("Enter New  Name")){
-				if ( cmbDBNames.getSelectionIndex()==0){
-					txtNewDBName.setText("");
-					txtNewDBName.setEnabled(true);
-					
-				}
-				
-				else {
-					
-					txtNewDBName.setText("Enter");
-					txtNewDBName.setEnabled(false);
-					//selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
-					
-				}
-			}
-		});
-		
-	 // traceTypeSelector.addObserver(new Observer());
-		
-	  // Add an observer to DBMS connection to automatically update 
-	  //the list of databases when new ones are created and old ones are deleted
-	   Configuration.connection.addObserver( new IObserver() {
-			@Override
-			public void update() {
-				Display.getDefault().asyncExec(new Runnable(){
-					@Override
-					public void run(){
-						populateComboWithDatabaseList(null);
-					}
-				});
-		
-			}
-		 });
 		
 
-		/**
-		 * End group modeling type and traces
-		 */
-	}
-	
-	
-	/**
-	 *
-	 * Populates the combo box with models (database) list
-	 * @param filter Filter as a string which needs to be excluded from the list or null for no exclusion
-	 *
-	 */
-	private void populateComboWithDatabaseList(String filter){
-		
-				cmbDBNames.removeAll(); // First clear it
-				cmbDBNames.add("Enter a new database name");
-
-				//Populate combo box
-				if (Configuration.connection.isConnected()){
-					
-					List<String> modelsList=Configuration.connection.getDatabaseList();
-					for (int j=0; j<modelsList.size();j++)
-					    if (filter ==null)
-						  cmbDBNames.add(modelsList.get(j));
-					    else if (modelsList.get(j).contains(filter)){
-					    	cmbDBNames.add(modelsList.get(j));
-					    }
-				
-					// Select the first item in the combo box		
-					cmbDBNames.select(0);
-					txtNewDBName.setEnabled(true);
-				}
-	}
 	
 	/**
 	 * Creates GUI widgets for the selection of validation traces
-	 * @param comptbItmModeling
+	 * @param compParent
 	 */
-	public void validation(Composite comptbItmModeling){
-		/**
-		 * Group modeling type and traces
-		 */
-		Group grpValidation=new Group(comptbItmModeling, SWT.NONE);
-		grpValidation.setText("Validation");
-		grpValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
-		grpValidation.setLayout(new GridLayout(2,false));//gridTwoColumns);
+	public void validation(Composite compParent){
+		
+		/////////////////////////////////////////////////////////
+		/////Cross validation will be available in the next version
+		///////////////////////////////////////////////////////////
+		/* 
+		 Group grpValidation=new Group(comptbItmModeling, SWT.NONE);
+		grpValidation.setText("Select Validation Traces");
+		grpValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
+		grpValidation.setLayout(new GridLayout(1,false));//gridTwoColumns);
 				
-		Button radioBtnCrossVal=new Button(grpValidation, SWT.RADIO);
+		
+		 Button radioBtnCrossVal=new Button(grpValidation, SWT.RADIO);
 		radioBtnCrossVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 		radioBtnCrossVal.setText("Cross Validation");
 		
@@ -263,18 +189,19 @@ public class Modeling {
 		Button radioBtnVal=new Button(grpValidation, SWT.RADIO);
 		radioBtnVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 		radioBtnVal.setText("Validation");
-		radioBtnVal.setSelection(true);
+		radioBtnVal.setSelection(true);*/
 		
+		Label lblValidationTraces= new Label(compParent, SWT.NONE);
+		lblValidationTraces.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,2,1));
+		lblValidationTraces.setText("Select Validation Traces");
 		
-		TraceBrowser traceBrowser= new TraceBrowser(grpValidation,new GridData(SWT.RIGHT,SWT.TOP,false,false));
-		//Button btnValidationBrowse =new Button(grpValidation, SWT.NONE);
-		//btnValidationBrowse.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false));
-		//btnValidationBrowse.setText("Browse Directory");
-		
-		txtValidationTraces = new Text(grpValidation, SWT.BORDER);
+		txtValidationTraces = new Text(compParent, SWT.BORDER);
 		//txtValidationTraces.setText("");
 		txtValidationTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		traceBrowser.setTextBox(txtValidationTraces);
+		TraceBrowser traceBrowser= new TraceBrowser(compParent, txtValidationTraces, 
+						new GridData(SWT.LEFT,SWT.TOP,false,false));
+
+		//traceBrowser.setTextBox(txtValidationTraces);
 		
 	
 		/**
@@ -298,7 +225,7 @@ public class Modeling {
 		@Override
 		public void mouseUp(MouseEvent e) {
 				try {
-					modelSelector.showSettingsDialog();
+					algorithmSelector.showSettingsDialog();
 				} catch (TotalADSUIException ex) {
 					msgBox.setMessage(ex.getMessage());
 					msgBox.open();
@@ -350,23 +277,11 @@ public class Modeling {
 						}
 						
 						   // get the database name from the text box or combo
-						 else if (txtNewDBName.getEnabled()==false){
-								selectedDB=cmbDBNames.getItem(cmbDBNames.getSelectionIndex());
-								isNewDB=false;
-						 }
-						 else if (txtNewDBName.getText().isEmpty()){
-								msgBox.setMessage("Please, enter a database name.");
-								msgBox.open();
-								btnBuildModel.setEnabled(true);
-								return;
-						} else{
-								 selectedDB=txtNewDBName.getText();
-								 isNewDB=true;
-						}
+						
 						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
-						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, selectedDB, isNewDB, 
-												validationTraces,traceReader,modelSelector,progConsole,
+						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, 
+												validationTraces,traceReader,algorithmSelector,progConsole,
 												btnBuildModel);
 						modeling.start();
 				

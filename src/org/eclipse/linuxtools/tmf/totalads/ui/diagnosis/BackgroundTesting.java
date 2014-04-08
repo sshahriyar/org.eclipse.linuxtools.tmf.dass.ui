@@ -174,7 +174,7 @@ public class BackgroundTesting extends Thread{
 			
 			try{ //Check for valid trace type reader and traces before creating a database
 				traceReader.getTraceIterator(fileList[0]);
-			}catch (Exception ex){
+			}catch (TotalADSReaderException ex){// this is just a validation error, cast it to UI exception
 				String message="Invalid trace reader and traces: "+ex.getMessage();
 				throw new TotalADSUIException(message);
 			}

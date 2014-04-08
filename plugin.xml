@@ -46,15 +46,6 @@
                relative="bottom"/>
       </perspectiveExtension>-->
    </extension>
-   <extension
-         point="org.eclipse.ui.perspectives">
-      <perspective
-            class="org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSPerspectiveFactory"
-            icon="icons/totalads.ico"
-            id="org.eclipse.linuxtools.tmf.totalads.TotalADSPS1"
-            name="TotalADS">
-      </perspective>
-   </extension>
 
 </plugin>
  

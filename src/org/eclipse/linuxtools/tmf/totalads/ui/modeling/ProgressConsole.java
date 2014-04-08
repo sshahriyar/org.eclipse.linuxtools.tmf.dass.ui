@@ -8,10 +8,12 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
+package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
+
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -28,6 +30,7 @@ public class ProgressConsole {
 	private CLabel lblProgressConsole;
 	private Text txtAnomaliesProgress;
 	private int MAX_TEXT_SIZE=20000;
+	
 	/**
 	 * Constructor
 	 * @param compParent Composite widget
@@ -37,9 +40,12 @@ public class ProgressConsole {
 	 * Progress Console
 	 * 		
 	 */
+
+		
 		lblProgressConsole = new CLabel(compParent, SWT.NONE);
 		lblProgressConsole.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,false,4,1));
 		lblProgressConsole.setText("Progress Console");
+		
 			
 		
 		txtAnomaliesProgress = new Text(compParent, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL |SWT.MULTI);

@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
@@ -146,19 +146,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, 
-			String[] options)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
+			String[] options, Boolean isNewDB)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
 			  validationAnomalies=0;
 			  int maxWinLimit=15;
-	    	  intialize=true;
-	    	 // Initializing 
-	    	  try{
-	    		  initialize(connection,database);
-	    	  } catch (Exception ex){
-	    		  throw new TotalADSDBMSException(ex);
-	    	  }
+	    	
 	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
@@ -172,7 +166,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		    		  if (options[2].equals(this.trainingOptions[2]) )
 			    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
 	    		  
-	    		  }catch (Exception ex){
+	    		  }catch (Exception ex){// Capturing exception to send a UI error
 	    			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
 	    		  }
 	    		  
@@ -180,6 +174,12 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
 	    	  }
 	    		
+	    	  intialize=true;
+		    	 // Initializing 
+		       	  	 if (isNewDB)
+		    	  		  createDatabase(database, connection);
+		    		 initialize(connection,database);
+		    
 	    		    	  
 	      }
 	    	  
@@ -207,11 +207,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     }
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
-	    	 try{
-	    		 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TRACE_COLLECTION);
-	    	 } catch (Exception ex){
-	    		 throw new TotalADSDBMSException(ex.getMessage());
-	    	 }
+	    	 
+	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TRACE_COLLECTION);
 	    	 intialize=false;
 	     }
 	     
