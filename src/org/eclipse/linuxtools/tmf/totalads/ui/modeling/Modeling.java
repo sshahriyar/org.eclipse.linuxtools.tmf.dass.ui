@@ -122,15 +122,14 @@ public class Modeling {
 		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
 		grpTracesModeling.setLayout(new GridLayout(2,false));//gridTwoColumns);
 	
-		// creates widgets for the selection of trace type
+		// creating widgets for the selection of trace type
 		Composite compTraceType=new Composite(grpTracesModeling, SWT.NONE);
 		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
 		compTraceType.setLayout(new GridLayout(2,false));
 		
 		Label lblTraceType= new Label(compTraceType, SWT.NONE);
 		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
-	    // adjusting font size which is too small
-		lblTraceType.setText("Select a Trace Type       ");
+	    lblTraceType.setText("Select a Trace Type       ");
 		
 		traceTypeSelector=new TracingTypeSelector(compTraceType,new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 

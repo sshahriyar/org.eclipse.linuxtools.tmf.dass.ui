@@ -109,7 +109,7 @@ public class ModelLoader {
 		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,3,5));
 		
 		
-		statusAndResults=new Composite(grpAnalysisModelSelection, SWT.NONE);
+		/*statusAndResults=new Composite(grpAnalysisModelSelection, SWT.NONE);
 		statusAndResults.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,2));
 		statusAndResults.setLayout(new GridLayout(1,false));
 		
@@ -120,7 +120,7 @@ public class ModelLoader {
 		lblProgress.setVisible(false);
 		
 		resultsAndFeedback=new ResultsAndFeedback(statusAndResults);
-		
+		*/
 		
 		populateTreeWithModels();
 		addEventHandlers();		

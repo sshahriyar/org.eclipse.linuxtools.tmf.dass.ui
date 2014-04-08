@@ -23,6 +23,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 //import org.eclipse.swt.widgets.Button;
 //import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -51,7 +52,7 @@ public class Diagnosis {
 	private TraceBrowser traceBrowser;
 	private StringBuilder tracePath; 
 	private ModelLoader modelLoader;
-	//private ResultsAndFeedback resultsAndFeedback;
+	private ResultsAndFeedback resultsAndFeedback;
 	/**
 	 * Constructor of the Diagnosis class
 	 * @param tabFolderParent TabFolder object
@@ -72,15 +73,21 @@ public class Diagnosis {
 		gridData.horizontalSpan=1;
 		comptbItmDiagnosis.setLayoutData(gridData);
 		comptbItmDiagnosis.setLayout(new GridLayout(2, false));
+		
+		Composite compTraceTypeAndModel=new Composite(comptbItmDiagnosis, SWT.NONE);
+		compTraceTypeAndModel.setLayoutData(gridData);
+		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
+		
 		// Create GUI elements for selection of a trace type
-		selectTraceTypeAndTraces(comptbItmDiagnosis);
+		selectTraceTypeAndTraces(compTraceTypeAndModel);
 		// Create GUI elements for a selection of a trace
-		currentlySelectedTrace(comptbItmDiagnosis);
+		//currentlySelectedTrace(comptbItmDiagnosis);
 		//Initialize a class which loads model names from db and create appropriate GUI elements
-		modelLoader=new ModelLoader(comptbItmDiagnosis);
+		modelLoader=new ModelLoader(compTraceTypeAndModel);
 		modelLoader.setTrace(tracePath);
 		modelLoader.setTraceTypeSelector(traceTypeSelector);
 		
+		resultsAndFeedback=new ResultsAndFeedback(comptbItmDiagnosis);
 		//Adjust settings for scrollable Diagnosis Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
@@ -101,20 +108,26 @@ public class Diagnosis {
 		 *  Group trace selection
 		 */
 		Group grpTraceSelection = new Group(compDiagnosis, SWT.NONE);
-		grpTraceSelection.setText("Select Traces");
+		grpTraceSelection.setText("Select Traces and Trace Type");
 		
 		grpTraceSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
-		grpTraceSelection.setLayout(new GridLayout(2,false));
+		grpTraceSelection.setLayout(new GridLayout(1,false));
 		
-		Label lblTraceType= new Label(grpTraceSelection, SWT.BORDER);
-		lblTraceType.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		lblTraceType.setText("Select a trace type");
+		// Creating widgets for the selection of a trace type
+		Composite compTraceType=new Composite(grpTraceSelection, SWT.NONE);
+		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+		compTraceType.setLayout(new GridLayout(2,false));
 		
-	    traceTypeSelector=new TracingTypeSelector(grpTraceSelection,new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		Label lblTraceType= new Label(compTraceType, SWT.NONE);
+		lblTraceType.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		lblTraceType.setText("Select a Trace Type");
 		
-		Label lblSelTestTraces = new Label(grpTraceSelection, SWT.CHECK);
-		lblSelTestTraces.setText("Select a folder containing traces or a single trace");
-		lblSelTestTraces.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
+	    traceTypeSelector=new TracingTypeSelector(compTraceType,new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		
+	    // 
+		Button btnSelTestTraces = new Button(grpTraceSelection, SWT.RADIO);
+		btnSelTestTraces.setText("Select the  Folder Containing Test Traces");
+		btnSelTestTraces.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
 		
 		txtTestTraceDir=new Text(grpTraceSelection, SWT.BORDER);
 		txtTestTraceDir.setEnabled(true);
@@ -124,7 +137,7 @@ public class Diagnosis {
 		//
 		//Event handler for a text box modification
 		//
-		txtTestTraceDir.addModifyListener(new ModifyListener() {
+		/*txtTestTraceDir.addModifyListener(new ModifyListener() {
 			
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -135,8 +148,16 @@ public class Diagnosis {
 				txtTraceCount.setText("Manually typed!");
 			}
 		});	
+		*/
 		
+		Button btnSelTMFTrace = new Button(grpTraceSelection, SWT.RADIO);
+		btnSelTMFTrace.setText("Select the Trace Selected in TMF/LTTng Persepctive");
+		btnSelTMFTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
 		
+		txtTraceID=new Text(grpTraceSelection,SWT.BORDER);
+		txtTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		txtTraceID.setEditable(false);
+	
 		/**
 		 * End group trace selection
 		 */
