@@ -14,6 +14,8 @@ import java.util.List;
 //import java.io.File;
 //import java.lang.reflect.InvocationTargetException;
 
+
+
 //import java.lang.reflect.Method;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -27,6 +29,8 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 //import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
+import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -46,7 +50,6 @@ import org.eclipse.swt.events.SelectionEvent;
 //import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.wb.swt.SWTResourceManager;
 /**
  * This class connects with the database and loads all the model names in a tree and creates the related GUI wdigets.
  * It also instantiates ResultsAndFeedback class and shows the results of the evaluation of the model 
@@ -56,45 +59,45 @@ import org.eclipse.wb.swt.SWTResourceManager;
  */
 
 public class ModelLoader {
-	private Group grpAnalysisModelSelection;
-	private Button btnAnalysisEvaluateModels;
-	private Tree treeAnalysisModels;
+	private Group grpModelSelection;
+	private Button btnEvaluateModels;
+	private Tree treeModels;
 	private Button btnSettings;
 	private Button btnDelete;
 	private  TreeItem currentlySelectedTreeItem;
 	private MessageBox msgBox;
 	private StringBuilder tracePath;
-	private Label lblProgress;
+	private StatusBar statusBar;
 	private TracingTypeSelector traceTypeSelector;
 	private ResultsAndFeedback resultsAndFeedback;
 	private Settings settingsDialog;
 	private String []algorithmSettings;
 	private Composite compModelSelection;
-	private Composite statusAndResults;
+	
 	/**
 	 * Constructor
 	 * @param comptbtmAnalysis Composite
 	 */
 	public ModelLoader(Composite comptbtmAnalysis ){
+		
+		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+		
 		/**
 		*  Group model selection
 		*/
-		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 		
-		grpAnalysisModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
-		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,2,5));
-		grpAnalysisModelSelection.setLayout(new GridLayout(2,false));
-		grpAnalysisModelSelection.setText("Evaluate a Model");
+		grpModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
+		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
+		grpModelSelection.setLayout(new GridLayout(1,false));
+		grpModelSelection.setText("Evaluate a Model");
 		
-					
-		compModelSelection=new Composite(grpAnalysisModelSelection, SWT.NONE);
-	    compModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true,1,2));
+		compModelSelection=new Composite(grpModelSelection, SWT.NONE);
+	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
 		compModelSelection.setLayout(new GridLayout(3,false));
 	    	
-		
-		btnAnalysisEvaluateModels=new Button(compModelSelection, SWT.NONE);
-		btnAnalysisEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnAnalysisEvaluateModels.setText(" Evaluate ");
+		btnEvaluateModels=new Button(compModelSelection, SWT.NONE);
+		btnEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnEvaluateModels.setText(" Evaluate ");
 	   
 		btnSettings=new Button(compModelSelection, SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
@@ -104,22 +107,22 @@ public class ModelLoader {
 		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
 		btnDelete.setText("   Delete   ");
 		
-		treeAnalysisModels = new Tree(compModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
-		treeAnalysisModels.setLinesVisible(true);
-		treeAnalysisModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,3,5));
+		treeModels = new Tree(grpModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
+		treeModels.setLinesVisible(true);
+		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		
 		
-		/*statusAndResults=new Composite(grpAnalysisModelSelection, SWT.NONE);
+		/*statusAndResults=new Composite(grpModelSelection, SWT.NONE);
 		statusAndResults.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,2));
 		statusAndResults.setLayout(new GridLayout(1,false));
 		
-		lblProgress= new Label(statusAndResults, SWT.NONE);
+		lblProgress= new Label(compModelSelection, SWT.NONE);
 		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
 		lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
 		lblProgress.setText("Processing........");
-		lblProgress.setVisible(false);
+		lblProgress.setVisible(false);*/
 		
-		resultsAndFeedback=new ResultsAndFeedback(statusAndResults);
+		/*resultsAndFeedback=new ResultsAndFeedback(statusAndResults);
 		*/
 		
 		populateTreeWithModels();
@@ -134,21 +137,21 @@ public class ModelLoader {
 	 * Populates the tree with the list of models (databases) from the database
 	 */
 	private void populateTreeWithModels(){
-	
+		treeModels.removeAll();
 		if (Configuration.connection.isConnected() ){ // if there is a running DB instance
 			
-			List <String> modelsList= Configuration.connection.getDatabaseList();
-				treeAnalysisModels.removeAll();
+				List <String> modelsList= Configuration.connection.getDatabaseList();
+				
 			    if (modelsList!=null){
 					TreeItem []items=new TreeItem[modelsList.size()];
 					for (int i=0;i <items.length;i++){
-						items[i]=new TreeItem(treeAnalysisModels,SWT.NONE);
+						items[i]=new TreeItem(treeModels,SWT.NONE);
 						items[i].setText(modelsList.get(i));
 										
 					}
 				}
 		}
-		    currentlySelectedTreeItem=null;
+		 currentlySelectedTreeItem=null;
 	}
 	
 	
@@ -161,7 +164,7 @@ public class ModelLoader {
 		/**
 		 * Event handler for the evaluate button
 		 */
-		btnAnalysisEvaluateModels.addMouseListener(new MouseAdapter() {
+		btnEvaluateModels.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				
@@ -171,21 +174,35 @@ public class ModelLoader {
 					return;
 				} 
 				
+				String database=currentlySelectedTreeItem.getText();
+				String []modelKey=database.split("_");
+				
+				if(modelKey.length<3){
+					msgBox.setMessage("Not a valid model created by TotalADS!");
+					msgBox.open();
+					return;
+				}
+				
 				ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();
 				
 				AlgorithmFactory modFac= AlgorithmFactory.getInstance();
-				String database=currentlySelectedTreeItem.getText();
-				String modelKey=database.split("_")[1];
-				IDetectionAlgorithm algorithm= modFac.getModelyByAcronym(modelKey);
+				
+				IDetectionAlgorithm algorithm= modFac.getModelyByAcronym(modelKey[1]);
+				
+				if(algorithm==null){
+					msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
+					msgBox.open();
+					return;
+				}
 				
 				resultsAndFeedback.clearData();
 				
-				btnAnalysisEvaluateModels.setEnabled(false);
+				btnEvaluateModels.setEnabled(false);
 				btnSettings.setEnabled(false);
 				btnDelete.setEnabled(false);
-				lblProgress.setVisible(true);
+				
 				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, algorithm, database,
-							lblProgress, btnDelete, btnSettings, btnAnalysisEvaluateModels, resultsAndFeedback, algorithmSettings);
+							statusBar, btnDelete, btnSettings, btnEvaluateModels, resultsAndFeedback, algorithmSettings);
 				testTheModel.start();
 				
 				
@@ -194,7 +211,7 @@ public class ModelLoader {
 		/**
 		 * Event handler for the tree selection event
 		 */
-		treeAnalysisModels.addSelectionListener(new SelectionAdapter() {
+		treeModels.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -206,7 +223,6 @@ public class ModelLoader {
 					if (item.getText(0).equalsIgnoreCase(currentlySelectedTreeItem.getText())){
 							if (currentlySelectedTreeItem.getChecked() ){
 								currentlySelectedTreeItem.setChecked(false);
-								
 							}
 							else
 								currentlySelectedTreeItem.setChecked(true);
@@ -328,10 +344,17 @@ public class ModelLoader {
 	
 	/**
 	 * Assigns ResultsAndFeddback object from Diagnosis class to a local variable
-	 * @param resultsAndFeedback Results and Feddback object
+	 * @param resultsAndFeedback Results and Feedback object
 	 */
 	public void setResultsAndFeedback(ResultsAndFeedback resultsAndFeedback){
 		this.resultsAndFeedback=resultsAndFeedback;
+	}
+	/**
+	 * Sets the StatusBar object to a local variable to update progress during processing
+	 * @param statusBar An object of the StatusBar
+	 */
+	public void setStautsBar(StatusBar statusBar){
+		this.statusBar=statusBar;
 	}
 	
 	// End of class

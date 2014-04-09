@@ -137,7 +137,7 @@ public class Modeling {
 		/// Training Traces selection widgets
 		Label lblTrainingTraces= new Label(grpTracesModeling, SWT.NONE);
 		lblTrainingTraces.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,2,1));
-		lblTrainingTraces.setText("Select Training Traces");
+		lblTrainingTraces.setText("Select the Folder Containing Training Traces");
 		
 		txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
 		txtTrainingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
@@ -192,7 +192,7 @@ public class Modeling {
 		
 		Label lblValidationTraces= new Label(compParent, SWT.NONE);
 		lblValidationTraces.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,2,1));
-		lblValidationTraces.setText("Select Validation Traces");
+		lblValidationTraces.setText("Select the Folder Containing Validation Traces");
 		
 		txtValidationTraces = new Text(compParent, SWT.BORDER);
 		//txtValidationTraces.setText("");

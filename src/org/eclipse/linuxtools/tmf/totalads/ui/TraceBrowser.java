@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.ui;
 
-import java.io.File;
+//import java.io.File;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -30,12 +30,12 @@ public class TraceBrowser {
 	private Button btnTraceBrowser;
 	private Composite parent;
 	private Text txtPath;
-	private Text txtTraceID,txtTraceSource,txtTraceCounter;
+	//private Text txtTraceID;//,txtTraceSource,txtTraceCounter;
 	
 	/**
-	 * onstructor
-	 * @param parent Composites
-	 * @param txtBox Textbox
+	 * Constructor
+	 * @param parent Composite object
+	 * @param txtBox Textbox object
 	 * @param gridData GriaData Layout
 	 */
 	public TraceBrowser(Composite parent, Text txtBox, GridData gridData ){
@@ -71,18 +71,18 @@ public class TraceBrowser {
 		this.txtPath=text;
 	}
 	/**
-	 *  This method takes the reference to Text boxes in the currently selected trace group and updates
-	 *  them when the a user selects the directory dialog
-	 * @param txtTraceID
-	 * @param txtTraceSource
-	 * @param txtTraceCount
+	 * Disables the Browse button
 	 */
-    public void setTextSelectedTraceFields(Text txtTraceID,Text txtTraceSource,Text txtTraceCount){
-    	this.txtTraceID=txtTraceID;
-    	this.txtTraceSource=txtTraceSource;
-    	this.txtTraceCounter=txtTraceCount;
-    }
-    
+	public void disableBrowsing(){
+		this.btnTraceBrowser.setEnabled(false);
+	}
+    /*
+     * Enables the Browse button
+     */
+	public void enableBrowsing(){
+		this.btnTraceBrowser.setEnabled(true);
+	}
+	
     /**
      * Method to open file dialog box
      */
@@ -98,24 +98,16 @@ public class TraceBrowser {
         //path.append(fd.open());
        String path= dD.open();
        
-       if (path!=null){
+       if (path!=null)
     	   this.txtPath.setText(path);
     	   
-    	   if (txtTraceID!=null && txtTraceSource !=null && txtTraceCounter !=null){
-	    	   File files=new File(path);
-	    	   Integer fileCounts=files.listFiles().length;
-	    	   txtTraceCounter.setText(fileCounts.toString());
-	    	   txtTraceID.setText("Multiple Traces");
-	    	   txtTraceSource.setText("Directory Reader");
-	    	   
-    	   }
-       }
+       
         
     }
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	//
-	//Inner classes for listeners of GUI elements (widgets)
+	//Inner classes (event handlers) for listeners of GUI elements (widgets)
 	//
 	///////////////////////////////////////////////////////////////////////////////////
 	/** Inner class for mouse up event on the button  */
@@ -130,7 +122,7 @@ public class TraceBrowser {
 	private class KeyPressEvent extends KeyAdapter{
 		@Override
 		public void keyPressed(KeyEvent e) {
-		directoryDialog();
+			directoryDialog();
 		}
 	}
 

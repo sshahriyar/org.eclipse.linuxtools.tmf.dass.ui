@@ -12,6 +12,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
@@ -23,6 +24,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -40,7 +42,7 @@ public class BackgroundTesting extends Thread{
 	private ITraceTypeReader traceReader;
 	private IDetectionAlgorithm model;
 	private String database;
-	private Label lblProgress;
+	private StatusBar statusBar;
 	private Button btnDelete;
 	private Button btnSettings;
 	private Button btnAnalysisEvaluateModels;
@@ -52,7 +54,7 @@ public class BackgroundTesting extends Thread{
 	 * @param traceReader Trace reader
 	 * @param algorithm Algorithm
 	 * @param database Database
-	 * @param lblProg Progress label
+	 * @param statusBar An object of StatusBar
 	 * @param btnDelete Delete button
 	 * @param btnSettings Settings button
 	 * @param btnEvaluate Evaluate button
@@ -60,13 +62,13 @@ public class BackgroundTesting extends Thread{
 	 * @param algorithmSettings Algorithm settings
 	 */
 	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database,
-				Label lblProg, Button btnDelete, Button btnSettings, Button btnEvaluate, ResultsAndFeedback resultsAndFeedback
+				StatusBar statusBar, Button btnDelete, Button btnSettings, Button btnEvaluate, ResultsAndFeedback resultsAndFeedback
 				, String []algorithmSettings){
 		this.testDirectory=testDirectory;
 		this.traceReader=traceReader;
 		this.model=algorithm;
 		this.database=database;
-		this.lblProgress=lblProg;
+		this.statusBar=statusBar;
 		this.btnDelete=btnDelete;
 		this.btnSettings=btnSettings;
 		this.btnAnalysisEvaluateModels=btnEvaluate;
@@ -114,7 +116,13 @@ public class BackgroundTesting extends Thread{
 				else
 					msg=ex.getMessage();
 				Logger.getLogger(BackgroundTesting.class.getName()).log(Level.SEVERE, msg, ex);
-	
+				// An exception could be thrown due to unavailability of the db, 
+				// make sure that the connection is not lost
+				Configuration.connection.connect(Configuration.host, Configuration.port);
+				// We don't have to worry about exceptions here as the above function handles all the exceptions
+				// and just returns a message. This function also initializes connection info to correct value
+				// We cannot write above function under ConnectinException block because such exception is never thrown
+				// and Eclipse starts throwing errors
 			}
 			finally{
 				
@@ -132,8 +140,7 @@ public class BackgroundTesting extends Thread{
 						btnAnalysisEvaluateModels.setEnabled(true);
 						btnSettings.setEnabled(true);
 						btnDelete.setEnabled(true);
-						lblProgress.setVisible(false);
-						
+						statusBar.initialState();
 					}
 				});
 				
@@ -158,7 +165,7 @@ public class BackgroundTesting extends Thread{
 				
 			// First verify selections
 			Boolean isLastTrace=false;
-					
+			Integer totalFiles;		
 			//if (!checkItemSelection())
 				//throw new TotalADSUIException("Please, first select a model!");
 	       if (testDirectory.isEmpty())
@@ -181,16 +188,11 @@ public class BackgroundTesting extends Thread{
 			
 			
 			// Second, start testing
-			
-			for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
-				final int counter=trcCnt+1;
-				Display.getDefault().syncExec(new Runnable() {
-					@Override
-					public void run() {
-						lblProgress.setText("Processing trace #"+counter+"..."); 
-						}
-				});
-				 
+			totalFiles=fileList.length;
+			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
+				 int counter=trcCnt+1;
+				statusBar.setProgress("Processing trace #"+counter+"..."); 
+					 
 				ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 		 					
 		 		final Results results= algorithm.test(trace, database, connection, modelOptions);
@@ -211,10 +213,12 @@ public class BackgroundTesting extends Thread{
 	       
 	     // Third, print summary
 			final String summary=algorithm.getSummaryOfTestResults();
+			final Integer totalTraces=totalFiles;
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					resultsAndFeedback.setSummary(summary);
+					resultsAndFeedback.setTotalAnomalyCount(summary);
+					resultsAndFeedback.setTotalTraceCount(totalTraces.toString());
 					
 				}
 			});

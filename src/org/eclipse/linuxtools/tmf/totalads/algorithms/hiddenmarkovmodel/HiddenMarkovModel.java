@@ -87,7 +87,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
-			ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException {
+			ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException {
 		// TODO Auto-generated method stub
 
 	}
@@ -99,7 +99,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 
 	@Override
-	public Chart graphicalResults() {
+	public Chart graphicalResults(ITraceIterator traceIterator) {
 	
 		return null;
 	}

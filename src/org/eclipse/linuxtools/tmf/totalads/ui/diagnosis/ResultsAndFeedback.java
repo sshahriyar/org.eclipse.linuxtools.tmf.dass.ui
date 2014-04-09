@@ -35,17 +35,20 @@ import org.eclipse.swt.widgets.TreeItem;
 public class ResultsAndFeedback {
 	private Tree treeTraceResults;
 	private Text txtAnalysisCurrentAnomaly;
-	private Text txtSummary;
+	private Text txtAnomalySummary;
 	private Text txtAnalysisDetails;
 	private Results currentTraceResults;
 	private Label lblAnalysisCurrentAnomaly;
 	private Group grpAnalysisResults;
-	private Label lblSummary;
+	private Label lblAnomalySummary;
 	private Label lblDetails;
-	private Group grpAnalysisIdentify;
+	private Group grpResults;
 	private Composite compTraceList;
+	private Composite compSummary;
 	private Label lblTreeTraceResult;
 	private Composite compResAndFeedback;
+	private Label lblTraceSummary;
+	private Text txtTraceSummary;
 	/**
 	 * Constructor
 	 * @param parent Composite object
@@ -61,20 +64,47 @@ public class ResultsAndFeedback {
 	 */
 	private void detailsAndFeedBack(Composite compParent){
 		//Group "Feedback: Is it anomaly?"
-				grpAnalysisIdentify = new Group(compParent, SWT.NONE);
-				grpAnalysisIdentify.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
+				grpResults = new Group(compParent, SWT.NONE);
+				grpResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
 				//grpAnalysisIdentify.setText("Results and Feedback");
-				grpAnalysisIdentify.setText("Results");
-				grpAnalysisIdentify.setLayout(new GridLayout(2,false));
-                
-				/// Trace list
-				compTraceList=new Composite(grpAnalysisIdentify, SWT.None);
+				grpResults.setText("Results");
+				grpResults.setLayout(new GridLayout(2,false));
+				
+				/////////////////////////////////////
+				// Widgets for summary
+				//////////////////////////////////////
+				compSummary=new Composite(grpResults, SWT.None);
+				compSummary.setLayout(new GridLayout(7,false));
+				compSummary.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
+				
+				lblTraceSummary = new Label(compSummary, SWT.NONE);
+				lblTraceSummary.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
+				lblTraceSummary.setText("Total Traces");
+				
+				txtTraceSummary= new Text(compSummary,SWT.BORDER);
+				txtTraceSummary.setEditable(false);
+				txtTraceSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,1,1));
+				
+				lblAnomalySummary = new Label(compSummary, SWT.NONE);
+				lblAnomalySummary.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
+				lblAnomalySummary.setText("Total Anomalies");
+				
+				txtAnomalySummary= new Text(compSummary,SWT.BORDER);
+				txtAnomalySummary.setEditable(false);
+				txtAnomalySummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,1,1));
+				
+				
+				
+                ///////////////////////////////////
+				/// Widgets for Trace list
+				/////////////////////////////////
+				compTraceList=new Composite(grpResults, SWT.None);
 				compTraceList.setLayout(new GridLayout(1,false));
 				compTraceList.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
 				
 				lblTreeTraceResult=new Label(compTraceList,SWT.NONE);
 				lblTreeTraceResult.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-				lblTreeTraceResult.setText("Trace List (Select to see results)");
+				lblTreeTraceResult.setText("Trace List (Select to See Results)");
 				
 				treeTraceResults=new Tree(compTraceList , SWT.BORDER |  SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 				treeTraceResults.setLinesVisible(true);
@@ -91,18 +121,21 @@ public class ResultsAndFeedback {
 						if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
 							txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
 						else
-							txtAnalysisCurrentAnomaly.setText(results.getAnomaly().toString());
+							txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
 						
 					 txtAnalysisDetails.setText(results.getDetails().toString());	
 					}
 				});
 				
 				
-				compResAndFeedback=new Composite(grpAnalysisIdentify, SWT.NONE);
+				compResAndFeedback=new Composite(grpResults, SWT.NONE);
 			    compResAndFeedback.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 			    compResAndFeedback.setLayout(new GridLayout(1,false));
 			    
 			    results(compResAndFeedback);
+			    
+			    
+			    
 				//*** End Trace list
 				
 				//*** Group Feedback: To be included in the next version.The code is commented at the moment.
@@ -161,6 +194,7 @@ public class ResultsAndFeedback {
 	
 	private void results(Composite compParent ){
 		/**
+		 * 
 		 * Result
 		 *
 		 */
@@ -169,27 +203,17 @@ public class ResultsAndFeedback {
 		gridDataResult.horizontalSpan=1;
 		grpAnalysisResults.setLayoutData(gridDataResult);
 		grpAnalysisResults.setLayout(new GridLayout(2,false));
-		//grpAnalysisResults.setText("");
-
 		
 		lblAnalysisCurrentAnomaly = new Label(grpAnalysisResults, SWT.NONE);
 		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
-		lblAnalysisCurrentAnomaly.setText("Anomaly (Anomaly Type)");
+		lblAnalysisCurrentAnomaly.setText("Anomaly ");
 		
 		txtAnalysisCurrentAnomaly= new Text(grpAnalysisResults,SWT.BORDER);
 		txtAnalysisCurrentAnomaly.setEditable(false);
-		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		
-		lblSummary = new Label(grpAnalysisResults, SWT.NONE);
-		lblSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
-		lblSummary.setText("Total Anomalies");
-		
-		txtSummary= new Text(grpAnalysisResults,SWT.BORDER);
-		txtSummary.setEditable(false);
-		txtSummary.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));//gridDataResultText);
-		
+		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultText);
+			
 		lblDetails=new Label(grpAnalysisResults,SWT.NONE);
-		lblDetails.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
+		lblDetails.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,false,2,1));
 		lblDetails.setText("Details");
 		
 		txtAnalysisDetails = new Text(grpAnalysisResults, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CANCEL);
@@ -205,7 +229,7 @@ public class ResultsAndFeedback {
 	 * @param traceName Trace name
 	 * @param results Results object
 	 */
-	//HashMap <String, IDetectionAlgorithm.Results> resultsList=new HashMap<String, IDetectionAlgorithm.Results>();
+	
 	public void addTraceResult(String traceName, Results results){
 		
 		if (!traceName.isEmpty() && results!=null){
@@ -218,13 +242,25 @@ public class ResultsAndFeedback {
 				if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
 					txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
 				else
-					txtAnalysisCurrentAnomaly.setText(results.getAnomaly().toString());
+					txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
+				
 				
 				txtAnalysisDetails.setText(results.getDetails().toString());
 			}
 				
 		}
 		
+	}
+	/**
+	 * Converts a boolean to displayable string
+	 * @param anomaly
+	 * @return A String value to be displayed
+	 */
+	private String booleanAnomalyToString(Boolean anomaly){
+		if (anomaly)
+			return "Yes, an anomaly.";
+		else
+			return "No, not an anomaly";
 	}
 	/** 
 	 * 
@@ -234,13 +270,22 @@ public class ResultsAndFeedback {
 		treeTraceResults.removeAll();
 		txtAnalysisCurrentAnomaly.setText("");
 		txtAnalysisDetails.setText("");
-		txtSummary.setText("");
+		txtAnomalySummary.setText("");
+		txtTraceSummary.setText("");
 	}
 	/**
 	 * Sets the summary of results
-	 * @param summary Summary as string
+	 * @param anomalyCount AnomalyCount as string
 	 */
-	public void setSummary(String summary){
-		txtSummary.setText(summary);
+	public void setTotalAnomalyCount(String anomalyCount){
+		txtAnomalySummary.setText(anomalyCount);
+		
+	}
+	/**
+	 * Sets the total trace count
+	 * @param traceCount Total trace count
+	 */
+	public void setTotalTraceCount(String traceCount){
+		txtTraceSummary.setText(traceCount);
 	}
 }

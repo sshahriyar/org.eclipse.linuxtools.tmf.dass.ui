@@ -12,7 +12,9 @@ package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
@@ -224,7 +226,6 @@ public class AlgorithmModelSelector {
 	 * @param compParent Modeling composite
 	 * 
 	 */
-	//Text txtModelingTraces;
 	public void identifyModelInDatabase(Composite compParent){
 		/**
 		 * Group modeling type and traces
@@ -324,8 +325,17 @@ public class AlgorithmModelSelector {
 				if (Configuration.connection.isConnected()){
 					cmbDBNames.setEnabled(true);	
 					cmbDBNames.removeAll(); 
+					List<String> modelsList;
+					try{
+						modelsList=Configuration.connection.getDatabaseList();
+					} catch (Exception ex){// in case of no db connection or no list
+					 	cmbDBNames.add("No connection/database list");
+					    cmbDBNames.select(0);
+						cmbDBNames.setEnabled(false);
+						return;
+					}
 					
-					List<String> modelsList=Configuration.connection.getDatabaseList();
+						
 					for (int j=0; j<modelsList.size();j++)
 					   	if (modelsList.get(j).contains(filter))
 								cmbDBNames.add(modelsList.get(j));
@@ -471,7 +481,7 @@ public class AlgorithmModelSelector {
 			 
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
-			console.printTextLn("Processing file "+fileList[trcCnt].getName());
+			console.printTextLn("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
 	 		theModel.train(trace, isLastTrace, database,connection, console, algorithmOptions, isCreateDB);
 		
 		}
@@ -508,7 +518,7 @@ public class AlgorithmModelSelector {
 			
  			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
  		
- 			console.printTextLn("Processing file "+fileList[trcCnt].getName());
+ 			console.printTextLn("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
  			
 	 		algorithm.validate(trace, database, Configuration.connection, isLastTrace, console );
 

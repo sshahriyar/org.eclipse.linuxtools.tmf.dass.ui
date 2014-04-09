@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.readers;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
@@ -30,12 +30,12 @@ public class TraceTypeFactory {
 
 	//Data variables
 	private static TraceTypeFactory traceTypes=null;
-	private HashMap<String,ITraceTypeReader> traceTypeReadersList=null;
+	private LinkedHashMap<String,ITraceTypeReader> traceTypeReadersList=null;
 	/**
 	 * Constructor 
 	 */
 	private TraceTypeFactory( ){
-		traceTypeReadersList=new HashMap<String,ITraceTypeReader>();
+		traceTypeReadersList=new LinkedHashMap<String,ITraceTypeReader>();
 	}
 	/**
 	 * Creates the instance of TraceTypeFactory

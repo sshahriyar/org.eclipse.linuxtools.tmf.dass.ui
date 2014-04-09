@@ -79,13 +79,18 @@ public class DBMS implements ISubject {
 		} catch (UnknownHostException ex) {
 			isConnected=false;
 			message=ex.getMessage();
+			notifyObservers();
 			return message;
-		} catch (Exception ex){ // Just capture an exception and don't let the sytem crash when db is not there
+		} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
 			isConnected=false;
 			message="Unable to connect to MongoDB.";
+			notifyObservers();
 			return message;
 		}
+		
+		
 		isConnected=true;// if it reaches here then it is connected
+		notifyObservers();
 		return message;
 		
 	}
@@ -109,9 +114,12 @@ public class DBMS implements ISubject {
 				isConnected=false;
 				message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
 			}
-			else
+			else{
 				isConnected=true;// if it reaches here then everything is fine
+				
+			}
 		}
+		
 		return message;
 	}
 	/**
@@ -156,8 +164,14 @@ public class DBMS implements ISubject {
 	 */
 	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
 	
-	 if (datbaseExists(dataBase))
+	 if (datbaseExists(dataBase)){
+		 	if (isConnected==false){// This code sinppet is a check for the breakage of connection during the excution
+		 		isConnected=true;   // if reconnection occurs  during execution it will notify all obervers
+		 		notifyObservers();
+		 	}
 			throw new TotalADSDBMSException("Database already exists!");
+			
+	 }
 		
 		DB db=mongoClient.getDB(dataBase);
 		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
@@ -165,6 +179,7 @@ public class DBMS implements ISubject {
 		for (int j=0; j<collectionNames.length;j++)
 			db.createCollection(collectionNames[j], options);
 		//db.createCollection(Configuration.settingsCollection, options);
+		isConnected=true; // if this code is executed after the breakage of connection, make sure isConnected is true if it h
 		notifyObservers();
 	}
 	

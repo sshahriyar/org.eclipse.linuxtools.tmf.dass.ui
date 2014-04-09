@@ -25,8 +25,12 @@ public interface ITraceTypeReader {
 	public String getName();
 	/** Returns the acronym of the Trace Reader; should only be three characters Long  */
 	public String getAcronym();
-	/** Gets a trace from a file 
-	 * @throws TotalADSReaderException TODO*/
+	/**
+	 * Gets a trace from a file 
+	 * @param file file object representing the file
+	 * @return Iterator to the trace
+	 * @throws TotalADSReaderException
+	 */
 	public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException;
 
 }

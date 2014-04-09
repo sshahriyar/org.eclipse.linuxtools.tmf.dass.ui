@@ -46,18 +46,27 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 		public boolean advance() throws TotalADSReaderException {
 		   boolean isAdvance=false;
 		   try {
-				 event=bufferedReader.readLine();
-				 if (event==null){
-					  bufferedReader.close();
-					  isClose=true;
-					  isAdvance=false;
-				 }
-				 else{
-					 isAdvance=true;
-					 String syscall=MapSysCallIDToName.getSysCallName(Integer.parseInt(event));
-					 event=syscall;
-					 
-				 }
+			   String syscall="";
+				do { 
+					event=bufferedReader.readLine();
+					 if (event==null){
+						  bufferedReader.close();
+						  isClose=true;
+						  isAdvance=false;
+					 }
+					 else{
+						 isAdvance=true;
+						 int id;
+						 try {
+							 id=Integer.parseInt(event);
+							 syscall=MapSysCallIDToName.getSysCallName(id);
+							 event=syscall;
+						 }catch (NumberFormatException ex){
+							 syscall=null;
+						 }
+						
+					 }
+				}while (syscall==null);
 				
 			} catch (IOException e) {
 				
@@ -111,7 +120,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 		// This is for lab experiments only
-		return "Text-Syscall ID to Name Reader (for lab)";
+		return "Text-Syscall ID to Name (lab)";
 	}
 
 	 /**

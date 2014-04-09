@@ -11,6 +11,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 
+import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.graphics.Font;
@@ -18,7 +19,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.wb.swt.SWTResourceManager;
 
 //import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 /**

@@ -13,6 +13,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
@@ -88,7 +89,7 @@ public class BackgroundModeling extends Thread{
 					msg=ex.getMessage();  
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
 				
-			}
+			} 
 			catch (Exception ex) { // handle all other exceptions here and log them too.
 									//UI exceptions are simply notifications--no need to log them
 									
@@ -98,6 +99,13 @@ public class BackgroundModeling extends Thread{
 					msg=ex.getMessage();
 				 //ex.printStackTrace();
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.SEVERE,msg,ex);
+				// An exception could be thrown due to unavailability of the db, 
+				// make sure that the connection is not lost
+				Configuration.connection.connect(Configuration.host, Configuration.port);
+				// We don't have to worry about exceptions here as the above function handles all the exceptions
+				// and just returns a message. This function also initializes connection info to correct value
+				// We cannot write above function under ConnectinException block because such exception is never thrown
+				// and Eclipse starts throwing errors
 			}
 			finally{
 				final String exception=msg;

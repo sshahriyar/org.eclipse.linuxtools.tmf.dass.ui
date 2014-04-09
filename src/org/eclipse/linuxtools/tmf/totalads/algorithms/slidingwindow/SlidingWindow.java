@@ -199,6 +199,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  String[] seq=new String[maxWin];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
+	    		 // System.out.println(Arrays.toString(seq));
 	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
 	    		  
 	    		  newSequence.remove(0);
@@ -423,7 +424,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * graphicalResults, an overriden method
 	 */
 	@Override
-	public Chart graphicalResults() {
+	public Chart graphicalResults(ITraceIterator traceIterator) {
 		
 		return null;
 	}
@@ -467,7 +468,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Performs cross validation
 	 */
 	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException{
+	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
 		
 	}
 }

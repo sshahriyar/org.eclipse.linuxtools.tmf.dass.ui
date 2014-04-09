@@ -46,7 +46,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	private List<String> FS_CALLS_LIST;
 	private List<String> IPC_CALLS_LIST;
 	private List<String> SECURITY_CALLS_LIST;
-	private Boolean intialize;
+	private Boolean initialize;
 	private Boolean isTestStarted;
 	private Integer validationTraceCount;
 	private Integer validationAnomalyCount;
@@ -83,7 +83,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     public KernelStateModeling(){
     	TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
     	SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
-    	intialize=false;
+    	initialize=false;
     	isTestStarted=false;
     	validationTraceCount=0;
         validationAnomalyCount=0;
@@ -134,9 +134,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     @Override
     public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
-    	if (!intialize){
+    	if (!initialize){
     		  alpha=0.0;
-	    	  intialize=true;
+	    	  
 	   
 	    	  if (options!=null){
 	    		  int trueCount=0;
@@ -159,28 +159,32 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	    		      throw new TotalADSUIException("Please, type true for one of the options.");
 	    		  	    			  	
 	    	  }
-	    	 if (isNewDB)
-	    		 createDatabase(database, connection);
+	    	 if (!isNewDB) // if it is not a newDB  then make initialize true else wait till the processing of first trace
+	    		 initialize=true;
 	    	 this.intializeStates();
 	    	  
 	    }
-    	if (isLastTrace)
-			intialize=false;
-			
+    				
     	TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
 		// if everything is fine up till now then carry on and insert it into the database
 		
 		try {
+			// If it has reached up till here now create the database and inserts. In case of incorrect trace format,
+			//it may have exited earlier
+			if (isNewDB && !initialize){
+	    		 createDatabase(database, connection);
+	    		 initialize=true;// make it true so we don't execute it again
+			}
+			
 			connection.insert(states, database,TRACE_COLLECTION);
 		} catch (IllegalAccessException ex) {
 			
 			throw new TotalADSDBMSException(ex.getMessage());
-		}//catch (Exception ex){ // or any other excption from DBMS
-		//	throw new TotalADSDBMSException(ex.getMessage());
-	//	}
+		}
 		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
-		
+		if (isLastTrace)
+			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
 	}
 	/**
 	 * Validates the model
@@ -226,7 +230,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Cross validate the model
 	 */
 	@Override
-	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace) throws TotalADSUIException, TotalADSDBMSException{
+	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
 		// totalTraces=get the record count in the database
 		// patitionSize=divide it by folds
 		//repeat untill j=0  to folds and j++
@@ -316,7 +320,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	/**
 	 * Returns chart object
 	 */
-	public org.swtchart.Chart graphicalResults(){
+	public org.swtchart.Chart graphicalResults(ITraceIterator traceIterator){
 		return null;
 	}
 	/** Returns an instance of KSM **/
@@ -375,7 +379,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		return isAnomalous;
 	}
 	/**
-	 * 
+	 * Gets maximum KL and MM
 	 * @param cursor
 	 * @param maxKL
 	 * @param maxMM
@@ -396,7 +400,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * 
+	 * Measure probabilities
 	 * @param trace
 	 * @param states
 	 * @throws TotalADSReaderException 
@@ -417,7 +421,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
 		// If correct system call names do not exist in the trace, throw an exception
 		if (totalSysCalls<=0 || totalSysCalls.equals(states.UN))
-			throw new TotalADSUIException("No system call names found in the trace!");
+			throw new TotalADSUIException("No system call names found in the last trace. Further processing aborted!");
 		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);
@@ -429,7 +433,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		states.UN=round(states.UN/totalSysCalls,2);
 	}
 	/**
-	 * 
+	 * Map system call ids to state and count frequencies
 	 * @param syscallID
 	 * @param states
 	 */

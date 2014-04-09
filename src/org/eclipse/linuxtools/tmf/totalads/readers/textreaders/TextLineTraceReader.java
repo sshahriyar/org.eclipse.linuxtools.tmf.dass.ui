@@ -48,19 +48,23 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		public boolean advance() throws TotalADSReaderException  {
 		   boolean isAdvance=false;
 		   try {
-				 event=bufferedReader.readLine();
-				
-				 if (event==null){
-					  bufferedReader.close();
-					  isClose=true;
-					  isAdvance=false;
-				 }
-				 else{
-					 isAdvance=true;
-					 if(!regEx.isEmpty())
-						 event= event.replaceAll(regEx, "$1");
-					 event=event.trim();
-				 }
+				do { 
+				   	event=bufferedReader.readLine();
+					 
+					 if (event==null){
+						  bufferedReader.close();
+						  isClose=true;
+						  isAdvance=false;
+					 }
+					 else{
+						 isAdvance=true;
+						 if(!regEx.isEmpty())
+							 event= event.replaceAll(regEx, "$1");
+						 event=event.trim();
+					 }
+				}while(event!=null && event.isEmpty());// if there are empty lines or there is no match on regex on a line, no need to send an event.
+										// keep looping till the end of file.
+				 
 				
 			} catch (IOException e) {
 				
@@ -111,7 +115,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 	
-		return "Text-line Reader";
+		return "Text File (Line) Reader";
 	}
 
 	 /**
