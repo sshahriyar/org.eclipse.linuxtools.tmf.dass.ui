@@ -65,11 +65,7 @@ public class TotalADS  {
 				    msg.open();
 			}	    
 		  
-			// This code deinitializes the  Factory instance. It was necessary because
-			// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
-			// deinitialized on previous close of the plugin. 
-			AlgorithmFactory.destroyInstance();
-			TraceTypeFactory.destroyInstance();
+			
 			
 			algFactory= AlgorithmFactory.getInstance();
 			algFactory.initialize();
@@ -95,7 +91,7 @@ public class TotalADS  {
 			diagnosis=new Diagnosis(tabFolderDetector);
 			modeling =new Modeling(tabFolderDetector);	
 		
-			
+		
 			
 		
 	   } catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes

@@ -138,7 +138,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
      */
     @Override
     public String getName(){
-    	return "LTTng System Call Reader";
+    	return "LTTng System Call (SYS)";
     }
     /**
      * Returns the acronym of the Kernel space reader

@@ -70,6 +70,9 @@ public class DBMS implements ISubject {
 	public String connect(String host, Integer port) {
 		String message="";
 		try {
+			if (isConnected) // Don't open multiple connections
+				closeConnection();
+			
 			mongoClient = new MongoClient( host , port );
 			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
 		
@@ -105,21 +108,45 @@ public class DBMS implements ISubject {
 	 */
 	public String connect(String host, Integer port, String username, String password, String database) {
 		
-		String message=connect(host,port);
-		if (message.isEmpty()){
-			// if there is a running db then check this
-			DB db=mongoClient.getDB(database);
+		String message="";
+		try {
+			if (isConnected) // Don't open multiple connections
+				closeConnection();
+			
+			mongoClient = new MongoClient( host , port );
+			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
 		
-			if (db.authenticate(username, password.toCharArray())==false){
-				isConnected=false;
-				message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
+			
+			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
+											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
+		} catch (UnknownHostException ex) {
+			isConnected=false;
+			message=ex.getMessage();
+			//notifyObservers();
+			//return message;
+		} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
+			isConnected=false;
+			message="Unable to connect to MongoDB.";
+			//notifyObservers();
+			//return message;
+		}finally{
+		
+			if (message.isEmpty()){
+				// if there is a running db then check this
+				DB db=mongoClient.getDB(database);
+			
+				if (db.authenticate(username, password.toCharArray())==false){
+					isConnected=false;
+					message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
+				}
+				else{
+					isConnected=true;// if it reaches here then everything is fine
+					
+				}
 			}
-			else{
-				isConnected=true;// if it reaches here then everything is fine
-				
-			}
+		  notifyObservers();
+		
 		}
-		
 		return message;
 	}
 	/**
@@ -197,6 +224,7 @@ public class DBMS implements ISubject {
 	 * Close the connection
 	 */
 	public void closeConnection(){
+		isConnected=false;
 		mongoClient.close();
 	}
 	/**

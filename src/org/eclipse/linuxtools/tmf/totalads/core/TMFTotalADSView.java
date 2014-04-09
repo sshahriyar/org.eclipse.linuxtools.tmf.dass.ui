@@ -12,6 +12,7 @@ package org.eclipse.linuxtools.tmf.totalads.core;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
@@ -66,21 +67,32 @@ public class TMFTotalADSView extends TmfView {
 	 */
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
-        // Don't populate the view again if we're already showing this trace
-        if (currentTrace == signal.getTrace()) {
-            return;
-        }
+      //  // Don't populate the view again if we're already showing this trace
+       // if (currentTrace == signal.getTrace()) {
+        //   return;
+       // }
         currentTrace = signal.getTrace();
      
             
-        ITmfTrace trace = signal.getTrace();
+        //ITmfTrace trace = signal.getTrace();
     	// Right now we are not sure how to determine whether a trace is a user space trace or kernel space trace
         // so we are only considering kernel space traces
         Boolean isKernelSpace=true;
 		ITraceTypeReader traceReader=TraceTypeFactory.getInstance().getCTFKernelorUserReader(isKernelSpace);
 
-        comp.notifyOnTraceSelection(trace.getPath(), traceReader.getName());
+        comp.notifyOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
+	@Override
+	public void dispose(){
+		super.dispose();
+		Configuration.connection.closeConnection();
+		// This code deinitializes the  Factory instance. It was necessary because
+		// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
+		// deinitialized on previous close of the plugin. 
+		AlgorithmFactory.destroyInstance();
+		TraceTypeFactory.destroyInstance();
+		
 	
+	}
 }

@@ -176,22 +176,22 @@ public class Diagnosis {
 	    // 
 		btnSelTestTraces = new Button(grpTraceSelection, SWT.RADIO);
 		btnSelTestTraces.setText("Select the  Folder Containing Test Traces");
-		btnSelTestTraces.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
+		btnSelTestTraces.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false, false,2,1));
 		btnSelTestTraces.setSelection(true);
 		
 		txtTestTraceDir=new Text(grpTraceSelection, SWT.BORDER);
 		txtTestTraceDir.setEnabled(true);
-		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
+		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
 		
 		traceBrowser= new TraceBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
 	
 		
 		btnSelTMFTrace = new Button(grpTraceSelection, SWT.RADIO);
 		btnSelTMFTrace.setText("Select the Trace Selected in TMF (Only Kernel Trace)");
-		btnSelTMFTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
+		btnSelTMFTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false, false,2,1));
 		
 		txtTMFTraceID=new Text(grpTraceSelection,SWT.BORDER);
-		txtTMFTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
+		txtTMFTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		txtTMFTraceID.setEditable(false);
 		txtTMFTraceID.setEnabled(false);
 		

@@ -115,7 +115,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 	
-		return "Text File (Line) Reader";
+		return "Text File (TXT)";
 	}
 
 	 /**

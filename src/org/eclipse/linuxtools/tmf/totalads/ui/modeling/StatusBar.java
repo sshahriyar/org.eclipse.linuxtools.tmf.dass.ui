@@ -13,11 +13,16 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 
 /**
  * This class creates the status bar and provides the necessary functions to update the status from background threads
@@ -28,6 +33,7 @@ public class StatusBar {
 	private Composite compStatus;
 	private Label lblProgress;
 	private Label lblStatus;
+	private Button btnConnection;
 	private int colorChooser;
 	private int maxColors;
 	public StatusBar(Composite compParent) {
@@ -35,23 +41,21 @@ public class StatusBar {
 		maxColors=2;
 		compStatus=new Composite(compParent, SWT.NONE);
 		compStatus.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		compStatus.setLayout(new GridLayout(2, false));
+		compStatus.setLayout(new GridLayout(3, false));
 		
 		lblProgress= new Label(compStatus, SWT.NONE);
 		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
 		
-		lblStatus= new Label(compStatus, SWT.BORDER);
-		lblStatus.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+		btnConnection= new Button(compStatus, SWT.BORDER);
+		btnConnection.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		btnConnection.setLayoutData(new GridData(SWT.RIGHT,SWT.CENTER,false,false,1,1));
+		btnConnection.setText("Connect");
 		
-		// Adding an observer to the connection
-		Configuration.connection.addObserver(new IObserver() {
-			
-			@Override
-			public void update() {
-				initialState();
-				
-			}
-		});
+		lblStatus= new Label(compStatus, SWT.BORDER);
+		lblStatus.setLayoutData(new GridData(SWT.RIGHT,SWT.CENTER,false,false,1,1));
+		lblStatus.setText("       ");
+	
+		addEventHandlers();
 		
 		initialState();
 	}
@@ -71,15 +75,20 @@ public class StatusBar {
 					
 					lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_GREEN));
 					lblProgress.setText("Connected to localhost..");
-				
 					lblStatus.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_GREEN));
-					lblStatus.setText("        ");
+					btnConnection.setVisible(false);
+					
+					
+					
+									
+					//lblStatus.setImage(SWTResourceManager.getImage("/home/umroot/experiments/workspace/org.eclipse.linuxtools/lttng/org.eclipse.linuxtools.tmf.totalads/icons/sample.gif"));
 				}else {
 					lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
 					lblProgress.setText("Connection to database failed..");
-				
 					lblStatus.setBackground(SWTResourceManager.getColor(SWT.COLOR_RED));
-					lblStatus.setText("        ");
+					btnConnection.setVisible(true);
+					
+					
 				}
 				
 			}
@@ -113,7 +122,38 @@ public class StatusBar {
 		});
 		
 	}
+	/**
+	 * Function to add event handlers
+	 */
+	private void addEventHandlers(){
+		// Adding an event handler for mouse up event
+		btnConnection.addMouseListener(new MouseAdapter() {
+		 @Override
+			public void mouseUp(MouseEvent e) {
+				
+				String err=	Configuration.connection.connect(Configuration.host, Configuration.port);
+				if (!err.isEmpty()){
+					MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+					           ,SWT.ICON_ERROR|SWT.OK);
+					msgBox.setMessage(err);
+					msgBox.open();
+				}
+				//initialState();
+					
+			}
+			
+		});
+		
+		// Adding an observer to the connection
+		Configuration.connection.addObserver(new IObserver() {
+					@Override
+					public void update() {
+						initialState();
+						
+					}
+		});
+		
 	
-	
+	}
 	
 }

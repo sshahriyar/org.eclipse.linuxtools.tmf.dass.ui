@@ -118,7 +118,7 @@ public class BackgroundTesting extends Thread{
 				Logger.getLogger(BackgroundTesting.class.getName()).log(Level.SEVERE, msg, ex);
 				// An exception could be thrown due to unavailability of the db, 
 				// make sure that the connection is not lost
-				Configuration.connection.connect(Configuration.host, Configuration.port);
+						Configuration.connection.connect(Configuration.host, Configuration.port);
 				// We don't have to worry about exceptions here as the above function handles all the exceptions
 				// and just returns a message. This function also initializes connection info to correct value
 				// We cannot write above function under ConnectinException block because such exception is never thrown
