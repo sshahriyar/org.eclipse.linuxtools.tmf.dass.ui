@@ -55,7 +55,7 @@ Instructions for Development and Testing
 	And append the following ":your_path"/mongodb/bin" to PATH. 
 	Replace your_path with the actual path in the system and restart terminal 
 	
-8. Start MongoDB. If you installed it directly on your OS from the URL in 8 then it may have already been started or will start
+8. Start MongoDB. If you installed it directly on your OS from the URL in 7 then it may have already been started or will start
    on a reboot automatically. An alternate way to start mongodb is as follows:
  	 cd mongodb
 	 type mongod --dbpath data/db/ 
