@@ -328,14 +328,14 @@ public class ModelLoader {
 		
 	}
 	/**
-	 * Assigns tracePath object from Diagnosis class to a local variable
+	 * Assigns tracePath object from LiveDiagnosis class to a local variable
 	 * @param tracePath Trace Path 
 	 */
 	public void setTrace(StringBuilder tracePath){
 		this.tracePath=tracePath;
 	}
 	/**
-	 *  Assigns TraceTypeSelector object from Diagnosis class to a local object
+	 *  Assigns TraceTypeSelector object from LiveDiagnosis class to a local object
 	 * @param traceTypeSelector Trace type selector
 	 */
 	public void setTraceTypeSelector(TracingTypeSelector traceTypeSelector){
@@ -343,7 +343,7 @@ public class ModelLoader {
 	}
 	
 	/**
-	 * Assigns ResultsAndFeddback object from Diagnosis class to a local variable
+	 * Assigns ResultsAndFeddback object from LiveDiagnosis class to a local variable
 	 * @param resultsAndFeedback Results and Feedback object
 	 */
 	public void setResultsAndFeedback(ResultsAndFeedback resultsAndFeedback){

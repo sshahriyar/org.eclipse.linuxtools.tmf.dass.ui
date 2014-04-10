@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Text;
 
 //import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
 /**
- * This class implements the GUI widget for the progress console visible on the Diagnosis tab
+ * This class implements the GUI widget for the progress console visible on the LiveDiagnosis tab
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */

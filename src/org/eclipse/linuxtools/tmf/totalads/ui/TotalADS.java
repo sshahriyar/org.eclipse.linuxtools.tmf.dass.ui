@@ -19,6 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.live.LiveDiagnosis;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,7 +35,7 @@ import org.eclipse.swt.widgets.MessageBox;
 //import org.eclipse.swt.custom.TableTree;
 /**
  * This is the main class for intializing GUI elements. It instantiates two  classes
- *  {@link Diagnosis} and {@link Modeling} which in turn further instantiate different components
+ *  {@link LiveDiagnosis} and {@link Modeling} which in turn further instantiate different components
  *  of GUI elements in TotalADS
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
@@ -43,7 +44,8 @@ import org.eclipse.swt.widgets.MessageBox;
 public class TotalADS  {
 	private Modeling modeling;
 	private Diagnosis diagnosis;
-	private CTabFolder tabFolderDetector;
+	private LiveDiagnosis liveDiagnosis;
+	private CTabFolder tabFolderTotalADS;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
 	private TraceTypeFactory trcTypeFactory;
@@ -82,15 +84,17 @@ public class TotalADS  {
 			
 			//leftPane(parent);
 			
-			tabFolderDetector = new CTabFolder(parent, SWT.BORDER);
-			tabFolderDetector.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
+			tabFolderTotalADS = new CTabFolder(parent, SWT.BORDER);
+			tabFolderTotalADS.setSelectionBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 			GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 			gridData.horizontalSpan=1;
-			tabFolderDetector.setLayoutData(gridData);
+			tabFolderTotalADS.setLayoutData(gridData);
 			
-			diagnosis=new Diagnosis(tabFolderDetector);
-			modeling =new Modeling(tabFolderDetector);	
-		
+			
+				
+			diagnosis=new Diagnosis(tabFolderTotalADS);
+			liveDiagnosis=new LiveDiagnosis(tabFolderTotalADS);
+			modeling =new Modeling(tabFolderTotalADS);
 		
 			
 		
@@ -109,7 +113,7 @@ public class TotalADS  {
 	 * Sets focus on TotalADS
 	 */
 	public void setFocus(){
-		tabFolderDetector.setFocus();
+		tabFolderTotalADS.setFocus();
 	}
 	/*
 	 	 
