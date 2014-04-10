@@ -33,8 +33,8 @@ public class UserInfoSSH implements UserInfo {
 		
 		@Override
 		public void showMessage(String msg) {
-			//progConsole.printTextLn(msg);
-			System.out.println(msg);
+			progConsole.printTextLn(msg);
+			//System.out.println(msg);
 		}
 		
 		@Override

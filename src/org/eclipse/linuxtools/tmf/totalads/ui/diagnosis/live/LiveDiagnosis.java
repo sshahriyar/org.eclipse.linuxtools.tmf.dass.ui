@@ -14,6 +14,7 @@ import java.awt.event.MouseAdapter;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
@@ -143,7 +144,7 @@ public class LiveDiagnosis {
 		//progressBar.setMaximum(5);
 		
 		//progressBar.setSelection(5);
-		
+		console =new ProgressConsole(compStatusResults);
 		
 		resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
 		modelLoader.setResultsAndFeedback(resultsAndFeedback);
@@ -210,7 +211,7 @@ public class LiveDiagnosis {
 		btnLiveTracing.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false,1,1));
 		btnLiveTracing.setText("Connect");
 		
-		console =new ProgressConsole(grpTraceSelection);
+		
 		
 		btnLiveTracing.addMouseListener(new MouseListener() {
 		
@@ -223,7 +224,13 @@ public class LiveDiagnosis {
 					msgBox.open();
 				}else {
 					SSHConnector ssh=new SSHConnector();
-					ssh.openSSHConnection(txtUserAtHost.getText(), txtPassword.getText(), null, console);
+					try {
+						ssh.openSSHConnection(txtUserAtHost.getText(), txtPassword.getText(), 7225, console);
+					} catch (TotalADSNetException e1) {
+						MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+						msgBox.setMessage(e1.getMessage());
+						msgBox.open();
+					}
 				}
 			}
 			

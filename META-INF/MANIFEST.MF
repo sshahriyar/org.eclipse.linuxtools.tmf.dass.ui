@@ -20,7 +20,8 @@ Bundle-ClassPath: swing2swt.jar,
  src/,
  lib/reflections-0.9.9-RC1.jar,
  lib/gson-2.2.4-javadoc.jar,
- lib/gson-2.2.4.jar
+ lib/gson-2.2.4.jar,
+ lib/jsch-0.1.51.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.linuxtools.ctf.core.tests.shared,
  org.eclipse.linuxtools.ctf.core.trace,

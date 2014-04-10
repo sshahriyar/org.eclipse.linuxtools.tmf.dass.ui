@@ -31,7 +31,7 @@ public class Exec{
       String user=host.substring(0, host.indexOf('@'));
       host=host.substring(host.indexOf('@')+1);
 
-      Session session=jsch.getSession(user, host, 22);
+      Session session=jsch.getSession(user, host, 7225);
       
       /*
       String xhost="127.0.0.1";
