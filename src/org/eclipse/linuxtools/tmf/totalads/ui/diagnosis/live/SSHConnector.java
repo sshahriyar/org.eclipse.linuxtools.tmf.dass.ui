@@ -3,10 +3,14 @@ package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.live;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 
 import javax.swing.JOptionPane;
 
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
+
+
+
 
 
 
@@ -22,6 +26,7 @@ import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
 /**
@@ -62,10 +67,11 @@ public class SSHConnector {
 		      session.connect();
 	      
 		      
-	       executeCommand("sudo -S -p '' lttng create ag-session\n lttng enable-event -a -k;\nlttng start;"
-	       		+ "lttng stop\nlttng destroy ag-session", 	    		   
-	    		    console,session,password);
-	      //executeCommand("sudo -S -p '' lttng enable-event -a -k",  console,password);
+	      // executeCommand("sudo -S -p '' lttng create ag-session\n lttng enable-event -a -k;\nlttng start;"
+	       	//	+ "lttng stop\nlttng destroy ag-session", 	    		   
+	    	//	    console,session,password);
+		      executeShell(session);
+	      ////executeCommand("sudo -S -p '' lttng enable-event -a -k",  console,password);
 	     // executeCommand("lttng start", console,session, password);
 	     // executeCommand("lttng stop", console,session, password);
 	    //  executeCommand("sudo -S -p  '' lttng destroy nome-session", console, session,password);
@@ -77,6 +83,56 @@ public class SSHConnector {
 	    catch(Exception e){
 	      System.out.println(e);
 	    }
+	}
+	
+	
+	private void executeShell(Session session) throws JSchException, IOException{
+
+
+        Channel channel=session.openChannel("shell");
+        OutputStream ops = channel.getOutputStream();
+        PrintStream ps = new PrintStream(ops, true);
+
+         channel.connect();
+         ps.println("sudo lttng create thesession");
+         ops.write(("grt_654321"+"\n").getBytes());
+         ps.println("lttng start"); 
+         ps.println("lttng stop");
+         ps.println("sudo lttng destroy thesession");
+ //give commands to be executed inside println.and can have any no of commands sent.
+                      ps.close();
+
+         InputStream in=channel.getInputStream();
+         byte[] bt=new byte[1024];
+
+
+         while(true)
+         {
+
+         while(in.available()>0)
+         {
+         int i=in.read(bt, 0, 1024);
+         if(i<0)
+          break;
+            String str=new String(bt, 0, i);
+          //displays the output of the command executed.
+            System.out.print(str);
+
+
+         }
+         if(channel.isClosed())
+         {
+
+             break;
+        }
+         try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			
+		}
+         channel.disconnect();
+         session.disconnect();   
+         }
 	}
 	/**
 	 * 
