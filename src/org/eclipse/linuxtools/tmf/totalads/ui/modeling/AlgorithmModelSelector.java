@@ -575,7 +575,7 @@ public class AlgorithmModelSelector {
 					   isAllFiles=true;
 			   
 				   if (isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains "
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains"
 					   		+ "	directories. Please put only trace files in it.");
 			   
 			    }
@@ -613,8 +613,8 @@ public class AlgorithmModelSelector {
 					   isAllFiles=true;
 			   
 				   if (isAllFiles && isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix"
-					   		+ "	of files and directories. Please put only LTTng traces' directories in it.");
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix of"+
+					   		 " files and directories. Please put only LTTng traces' directories in it.");
 			   
 			    }
 			    // if it has reached this far 

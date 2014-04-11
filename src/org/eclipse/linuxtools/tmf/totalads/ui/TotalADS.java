@@ -19,7 +19,6 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.live.LiveDiagnosis;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,7 +43,6 @@ import org.eclipse.swt.widgets.MessageBox;
 public class TotalADS  {
 	private Modeling modeling;
 	private Diagnosis diagnosis;
-	private LiveDiagnosis liveDiagnosis;
 	private CTabFolder tabFolderTotalADS;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
@@ -93,7 +91,6 @@ public class TotalADS  {
 			
 				
 			diagnosis=new Diagnosis(tabFolderTotalADS);
-			liveDiagnosis=new LiveDiagnosis(tabFolderTotalADS);
 			modeling =new Modeling(tabFolderTotalADS);
 		
 			
