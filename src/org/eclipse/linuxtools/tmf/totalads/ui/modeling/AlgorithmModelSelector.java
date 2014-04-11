@@ -27,6 +27,9 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -438,10 +441,11 @@ public class AlgorithmModelSelector {
 		Boolean isCreateDB=isNewOrOldModel;
 		database=modelNameRetreival;
 		
-		File fileList[]=getDirectoryHandler(trainDirectory);// Get a file and a db handler
-		DBMS connection=Configuration.connection;
-		
-		
+		////////////////////
+		///File verifications
+		///////////////////
+		File fileList[]=getDirectoryHandler(trainDirectory,traceReader);// Get a file handler
+				
 		try{ //Check for valid trace type reader and training traces before creating a database
 			traceReader.getTraceIterator(fileList[0]);
 		}catch (TotalADSReaderException ex){
@@ -449,7 +453,8 @@ public class AlgorithmModelSelector {
 			throw new TotalADSUIException(message);
 		}
 		
-		File validationFileList[]=getDirectoryHandler(validationDirectory);
+	
+		File validationFileList[]=getDirectoryHandler(validationDirectory,traceReader);
 		
 		try{ //Check for valid trace type reader and validation traces before creating a database
 			traceReader.getTraceIterator(validationFileList[0]);
@@ -457,7 +462,11 @@ public class AlgorithmModelSelector {
 			String message="Invalid validation traces and the trace reader.\n"+ex.getMessage();
 			throw new TotalADSUIException(message);
 		}
+	    ///////////////
+		/// Db vverifications
+		///////////////
 		//Second,  create a database after verifications
+		DBMS connection=Configuration.connection;
 		if(isCreateDB){
 				database=database.trim()+"_"+theModel.getAcronym()+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();
@@ -529,21 +538,100 @@ public class AlgorithmModelSelector {
 	}
 	
 	/**
-	 * Get an array of trace list for a directory
-	 * @param directory Folder of traces
-	 * @return
+	 * 
+	 * @param directory The name of the directory
+	 * @param traceReader An object of the trace reader
+	 * @return An array list of traces sutied for the appropriate type
+	 * @throws TotalADSUIException
 	 */
-	private File[] getDirectoryHandler(String directory){
+	
+	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSUIException{
 		File traces=new File(directory);
+		
+		CTFLTTngSysCallTraceReader kernelReader=new CTFLTTngSysCallTraceReader();
+		if (traceReader.getAcronym().equals(kernelReader.getAcronym()))
+			return getDirectoryHandlerforLTTngTraces(traces);
+		else // It is a text trace or any other 
+			return getDirectoryHandlerforTextTraces(traces);
+	}
+	/**
+	 * Get an array of trace list for a directory or just one file handler if there is only one file
+	 * @param traces File object representing traces
+	 * @return the file handler to the correct path
+	 * @throws TotalADSUIException 
+	 */
+	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSUIException{
+		
 		File []fileList;
-		
-		
-		if (traces.isDirectory())
-	            fileList=traces.listFiles();
-	    else{
+				
+		if (traces.isDirectory()){ // if it is a directory return the list of all files
+			    Boolean isAllFiles=false, isAllFolders=false;
+			    fileList=traces.listFiles();
+			    for (File file: fileList){
+				
+				   if (file.isDirectory())
+					   isAllFolders=true;
+				   else if (file.isFile())
+					   isAllFiles=true;
+			   
+				   if (isAllFolders) // there is no need to continue further throw this msg	   
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains "
+					   		+ "	directories. Please put only trace files in it.");
+			   
+			    }
+			    
+			 
+		}
+	    else{// if it is a single file return the single file; however, this code will never be reached
+	    	// as in GUI we are only using a directory handle, but if in futre we decide to change 
+	    	// this could come handy
 	            fileList= new File[1];
 	            fileList[0]=traces;
 	    }
 		return fileList;
+	}
+	
+	/**
+	 * Gets an array of list of directories 
+	 * @param traces File object representing traces
+	 * @return Handler to the correct path of files
+	 * @throws TotalADSUIException
+	 */
+	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSUIException{
+		
+				
+		if (traces.isDirectory()){
+				File []fileList=traces.listFiles();
+				File []fileHandler;
+			    Boolean isAllFiles=false, isAllFolders=false;
+			   
+			    for (File file: fileList){
+				
+				   if (file.isDirectory())
+					   isAllFolders=true;
+				   else if (file.isFile())
+					   isAllFiles=true;
+			   
+				   if (isAllFiles && isAllFolders) // there is no need to continue further throw this msg	   
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix"
+					   		+ "	of files and directories. Please put only LTTng traces' directories in it.");
+			   
+			    }
+			    // if it has reached this far 
+			    if (isAllFiles){ // return the name of folder as a trace
+			    	fileHandler =new File[1];
+			    	fileHandler[0]=traces;
+			    	
+			    } 
+			    else // if all folders then return the list of all folders
+			    	fileHandler=fileList;
+			   
+			     return fileHandler;
+			   
+			    
+	    } else// this will not happen currently as we are only using the directory 
+	    	  //loader in the main view
+	    	throw new TotalADSUIException("You have selected a file"+traces.getName()+", select a folder");
+	
 	}
 }
