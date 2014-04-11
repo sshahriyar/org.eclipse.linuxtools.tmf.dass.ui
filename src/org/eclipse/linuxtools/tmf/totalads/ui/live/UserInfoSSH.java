@@ -7,7 +7,7 @@
  * Contributors:
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
-package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.live;
+package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 

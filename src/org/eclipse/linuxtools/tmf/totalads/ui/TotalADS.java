@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.live.LiveDiagnosis;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveEvaluation;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.MessageBox;
 //import org.eclipse.swt.custom.TableTree;
 /**
  * This is the main class for intializing GUI elements. It instantiates two  classes
- *  {@link LiveDiagnosis} and {@link Modeling} which in turn further instantiate different components
+ *  {@link LiveEvaluation} and {@link Modeling} which in turn further instantiate different components
  *  of GUI elements in TotalADS
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.MessageBox;
 public class TotalADS  {
 	private Modeling modeling;
 	private Diagnosis diagnosis;
-	private LiveDiagnosis liveDiagnosis;
+	private LiveEvaluation liveDiagnosis;
 	private CTabFolder tabFolderTotalADS;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
@@ -76,7 +76,7 @@ public class TotalADS  {
 			trcTypeFactory.initialize();
 			// Intialize the logger
 			handler=null;
-			handler= new  FileHandler("totaladslog.xml");
+			handler= new  FileHandler(Configuration.getCurrentPath()+"totalads_log.xml");
             Logger.getLogger("").addHandler(handler);
 			//super(parent, style);
             // Intialize the parent composite GUI Layout
@@ -93,7 +93,7 @@ public class TotalADS  {
 			
 				
 			diagnosis=new Diagnosis(tabFolderTotalADS);
-			liveDiagnosis=new LiveDiagnosis(tabFolderTotalADS);
+			liveDiagnosis=new LiveEvaluation(tabFolderTotalADS);
 			modeling =new Modeling(tabFolderTotalADS);
 		
 			

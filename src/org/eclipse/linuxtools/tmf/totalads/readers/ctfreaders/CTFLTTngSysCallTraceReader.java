@@ -160,6 +160,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
 	
 		 try {
 	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
+	         
 	            
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
