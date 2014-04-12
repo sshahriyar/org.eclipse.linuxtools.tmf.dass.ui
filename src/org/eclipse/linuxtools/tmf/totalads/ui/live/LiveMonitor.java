@@ -53,6 +53,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 //import org.eclipse.swt.widgets.TableColumn;
 //import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
 
 /**
  * This class creates the GUI elements/widgets for live diagnosis using ssh. Any host can be selected and LTTNg tracing
@@ -62,7 +63,7 @@ import org.eclipse.swt.widgets.Text;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class LiveEvaluation {
+public class LiveMonitor {
 	//Initializes variables
 	private TracingTypeSelector traceTypeSelector;
 	private Text txtPassword;
@@ -78,14 +79,14 @@ public class LiveEvaluation {
 	private ProgressConsole console;
 
 	/**
-	 * Constructor of the LiveEvaluation class
+	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
 	 *
 	 */
-	public LiveEvaluation(CTabFolder tabFolderParent){
+	public LiveMonitor(CTabFolder tabFolderParent){
 		tmfTracePath=new StringBuilder();
 		currentlySelectedTracesPath=new StringBuilder();
-		//LiveEvaluation Tab Item
+		//LiveMonitor Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
 		tbItmDiagnosis.setText("Live Monitor");
 		//Making scrollable tab item 
@@ -93,7 +94,7 @@ public class LiveEvaluation {
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
 		tbItmDiagnosis.setControl(scrolCompAnom);
 		
-		//Desiging the Layout of the GUI Items  for the LiveEvaluation Tab Item
+		//Desiging the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
 		comptbItmDiagnosis.setLayoutData(gridData);
@@ -112,9 +113,9 @@ public class LiveEvaluation {
 		
 		//Initialize a class which loads model names from db and create appropriate GUI elements
 		
-		modelLoader=new ModelLoader(compTraceTypeAndModel);
-		modelLoader.setTrace(currentlySelectedTracesPath);///////////////////////////////
-		modelLoader.setTraceTypeSelector(traceTypeSelector);
+		//modelLoader=new ModelLoader(compTraceTypeAndModel);
+		//modelLoader.setTrace(currentlySelectedTracesPath);///////////////////////////////
+		//modelLoader.setTraceTypeSelector(traceTypeSelector);
 		
 		
 		//////////////////////////////////////////////////////////////////////
@@ -126,10 +127,10 @@ public class LiveEvaluation {
 		console =new ProgressConsole(compStatusResults);
 		
 		resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
-		modelLoader.setResultsAndFeedback(resultsAndFeedback);
+		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
 	
 		
-		//Adjust settings for scrollable LiveEvaluation Tab Item
+		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
 		scrolCompAnom.setMinSize(500, 500);
@@ -142,7 +143,7 @@ public class LiveEvaluation {
 	
 	/**
 	 * Creates GUI widgets for a selection of traces and trace types
-	 * @param compDiagnosis Composite of LiveEvaluation
+	 * @param compDiagnosis Composite of LiveMonitor
 	 */
 	private void selectHostUsingSSH(Composite compDiagnosis){
 		/**
@@ -152,32 +153,40 @@ public class LiveEvaluation {
 		grpSSHConfig.setText("Select Configuration");
 		
 		grpSSHConfig.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false));
-		grpSSHConfig.setLayout(new GridLayout(2,false));
+		grpSSHConfig.setLayout(new GridLayout(3,false));
 		
 		Label userAtHost= new Label(grpSSHConfig, SWT.NONE);
 		userAtHost.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
 		userAtHost.setText("Enter username@hostname   ");
 		
-		Label lblPort= new Label(grpSSHConfig, SWT.NONE);
-		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
-		lblPort.setText("Enter Port ");
+		Label lblSudoPassword= new Label(grpSSHConfig, SWT.NONE);
+		lblSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
+		 lblSudoPassword.setText("Sudo Password ");
 		
+		Label lblPort= new Label(grpSSHConfig, SWT.NONE);
+		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		lblPort.setText("Port");
+			
 		txtUserAtHost=new Text(grpSSHConfig, SWT.BORDER);
 		txtUserAtHost.setEnabled(true);
 		txtUserAtHost.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
 		txtUserAtHost.setText(System.getProperty("user.name")+"@localhost");
 		txtUserAtHost.setText("shary@172.30.39.85");
 		
+		Text txtSudoPassword=new Text(grpSSHConfig,SWT.BORDER|SWT.PASSWORD);
+		txtSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		txtSudoPassword.setText("grt_654321");
+		
 		Text txtPort=new Text(grpSSHConfig,SWT.BORDER);
 		txtPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		
+		txtPort.setText("22");
 		/////////
-		///Passowrd and Private Key
+		///SSH Password and Private Key
 		/////////
 		Group grpPrivacy = new Group(grpSSHConfig, SWT.NONE);
-		grpPrivacy.setText("Password/Pvt. Key");
+		grpPrivacy.setText("SSH Password/Pvt. Key");
 		
-		grpPrivacy.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false,2,2));
+		grpPrivacy.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false,3,2));
 		grpPrivacy.setLayout(new GridLayout(3,false));
 				
 		Button btnPassword = new Button(grpPrivacy, SWT.RADIO);
@@ -200,19 +209,26 @@ public class LiveEvaluation {
 		
 		TraceBrowser trcbrowser=new TraceBrowser(grpPrivacy, txtPvtKey, new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		//////////
-		///End password and private key
+		///End SSH password and private key
 		//////
+		///////////////
+		// Duration and Port
+		//////////
+		Composite compDurationPort=new Composite(grpSSHConfig, SWT.NONE);
+		compDurationPort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,3,2));
+		compDurationPort.setLayout(new GridLayout(2,false));
 		
-		Label lblSnapshotDuration= new Label(grpSSHConfig, SWT.NONE);
-		lblSnapshotDuration.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
+		Label lblSnapshotDuration= new Label(compDurationPort, SWT.NONE);
+		lblSnapshotDuration.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false,1,1));
 		lblSnapshotDuration.setText("Snapshot Duration (secs)");
 		
-		Label lblIntervalDuration= new Label(grpSSHConfig, SWT.NONE);
-		lblIntervalDuration.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
+		Label lblIntervalDuration= new Label(compDurationPort, SWT.NONE);
+		lblIntervalDuration.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, true, false,1,1));
 		lblIntervalDuration.setText("Snapshots Interval (mins)");
 		
-		Combo cmbSnapshot=new Combo(grpSSHConfig, SWT.NONE| SWT.READ_ONLY);
-		cmbSnapshot.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false,1,1));
+		
+		Combo cmbSnapshot=new Combo(compDurationPort, SWT.NONE| SWT.READ_ONLY);
+		cmbSnapshot.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
 		cmbSnapshot.add("10"); 
 		cmbSnapshot.add("20"); 
 		cmbSnapshot.add("30");
@@ -221,8 +237,8 @@ public class LiveEvaluation {
 		cmbSnapshot.add("100");
 		cmbSnapshot.select(0);
 		
-		Combo cmbInterval=new Combo(grpSSHConfig, SWT.NONE|SWT.READ_ONLY);
-		cmbInterval.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false,1,1));
+		Combo cmbInterval=new Combo(compDurationPort, SWT.NONE|SWT.READ_ONLY);
+		cmbInterval.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
 		cmbInterval.add("3"); 
 		cmbInterval.add("5"); 
 		cmbInterval.add("7");
@@ -233,10 +249,11 @@ public class LiveEvaluation {
 		cmbInterval.add("60");
 		cmbInterval.select(0);
 		
-		btnLiveTracing=new Button(grpSSHConfig, SWT.BORDER);
-		btnLiveTracing.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false,1,1));
-		btnLiveTracing.setText("Connect");
+		trainingAndEvaluation(compDiagnosis);
 		
+		btnLiveTracing=new Button(compDiagnosis, SWT.BORDER);
+		btnLiveTracing.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false,1,1));
+		btnLiveTracing.setText("Start");
 		
 		
 		btnLiveTracing.addMouseListener(new MouseListener() {
@@ -250,7 +267,7 @@ public class LiveEvaluation {
 					msgBox.open();
 				}else {
 					int port=7225;
-					BackgroundLiveEvaluation liveEval= new BackgroundLiveEvaluation
+					BackgroundLiveMonitor liveEval= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), txtPassword.getText(), txtPassword.getText(), 
 									  "", port,10,1, console);
 					liveEval.start();
@@ -272,6 +289,54 @@ public class LiveEvaluation {
 		/**
 		 * End group trace selection
 		 */
+	}
+	/**
+	 * 
+	 */
+	public void trainingAndEvaluation(Composite compParent){
+		/////////
+		///Training and Evaluation
+		/////////
+		Group grpTrainingAndEval = new Group(compParent, SWT.NONE);
+		grpTrainingAndEval.setText("Model Selection");
+		grpTrainingAndEval.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
+		grpTrainingAndEval.setLayout(new GridLayout(2,false));
+		
+		Button btnTrainingAndEval=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
+		btnTrainingAndEval.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		btnTrainingAndEval.setText("Training and Evaluation");
+		
+		Button btnTesting=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
+		btnTesting.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		btnTesting.setText("Evaluation");
+		
+		//////////////////
+		/////// Existing Model
+		//////////////
+		Group grpModelSelection=new Group(grpTrainingAndEval,SWT.NONE);	
+		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
+		grpModelSelection.setLayout(new GridLayout(1,false));
+		grpModelSelection.setText("Existing Model");
+		
+		Composite compModelSelection=new Composite(grpModelSelection, SWT.NONE);
+	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
+		compModelSelection.setLayout(new GridLayout(2,false));
+	    	
+		   
+		Button btnSettings=new Button(compModelSelection, SWT.NONE);
+		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnSettings.setText(" Settings ");
+		
+		Button btnDelete=new Button(compModelSelection, SWT.NONE);
+		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
+		btnDelete.setText("   Delete   ");
+		
+		Tree treeModels = new Tree(grpModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
+		treeModels.setLinesVisible(true);
+		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		
+		ModelSelection modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);
+		
 	}
 	
 	

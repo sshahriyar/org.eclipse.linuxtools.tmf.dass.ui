@@ -177,7 +177,7 @@ public class ModelLoader {
 				String database=currentlySelectedTreeItem.getText();
 				String []modelKey=database.split("_");
 				
-				if(modelKey.length<3){
+				if(modelKey==null ||  modelKey.length<3){
 					msgBox.setMessage("Not a valid model created by TotalADS!");
 					msgBox.open();
 					return;
@@ -255,9 +255,18 @@ public class ModelLoader {
 					try {
 							AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 							String database=currentlySelectedTreeItem.getText();
-							String modelKey=database.split("_")[1];
-							IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey);
-							//
+							String []modelKey=database.split("_");
+							if(modelKey==null ||  modelKey.length<3){
+								msgBox.setMessage("Not a valid model created by TotalADS!");
+								msgBox.open();
+								return;
+							}
+							IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey[1]);
+							if(model==null){
+								msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
+								msgBox.open();
+								return;
+							}
 							
 							settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
 						
@@ -328,14 +337,14 @@ public class ModelLoader {
 		
 	}
 	/**
-	 * Assigns tracePath object from LiveEvaluation class to a local variable
+	 * Assigns tracePath object from LiveMonitor class to a local variable
 	 * @param tracePath Trace Path 
 	 */
 	public void setTrace(StringBuilder tracePath){
 		this.tracePath=tracePath;
 	}
 	/**
-	 *  Assigns TraceTypeSelector object from LiveEvaluation class to a local object
+	 *  Assigns TraceTypeSelector object from LiveMonitor class to a local object
 	 * @param traceTypeSelector Trace type selector
 	 */
 	public void setTraceTypeSelector(TracingTypeSelector traceTypeSelector){
@@ -343,7 +352,7 @@ public class ModelLoader {
 	}
 	
 	/**
-	 * Assigns ResultsAndFeddback object from LiveEvaluation class to a local variable
+	 * Assigns ResultsAndFeddback object from LiveMonitor class to a local variable
 	 * @param resultsAndFeedback Results and Feedback object
 	 */
 	public void setResultsAndFeedback(ResultsAndFeedback resultsAndFeedback){

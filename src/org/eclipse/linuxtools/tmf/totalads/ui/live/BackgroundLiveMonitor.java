@@ -7,7 +7,7 @@ import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 
-public class BackgroundLiveEvaluation extends Thread {
+public class BackgroundLiveMonitor extends Thread {
 	private String userAtHost;
 	private String password;
 	private String sudoPassword;
@@ -18,7 +18,7 @@ public class BackgroundLiveEvaluation extends Thread {
 	private Integer snapshotDuration;// In Seconds
 	private Integer intervalsBetweenSnapshots; // In Minutes
 	
-	public BackgroundLiveEvaluation(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
+	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots,	ProgressConsole console ) {
 		this.userAtHost=userAtHost;
 		this.password=password;

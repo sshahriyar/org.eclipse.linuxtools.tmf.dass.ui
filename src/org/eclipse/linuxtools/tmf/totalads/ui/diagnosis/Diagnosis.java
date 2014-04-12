@@ -64,14 +64,14 @@ public class Diagnosis {
 	private Button btnSelTMFTrace;
 
 	/**
-	 * Constructor of the LiveEvaluation class
+	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
 	 *
 	 */
 	public Diagnosis(CTabFolder tabFolderParent){
 		tmfTracePath=new StringBuilder();
 		currentlySelectedTracesPath=new StringBuilder();
-		//LiveEvaluation Tab Item
+		//LiveMonitor Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
 		tbItmDiagnosis.setText("Diagnosis");
 		//Making scrollable tab item 
@@ -79,7 +79,7 @@ public class Diagnosis {
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
 		tbItmDiagnosis.setControl(scrolCompAnom);
 		
-		//Desiging the Layout of the GUI Items  for the LiveEvaluation Tab Item
+		//Desiging the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
 		comptbItmDiagnosis.setLayoutData(gridData);
@@ -137,7 +137,7 @@ public class Diagnosis {
 		modelLoader.setResultsAndFeedback(resultsAndFeedback);
 		modelLoader.setStautsBar(statusBar);
 		
-		//Adjust settings for scrollable LiveEvaluation Tab Item
+		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
 		scrolCompAnom.setMinSize(500, 500);
@@ -150,7 +150,7 @@ public class Diagnosis {
 	
 	/**
 	 * Creates GUI widgets for a selection of traces and trace types
-	 * @param compDiagnosis Composite of LiveEvaluation
+	 * @param compDiagnosis Composite of LiveMonitor
 	 */
 	private void selectTraceTypeAndTraces(Composite compDiagnosis){
 		/**
