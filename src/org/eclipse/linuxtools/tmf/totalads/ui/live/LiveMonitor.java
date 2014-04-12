@@ -9,22 +9,23 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
-
-import java.awt.event.MouseAdapter;
+import java.util.HashMap;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
-import org.eclipse.osgi.framework.internal.core.Msg;
+//import org.eclipse.osgi.framework.internal.core.Msg;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.SWT;
 //import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
@@ -37,6 +38,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -65,27 +67,37 @@ import org.eclipse.swt.widgets.Tree;
  */
 public class LiveMonitor {
 	//Initializes variables
-	private TracingTypeSelector traceTypeSelector;
+	//private TracingTypeSelector traceTypeSelector;
 	private Text txtPassword;
 	private Text txtUserAtHost;
-	private TraceBrowser traceBrowser;
-	private StringBuilder tmfTracePath;
-	private StringBuilder currentlySelectedTracesPath;
-	private ModelLoader modelLoader;
+	private Combo cmbSnapshot;
+	private Combo cmbInterval;
+	private Text txtPvtKey;
+	private Button btnPvtKey;
+	private Button btnPassword;
+	private Text txtPort;
+	private Text txtSudoPassword;
+	//private TraceBrowser traceBrowser;
+	//private StringBuilder tmfTracePath;
+	//private StringBuilder currentlySelectedTracesPath;
+	//private ModelLoader modelLoader;
 	private ResultsAndFeedback resultsAndFeedback;
-	private Button btnSelTestTraces;
-	private Button btnSelTMFTrace;
-	private Button btnLiveTracing;
+	//private Button btnSelTestTraces;
+	//private Button btnSelTMFTrace;
+	private Button btnStart;
 	private ProgressConsole console;
-
+	private Button btnStop;
+	private Button btnDetails;
+	private BackgroundLiveMonitor liveExecutor;
+	private ModelSelection modelSelectionHandler;
 	/**
 	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
 	 *
 	 */
 	public LiveMonitor(CTabFolder tabFolderParent){
-		tmfTracePath=new StringBuilder();
-		currentlySelectedTracesPath=new StringBuilder();
+		//tmfTracePath=new StringBuilder();
+		//currentlySelectedTracesPath=new StringBuilder();
 		//LiveMonitor Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
 		tbItmDiagnosis.setText("Live Monitor");
@@ -121,15 +133,37 @@ public class LiveMonitor {
 		//////////////////////////////////////////////////////////////////////
 		// Creating GUI widgets for status, results and feedback
 		//////////////////////////////////////////////////////////////////
-		Composite compStatusResults=new Composite(comptbItmDiagnosis, SWT.NONE);
-		compStatusResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		compStatusResults.setLayout(new GridLayout(1, false));
-		console =new ProgressConsole(compStatusResults);
+		Composite compButtonsChartConsole=new Composite(comptbItmDiagnosis, SWT.NONE);
+		compButtonsChartConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		compButtonsChartConsole.setLayout(new GridLayout(1, false));
 		
-		resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
-		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
+		Composite compButtons=new Composite(compButtonsChartConsole, SWT.NONE);
+		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		compButtons.setLayout(new GridLayout(5, false));
+		
+		btnStart=new Button(compButtons, SWT.BORDER);
+		btnStart.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnStart.setText("Start");
+		
+		btnStop=new Button(compButtons, SWT.BORDER);
+		btnStop.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnStop.setText("Stop");
 	
+		btnDetails=new Button(compButtons, SWT.BORDER);
+		btnDetails.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnDetails.setText("Details");
 		
+		//resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
+		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
+		
+		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
+		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		compChart.setLayout(new FillLayout());
+		LiveXYChart liveChart=new LiveXYChart(compChart);
+		
+		console =new ProgressConsole(compButtonsChartConsole,new GridData(SWT.LEFT,SWT.TOP,true,false),
+				new GridData(SWT.FILL,SWT.FILL,true,true));
+
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
@@ -137,6 +171,7 @@ public class LiveMonitor {
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
+
 	}
 
 	
@@ -173,11 +208,11 @@ public class LiveMonitor {
 		txtUserAtHost.setText(System.getProperty("user.name")+"@localhost");
 		txtUserAtHost.setText("shary@172.30.39.85");
 		
-		Text txtSudoPassword=new Text(grpSSHConfig,SWT.BORDER|SWT.PASSWORD);
+		txtSudoPassword=new Text(grpSSHConfig,SWT.BORDER|SWT.PASSWORD);
 		txtSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		txtSudoPassword.setText("grt_654321");
 		
-		Text txtPort=new Text(grpSSHConfig,SWT.BORDER);
+		txtPort=new Text(grpSSHConfig,SWT.BORDER);
 		txtPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		txtPort.setText("22");
 		/////////
@@ -189,12 +224,12 @@ public class LiveMonitor {
 		grpPrivacy.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false,3,2));
 		grpPrivacy.setLayout(new GridLayout(3,false));
 				
-		Button btnPassword = new Button(grpPrivacy, SWT.RADIO);
+		btnPassword = new Button(grpPrivacy, SWT.RADIO);
 		btnPassword.setText("Enter Password");
 		btnPassword.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,1,1));
 		
 		
-		Button btnPvtKey = new Button(grpPrivacy, SWT.RADIO);
+		btnPvtKey = new Button(grpPrivacy, SWT.RADIO);
 		btnPvtKey.setText("Select Private Key");
 		btnPvtKey.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,2,1));
 		
@@ -203,7 +238,7 @@ public class LiveMonitor {
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtPassword.setText("grt_654321");
 		
-		Text txtPvtKey=new Text(grpPrivacy,SWT.BORDER);
+		txtPvtKey=new Text(grpPrivacy,SWT.BORDER);
 		txtPvtKey.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtPvtKey.setText("");
 		
@@ -227,7 +262,7 @@ public class LiveMonitor {
 		lblIntervalDuration.setText("Snapshots Interval (mins)");
 		
 		
-		Combo cmbSnapshot=new Combo(compDurationPort, SWT.NONE| SWT.READ_ONLY);
+		cmbSnapshot=new Combo(compDurationPort, SWT.NONE| SWT.READ_ONLY);
 		cmbSnapshot.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
 		cmbSnapshot.add("10"); 
 		cmbSnapshot.add("20"); 
@@ -237,7 +272,7 @@ public class LiveMonitor {
 		cmbSnapshot.add("100");
 		cmbSnapshot.select(0);
 		
-		Combo cmbInterval=new Combo(compDurationPort, SWT.NONE|SWT.READ_ONLY);
+		cmbInterval=new Combo(compDurationPort, SWT.NONE|SWT.READ_ONLY);
 		cmbInterval.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
 		cmbInterval.add("3"); 
 		cmbInterval.add("5"); 
@@ -251,41 +286,6 @@ public class LiveMonitor {
 		
 		trainingAndEvaluation(compDiagnosis);
 		
-		btnLiveTracing=new Button(compDiagnosis, SWT.BORDER);
-		btnLiveTracing.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, false, false,1,1));
-		btnLiveTracing.setText("Start");
-		
-		
-		btnLiveTracing.addMouseListener(new MouseListener() {
-		
-			
-			@Override
-			public void mouseUp(MouseEvent e) {
-				if (txtUserAtHost.getText().isEmpty() || txtPassword.getText().isEmpty()){
-					MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
-					msgBox.setMessage("Empty fields are not allowed");
-					msgBox.open();
-				}else {
-					int port=7225;
-					BackgroundLiveMonitor liveEval= new BackgroundLiveMonitor
-							  (txtUserAtHost.getText(), txtPassword.getText(), txtPassword.getText(), 
-									  "", port,10,1, console);
-					liveEval.start();
-				}
-			}
-			
-			@Override
-			public void mouseDown(MouseEvent e) {
-				
-				
-			}
-			
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				
-				
-			}
-		});
 		/**
 		 * End group trace selection
 		 */
@@ -335,10 +335,81 @@ public class LiveMonitor {
 		treeModels.setLinesVisible(true);
 		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		
-		ModelSelection modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);
+		modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);
 		
 	}
 	
+	/**
+	 * 
+	 */
+	private void addHandlers(){
+		/**
+		 * 
+		 */
+		btnStart.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				if (txtUserAtHost.getText().isEmpty() || txtPassword.getText().isEmpty()){
+					MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+					msgBox.setMessage("Empty fields are not allowed");
+					msgBox.open();
+				}else {
+					int port=Integer.parseInt(txtPort.getText());
+					int snapshotDuration=Integer.parseInt(cmbSnapshot.getItem(cmbSnapshot.getSelectionIndex()));
+					int snapshotIntervals=Integer.parseInt(cmbInterval.getItem(cmbInterval.getSelectionIndex()));
+					String password=""; String privateKey="";
+					if (btnPassword.getSelection())
+						password=txtPassword.getText();
+					else if (btnPvtKey.getSelection())
+						privateKey=txtPvtKey.getText();
+							
+					btnStart.setEnabled(false);
+					btnStop.setEnabled(true);
+					//IDetectionAlgorithm algorithms[]=modelSelectionHandler.getCurrentlySelectedAlgorithms();
+					HashMap<String,String[]> modelsAndSettings=modelSelectionHandler.getModelaAndSettings();
+					
+					liveExecutor= new BackgroundLiveMonitor
+							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
+									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
+									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,console);
+					liveExecutor.start();
+				}
+			}
+		
+		});
+		/**
+		 * 
+		 */
+		btnStop.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				liveExecutor.stopMonitoring();
+			}
+		});
+		/**
+		 * 
+		 */
+		btnDetails.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseUp(MouseEvent e) {
+				
+			}
+		});
+		
+	}
+	
+	private Boolean findInvalidSSHFields(){
+		/*private Text txtPassword;
+		private Text txtUserAtHost;
+		private Combo cmbSnapshot;
+		private Combo cmbInterval;
+		private Text txtPvtKey;
+		private Button btnPvtKey;
+		private Button btnPassword;
+		private Text txtPort;
+		private Text txtSudoPassword;*/
+		return true;
+	}
 	
 	
 }

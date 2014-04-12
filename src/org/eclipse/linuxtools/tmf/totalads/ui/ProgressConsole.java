@@ -8,7 +8,7 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
@@ -50,6 +50,31 @@ public class ProgressConsole {
 		
 		txtAnomaliesProgress = new Text(compParent, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL |SWT.MULTI);
 		txtAnomaliesProgress.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,4,4));
+		txtAnomaliesProgress.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		txtAnomaliesProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+		
+	}
+	/**
+	 * Constructor taking grid style as arguments
+	 * @param compParent
+	 * @param gridDataLabel
+	 * @param gridDataConsole
+	 */
+	public ProgressConsole(Composite compParent, GridData gridDataLabel, GridData gridDataConsole){
+	/**
+	 * Progress Console
+	 * 		
+	 */
+
+		
+		lblProgressConsole = new CLabel(compParent, SWT.NONE);
+		lblProgressConsole.setLayoutData(gridDataLabel);
+		lblProgressConsole.setText("Progress Console");
+		
+			
+		
+		txtAnomaliesProgress = new Text(compParent, SWT.BORDER | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL |SWT.MULTI);
+		txtAnomaliesProgress.setLayoutData(gridDataConsole);
 		txtAnomaliesProgress.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
 		txtAnomaliesProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
 		

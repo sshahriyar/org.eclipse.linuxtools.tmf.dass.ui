@@ -31,14 +31,14 @@ public class AlgorithmFactory {
 //Variables used in the class that keep track of algorithms in the class
 private static AlgorithmFactory algorithmTypes=null;
 
-private HashMap<AlgorithmTypes,HashSet<String>> modelList=null;
+private HashMap<AlgorithmTypes,HashSet<String>> algList=null;
 private HashMap<String,IDetectionAlgorithm> acronymModels=null;
 
 /**
  * Constructor
  */
 private AlgorithmFactory( ){
-	modelList=new HashMap<AlgorithmTypes,HashSet<String>>();
+	algList=new HashMap<AlgorithmTypes,HashSet<String>>();
 	acronymModels=new HashMap<String, IDetectionAlgorithm>();
 }
 /**
@@ -65,8 +65,8 @@ public static void destroyInstance(){
  * @param algorithmTypes  an enum of AlgorithmTypes
  * @return Array of Algorithms 
  */
-public IDetectionAlgorithm[] getModels(AlgorithmTypes algorithmTypes){
-	HashSet<String> list= modelList.get(algorithmTypes);
+public IDetectionAlgorithm[] getAlgorithms(AlgorithmTypes algorithmTypes){
+	HashSet<String> list= algList.get(algorithmTypes);
 	if (list==null)
 		return null;
 	else{	
@@ -74,7 +74,7 @@ public IDetectionAlgorithm[] getModels(AlgorithmTypes algorithmTypes){
 		Iterator<String> it=list.iterator();
 		int count=0;
 		while (it.hasNext()){
-			models[count++]= getModelyByAcronym(it.next());
+			models[count++]= getAlgorithmByAcronym(it.next());
 		}
 		return models;
 	}
@@ -111,23 +111,23 @@ public void registerModelWithFactory(AlgorithmTypes algorithmType,  IDetectionAl
 																	throws TotalADSUIException{
 	
 	registerAlgorithmWithAcronym(detectionAlgorithm.getAcronym(), detectionAlgorithm);
-	HashSet<String>  list=modelList.get(algorithmType);
+	HashSet<String>  list=algList.get(algorithmType);
 	
 	if (list==null)
 		list=new HashSet<String>();
 	
 	list.add(detectionAlgorithm.getAcronym());
 	
-	modelList.put(algorithmType, list);
+	algList.put(algorithmType, list);
 	
 		
 }
 /**
- * Get a model by acronym
+ * Get an algorithm by acronym
  * @param key
  * @return an instance of the algorithm
  */
-public IDetectionAlgorithm getModelyByAcronym(String key){
+public IDetectionAlgorithm getAlgorithmByAcronym(String key){
 	IDetectionAlgorithm model= acronymModels.get(key);
 	if (model==null)
 		return null;

@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+
 
 
 

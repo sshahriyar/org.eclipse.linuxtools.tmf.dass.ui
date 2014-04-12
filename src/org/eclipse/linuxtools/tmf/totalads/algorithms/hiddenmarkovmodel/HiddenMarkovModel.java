@@ -17,7 +17,7 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 import org.swtchart.Chart;
 /**
  * This class implements a Hidden Markov Model

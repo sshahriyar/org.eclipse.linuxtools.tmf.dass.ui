@@ -27,6 +27,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

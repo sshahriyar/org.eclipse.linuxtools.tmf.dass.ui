@@ -20,11 +20,15 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitor;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveXYChart;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Display;
 //import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridData;
@@ -95,7 +99,9 @@ public class TotalADS  {
 			diagnosis=new Diagnosis(tabFolderTotalADS);
 			liveDiagnosis=new LiveMonitor(tabFolderTotalADS);
 			modeling =new Modeling(tabFolderTotalADS);
-		
+			
+			////////////*********************************
+			
 			
 		
 	   } catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes

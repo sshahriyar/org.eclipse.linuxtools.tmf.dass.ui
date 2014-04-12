@@ -19,7 +19,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ProgressConsole;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;

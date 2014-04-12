@@ -187,7 +187,7 @@ public class ModelLoader {
 				
 				AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 				
-				IDetectionAlgorithm algorithm= modFac.getModelyByAcronym(modelKey[1]);
+				IDetectionAlgorithm algorithm= modFac.getAlgorithmByAcronym(modelKey[1]);
 				
 				if(algorithm==null){
 					msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
@@ -261,7 +261,7 @@ public class ModelLoader {
 								msgBox.open();
 								return;
 							}
-							IDetectionAlgorithm model= modFac.getModelyByAcronym(modelKey[1]);
+							IDetectionAlgorithm model= modFac.getAlgorithmByAcronym(modelKey[1]);
 							if(model==null){
 								msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
 								msgBox.open();

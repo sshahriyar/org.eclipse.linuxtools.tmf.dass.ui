@@ -1,8 +1,10 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
@@ -32,10 +34,11 @@ public class ModelSelection {
 	private Button btnSettings;
 	private Button btnDelete;
 	private Tree treeModels;
-	
+	private AlgorithmFactory algFactory;
 	private MessageBox msgBox;
 	private Settings settingsDialog;
-	private String []algorithmSettings;
+	//private String []algorithmSettings;
+	private HashMap<String,String[]> models= new HashMap<String,String[]>();
 	
 	/**
 	 * Constructor used in Live modeling
@@ -45,7 +48,7 @@ public class ModelSelection {
 		this.btnSettings=btnSettings;
 		this.btnDelete=btnDelete;
 		this.treeModels=tree;
-		
+		this.algFactory= AlgorithmFactory.getInstance();
 		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 		populateTreeWithModels();
 		addEventHandlers();
@@ -72,7 +75,7 @@ public class ModelSelection {
 		}
 		
 	}
-	private HashSet<String> models= new HashSet<String>();
+	
 	/**
 	 * 
 	 * Adds event handlers to different widgets
@@ -87,8 +90,28 @@ public class ModelSelection {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				TreeItem item=(TreeItem)e.item;
+				
+				
+				if (item.getChecked()){
+					String []modelKey=item.getText().split("_");
+					
+					if(modelKey==null ||  modelKey.length<3){
+						msgBox.setMessage(item.getText()+ " is not a valid model created by TotalADS!");
+						msgBox.open();
+						item.setChecked(false);
+						return;
+					}
+					if (algFactory.getAlgorithmByAcronym(modelKey[1])==null){
+							msgBox.setMessage(item.getText()+" is not a valid model created by TotalADS!");
+							msgBox.open();
+							item.setChecked(false);
+							return;
+					}
+				
+				}
+				//if it reaches here then
 				if (item.getChecked())
-					models.add(item.getText());
+					models.put(item.getText(),null);
 				else
 					models.remove(item.getText());
 				
@@ -105,7 +128,7 @@ public class ModelSelection {
 				
 					try {
 							
-							IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithmAndModels();
+							IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithms();
 							String []databases=getModels();
 							
 							if (databases.length >1){
@@ -119,7 +142,8 @@ public class ModelSelection {
 								settingsDialog= new Settings(algorithm[0].getTestingOptions(databases[0], Configuration.connection));
 						
 							settingsDialog.showForm();
-							algorithmSettings=settingsDialog.getOptions();
+							String []algorithmSettings=settingsDialog.getOptions();
+							models.put(databases[0], algorithmSettings);
 							settingsDialog=null;
 						
 					} catch (TotalADSUIException ex) {
@@ -137,7 +161,7 @@ public class ModelSelection {
 			public void mouseUp(MouseEvent e) {
 				 try{
 					 
-						IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithmAndModels();;
+						IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithms();;
 						String []databases=getModels();
 											
 						
@@ -187,8 +211,8 @@ public class ModelSelection {
 	 * @return  An array of {@link IDetectionAlgorithm}
 	 * @throws TotalADSUIException
 	 */
-	public IDetectionAlgorithm[] getCurrentlySelectedAlgorithmAndModels() throws TotalADSUIException{
-		AlgorithmFactory modFac= AlgorithmFactory.getInstance();
+	public IDetectionAlgorithm[] getCurrentlySelectedAlgorithms() throws TotalADSUIException{
+	
 		
 		
 		if (models.size()<=0)
@@ -198,7 +222,7 @@ public class ModelSelection {
 		String []models=new String[this.models.size()];
 		
 		int idx=0;
-		java.util.Iterator<String> it=this.models.iterator();
+		java.util.Iterator<String> it=this.models.keySet().iterator();
 		while (it.hasNext()){
 				
 					String database=it.next();
@@ -208,7 +232,7 @@ public class ModelSelection {
 					if(modelKey==null ||  modelKey.length<3)
 						throw new TotalADSUIException(database+ " is not a valid model created by TotalADS!");
 					
-					algorithms[idx]= modFac.getModelyByAcronym(modelKey[1]);
+					algorithms[idx]= algFactory.getAlgorithmByAcronym(modelKey[1]);
 					if  (algorithms[idx]==null)
 						throw new TotalADSUIException(database+" is not a valid model created by TotalADS!");
 					idx++;
@@ -219,19 +243,19 @@ public class ModelSelection {
 		
 	}
 	/**
-	 * Returns the selected  algorithm's settings
+	 * Returns the selected models and their settings
 	 * @return
 	 */
-	public String[] getAlgorithmSettings(){
-			return algorithmSettings;
-	}
+	public HashMap<String,String[]> getModelaAndSettings(){
+			return models;
+		}
 	/**
 	 * Gets the list of models
 	 * @return
 	 */
-	public String[] getModels(){
-		String modelList[]=new String[models.size()];
-		return models.toArray(modelList);
+	private String[] getModels(){
+		String modelList[]=new String[models.keySet().size()];
+		return models.keySet().toArray(modelList);
 	}
 	
 }
