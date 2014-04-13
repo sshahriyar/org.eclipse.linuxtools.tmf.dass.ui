@@ -11,18 +11,18 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.HashMap;
 
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
-import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
+//import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+//import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+//import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
+//import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
+//import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
+//import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+//import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
+//import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 //import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.swt.events.MouseAdapter;
@@ -35,9 +35,9 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+//import org.eclipse.swt.events.SelectionAdapter;
+//import org.eclipse.swt.events.SelectionEvent;
+//import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.ProgressBar;
+//import org.eclipse.swt.widgets.ProgressBar;
 //import org.eclipse.swt.widgets.TabItem;
 //import org.eclipse.swt.widgets.Table;
 //import org.eclipse.swt.widgets.TableColumn;
@@ -77,19 +77,14 @@ public class LiveMonitor {
 	private Button btnPassword;
 	private Text txtPort;
 	private Text txtSudoPassword;
-	//private TraceBrowser traceBrowser;
-	//private StringBuilder tmfTracePath;
-	//private StringBuilder currentlySelectedTracesPath;
-	//private ModelLoader modelLoader;
 	private ResultsAndFeedback resultsAndFeedback;
-	//private Button btnSelTestTraces;
-	//private Button btnSelTMFTrace;
 	private Button btnStart;
 	private ProgressConsole console;
 	private Button btnStop;
 	private Button btnDetails;
 	private BackgroundLiveMonitor liveExecutor;
 	private ModelSelection modelSelectionHandler;
+	private LiveXYChart liveChart;
 	/**
 	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
@@ -159,7 +154,7 @@ public class LiveMonitor {
 		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
 		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compChart.setLayout(new FillLayout());
-		LiveXYChart liveChart=new LiveXYChart(compChart);
+		liveChart=new LiveXYChart(compChart);
 		
 		console =new ProgressConsole(compButtonsChartConsole,new GridData(SWT.LEFT,SWT.TOP,true,false),
 				new GridData(SWT.FILL,SWT.FILL,true,true));
@@ -171,7 +166,7 @@ public class LiveMonitor {
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
-
+		addHandlers();
 	}
 
 	
@@ -206,7 +201,7 @@ public class LiveMonitor {
 		txtUserAtHost.setEnabled(true);
 		txtUserAtHost.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
 		txtUserAtHost.setText(System.getProperty("user.name")+"@localhost");
-		txtUserAtHost.setText("shary@172.30.39.85");
+		txtUserAtHost.setText("shary@172.30.103.143");
 		
 		txtSudoPassword=new Text(grpSSHConfig,SWT.BORDER|SWT.PASSWORD);
 		txtSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
@@ -264,16 +259,17 @@ public class LiveMonitor {
 		
 		cmbSnapshot=new Combo(compDurationPort, SWT.NONE| SWT.READ_ONLY);
 		cmbSnapshot.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
+		cmbSnapshot.add("5"); 
 		cmbSnapshot.add("10"); 
-		cmbSnapshot.add("20"); 
-		cmbSnapshot.add("30");
+		cmbSnapshot.add("15");
+		cmbSnapshot.add("20");
+		cmbSnapshot.add("35");
 		cmbSnapshot.add("60");
-		cmbSnapshot.add("80");
-		cmbSnapshot.add("100");
 		cmbSnapshot.select(0);
 		
 		cmbInterval=new Combo(compDurationPort, SWT.NONE|SWT.READ_ONLY);
 		cmbInterval.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
+		cmbInterval.add("1");
 		cmbInterval.add("3"); 
 		cmbInterval.add("5"); 
 		cmbInterval.add("7");
@@ -281,7 +277,6 @@ public class LiveMonitor {
 		cmbInterval.add("15");
 		cmbInterval.add("20");
 		cmbInterval.add("30");
-		cmbInterval.add("60");
 		cmbInterval.select(0);
 		
 		trainingAndEvaluation(compDiagnosis);
@@ -291,7 +286,7 @@ public class LiveMonitor {
 		 */
 	}
 	/**
-	 * 
+	 * Training and Evaluation Widgets
 	 */
 	public void trainingAndEvaluation(Composite compParent){
 		/////////
@@ -340,7 +335,7 @@ public class LiveMonitor {
 	}
 	
 	/**
-	 * 
+	 * Handlers
 	 */
 	private void addHandlers(){
 		/**
@@ -371,7 +366,7 @@ public class LiveMonitor {
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
-									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,console);
+									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,liveChart, console);
 					liveExecutor.start();
 				}
 			}

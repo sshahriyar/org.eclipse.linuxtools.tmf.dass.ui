@@ -1,11 +1,14 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
@@ -19,9 +22,11 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
 public class BackgroundLiveMonitor extends Thread {
@@ -40,21 +45,42 @@ public class BackgroundLiveMonitor extends Thread {
   	private HashMap<String,String[]> modelsAndSettings;
   	private ResultsAndFeedback results;
   	private MessageBox msgBox;
-  	private HashMap<String,LinkedList<Integer>> modelsAndAnomalyCounts;
+  	private HashMap<String,LinkedList<Double>> modelsAndAnomalyCounts;
   	private Integer anomalyIdx=0;
 	private Integer maxPoints;
-	
+	private LiveXYChart liveXYChart;
+	private String []seriesNames;
+	private AlgorithmFactory algFac;
+	private ITraceTypeReader lttngSyscallReader;
+	private LinkedList<Double> xSeries;
+	private volatile boolean isExecuting=true;
+	/**
+	 * Constructor
+	 * @param userAtHost
+	 * @param password
+	 * @param sudoPassowrd
+	 * @param pathToPrivateKey
+	 * @param port
+	 * @param snapshotDuration
+	 * @param intervalBetweenSnapshots
+	 * @param btnStart
+	 * @param btnStop
+	 * @param btnDetails
+	 * @param modelsAndSettings
+	 * @param results
+	 * @param xyChart
+	 * @param console
+	 */
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
 		  	Button btnStop, Button btnDetails,HashMap<String,String[]> modelsAndSettings,
-		  	ResultsAndFeedback results,	ProgressConsole console ) {
+		  	ResultsAndFeedback results,	LiveXYChart xyChart,ProgressConsole console ) {
 		
 		this.userAtHost=userAtHost;
 		this.password=password;
 		this.sudoPassword=sudoPassowrd;
 		this.pathToPrivateKey=pathToPrivateKey;
 		this.port=port;
-		this.console=console;
 		this.snapshotDuration=snapshotDuration;
 		this.intervalsBetweenSnapshots=intervalBetweenSnapshots;
 		this.btnStart=btnStart;
@@ -62,14 +88,33 @@ public class BackgroundLiveMonitor extends Thread {
 		this.btnDetails=btnDetails;
 		this.modelsAndSettings=modelsAndSettings;
 		this.results=results;
+		this.liveXYChart=xyChart;
+		this.console=console;
 		this.maxPoints=intervalBetweenSnapshots*20;
+	
 		
-		LinkedList<Integer> anomalyCounts=new LinkedList<Integer>();
+		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
+		modelsAndAnomalyCounts=new HashMap<String, LinkedList<Double>>();
+		
+		seriesNames=new String[modelsAndSettings.size()];
+		int idx=0;
+		
 		for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
-			this.modelsAndAnomalyCounts.put(models.getKey(), anomalyCounts); 
+			this.modelsAndAnomalyCounts.put(models.getKey(), anomalyCounts);
+			seriesNames[idx++]=models.getKey();
 		}
+		
+		
 		ssh = new SSHConnector();
 		msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+		
+		algFac=AlgorithmFactory.getInstance();
+		lttngSyscallReader= TraceTypeFactory.getInstance().getCTFKernelorUserReader(true);
+		
+		xSeries=new LinkedList<Double>();
+		
+		//for (idx=0;idx < maxPoints;idx++)
+		//	xSeries.add( intervalBetweenSnapshots.doubleValue()*idx);
 		
 	}
 
@@ -78,81 +123,191 @@ public class BackgroundLiveMonitor extends Thread {
 	*/
 	@Override
 	public void run(){
+		String exception="";
 		try{
+			initialise();
+			while (isExecuting){//keep running untill the stop function is called
+						//Getting a trace from remote system
+					ssh.collectATrace(sudoPassword);
+					String tracePath=ssh.getTrace();
+					
+					if (xSeries.isEmpty()){
+						xSeries.add(0.0);
+						liveXYChart.setXRange(0, 1);
+					}
+					else{
+						if (anomalyIdx>maxPoints)
+							xSeries.remove();
+						xSeries.add(intervalsBetweenSnapshots.doubleValue()+xSeries.getLast());
+						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue());
+					}
+					//Convert it into a series for plotting a chart
+					Double []xVals=new Double[xSeries.size()];
+					xVals=xSeries.toArray(xVals);
+					
+					  
+					for (Map.Entry<String, String[]> modAndSettings:modelsAndSettings.entrySet()){
+						
+							String model=modAndSettings.getKey();
+							String []settings=modAndSettings.getValue();
+							
+							IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
+							//Getting a trace iterator
+							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
+						  
+							
+							console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
+							console.printTextLn("Please wait while the trace is evaluated....");
+							Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
+							
+							console.printTextLn("Evaluation finished....");
+							
+							LinkedList<Double> anomalies=modelsAndAnomalyCounts.get(model);
+							if (results.getAnomaly()){
+										anomalies.add(1.0);
+										console.printTextLn("It is an anomaly");
+										
+							}
+							else{
+										anomalies.add(0.0);
+										console.printTextLn("It is not an anomaly");
+							}
+							
+							console.printTextLn("Plotting anomaly on the chart");
+							
+							if (anomalyIdx>maxPoints){
+								anomalies.remove();//remove head
+								xSeries.remove();// remove head
+								anomalyIdx--;
+							}else
+								anomalyIdx++;
+							
+							//Convert it into a series for plotting a chart
+							Double []ySeries=new Double[anomalies.size()];
+						
+							ySeries=anomalies.toArray(ySeries);
+							
+							liveXYChart.addYSeriesValues(ySeries, model);
+							liveXYChart.addXSeriesValues(xVals,model);
+							liveXYChart.drawChart();
 			
-			if (!pathToPrivateKey.isEmpty())
-				ssh.openSSHConnectionUsingPrivateKey(userAtHost, pathToPrivateKey, port, console,snapshotDuration);
-			else
-				ssh.openSSHConnectionUsingPassword(userAtHost, password, port, console,snapshotDuration);
+						}
 			
-			ssh.collectATrace(sudoPassword);
-			String tracePath=ssh.getTrace();
+						
+						
+						
+						//ssh.close();
+						
+						//
+						//Run on main GUI thread
+						//
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								btnDetails.setEnabled(true);
+							}
+						});
+						
+						console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
+										+ " the remote host "+userAtHost.replaceAll(".*@","" ));
+						try{
+							TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+							
+						} catch (InterruptedException ex){}
 			
-			ITraceTypeReader lttngSyscallReader= TraceTypeFactory.getInstance().getCTFKernelorUserReader(true);
-			ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-		
-			AlgorithmFactory algFac=AlgorithmFactory.getInstance();
-			
-			for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
-				
-				String model=models.getKey();
-				String []settings=models.getValue();
-				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
-				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
-				
-				LinkedList<Integer> anomalies=modelsAndAnomalyCounts.get(models);
-				
-				if (results.getAnomaly())
-							anomalies.add(1);
-				else
-							anomalies.add(0);
-				
-				if (anomalyIdx>maxPoints){
-					anomalies.remove();//remove head
-					anomalyIdx--;
-				}else
-					anomalyIdx++;
-				
-				//convert it into a series for plotting in a chart
-				Integer []ySeries=new Integer[anomalies.size()];
-				ySeries=anomalies.toArray(ySeries);
-				
-				
-			}
-			
-			
-			
-			
-			try{
-				TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
-			} catch (InterruptedException ex){}
-			
-			
+		}// End of while
 			
 		} 
 		catch (TotalADSNetException ex){
-			msgBox.setMessage(ex.getMessage());
-			msgBox.open();
+			exception=ex.getMessage();
+			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
+			
 		} catch (TotalADSReaderException ex) {
-			msgBox.setMessage(ex.getMessage());
-			msgBox.open();
+			exception=ex.getMessage();
+			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
+			
 	
 		} catch (TotalADSDBMSException ex) {
-			msgBox.setMessage(ex.getMessage());
-			msgBox.open();
+			exception=ex.getMessage();
+			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
+			
 	
 		} catch (TotalADSUIException ex) {
-			msgBox.setMessage(ex.getMessage());
-			msgBox.open();
+			exception=ex.getMessage();
+			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
 	
-		} finally{
+		}catch (Exception ex){
+			exception=ex.getMessage();
+			
+			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
+			
+		}
+		finally{
 			ssh.close();
+			console.printTextLn("SSH connection terminated");
+			console.printTextLn("Monitor stopped");
+			final String err=exception;
+			//
+			//Run on main GUI thread
+			//
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					
+					if (!err.isEmpty()){
+						msgBox.setMessage(err);
+						msgBox.open();
+					}
+						
+					btnStop.setEnabled(false);
+					btnStart.setEnabled(true);
+					
+				}
+			});
+			
 		}
 		
 	}
 	
+	/**
+	 * Stops the thread
+	 */
 	public void stopMonitoring(){
-		
+		isExecuting=false;
+		console.printTextLn("Stopping monitor");
+		console.printTextLn("It could take approximately "+intervalsBetweenSnapshots+ "min or more to safely stop the monitor");
+		console.printTextLn("Please wait...");		
 	}
-
+	
+	/**
+	 * Initialises the connection and chart
+	 * @throws TotalADSNetException 
+	 */
+	private void initialise() throws TotalADSNetException{
+		console.clearText();
+		console.printTextLn("Starting SSH....waiting for response from the remote host");
+		//Connecting to SSH
+		if (!pathToPrivateKey.isEmpty())
+			ssh.openSSHConnectionUsingPrivateKey(userAtHost, pathToPrivateKey, port, console,snapshotDuration);
+		else
+			ssh.openSSHConnectionUsingPassword(userAtHost, password, port, console,snapshotDuration);
+		
+		liveXYChart.clearChart();
+		liveXYChart.inititaliseSeries(seriesNames);
+		liveXYChart.setYRange(0, 1);
+		
+		
+		
+		//
+		//Run on main GUI thread
+		//
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				btnDetails.setEnabled(false);
+			}
+		});
+	}
+	
+	
 }

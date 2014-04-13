@@ -2,9 +2,12 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 
 
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -18,89 +21,216 @@ import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries;
 import org.swtchart.ISeries.SeriesType;
 import org.swtchart.IErrorBar;
+import org.swtchart.ISeriesSet;
+import org.swtchart.Range;
 
 /**
- * 
+ * This class creates a chart
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class LiveXYChart {
 	private Chart xyChart;
-	public LiveXYChart(Composite compParent) {
-		//xyChart=new Chart(compParent, SWT.NONE);
-		//xyChart.setLayoutData(gridData);
-		createChart(compParent);
-		//Button b=new Button(compParent, SWT.NONE);
-		//b.setLayoutData(gridData);
+	private PlotSymbolType []plotSymbols;
+	private Color []plotColors;
+	private final int MAX_SERIES=5;
 	
-		//b.setText("test");
-		//b.setLayoutData();
+	/**
+	 * Constructor
+	 * @param compParent
+	 */
+	public LiveXYChart(Composite compParent) {
+	   
+	   xyChart = new Chart(compParent, SWT.NONE);
+	   xyChart.getTitle().setText("Anomalies At Different Intervals");
+	   xyChart.getAxisSet().getXAxis(0).getTitle().setText("Time (mins)");
+	   xyChart.getAxisSet().getYAxis(0).getTitle().setText("Anomalies");
+	   
+	   plotSymbols=new PlotSymbolType[MAX_SERIES];
+	   plotSymbols[0]=PlotSymbolType.CIRCLE;
+	   plotSymbols[1]=PlotSymbolType.DIAMOND;
+	   plotSymbols[2]=PlotSymbolType.CROSS;
+	   plotSymbols[3]=PlotSymbolType.INVERTED_TRIANGLE;
+	   plotSymbols[4]=PlotSymbolType.SQUARE;
+	   
+	   plotColors=new Color[MAX_SERIES];
+	   plotColors[0]=SWTResourceManager.getColor(SWT.COLOR_GREEN);
+	   plotColors[1]=SWTResourceManager.getColor(SWT.COLOR_BLUE);
+	   plotColors[2]=SWTResourceManager.getColor(SWT.COLOR_RED);
+	   plotColors[3]=SWTResourceManager.getColor(SWT.COLOR_MAGENTA);
+	   plotColors[4]=SWTResourceManager.getColor(SWT.COLOR_GRAY);
+	   
 	}
 	
-	private static final double[] ySeries = { 0.0, 0.38, 0.71, 0.92, 1.0, 0.92,
-        0.71, 0.38, 0.0, -0.38, -0.71, -0.92, -1.0, -0.92, -0.71, -0.38 };
 	
-	private static final double[] ySeries2 = { 0.0, 0.50, 0.83, 0.88, 1.0, 0.92,
-        0.66, 0.50, 0.0, -0.25, -0.60, -0.988 -1.0, -0.66, -0.51, -0.58 };
+
 
 /**
- * The main method.
+ * This function initialises different series in a chart. It must be called immediately after the creation of an object
+ * @param seriesNames An array of series names
  * 
- * @param args
- *            the arguments
  */
-public static void main(String[] args) {
-    Display display = new Display();
-    Shell shell = new Shell(display);
-    shell.setText("Line Chart");
-    shell.setSize(500, 400);
-    shell.setLayout(new FillLayout());
+ public  void inititaliseSeries(final String[] seriesNames) {
+	 
+	 Display.getDefault().asyncExec(new Runnable() {//Always execute on the main GUI thread
+			
+			@Override
+			public void run() { 
+				    for (int j=0; j<seriesNames.length;j++){
+				    	
+				    	ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().
+				    							createSeries(SeriesType.LINE, seriesNames[j]);
+				 
+				    	lineSeries.setSymbolType(getSymbol(j));
+				    	lineSeries.setLineColor(getColor(j));
+				    }
+			}
+	 });
 
-    createChart(shell);
-
-    shell.open();
-    while (!shell.isDisposed()) {
-        if (!display.readAndDispatch()) {
-            display.sleep();
-        }
-    }
-    display.dispose();
 }
-
-/**
- * create the chart.
- * 
- * @param parent
- *            The parent composite
- * @return The created chart
- */
-static public Chart createChart(Composite parent) {
-
-    // create a chart
-    Chart chart = new Chart(parent, SWT.NONE);
-   // chart.setLayoutData(grd);
-    // set titles
-    chart.getTitle().setText("Line Chart");
-    chart.getAxisSet().getXAxis(0).getTitle().setText("Snapshot Interval");
-    chart.getAxisSet().getYAxis(0).getTitle().setText("Anomalies");
-
-    // create line series
-    ILineSeries lineSeries = (ILineSeries) chart.getSeriesSet()
-            .createSeries(SeriesType.LINE, "KSM");
-    lineSeries.setSymbolType(PlotSymbolType.DIAMOND);
+ /**
+  * Sets minimum and maximum on Y axis
+  * @param min
+  * @param max
+  */
+ public void setYRange(int min, int max){
+	 xyChart.getAxisSet().getYAxis(0).setRange(new Range(min, max));
+ }
+ 
+ /**
+  * Sets minimum and maximum on X axis
+  * @param min
+  * @param max
+  */
+ public void setXRange(int min, int max){
+	 xyChart.getAxisSet().getXAxis(0).setRange(new Range(min, max));
+ }
+ /**
+  * Returns the symbol for a series out of five symbols
+  * @param index Index of five symbols
+  * @return PlotSymbolType
+  */
+ private PlotSymbolType getSymbol(int index){
+	 if (index<MAX_SERIES)
+		 return plotSymbols[index];
+	 else
+		 return plotSymbols[0];
+ }
+ 
+ /**
+  * Returns the color for a series out of five colors
+  * @param index Index of five colors
+  * @return Color
+  */
+ private Color getColor(int index){
+	 if (index<MAX_SERIES)
+		 return plotColors[index];
+	 else
+		 return plotColors[0];
+ }
+ 
+ /**
+  * This function allows to add the values to a series that has been intialized earlier using inititalizeSeries
+  * function. It throws an exception if series name is not found
+  * @param ySeries Array of double values
+  * @param seriesName Series name
+  * @throws TotalADSUIException
+  */
+public void addYSeriesValues(double []ySeries, String seriesName) throws TotalADSUIException{
+	// create line series
+    ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
+    if (lineSeries==null)
+    	throw new  TotalADSUIException("No such series");
     lineSeries.setYSeries(ySeries);
     
-    
-    ILineSeries lineSeries2 = (ILineSeries) chart.getSeriesSet()
-            .createSeries(SeriesType.LINE, "SWN");
-    lineSeries2.setYSeries(ySeries2);
-    lineSeries2.setSymbolType(PlotSymbolType.CIRCLE);
-    lineSeries2.setLineColor(SWTResourceManager.getColor(SWT.COLOR_GREEN));
-    // adjust the axis range
-    chart.getAxisSet().adjustRange();
-
-    return chart;
 }
+/**
+ * This function allows to add the values to a series that has been intialized earlier using inititalizeSeries
+ * function. It throws an exception if series name is not found
+ * @param ySeries Array of double values
+ * @param seriesName Series name
+ * @throws TotalADSUIException
+ */
+public void addYSeriesValues(Double []ySeries, String seriesName) throws TotalADSUIException{
+	//First convert Double to double
+	double []yVals=new double[ySeries.length];
+	for (int j=0;j<ySeries.length;j++)
+		yVals[j]=ySeries[j];
+	
+	// create line series
+   ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
+   if (lineSeries==null)
+   	throw new  TotalADSUIException("No such series");
+   lineSeries.setYSeries(yVals);
+   
+}
+/**
+ * This function sets the values on X axis that would be displayed for corresponding points on Y axis
+ * @param xSeries An array of double values
+ * @throws TotalADSUIException 
+ */
+public void addXSeriesValues(double []xSeries, String seriesName) throws TotalADSUIException{
+	// create line series
+    //xyChart.getSeriesSet().getSeries()[0].setXSeries(xSeries);
+	 ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
+	 if (lineSeries==null)
+	   	throw new  TotalADSUIException("No such series");
+	 lineSeries.setXSeries(xSeries);
 
+}
+/**
+ * This function sets the values on X axis that would be displayed for corresponding points on Y axis
+ * @param xSeries An array of double values
+ * @throws TotalADSUIException 
+ */
+public void addXSeriesValues(Double []xSeries,String seriesName) throws TotalADSUIException{
+	//First convert Double to double
+	double []xVals=new double[xSeries.length];
+	for (int j=0;j<xSeries.length;j++)
+			xVals[j]=xSeries[j];
+	// create line series
+   // xyChart.getSeriesSet().getSeries()[0].setXSeries(xVals);
+	 ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
+	 if (lineSeries==null)
+	   	throw new  TotalADSUIException("No such series");
+	 lineSeries.setXSeries(xVals);
+
+}
+/**
+ * Draws the chart.  It must be called every time the series is updated
+ */
+public void drawChart(){
+
+	  Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
+		
+		@Override
+		public void run() {
+			// adjust the axis range
+			xyChart.getAxisSet().adjustRange();
+			xyChart.redraw();
+		}
+	 });
+}
+/*
+ * Clears the chart
+ */
+public void clearChart(){
+	
+	Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
+		
+		@Override
+		public void run() {
+			ISeriesSet seriesSet=xyChart.getSeriesSet();
+			ISeries []series= xyChart.getSeriesSet().getSeries();
+			
+			for (int j=0;j<series.length;j++)
+				seriesSet.deleteSeries(series[j].getId());
+			
+			xyChart.redraw();
+			
+		}
+	});
+	
+}
 
 }
