@@ -30,8 +30,8 @@ public class LiveXYChart {
 		//xyChart=new Chart(compParent, SWT.NONE);
 		//xyChart.setLayoutData(gridData);
 		createChart(compParent);
-		Button b=new Button(compParent, SWT.NONE);
-		b.setLayoutData(gridData);
+		//Button b=new Button(compParent, SWT.NONE);
+		//b.setLayoutData(gridData);
 	
 		//b.setText("test");
 		//b.setLayoutData();
@@ -90,6 +90,7 @@ static public Chart createChart(Composite parent) {
     lineSeries.setSymbolType(PlotSymbolType.DIAMOND);
     lineSeries.setYSeries(ySeries);
     
+    
     ILineSeries lineSeries2 = (ILineSeries) chart.getSeriesSet()
             .createSeries(SeriesType.LINE, "SWN");
     lineSeries2.setYSeries(ySeries2);
@@ -100,4 +101,6 @@ static public Chart createChart(Composite parent) {
 
     return chart;
 }
+
+
 }

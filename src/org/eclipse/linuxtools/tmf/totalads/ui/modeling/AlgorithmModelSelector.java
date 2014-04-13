@@ -160,7 +160,7 @@ public class AlgorithmModelSelector {
 			
 		    // populating anomaly detection models		
 		    
-			IDetectionAlgorithm []models  = modFac.getModels(algorithmTypes);
+			IDetectionAlgorithm []models  = modFac.getAlgorithms(algorithmTypes);
 			
 			if (models!=null){
 				TreeItem []items=new TreeItem[models.length];

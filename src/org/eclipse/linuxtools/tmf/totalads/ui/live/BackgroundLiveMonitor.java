@@ -1,7 +1,9 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +40,9 @@ public class BackgroundLiveMonitor extends Thread {
   	private HashMap<String,String[]> modelsAndSettings;
   	private ResultsAndFeedback results;
   	private MessageBox msgBox;
+  	private HashMap<String,LinkedList<Integer>> modelsAndAnomalyCounts;
+  	private Integer anomalyIdx=0;
+	private Integer maxPoints;
 	
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
@@ -57,6 +62,12 @@ public class BackgroundLiveMonitor extends Thread {
 		this.btnDetails=btnDetails;
 		this.modelsAndSettings=modelsAndSettings;
 		this.results=results;
+		this.maxPoints=intervalBetweenSnapshots*20;
+		
+		LinkedList<Integer> anomalyCounts=new LinkedList<Integer>();
+		for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
+			this.modelsAndAnomalyCounts.put(models.getKey(), anomalyCounts); 
+		}
 		ssh = new SSHConnector();
 		msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 		
@@ -83,12 +94,34 @@ public class BackgroundLiveMonitor extends Thread {
 			AlgorithmFactory algFac=AlgorithmFactory.getInstance();
 			
 			for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
+				
 				String model=models.getKey();
 				String []settings=models.getValue();
 				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
 				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
 				
+				LinkedList<Integer> anomalies=modelsAndAnomalyCounts.get(models);
+				
+				if (results.getAnomaly())
+							anomalies.add(1);
+				else
+							anomalies.add(0);
+				
+				if (anomalyIdx>maxPoints){
+					anomalies.remove();//remove head
+					anomalyIdx--;
+				}else
+					anomalyIdx++;
+				
+				//convert it into a series for plotting in a chart
+				Integer []ySeries=new Integer[anomalies.size()];
+				ySeries=anomalies.toArray(ySeries);
+				
+				
 			}
+			
+			
+			
 			
 			try{
 				TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
