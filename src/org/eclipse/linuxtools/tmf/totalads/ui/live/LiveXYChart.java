@@ -93,8 +93,14 @@ public class LiveXYChart {
   * @param min
   * @param max
   */
- public void setYRange(int min, int max){
-	 xyChart.getAxisSet().getYAxis(0).setRange(new Range(min, max));
+ public void setYRange(final int min, final int max){
+	  Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
+			@Override
+			public void run() {
+				xyChart.getAxisSet().getYAxis(0).setRange(new Range(min, max));
+			//	xyChart.getAxisSet().adjustRange();
+			}
+	  });
  }
  
  /**
@@ -102,8 +108,14 @@ public class LiveXYChart {
   * @param min
   * @param max
   */
- public void setXRange(int min, int max){
-	 xyChart.getAxisSet().getXAxis(0).setRange(new Range(min, max));
+ public void setXRange(final int min,final  int max){
+	  Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
+			@Override
+			public void run() {
+					xyChart.getAxisSet().getXAxis(0).setRange(new Range(min, max));
+					//xyChart.getAxisSet().adjustRange();
+			}
+	  });
  }
  /**
   * Returns the symbol for a series out of five symbols

@@ -2,76 +2,30 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2014-04-13T19:54:54</date>
-  <millis>1397433294113</millis>
+  <date>2014-04-13T20:06:57</date>
+  <millis>1397434017282</millis>
   <sequence>0</sequence>
   <logger>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</logger>
   <level>SEVERE</level>
   <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
   <method>run</method>
   <thread>10</thread>
-  <message>Invalid thread access</message>
   <exception>
-    <message>org.eclipse.swt.SWTException: Invalid thread access</message>
+    <message>java.lang.NullPointerException</message>
     <frame>
-      <class>org.eclipse.swt.SWT</class>
-      <method>error</method>
-      <line>4397</line>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.SSHConnector</class>
+      <method>downloadTrace</method>
+      <line>257</line>
     </frame>
     <frame>
-      <class>org.eclipse.swt.SWT</class>
-      <method>error</method>
-      <line>4312</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.swt.SWT</class>
-      <method>error</method>
-      <line>4283</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.swt.widgets.Widget</class>
-      <method>error</method>
-      <line>481</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.swt.widgets.Widget</class>
-      <method>checkWidget</method>
-      <line>419</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.swt.widgets.Composite</class>
-      <method>getClientArea</method>
-      <line>613</line>
-    </frame>
-    <frame>
-      <class>org.swtchart.internal.Legend</class>
-      <method>updateLayoutData</method>
-      <line>294</line>
-    </frame>
-    <frame>
-      <class>org.swtchart.Chart</class>
-      <method>updateLayout</method>
-      <line>308</line>
-    </frame>
-    <frame>
-      <class>org.swtchart.internal.axis.Axis</class>
-      <method>setRange</method>
-      <line>235</line>
-    </frame>
-    <frame>
-      <class>org.swtchart.internal.axis.Axis</class>
-      <method>setRange</method>
-      <line>180</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.LiveXYChart</class>
-      <method>setXRange</method>
-      <line>106</line>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.SSHConnector</class>
+      <method>collectATrace</method>
+      <line>167</line>
     </frame>
     <frame>
       <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
       <method>run</method>
-      <line>142</line>
+      <line>131</line>
     </frame>
   </exception>
 </record>
