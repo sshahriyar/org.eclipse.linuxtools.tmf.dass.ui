@@ -18,6 +18,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 //import com.sun.corba.se.impl.ior.NewObjectKeyTemplateBase;
@@ -27,7 +28,7 @@ import org.eclipse.swt.widgets.Text;
  *
  */
 public class ProgressConsole {
-	private CLabel lblProgressConsole;
+	private Label lblProgressConsole;
 	private Text txtAnomaliesProgress;
 	private int MAX_TEXT_SIZE=20000;
 	
@@ -42,7 +43,7 @@ public class ProgressConsole {
 	 */
 
 		
-		lblProgressConsole = new CLabel(compParent, SWT.NONE);
+		lblProgressConsole = new Label(compParent, SWT.NONE);
 		lblProgressConsole.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,false,4,1));
 		lblProgressConsole.setText("Progress Console");
 		
@@ -67,7 +68,7 @@ public class ProgressConsole {
 	 */
 
 		
-		lblProgressConsole = new CLabel(compParent, SWT.NONE);
+		lblProgressConsole = new Label(compParent, SWT.NONE);
 		lblProgressConsole.setLayoutData(gridDataLabel);
 		lblProgressConsole.setText("Progress Console");
 		

@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
+import org.swtchart.IAxis;
 import org.swtchart.IBarSeries;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
@@ -42,9 +43,12 @@ public class LiveXYChart {
 	public LiveXYChart(Composite compParent) {
 	   
 	   xyChart = new Chart(compParent, SWT.NONE);
-	   xyChart.getTitle().setText("Anomalies At Different Intervals");
+	  //xyChart.getTitle().setText("Anomalies At Different Intervals");
+	   xyChart.getTitle().setVisible(false); // Keep title invisible to get more space for the chart
 	   xyChart.getAxisSet().getXAxis(0).getTitle().setText("Time (mins)");
 	   xyChart.getAxisSet().getYAxis(0).getTitle().setText("Anomalies");
+	   setXRange(1, 8,100);
+	   setYRange(0, 1);
 	   
 	   plotSymbols=new PlotSymbolType[MAX_SERIES];
 	   plotSymbols[0]=PlotSymbolType.CIRCLE;
@@ -83,6 +87,7 @@ public class LiveXYChart {
 				 
 				    	lineSeries.setSymbolType(getSymbol(j));
 				    	lineSeries.setLineColor(getColor(j));
+				    	lineSeries.enableStep(true);
 				    }
 			}
 	 });
@@ -97,7 +102,11 @@ public class LiveXYChart {
 	  Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
 			@Override
 			public void run() {
-				xyChart.getAxisSet().getYAxis(0).setRange(new Range(min, max));
+				
+				
+				IAxis yAxis= xyChart.getAxisSet().getYAxis(0);
+				yAxis.setRange(new Range(min, max));
+				yAxis.getTick().setTickMarkStepHint(100);
 			//	xyChart.getAxisSet().adjustRange();
 			}
 	  });
@@ -108,12 +117,13 @@ public class LiveXYChart {
   * @param min
   * @param max
   */
- public void setXRange(final int min,final  int max){
+ public void setXRange(final int min,final  int max, final int step){
 	  Display.getDefault().syncExec(new Runnable() {//Always execute on the main GUI thread
 			@Override
 			public void run() {
-					xyChart.getAxisSet().getXAxis(0).setRange(new Range(min, max));
-					//xyChart.getAxisSet().adjustRange();
+				IAxis xAxis= xyChart.getAxisSet().getXAxis(0);
+				xAxis.setRange(new Range(min, max));
+				xAxis.getTick().setTickMarkStepHint(step);//xyChart.getAxisSet().adjustRange();
 			}
 	  });
  }

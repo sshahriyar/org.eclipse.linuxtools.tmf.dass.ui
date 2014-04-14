@@ -85,6 +85,8 @@ public class LiveMonitor {
 	private BackgroundLiveMonitor liveExecutor;
 	private ModelSelection modelSelectionHandler;
 	private LiveXYChart liveChart;
+	private Button btnTrainingAndEval;
+	private Button btnTesting;
 	/**
 	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
@@ -126,7 +128,7 @@ public class LiveMonitor {
 		
 		
 		//////////////////////////////////////////////////////////////////////
-		// Creating GUI widgets for status, results and feedback
+		// Creating GUI widgets for charts and console
 		//////////////////////////////////////////////////////////////////
 		Composite compButtonsChartConsole=new Composite(comptbItmDiagnosis, SWT.NONE);
 		compButtonsChartConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -148,17 +150,29 @@ public class LiveMonitor {
 		btnDetails.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 		btnDetails.setText("Details");
 		
-		//resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
-		//modelLoader.setResultsAndFeedback(resultsAndFeedback);
-		
+		///////////////
+		///Creating a chart
+		///////////////
 		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
-		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,10));
 		compChart.setLayout(new FillLayout());
 		liveChart=new LiveXYChart(compChart);
 		
-		console =new ProgressConsole(compButtonsChartConsole,new GridData(SWT.LEFT,SWT.TOP,true,false),
-				new GridData(SWT.FILL,SWT.FILL,true,true));
+		/////////
+		///Creating a smaller console than the chart
+		///////
+		Composite compConsole = new Composite(compButtonsChartConsole,SWT.NONE);
+		compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		compConsole.setLayout(new GridLayout(1,false));
+		
+		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
+		gridDataConsoleText.minimumHeight=150;
+				
+		console =new ProgressConsole(compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
+				gridDataConsoleText);
 
+		
+		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
@@ -222,7 +236,7 @@ public class LiveMonitor {
 		btnPassword = new Button(grpPrivacy, SWT.RADIO);
 		btnPassword.setText("Enter Password");
 		btnPassword.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true, false,1,1));
-		
+		btnPassword.setSelection(true);
 		
 		btnPvtKey = new Button(grpPrivacy, SWT.RADIO);
 		btnPvtKey.setText("Select Private Key");
@@ -288,6 +302,7 @@ public class LiveMonitor {
 	/**
 	 * Training and Evaluation Widgets
 	 */
+	
 	public void trainingAndEvaluation(Composite compParent){
 		/////////
 		///Training and Evaluation
@@ -297,21 +312,22 @@ public class LiveMonitor {
 		grpTrainingAndEval.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
 		grpTrainingAndEval.setLayout(new GridLayout(2,false));
 		
-		Button btnTrainingAndEval=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
+		btnTrainingAndEval=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
 		btnTrainingAndEval.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		btnTrainingAndEval.setText("Training and Evaluation");
 		
-		Button btnTesting=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
+		btnTesting=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
 		btnTesting.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		btnTesting.setText("Evaluation");
+		btnTesting.setSelection(true);
 		
 		//////////////////
 		/////// Existing Model
 		//////////////
 		Group grpModelSelection=new Group(grpTrainingAndEval,SWT.NONE);	
-		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
+		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,2,2));
 		grpModelSelection.setLayout(new GridLayout(1,false));
-		grpModelSelection.setText("Existing Model");
+		grpModelSelection.setText("Existing Models");
 		
 		Composite compModelSelection=new Composite(grpModelSelection, SWT.NONE);
 	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
@@ -328,7 +344,7 @@ public class LiveMonitor {
 		
 		Tree treeModels = new Tree(grpModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 		treeModels.setLinesVisible(true);
-		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);
 		
@@ -349,14 +365,26 @@ public class LiveMonitor {
 					msgBox.setMessage("Empty fields are not allowed");
 					msgBox.open();
 				}else {
+					
+					String password=""; 
+					String privateKey="";
+					Boolean isTrainAndEval=false;
+					
 					int port=Integer.parseInt(txtPort.getText());
 					int snapshotDuration=Integer.parseInt(cmbSnapshot.getItem(cmbSnapshot.getSelectionIndex()));
 					int snapshotIntervals=Integer.parseInt(cmbInterval.getItem(cmbInterval.getSelectionIndex()));
-					String password=""; String privateKey="";
+					
+					
+				
 					if (btnPassword.getSelection())
 						password=txtPassword.getText();
 					else if (btnPvtKey.getSelection())
 						privateKey=txtPvtKey.getText();
+					
+					if (btnTrainingAndEval.getSelection())
+						isTrainAndEval=true;
+					else if (btnTesting.getSelection())
+						isTrainAndEval=false;
 							
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
@@ -366,7 +394,8 @@ public class LiveMonitor {
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
-									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,liveChart, console);
+									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,liveChart,
+									  	isTrainAndEval, console);
 					liveExecutor.start();
 				}
 			}

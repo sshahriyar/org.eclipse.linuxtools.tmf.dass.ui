@@ -53,7 +53,9 @@ public class BackgroundLiveMonitor extends Thread {
 	private AlgorithmFactory algFac;
 	private ITraceTypeReader lttngSyscallReader;
 	private LinkedList<Double> xSeries;
+	private boolean isTrainAndEval;
 	private volatile boolean isExecuting=true;
+	
 	/**
 	 * Constructor
 	 * @param userAtHost
@@ -74,7 +76,7 @@ public class BackgroundLiveMonitor extends Thread {
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
 		  	Button btnStop, Button btnDetails,HashMap<String,String[]> modelsAndSettings,
-		  	ResultsAndFeedback results,	LiveXYChart xyChart,ProgressConsole console ) {
+		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval,ProgressConsole console ) {
 		
 		this.userAtHost=userAtHost;
 		this.password=password;
@@ -91,7 +93,7 @@ public class BackgroundLiveMonitor extends Thread {
 		this.liveXYChart=xyChart;
 		this.console=console;
 		this.maxPoints=intervalBetweenSnapshots*20;
-	
+		this.isTrainAndEval=isTrainEval;
 		
 		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
 		modelsAndAnomalyCounts=new HashMap<String, LinkedList<Double>>();
@@ -133,13 +135,14 @@ public class BackgroundLiveMonitor extends Thread {
 					
 					if (xSeries.isEmpty()){
 						xSeries.add(0.0);
-						liveXYChart.setXRange(0, 1);
+						//liveXYChart.setXRange(0, 1);
 					}
 					else{
 						if (anomalyIdx>maxPoints)
 							xSeries.remove();
 						xSeries.add(intervalsBetweenSnapshots.doubleValue()+xSeries.getLast());
-						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue());
+						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue(),
+								100);
 					}
 					//Convert it into a series for plotting a chart
 					Double []xVals=new Double[xSeries.size()];
@@ -153,14 +156,23 @@ public class BackgroundLiveMonitor extends Thread {
 							
 							IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
 							//Getting a trace iterator
-							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-						  
+							
 							
 							console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
 							console.printTextLn("Please wait while the trace is evaluated....");
+							
+							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 							Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
 							
-							console.printTextLn("Evaluation finished....");
+							if (isTrainAndEval){//if it is both training and evaluation, then first train it
+												// we are nit passing settings here because the assumption is that 
+												// database has already been created and settings for test are only passed to this threa
+												// in the constructor. Also, this will always be a last trace, and new db is false
+								traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
+								algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
+							} 
+							
+							console.printTextLn("Eexecution  finished for an algorithm....");
 							
 							LinkedList<Double> anomalies=modelsAndAnomalyCounts.get(model);
 							if (results.getAnomaly()){
@@ -207,6 +219,9 @@ public class BackgroundLiveMonitor extends Thread {
 								btnDetails.setEnabled(true);
 							}
 						});
+						
+						if (isExecuting==false)// Check if stop has been requested
+							break;// break out of the loop 
 						
 						console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
 										+ " the remote host "+userAtHost.replaceAll(".*@","" ));
