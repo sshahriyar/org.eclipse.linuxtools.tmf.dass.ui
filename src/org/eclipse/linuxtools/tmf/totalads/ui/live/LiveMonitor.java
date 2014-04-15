@@ -166,7 +166,7 @@ public class LiveMonitor {
 		compConsole.setLayout(new GridLayout(1,false));
 		
 		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
-		gridDataConsoleText.minimumHeight=150;
+		gridDataConsoleText.minimumHeight=200;
 				
 		console =new ProgressConsole(compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
 				gridDataConsoleText);
@@ -299,10 +299,10 @@ public class LiveMonitor {
 		 * End group trace selection
 		 */
 	}
+	
 	/**
 	 * Training and Evaluation Widgets
 	 */
-	
 	public void trainingAndEvaluation(Composite compParent){
 		/////////
 		///Training and Evaluation
@@ -314,11 +314,11 @@ public class LiveMonitor {
 		
 		btnTrainingAndEval=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
 		btnTrainingAndEval.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		btnTrainingAndEval.setText("Training and Evaluation");
+		btnTrainingAndEval.setText("Training and Testing");
 		
 		btnTesting=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
 		btnTesting.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		btnTesting.setText("Evaluation");
+		btnTesting.setText("Testing");
 		btnTesting.setSelection(true);
 		
 		//////////////////
@@ -360,11 +360,8 @@ public class LiveMonitor {
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				if (txtUserAtHost.getText().isEmpty() || txtPassword.getText().isEmpty()){
-					MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
-					msgBox.setMessage("Empty fields are not allowed");
-					msgBox.open();
-				}else {
+			
+				if (findInvalidSSettings()==false){
 					
 					String password=""; 
 					String privateKey="";
@@ -421,8 +418,11 @@ public class LiveMonitor {
 		});
 		
 	}
-	
-	private Boolean findInvalidSSHFields(){
+	/**
+	 * Validates the fields before execution
+	 * @return
+	 */
+	private Boolean findInvalidSSettings(){
 		/*private Text txtPassword;
 		private Text txtUserAtHost;
 		private Combo cmbSnapshot;
@@ -432,7 +432,27 @@ public class LiveMonitor {
 		private Button btnPassword;
 		private Text txtPort;
 		private Text txtSudoPassword;*/
-		return true;
+		String msg="";
+		if (txtUserAtHost.getText().isEmpty())
+				msg="User@Host cannot be empty";
+		else if (txtSudoPassword.getText().isEmpty())
+			msg="Sudo password cannot be empty";
+		else if (txtPort.getText().isEmpty())
+			msg="Port cannot be empty";
+		else if (btnPassword.getSelection() && txtPassword.getText().isEmpty())
+			msg="SSH password cannot be empty";
+		else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
+           msg="Private key path cannot be empty";
+		else if (this.modelSelectionHandler.getSelectedModelsCount()==0)
+			msg="Please, first select a model";
+		
+		if (!msg.isEmpty()){
+			 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+			 msgBox.setMessage(msg);
+			 msgBox.open();
+			 return true;
+		}else
+			 return false;
 	}
 	
 	

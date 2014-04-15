@@ -59,7 +59,7 @@ public class AlgorithmModelSelector {
 	private Tree treeAnalysisModels;
 	
 	private TreeItem currentlySelectedTreeItem;
-	private IDetectionAlgorithm currentlySelectedModel;
+	private IDetectionAlgorithm currentlySelectedAlgorithm;
 	private Settings settingsDialog;
 	private String []algorithmOptions;
 	private Combo cmbDBNames;
@@ -141,7 +141,7 @@ public class AlgorithmModelSelector {
 						 currentlySelectedTreeItem.setChecked(false);
 				 item.setChecked(true);
 				 currentlySelectedTreeItem=item;
-				 currentlySelectedModel= ((IDetectionAlgorithm)currentlySelectedTreeItem.getData());
+				 currentlySelectedAlgorithm= ((IDetectionAlgorithm)currentlySelectedTreeItem.getData());
 		}
 		
 		
@@ -172,7 +172,7 @@ public class AlgorithmModelSelector {
 				}
 				items[0].setChecked(true);
 				currentlySelectedTreeItem=items[0];
-				currentlySelectedModel= ((IDetectionAlgorithm)currentlySelectedTreeItem.getData());
+				currentlySelectedAlgorithm= ((IDetectionAlgorithm)currentlySelectedTreeItem.getData());
 			}
 			   
 		    
@@ -207,7 +207,7 @@ public class AlgorithmModelSelector {
 		if (!checkItemSelection())
 			throw new TotalADSUIException("Please, first select an algorithm!");
 		// Getting training options
-		String []options=currentlySelectedModel.getTrainingOptions();
+		String []options=currentlySelectedAlgorithm.getTrainingOptions();
 		if (options!=null){
 			settingsDialog= new Settings(options);
 			settingsDialog.showForm();
@@ -320,7 +320,7 @@ public class AlgorithmModelSelector {
 	private void populateComboWithDatabaseList(){
 		
 		if (checkItemSelection() && btnSelectDB.getSelection()){
-			String filter =currentlySelectedModel.getAcronym();	
+			String filter =currentlySelectedAlgorithm.getAcronym();	
 			// First clear it
 				//Populate combo box
 				if (Configuration.connection.isConnected()){
@@ -385,12 +385,12 @@ public class AlgorithmModelSelector {
 					 }
 					 else if (btnEnterDB.getSelection()){ 
 						 if (txtNewDBName.getText().isEmpty()){
-							 modelNameVerificationException="Please, enter a database name";
+							 modelNameVerificationException="Please, enter a new model name";
 							 return;
 						 }
 						 else{
 							 if (txtNewDBName.getText().contains("_")){
-								 modelNameVerificationException="Database name cannot contain underscore \"_\"";
+								 modelNameVerificationException="Model name cannot contain underscore \"_\"";
 								 return;
 							 }
 							 selectedDB=txtNewDBName.getText();
@@ -399,7 +399,7 @@ public class AlgorithmModelSelector {
 				      }
 					 
 					 if (selectedDB.isEmpty()){
-						 modelNameVerificationException="Please, enter or select a database name";
+						 modelNameVerificationException="Please, enter or select a model name";
 						 return;
 					 }
 					
@@ -429,7 +429,7 @@ public class AlgorithmModelSelector {
 			throw new TotalADSUIException("Please, first select an algorithm!");
        
 		Boolean isLastTrace=false;
-		IDetectionAlgorithm theModel=currentlySelectedModel.createInstance();
+		IDetectionAlgorithm algorithm=currentlySelectedAlgorithm.createInstance();
 		
 		//Get the model/database name
 		String msg=retreiveModelName();
@@ -460,7 +460,7 @@ public class AlgorithmModelSelector {
 		}
 		//Second,  create a database after verifications
 		if(isCreateDB){
-				database=database.trim()+"_"+theModel.getAcronym()+"_"+ traceReader.getAcronym();
+				database=database.trim()+"_"+algorithm.getAcronym(); //+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();
 				//theModel.createDatabase(database, connection);// throws TotalADSDBMSException
 				if (checkDBExistence(database)){
@@ -483,11 +483,11 @@ public class AlgorithmModelSelector {
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
 			console.printTextLn("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
-	 		theModel.train(trace, isLastTrace, database,connection, console, algorithmOptions, isCreateDB);
+	 		algorithm.train(trace, isLastTrace, database,connection, console, algorithmOptions, isCreateDB);
 		
 		}
 		//Fourth, start validation
-		validateModels(validationFileList, traceReader,theModel, database, console);
+		validateModels(validationFileList, traceReader,algorithm, database, console);
 		
 	}
 
@@ -527,6 +527,31 @@ public class AlgorithmModelSelector {
 		
 		
 		
+	}
+	/**
+	 * Creates an empty model
+	 * @throws TotalADSDBMSException 
+	 */
+	public void createAnEmptyModel() throws TotalADSDBMSException, TotalADSUIException{
+		
+		    if (!btnEnterDB.getSelection() || txtNewDBName.getText().isEmpty() ){
+				 throw new TotalADSUIException("Please, enter a new model name");
+				 
+			 }
+			 else{
+				 
+				 if (txtNewDBName.getText().contains("_")){
+					 throw new TotalADSUIException("Model name cannot contain underscore \"_\"");
+				
+				 }
+				 String database=txtNewDBName.getText();
+				 IDetectionAlgorithm algorithm=currentlySelectedAlgorithm.createInstance();
+				 database=database.trim()+"_"+algorithm.getAcronym(); //+"_"+ traceReader.getAcronym();
+				 database=database.toUpperCase();
+				 algorithm.createDatabase(database, Configuration.connection);	
+			}
+	      
+		 
 	}
 	
 	/**

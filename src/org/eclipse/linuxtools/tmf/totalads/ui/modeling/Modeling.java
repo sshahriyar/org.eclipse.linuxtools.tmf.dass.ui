@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
@@ -85,13 +86,12 @@ public class Modeling {
 		
 		algorithmSelector=new AlgorithmModelSelector(grpAlgorithmModel);
 		
-		
-		//
-	    Composite compSettingAndEvaluation=new Composite(comptbItmModeling,SWT.NONE);
+		Composite compSettingAndEvaluation=new Composite(comptbItmModeling,SWT.NONE);
 	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
-	    compSettingAndEvaluation.setLayout(new GridLayout(4, false));
+	    compSettingAndEvaluation.setLayout(new GridLayout(6, false));
 	    
-		adjustSettings(compSettingAndEvaluation);
+		createAnEmptyModel(compSettingAndEvaluation);
+	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
 		//Initialize progress console
 	    progConsole=new ProgressConsole(comptbItmModeling);
@@ -208,6 +208,42 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
+	
+	/**
+	    * Creates GUI widgets for the creation of an empty model
+	    * @param comptbItmModeling Composite of Modeling
+	    */
+		private void createAnEmptyModel(Composite comptbItmModeling){
+			
+			Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
+			btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+			btnSettings.setText("Create an Empty Model");
+			
+			//Event handler for Settings button
+			btnSettings.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseUp(MouseEvent e) {
+					try {
+						algorithmSelector.createAnEmptyModel();
+						MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+						           ,SWT.ICON_INFORMATION|SWT.OK);
+						msgBox.setMessage("An empty model created");
+						msgBox.open();
+						
+					} catch (TotalADSDBMSException ex) {
+						msgBox.setMessage(ex.getMessage());
+						msgBox.open();
+					} catch (TotalADSUIException ex) {
+						msgBox.setMessage(ex.getMessage());
+						msgBox.open();
+					}
+					
+					
+				}
+			 });
+		}
+	
    /**
     * Creates GUI widgets for adjustment of settings of an algorithm
     * Shows setting dialog for a selected algorithm
@@ -216,7 +252,7 @@ public class Modeling {
 	private void adjustSettings(Composite comptbItmModeling){
 		
 		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
-		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
 		btnSettings.setText("Adjust Settings");
 		
 		//Event handler for Settings button

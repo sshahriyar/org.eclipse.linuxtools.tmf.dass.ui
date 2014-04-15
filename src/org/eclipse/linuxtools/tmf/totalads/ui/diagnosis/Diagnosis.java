@@ -73,7 +73,7 @@ public class Diagnosis {
 		currentlySelectedTracesPath=new StringBuilder();
 		//LiveMonitor Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmDiagnosis.setText("Diagnosis");
+		tbItmDiagnosis.setText("Testing");
 		//Making scrollable tab item 
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);

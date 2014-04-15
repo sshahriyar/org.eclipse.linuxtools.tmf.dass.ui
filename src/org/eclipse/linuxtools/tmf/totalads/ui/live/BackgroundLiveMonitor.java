@@ -155,12 +155,12 @@ public class BackgroundLiveMonitor extends Thread {
 							String []settings=modAndSettings.getValue();
 							
 							IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
-							//Getting a trace iterator
+							
 							
 							
 							console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
 							console.printTextLn("Please wait while the trace is evaluated....");
-							
+							//Getting a trace iterator
 							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 							Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
 							
@@ -168,11 +168,14 @@ public class BackgroundLiveMonitor extends Thread {
 												// we are nit passing settings here because the assumption is that 
 												// database has already been created and settings for test are only passed to this threa
 												// in the constructor. Also, this will always be a last trace, and new db is false
+								
+								console.printTextLn("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
+								console.printTextLn("Please wait while the model is updated....");
 								traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 								algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
 							} 
 							
-							console.printTextLn("Eexecution  finished for an algorithm....");
+							console.printTextLn("Execution  finished for "+model);
 							
 							LinkedList<Double> anomalies=modelsAndAnomalyCounts.get(model);
 							if (results.getAnomaly()){
@@ -309,7 +312,8 @@ public class BackgroundLiveMonitor extends Thread {
 		
 		liveXYChart.clearChart();
 		liveXYChart.inititaliseSeries(seriesNames);
-		liveXYChart.setYRange(0, 1);
+		//liveXYChart.setYRange(0, 1);
+		liveXYChart.drawChart();
 		
 		
 		

@@ -17,12 +17,15 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 /**
  * This class implements the tree transformation methods for the sliding window algorithm. it converts a trace of events
- * into a tree of patterns and serailzies to database when needed.
+ * into a tree of patterns and serializes to database when needed.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  * 
  */
@@ -35,16 +38,19 @@ public class SlidingWindowTree {
 	}
 	
 	/**
-	 * 
 	 * Searches and adds a sequence in the training database. 
 	 * If a sequence already exists, it updates the counter
-	 * @param sequence Sequence to add
-	 * @param sysCallSequences A map containing one tree of events for every key
-	 * 
+	 * @param newSequence
+	 * @param database
+	 * @param connection
+	 * @throws TotalADSDBMSException
 	 */
-	public void searchAndAddSequence(String []newSequence, HashMap<String, Event[]> sysCallSequences){
+	//public void searchAndAddSequence(String []newSequence, HashMap<String, Event[]> sysCallSequences){
+    public void searchAndAddSequence(String []newSequence, String database, DBMS connection) throws TotalADSDBMSException{
 		Integer seqSize=newSequence.length;
-		Event[] eventSequence= sysCallSequences.get(newSequence[0]);
+		//Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
+		Event[] eventSequence=	loadTreeFromDatabase(newSequence[0], database, connection) ;//load from database
+		
 		if (eventSequence==null){ // if there is no such starting event then add sequence to such an event
 			
 			eventSequence=new Event[seqSize+1];
@@ -72,7 +78,8 @@ public class SlidingWindowTree {
 			}
 		}
 		// putting the sequence (graph actually) to the starting event (node) as a key
-		sysCallSequences.put(newSequence[0],eventSequence);
+		//sysCallSequences.put(newSequence[0],eventSequence);//add to database
+		saveTreeInDatabase( database, connection, eventSequence, TraceCollection.COLLECTION_NAME.toString());
 	}
 	
 	/**
@@ -163,7 +170,7 @@ public class SlidingWindowTree {
    }
 	
 	/**
-	 *  * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
+	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
 	 * @param console ProgressConsole object
 	 * @param database Database name
 	 * @param connection DBMS object
@@ -174,6 +181,7 @@ public class SlidingWindowTree {
 	public void saveinDatabase(ProgressConsole console, String database, DBMS connection,HashMap<String, 
 			Event[]> sysCallSequences, String collectionName) throws TotalADSDBMSException{
 		console.printTextLn("Saving in database.....");
+		
 		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
 			
 					
@@ -194,6 +202,56 @@ public class SlidingWindowTree {
 			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, collectionName);
 			
 		}
+	}
+	
+	/**
+	 * Saves a tree in the database
+	 * @param database
+	 * @param connection
+	 * @param sysCallSequences
+	 * @param collectionName
+	 * @throws TotalADSDBMSException
+	 */
+	public void saveTreeInDatabase( String database, DBMS connection, 
+			Event[] tree, String collectionName) throws TotalADSDBMSException{
+		
+		 
+		
+		 	String key=tree[0].getEvent(); // top node is the key
+			
+			com.google.gson.Gson gson = new com.google.gson.Gson();
+			
+			JsonElement jsonArray= gson.toJsonTree(tree);
+			JsonObject jsonObject= new JsonObject();
+			jsonObject.addProperty("_id", key);
+			jsonObject.add("tree", jsonArray);
+			
+			JsonObject jsonKey=new JsonObject();
+			jsonKey.addProperty("_id", key);
+			
+			//console.printTextLn(jsonObject.toString());
+			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, collectionName);
+		
+	}
+	/**
+	 * Loads a tree based on the root node from the database
+	 * @param rootNode
+	 * @param database
+	 * @param connection
+	 * @return
+	 */
+	public Event[] loadTreeFromDatabase(String rootNode ,String database, DBMS connection){
+		DBCursor cursor=connection.select("_id", "", rootNode, database, TraceCollection.COLLECTION_NAME.toString());
+		Event []event=null;
+		 if (cursor !=null){
+			
+				DBObject dbObject=cursor.next();
+				Gson gson =new Gson();
+				event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
+			
+				cursor.close();
+		}
+		 return event;
 	}
 	/**
 	 * Prints the graph of sequence; use for testing

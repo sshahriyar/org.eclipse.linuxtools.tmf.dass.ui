@@ -95,7 +95,7 @@ public class ModelSelection {
 				if (item.getChecked()){
 					String []modelKey=item.getText().split("_");
 					
-					if(modelKey==null ||  modelKey.length<3){
+					if(modelKey==null ||  modelKey.length<2){
 						msgBox.setMessage(item.getText()+ " is not a valid model created by TotalADS!");
 						msgBox.open();
 						item.setChecked(false);
@@ -175,8 +175,10 @@ public class ModelSelection {
 									SWT.ICON_INFORMATION|SWT.YES|SWT.NO);
 						
 						msgBox.setMessage("Do you want to delete the model "+databases[0]+ "?");
-						if (msgBox.open()==SWT.YES)
+						if (msgBox.open()==SWT.YES){
 							Configuration.connection.deleteDatabase(databases[0]);
+							models.remove(databases[0]);
+						}
 				} catch (TotalADSUIException ex) {
 					msgBox.setMessage(ex.getMessage());
 					msgBox.open();
@@ -203,8 +205,13 @@ public class ModelSelection {
 		});
 	 // end of function addEventHandler
 	}
-	
-	
+	/**
+	 * Returns the numebr of models selected
+	 * @return
+	 */
+	public int getSelectedModelsCount(){
+		return models.size();
+	}
 
 	/**
 	 *  Returns the currently selected algorithms as an array
@@ -229,12 +236,12 @@ public class ModelSelection {
 					models[idx]=database;
 					String []modelKey=database.split("_");
 					
-					if(modelKey==null ||  modelKey.length<3)
-						throw new TotalADSUIException(database+ " is not a valid model created by TotalADS!");
+					//if(modelKey==null ||  modelKey.length<2)
+						//throw new TotalADSUIException(database+ " is not a valid model created by TotalADS!");
 					
 					algorithms[idx]= algFactory.getAlgorithmByAcronym(modelKey[1]);
-					if  (algorithms[idx]==null)
-						throw new TotalADSUIException(database+" is not a valid model created by TotalADS!");
+					//if  (algorithms[idx]==null)
+						//throw new TotalADSUIException(database+" is not a valid model created by TotalADS!");
 					idx++;
 				
 		

@@ -10,35 +10,24 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 /**
- * This class represents the fields of  a settings collection in the MongoDB.
- * 
+ * This class represents the fields of  a trace collection in the MongoDB.
+ * In the case of trace collection the fields are the system call tree generated from the trace
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-public enum SettingsCollection{
-	/**
-	 * The Key name in the collection
-	 */
-	KEY("_id"),
-	/**
-	 * Max win field in the collection
-	 */
-	MAX_WIN("maxWIN"),
-	/**
-	 * MAx hamming distance field in the collection
-	 */
-	MAX_HAM_DIS("maxHamDis"),
+public enum TraceCollection{
+	
 	/**
 	 * The name of collection itself
 	 */
-	COLLECTION_NAME("settings");
+	COLLECTION_NAME("trace_data");
 	
 	private String fieldName;
 	/**
 	 * Constructor
 	 * @param fieldName
 	 */
-	private SettingsCollection(String fieldName){
+	private TraceCollection(String fieldName){
 		this.fieldName=fieldName;
 	}
 	/**

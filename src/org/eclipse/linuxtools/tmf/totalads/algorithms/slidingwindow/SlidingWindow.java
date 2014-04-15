@@ -42,12 +42,13 @@ import com.mongodb.DBObject;
  */
 public class SlidingWindow implements IDetectionAlgorithm {
 	 
-	private String TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
-	private String SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
+	//private String TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
+	//private String SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
 	private Integer maxWin=5;
 	private Integer maxHamDis=0;
 	private String warningMessage="";
-	private HashMap<String, Event[]> sysCallSequences;
+	//private HashMap<String, Event[]> sysCallSequences;
+	private Boolean treeExists;
 	private String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
 	private String []testingOptions={"Max Hamming Distance","0"};
 	private Integer validationTraceCount=0;
@@ -62,7 +63,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Constructor
 	 **/
 	public SlidingWindow() {
-		sysCallSequences= new HashMap<String, Event[]>();
+		//sysCallSequences= new HashMap<String, Event[]>();
 		treeTransformer=new SlidingWindowTree();
 	}
 	/**
@@ -72,20 +73,15 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	private void initialize(DBMS connection,String database) {
 		
-			DBCursor cursor=connection.selectAll(database, this.TRACE_COLLECTION);
+			DBCursor cursor=connection.selectAll(database, TraceCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
-				while (cursor.hasNext()){
-					DBObject dbObject=cursor.next();
-					Gson gson =new Gson();
-					String key=dbObject.get("_id").toString();
-					
-					Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
-					sysCallSequences.put(key, event);
-				}
-			cursor.close();
-			}
+				//if (cursor.hasNext())
+					treeExists=true;
+					cursor.close();
+			}else
+				treeExists=false;
 			// get the maxwin
-			cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
+			cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
 				while (cursor.hasNext()){
 					DBObject dbObject=cursor.next();
@@ -115,7 +111,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
      */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
-    	DBCursor cursor=connection.selectAll(database, this.SETTINGS_COLLECTION);
+    	DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 		if (cursor !=null){
 			while (cursor.hasNext()){
 				DBObject dbObject=cursor.next();
@@ -134,7 +130,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException{
-		String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
+		String []collectionNames={TraceCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString()};
 		connection.createDatabase(databaseName, collectionNames);
 	}
 	
@@ -157,7 +153,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
 	    		  try{
-		    		  if (sysCallSequences.size()!=0)
+		    		  if (treeExists==true)
 		    			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
 		    		  else if (options[0].equals(this.trainingOptions[0]))
 			    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
@@ -200,8 +196,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		 // System.out.println(Arrays.toString(seq));
-	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
-	    		  
+	    		//  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
+	    		  treeTransformer.searchAndAddSequence(seq,database,connection);
 	    		  newSequence.remove(0);
 	    	  }
 	    		  
@@ -209,7 +205,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
 	    	 
-	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TRACE_COLLECTION);
+	    	 //treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TraceCollection.COLLECTION_NAME.toString());
 	    	 intialize=false;
 	     }
 	     
@@ -327,7 +323,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  do {// This loop searches for the tree that starts with the first event of a new sequences, 
 	    			  // if not found it starts with a second event, then the third event and so on. Each time
 	    			  //it keeps on increasing the hamming distnace
-	    			   nodes=sysCallSequences.get(seq[counter]);
+	    			   //nodes=sysCallSequences.get(seq[counter]);//load from database
+	    			   nodes=treeTransformer.loadTreeFromDatabase(seq[counter], database, connection);
 	    			   counter++;
 	    		  }while (nodes==null && counter <seq.length);
 	    		  
@@ -405,7 +402,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_WIN.toString(), maxWin);
 		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_HAM_DIS.toString(), maxHamDis);
 		
-		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, this.SETTINGS_COLLECTION);
+		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, TraceCollection.COLLECTION_NAME.toString());
 	 
 		 
 	}
