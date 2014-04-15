@@ -293,7 +293,7 @@ public class BackgroundLiveMonitor extends Thread {
 	public void stopMonitoring(){
 		isExecuting=false;
 		console.printTextLn("Stopping monitor");
-		console.printTextLn("It could take approximately "+intervalsBetweenSnapshots+ "min or more to safely stop the monitor");
+		console.printTextLn("It could take few minutes to safely stop the monitor");
 		console.printTextLn("Please wait...");		
 	}
 	

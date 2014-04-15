@@ -47,7 +47,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private Integer maxWin=5;
 	private Integer maxHamDis=0;
 	private String warningMessage="";
-	//private HashMap<String, Event[]> sysCallSequences;
+	private HashMap<String, Event[]> sysCallSequences;
 	private Boolean treeExists;
 	private String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
 	private String []testingOptions={"Max Hamming Distance","0"};
@@ -63,7 +63,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Constructor
 	 **/
 	public SlidingWindow() {
-		//sysCallSequences= new HashMap<String, Event[]>();
+		sysCallSequences= new HashMap<String, Event[]>();
 		treeTransformer=new SlidingWindowTree();
 	}
 	/**
@@ -75,9 +75,19 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		
 			DBCursor cursor=connection.selectAll(database, TraceCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
-				//if (cursor.hasNext())
+				while (cursor.hasNext()){
+					DBObject dbObject=cursor.next();
+ 					Gson gson =new Gson();
+ 					String key=dbObject.get("_id").toString();
+ 					
+ 					Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
+ 					sysCallSequences.put(key, event);
+
+					
 					treeExists=true;
-					cursor.close();
+				}
+				
+				cursor.close();
 			}else
 				treeExists=false;
 			// get the maxwin
@@ -181,6 +191,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	  
 	    	  
 		  int  winWidth=0;
+		  int seqCount=1;
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	     
 	      while (trace.advance()) {
@@ -196,16 +207,18 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		 // System.out.println(Arrays.toString(seq));
-	    		//  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
-	    		  treeTransformer.searchAndAddSequence(seq,database,connection);
+	    		 // console.printTextLn("Adding sequence "+seqCount+ " starting with "+seq[0]);
+	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
+	    		  //treeTransformer.searchAndAddSequence(seq,database,connection);
 	    		  newSequence.remove(0);
+	    		  seqCount++;
 	    	  }
 	    		  
 	     }
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
 	    	 
-	    	 //treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TraceCollection.COLLECTION_NAME.toString());
+	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TraceCollection.COLLECTION_NAME.toString());
 	    	 intialize=false;
 	     }
 	     

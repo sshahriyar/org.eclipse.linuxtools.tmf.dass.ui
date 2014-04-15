@@ -45,11 +45,11 @@ public class SlidingWindowTree {
 	 * @param connection
 	 * @throws TotalADSDBMSException
 	 */
-	//public void searchAndAddSequence(String []newSequence, HashMap<String, Event[]> sysCallSequences){
-    public void searchAndAddSequence(String []newSequence, String database, DBMS connection) throws TotalADSDBMSException{
+	public void searchAndAddSequence(String []newSequence, HashMap<String, Event[]> sysCallSequences){
+  //  public void searchAndAddSequence(String []newSequence, String database, DBMS connection) throws TotalADSDBMSException{
 		Integer seqSize=newSequence.length;
-		//Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
-		Event[] eventSequence=	loadTreeFromDatabase(newSequence[0], database, connection) ;//load from database
+		Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
+		//Event[] eventSequence=	loadTreeFromDatabase(newSequence[0], database, connection) ;//load from database
 		
 		if (eventSequence==null){ // if there is no such starting event then add sequence to such an event
 			
@@ -78,8 +78,8 @@ public class SlidingWindowTree {
 			}
 		}
 		// putting the sequence (graph actually) to the starting event (node) as a key
-		//sysCallSequences.put(newSequence[0],eventSequence);//add to database
-		saveTreeInDatabase( database, connection, eventSequence, TraceCollection.COLLECTION_NAME.toString());
+		sysCallSequences.put(newSequence[0],eventSequence);//add to database
+		//saveTreeInDatabase( database, connection, eventSequence, TraceCollection.COLLECTION_NAME.toString());
 	}
 	
 	/**
