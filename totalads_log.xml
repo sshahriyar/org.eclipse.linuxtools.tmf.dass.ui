@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2014-04-14T20:12:08</date>
+  <millis>1397520728757</millis>
+  <sequence>0</sequence>
+  <logger>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</logger>
+  <level>SEVERE</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+  <method>run</method>
+  <thread>10</thread>
+  <message>this Mongo has been closed</message>
+  <exception>
+    <message>java.lang.IllegalStateException: this Mongo has been closed</message>
+    <frame>
+      <class>com.mongodb.DBTCPConnector</class>
+      <method>_checkClosed</method>
+      <line>95</line>
+    </frame>
+    <frame>
+      <class>com.mongodb.DBTCPConnector</class>
+      <method>say</method>
+      <line>133</line>
+    </frame>
+    <frame>
+      <class>com.mongodb.DBTCPConnector</class>
+      <method>say</method>
+      <line>115</line>
+    </frame>
+    <frame>
+      <class>com.mongodb.DBApiLayer$MyCollection</class>
+      <method>update</method>
+      <line>327</line>
+    </frame>
+    <frame>
+      <class>com.mongodb.DBCollection</class>
+      <method>update</method>
+      <line>178</line>
+    </frame>
+    <frame>
+      <class>com.mongodb.DBCollection</class>
+      <method>update</method>
+      <line>209</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.dbms.DBMS</class>
+      <method>insertOrUpdateUsingJSON</method>
+      <line>340</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindowTree</class>
+      <method>saveTreeInDatabase</method>
+      <line>233</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindowTree</class>
+      <method>searchAndAddSequence</method>
+      <line>82</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow</class>
+      <method>train</method>
+      <line>200</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+      <method>run</method>
+      <line>175</line>
+    </frame>
+  </exception>
+</record>
+</log>
