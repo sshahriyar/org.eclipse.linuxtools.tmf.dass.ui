@@ -163,7 +163,12 @@ public class BackgroundLiveMonitor extends Thread {
 							//Getting a trace iterator
 							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 							Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
-							
+						
+							//put result if anomaly  into an array list for a key 
+							// by the name of a model in the map
+							// in the result and feedback class
+							// in the result and feedback class set upper limit to remove the first one automatically
+							//
 							if (isTrainAndEval){//if it is both training and evaluation, then first train it
 												// we are nit passing settings here because the assumption is that 
 												// database has already been created and settings for test are only passed to this threa
@@ -312,7 +317,8 @@ public class BackgroundLiveMonitor extends Thread {
 		
 		liveXYChart.clearChart();
 		liveXYChart.inititaliseSeries(seriesNames);
-		//liveXYChart.setYRange(0, 1);
+		liveXYChart.setXRange(1, 8,100);
+		liveXYChart.setYRange(0, 1);
 		liveXYChart.drawChart();
 		
 		

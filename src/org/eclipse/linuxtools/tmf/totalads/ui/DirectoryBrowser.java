@@ -22,11 +22,11 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.KeyEvent;
 /**
- * This class takes care of the browsing capabilities of files on a hard disk
+ * This class takes care of the browsing capabilities of directories on a hard disk
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  *
  */
-public class TraceBrowser {
+public class DirectoryBrowser {
 	private Button btnTraceBrowser;
 	private Composite parent;
 	private Text txtPath;
@@ -38,7 +38,7 @@ public class TraceBrowser {
 	 * @param txtBox Textbox object
 	 * @param gridData GriaData Layout
 	 */
-	public TraceBrowser(Composite parent, Text txtBox, GridData gridData ){
+	public DirectoryBrowser(Composite parent, Text txtBox, GridData gridData ){
 		this.txtPath=txtBox;
 		this.parent=parent;
 	    btnTraceBrowser =new Button(parent, SWT.NONE);
@@ -53,7 +53,7 @@ public class TraceBrowser {
 	 * @param parent Composite
 	 * @param gridData Griddata Layout
 	 */
-	public TraceBrowser(Composite parent, GridData gridData ){
+	public DirectoryBrowser(Composite parent, GridData gridData ){
 		
 		this.parent=parent;
 	    btnTraceBrowser =new Button(parent, SWT.NONE);

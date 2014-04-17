@@ -11,6 +11,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.HashMap;
 
+import org.eclipse.linuxtools.tmf.totalads.ui.FileBrowser;
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 //import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 //import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 //import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.DirectoryBrowser;
 //import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
@@ -35,6 +36,9 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 //import org.eclipse.swt.events.SelectionAdapter;
 //import org.eclipse.swt.events.SelectionEvent;
 //import org.eclipse.swt.events.SelectionListener;
@@ -87,6 +91,7 @@ public class LiveMonitor {
 	private LiveXYChart liveChart;
 	private Button btnTrainingAndEval;
 	private Button btnTesting;
+	private FileBrowser trcbrowser;
 	/**
 	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
@@ -142,14 +147,16 @@ public class LiveMonitor {
 		btnStart.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 		btnStart.setText("Start");
 		
+		
 		btnStop=new Button(compButtons, SWT.BORDER);
 		btnStop.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 		btnStop.setText("Stop");
-	
+		btnStop.setEnabled(false);
+		
 		btnDetails=new Button(compButtons, SWT.BORDER);
 		btnDetails.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 		btnDetails.setText("Details");
-		
+		btnDetails.setEnabled(false);
 		///////////////
 		///Creating a chart
 		///////////////
@@ -166,7 +173,7 @@ public class LiveMonitor {
 		compConsole.setLayout(new GridLayout(1,false));
 		
 		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
-		gridDataConsoleText.minimumHeight=200;
+		gridDataConsoleText.minimumHeight=160;
 				
 		console =new ProgressConsole(compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
 				gridDataConsoleText);
@@ -205,11 +212,11 @@ public class LiveMonitor {
 		
 		Label lblSudoPassword= new Label(grpSSHConfig, SWT.NONE);
 		lblSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
-		 lblSudoPassword.setText("Sudo Password ");
+		lblSudoPassword.setText("Sudo Password ");
 		
 		Label lblPort= new Label(grpSSHConfig, SWT.NONE);
 		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
-		lblPort.setText("Port");
+		lblPort.setText("Enter Port");
 			
 		txtUserAtHost=new Text(grpSSHConfig, SWT.BORDER);
 		txtUserAtHost.setEnabled(true);
@@ -249,9 +256,11 @@ public class LiveMonitor {
 		
 		txtPvtKey=new Text(grpPrivacy,SWT.BORDER);
 		txtPvtKey.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		txtPvtKey.setText("");
+		//txtPvtKey.setText("");
+		txtPvtKey.setEnabled(false);
 		
-		TraceBrowser trcbrowser=new TraceBrowser(grpPrivacy, txtPvtKey, new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		trcbrowser=new FileBrowser(grpPrivacy, txtPvtKey, new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		trcbrowser.disableBrowsing();
 		//////////
 		///End SSH password and private key
 		//////
@@ -417,6 +426,31 @@ public class LiveMonitor {
 			}
 		});
 		
+		//**** Pvt key button handler
+		btnPvtKey.addSelectionListener(new SelectionAdapter() {
+					
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				trcbrowser.enableBrowsing();
+				txtPvtKey.setEnabled(true);
+				txtPassword.setEnabled(false);
+				txtPassword.setText("");
+			}
+			});
+		
+		//**** Password button key handler
+		 btnPassword.addSelectionListener(new SelectionAdapter() {
+							
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						
+						txtPvtKey.setEnabled(false);
+						txtPvtKey.setText("");
+						trcbrowser.disableBrowsing();
+						txtPassword.setEnabled(true);
+					}
+			});
+		
 	}
 	/**
 	 * Validates the fields before execution
@@ -445,6 +479,13 @@ public class LiveMonitor {
            msg="Private key path cannot be empty";
 		else if (this.modelSelectionHandler.getSelectedModelsCount()==0)
 			msg="Please, first select a model";
+		else {
+				try{ 
+					Integer.parseInt(txtPort.getText());
+				} catch (Exception ex){
+					msg="Port number can only be a number";
+				}
+			}
 		
 		if (!msg.isEmpty()){
 			 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);

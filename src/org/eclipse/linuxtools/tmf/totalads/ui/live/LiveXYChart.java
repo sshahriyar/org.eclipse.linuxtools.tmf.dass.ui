@@ -2,26 +2,26 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 
 
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+//import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseEvent;
+//import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
+//import org.eclipse.swt.layout.FillLayout;
+//import org.eclipse.swt.layout.GridData;
+//import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+//import org.eclipse.swt.widgets.Shell;
 import org.swtchart.Chart;
 import org.swtchart.IAxis;
-import org.swtchart.IBarSeries;
+//import org.swtchart.IBarSeries;
 import org.swtchart.ILineSeries;
 import org.swtchart.ILineSeries.PlotSymbolType;
 import org.swtchart.ISeries;
 import org.swtchart.ISeries.SeriesType;
-import org.swtchart.IErrorBar;
+//import org.swtchart.IErrorBar;
 import org.swtchart.ISeriesSet;
 import org.swtchart.Range;
 
@@ -53,7 +53,7 @@ public class LiveXYChart {
 	   plotSymbols=new PlotSymbolType[MAX_SERIES];
 	   plotSymbols[0]=PlotSymbolType.CIRCLE;
 	   plotSymbols[1]=PlotSymbolType.DIAMOND;
-	   plotSymbols[2]=PlotSymbolType.CROSS;
+	   plotSymbols[2]=PlotSymbolType.CROSS;	
 	   plotSymbols[3]=PlotSymbolType.INVERTED_TRIANGLE;
 	   plotSymbols[4]=PlotSymbolType.SQUARE;
 	   

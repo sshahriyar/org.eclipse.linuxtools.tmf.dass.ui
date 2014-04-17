@@ -10,6 +10,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
@@ -17,8 +19,9 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -143,7 +146,7 @@ public class Modeling {
 		txtTrainingTraces = new Text(grpTracesModeling, SWT.BORDER);
 		txtTrainingTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		// instantiate an object of trace browser
-		TraceBrowser traceBrowserTraining=new TraceBrowser(grpTracesModeling,txtTrainingTraces,
+		DirectoryBrowser traceBrowserTraining=new DirectoryBrowser(grpTracesModeling,txtTrainingTraces,
 							new GridData(SWT.LEFT,SWT.TOP,false,false));
 		
 		// Widgets for Validation traces
@@ -198,7 +201,7 @@ public class Modeling {
 		txtValidationTraces = new Text(compParent, SWT.BORDER);
 		//txtValidationTraces.setText("");
 		txtValidationTraces.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		TraceBrowser traceBrowser= new TraceBrowser(compParent, txtValidationTraces, 
+		DirectoryBrowser traceBrowser= new DirectoryBrowser(compParent, txtValidationTraces, 
 						new GridData(SWT.LEFT,SWT.TOP,false,false));
 
 		//traceBrowser.setTextBox(txtValidationTraces);
@@ -237,8 +240,12 @@ public class Modeling {
 					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
+					} catch (Exception ex) {
+							msgBox.setMessage(ex.getMessage());
+							msgBox.open();
+							Logger.getLogger(Modeling.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
+							
 					}
-					
 					
 				}
 			 });

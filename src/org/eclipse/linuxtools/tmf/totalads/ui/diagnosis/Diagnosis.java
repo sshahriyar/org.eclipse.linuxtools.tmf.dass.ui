@@ -14,7 +14,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-import org.eclipse.linuxtools.tmf.totalads.ui.TraceBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
@@ -55,7 +55,7 @@ public class Diagnosis {
 	private TracingTypeSelector traceTypeSelector;
 	private Text txtTMFTraceID;
 	private Text txtTestTraceDir;
-	private TraceBrowser traceBrowser;
+	private DirectoryBrowser traceBrowser;
 	private StringBuilder tmfTracePath;
 	private StringBuilder currentlySelectedTracesPath;
 	private ModelLoader modelLoader;
@@ -183,7 +183,7 @@ public class Diagnosis {
 		txtTestTraceDir.setEnabled(true);
 		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
 		
-		traceBrowser= new TraceBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
+		traceBrowser= new DirectoryBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
 	
 		
 		btnSelTMFTrace = new Button(grpTraceSelection, SWT.RADIO);
