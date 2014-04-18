@@ -177,7 +177,7 @@ public class ModelLoader {
 				String database=currentlySelectedTreeItem.getText();
 				String []modelKey=database.split("_");
 				
-				if(modelKey==null ||  modelKey.length<3){
+				if(modelKey==null ||  modelKey.length<2){
 					msgBox.setMessage("Not a valid model created by TotalADS!");
 					msgBox.open();
 					return;
@@ -256,7 +256,7 @@ public class ModelLoader {
 							AlgorithmFactory modFac= AlgorithmFactory.getInstance();
 							String database=currentlySelectedTreeItem.getText();
 							String []modelKey=database.split("_");
-							if(modelKey==null ||  modelKey.length<3){
+							if(modelKey==null ||  modelKey.length<2){
 								msgBox.setMessage("Not a valid model created by TotalADS!");
 								msgBox.open();
 								return;

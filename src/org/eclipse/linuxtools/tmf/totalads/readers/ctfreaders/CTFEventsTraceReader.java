@@ -104,6 +104,7 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
      */
    @Override
     public ITraceTypeReader createInstance(){
+	   
     	return new CTFEventsTraceReader();
     }
    /**

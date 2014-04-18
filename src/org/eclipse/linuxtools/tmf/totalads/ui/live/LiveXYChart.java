@@ -230,6 +230,8 @@ public void drawChart(){
 			// adjust the axis range
 			xyChart.getAxisSet().adjustRange();
 			xyChart.redraw();
+			xyChart.updateLayout();
+			//xyChart.redraw(, y, width, height, all);;
 		}
 	 });
 }

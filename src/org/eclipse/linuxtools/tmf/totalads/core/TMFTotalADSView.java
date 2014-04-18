@@ -92,7 +92,7 @@ public class TMFTotalADSView extends TmfView {
 		// deinitialized on previous close of the plugin. 
 		AlgorithmFactory.destroyInstance();
 		TraceTypeFactory.destroyInstance();
-		
+		comp.destroy();
 	
 	}
 }

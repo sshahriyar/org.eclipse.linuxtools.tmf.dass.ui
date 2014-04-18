@@ -11,18 +11,27 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.swt.SWT;
 //import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 //import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
 //import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -37,7 +46,6 @@ public class ResultsAndFeedback {
 	private Text txtAnalysisCurrentAnomaly;
 	private Text txtAnomalySummary;
 	private Text txtAnalysisDetails;
-	private Results currentTraceResults;
 	private Label lblAnalysisCurrentAnomaly;
 	private Group grpAnalysisResults;
 	private Label lblAnomalySummary;
@@ -48,21 +56,75 @@ public class ResultsAndFeedback {
 	private Label lblTreeTraceResult;
 	private Composite compResAndFeedback;
 	private Label lblTraceSummary;
+	private Label lblSelectModel;
+	private Combo cmbModels;
 	private Text txtTraceSummary;
+	private Integer maxAllowableTraces;
+	private HashMap<String,Double> modelAndAnomalyCount;
+	private Display display;
+	private	 Shell dialogShel;
+	private String traceToDeleted;
+
 	/**
 	 * Constructor
 	 * @param parent Composite object
+	 * @param isDiagnosis false if model combobox is to be made visible
 	 */
-	public ResultsAndFeedback(Composite parent) {
-		detailsAndFeedBack(parent);
-		currentTraceResults=null;
+	public ResultsAndFeedback(Composite parent, Boolean isDiagnois) {
+		detailsAndFeedBack(parent,isDiagnois);
+		maxAllowableTraces=5000;
 	}
 
 	/**
+	 * Constructor to create results object as a separate dialog form
+	 * 
+	 */
+	public ResultsAndFeedback() {
+		display = Display.getDefault();
+		dialogShel = new Shell(display, SWT.BORDER | SWT.CLOSE |SWT.V_SCROLL);
+		dialogShel.setLayout(new GridLayout(4, false));
+	
+		detailsAndFeedBack(dialogShel,false);
+		maxAllowableTraces=5000;
+		//adding event to avoid disposing it off
+		dialogShel.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				event.doit=false;
+				dialogShel.setVisible(false);
+			}
+		});
+	}
+	
+	/**
+	 * Shows the modal form
+	 */
+	public void showForm(){
+		// open the form as a modal only if it has been created like this
+		if (dialogShel!=null){
+			dialogShel.open();
+			while (!dialogShel.isDisposed()) {
+			    if (!display.readAndDispatch()) {
+			        display.sleep();
+			    }
+			}
+			
+		}
+		
+	}// end function ShowForm
+	/**
+	 * Close the shell dialog
+	 */
+	public void destroy(){
+		if (dialogShel!=null)
+		 dialogShel.dispose();
+	}
+	/**
 	 * Creates widgets for details and results
 	 * @param compParent Composite object
+	 * @param isDiagnosis It is false if it is from live monitor and true if it s from diagnosis
 	 */
-	private void detailsAndFeedBack(Composite compParent){
+	private void detailsAndFeedBack(Composite compParent, Boolean isDiagnosis){
 		//Group "Feedback: Is it anomaly?"
 				grpResults = new Group(compParent, SWT.NONE);
 				grpResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,4));
@@ -74,20 +136,30 @@ public class ResultsAndFeedback {
 				// Widgets for summary
 				//////////////////////////////////////
 				compSummary=new Composite(grpResults, SWT.None);
-				compSummary.setLayout(new GridLayout(7,false));
+				compSummary.setLayout(new GridLayout(4,false));
 				compSummary.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,1));
 				
 				lblTraceSummary = new Label(compSummary, SWT.NONE);
-				lblTraceSummary.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
+				lblTraceSummary.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,2,1));
 				lblTraceSummary.setText("Total Traces");
 				
 				txtTraceSummary= new Text(compSummary,SWT.BORDER);
 				txtTraceSummary.setEditable(false);
-				txtTraceSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,1,1));
+				txtTraceSummary.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,2,1));
 				
+				lblSelectModel = new Label(compSummary, SWT.NONE);
+				lblSelectModel.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
+				lblSelectModel.setText("Select Models");
+				
+				cmbModels= new Combo(compSummary,SWT.BORDER|SWT.READ_ONLY);
+				cmbModels.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,1,1));
+				if (isDiagnosis==true){
+					cmbModels.setVisible(false);
+					lblSelectModel.setVisible(false);
+				}
 				lblAnomalySummary = new Label(compSummary, SWT.NONE);
-				lblAnomalySummary.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
-				lblAnomalySummary.setText("Total Anomalies");
+				lblAnomalySummary.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,false,false,1,1));
+				lblAnomalySummary.setText("Total Anomalies (%)");
 				
 				txtAnomalySummary= new Text(compSummary,SWT.BORDER);
 				txtAnomalySummary.setEditable(false);
@@ -109,24 +181,6 @@ public class ResultsAndFeedback {
 				treeTraceResults=new Tree(compTraceList , SWT.BORDER |  SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
 				treeTraceResults.setLinesVisible(true);
 				treeTraceResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true,1,5));
-				//
-				// Event handler for the tree
-				//
-				treeTraceResults.addSelectionListener(new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						TreeItem item =(TreeItem)e.item;
-						Results results=(Results)item.getData();
-						currentTraceResults=results;
-						if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
-							txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
-						else
-							txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
-						
-					 txtAnalysisDetails.setText(results.getDetails().toString());	
-					}
-				});
-				
 				
 				compResAndFeedback=new Composite(grpResults, SWT.NONE);
 			    compResAndFeedback.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
@@ -134,7 +188,7 @@ public class ResultsAndFeedback {
 			    
 			    results(compResAndFeedback);
 			    
-			    
+			    addHandlers();
 			    
 				//*** End Trace list
 				
@@ -191,8 +245,7 @@ public class ResultsAndFeedback {
 	 * Creates widgets or GUI elements for the results 
 	 * @param compParent Composite object
 	 */
-	
-	private void results(Composite compParent ){
+	 private void results(Composite compParent ){
 		/**
 		 * 
 		 * Result
@@ -224,12 +277,86 @@ public class ResultsAndFeedback {
 		 * 
 		 */
 	}
-	/**
-	 * Assigns a trace and its results to appropriate widgets for viewing in Results and Feedback Section 
-	 * @param traceName Trace name
-	 * @param results Results object
-	 */
 	
+	 /**
+	  * This function adds the handlers for the different events called on widgets
+	  */
+	 private void addHandlers(){
+		 //
+			// Event handler for the tree
+			//
+			treeTraceResults.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					
+					String modelName=cmbModels.getItem(cmbModels.getSelectionIndex());
+					if (modelName==null || modelName.isEmpty())
+						return;
+					
+					TreeItem item =(TreeItem)e.item;
+					HashMap<String,Results> modelResults=(HashMap<String,Results>)item.getData();
+					
+					Results results=modelResults.get(modelName);
+					
+					//currentTraceResults=results;
+					if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
+						txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
+					else
+						txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
+					
+				 txtAnalysisDetails.setText(results.getDetails().toString());	
+				}
+			});
+			
+			/**
+			 * Add Combo handlers
+			 */
+			cmbModels.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					String item=cmbModels.getItem(cmbModels.getSelectionIndex());
+					if (item!=null && !item.isEmpty()){
+						Double anomalies=modelAndAnomalyCount.get(item);
+						if (anomalies!=null)
+							txtAnomalySummary.setText(anomalies.toString());
+					}
+					
+				}
+			});
+	 }
+	 
+	 /**
+	  * Add all model names
+	  * @param modelNames Array of all the models whose results will appear in the results section
+	  */
+	 public void registerAllModelNames(final String []modelNames){
+		 Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				 for (int j=0; j<modelNames.length; j++)
+						cmbModels.add(modelNames[j]);
+				 cmbModels.select(0);
+			}
+			
+			 
+		 });
+				
+	 }
+	 
+	 /**
+	  * This function sets the maximum traces that are allowed to be displayed in the results sections
+	  * @param maxTraces
+	  */
+	 public void  setMaxAllowableTrace(Integer maxTraces){
+		 maxAllowableTraces=maxTraces;
+	 }
+	 /**
+	 * Assigns a trace and its results to appropriate widgets for viewing in Results and Feedback Section.
+	  * @param traceName Trace name
+	 * @param results Results object
+	 
 	public void addTraceResult(String traceName, Results results){
 		
 		if (!traceName.isEmpty() && results!=null){
@@ -237,6 +364,7 @@ public class ResultsAndFeedback {
 			TreeItem item= new TreeItem(treeTraceResults, SWT.NONE);
 			item.setText(traceName);
 			item.setData(results);
+			
 			if (treeTraceResults.getItemCount()==1){
 				
 				if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
@@ -250,7 +378,48 @@ public class ResultsAndFeedback {
 				
 		}
 		
+	}*/
+	
+	/**
+	 * Assigns a trace and its results to appropriate widgets for viewing in Results Section.
+	 * If the number of traces increase beyond maximum allowable traces then the first trace is removed
+	 *  and its name is returned. First call registerAllModels function before calling this function.
+	 * @param traceName Name of the trace
+	 * @param modelResults Results of all the models as a HashMap
+	 * @return Name of the trace removed or empty if none is removed
+	 */
+	public String addTraceResult(final String traceName, 	final HashMap<String,Results> modelResults){
+		
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+		
+				traceToDeleted="";
+				
+				if (!traceName.isEmpty() && modelResults !=null){
+					
+					TreeItem item= new TreeItem(treeTraceResults, SWT.NONE);
+					item.setText(traceName);
+					item.setData(modelResults);
+				
+					if (treeTraceResults.getItemCount() >maxAllowableTraces){
+						traceToDeleted=treeTraceResults.getItem(0).getText();
+						treeTraceResults.getItem(0).dispose();
+					}
+					
+					/*if (treeTraceResults.getItemCount()==1){
+						txtAnalysisCurrentAnomaly.setText("Select a trace");
+						txtAnalysisDetails.setText("Select a trace to see details");
+					} */
+						
+				}
+			}
+		});
+		
+		return traceToDeleted;
 	}
+	
 	/**
 	 * Converts a boolean to displayable string
 	 * @param anomaly
@@ -267,25 +436,56 @@ public class ResultsAndFeedback {
 	 * Clears the tree 
 	 */
 	public void clearData(){
-		treeTraceResults.removeAll();
-		txtAnalysisCurrentAnomaly.setText("");
-		txtAnalysisDetails.setText("");
-		txtAnomalySummary.setText("");
-		txtTraceSummary.setText("");
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+		
+				treeTraceResults.removeAll();
+				txtAnalysisCurrentAnomaly.setText("");
+				txtAnalysisDetails.setText("");
+				txtAnomalySummary.setText("");
+				txtTraceSummary.setText("");
+				cmbModels.removeAll();
+
+			}
+		});
 	}
+	
 	/**
 	 * Sets the summary of results
 	 * @param anomalyCount AnomalyCount as string
 	 */
-	public void setTotalAnomalyCount(String anomalyCount){
-		txtAnomalySummary.setText(anomalyCount);
+	public void setTotalAnomalyCount(final HashMap<String, Double> modelAnomCount){
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
 		
+				modelAndAnomalyCount=modelAnomCount;
+				if (cmbModels.getItemCount() >0){
+					int index=cmbModels.getSelectionIndex();
+					if (index==-1) index=0;
+					String anomalies=modelAndAnomalyCount.get(cmbModels.getItem(index)).toString();
+					if (anomalies!=null)
+						txtAnomalySummary.setText(anomalies);
+				}
+			}
+		});
 	}
 	/**
 	 * Sets the total trace count
 	 * @param traceCount Total trace count
 	 */
-	public void setTotalTraceCount(String traceCount){
-		txtTraceSummary.setText(traceCount);
+	public void setTotalTraceCount(final String traceCount){
+		Display.getDefault().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				txtTraceSummary.setText(traceCount);
+				
+			}
+		});
+		
 	}
 }

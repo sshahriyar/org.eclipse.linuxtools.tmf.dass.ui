@@ -27,13 +27,13 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-<<<<<<< HEAD
+//<<<<<<< HEAD
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-=======
+//=======
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
->>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
+//>>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -255,7 +255,7 @@ public class AlgorithmModelSelector {
 		txtNewDBName = new Text(grpIdentifyDB, SWT.BORDER);
 		txtNewDBName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		//txtNewDBName.setText("Enter");
-		txtNewDBName.setTextLimit(7);
+		txtNewDBName.setTextLimit(8);
 		//txtNewDBName.setEnabled(false);
 		
 		btnSelectDB=new Button(grpIdentifyDB, SWT.RADIO);
@@ -543,7 +543,7 @@ public class AlgorithmModelSelector {
 	/**
 	 * Creates an empty model
 	 * @throws TotalADSDBMSException 
-	 */
+	 
 	public void createAnEmptyModel() throws TotalADSDBMSException, TotalADSUIException{
 		
 		    if (!btnEnterDB.getSelection() || txtNewDBName.getText().isEmpty() ){
@@ -564,7 +564,7 @@ public class AlgorithmModelSelector {
 			}
 	      
 		 
-	}
+	}*/
 	
 	/**
 	 * 

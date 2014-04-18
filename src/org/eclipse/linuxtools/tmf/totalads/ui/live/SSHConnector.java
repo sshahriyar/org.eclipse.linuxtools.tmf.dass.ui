@@ -1,14 +1,34 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream.GetField;
 import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+
+
+
+
+
 
 
 
@@ -62,8 +82,8 @@ public class SSHConnector {
 		File file =new File(totalADSLocalDir);
 		if (!file.isDirectory())// create this directory if it doesn't exist
 			file.mkdir();
-		else // delete all its contents if it the system was close abruptly last time without stopping the thread
-			deleteFolderContents(file);
+		//else // delete all its contents if it the system was close abruptly last time without stopping the thread
+			//deleteFolderContents(file);
 	}
 	
 	/**
@@ -142,11 +162,11 @@ public class SSHConnector {
 	 * @param console
 	 * @param sudoPassword
 	 */
-	public void collectATrace( String sudoPassword) throws TotalADSNetException{
+	public String collectATrace( String sudoPassword) throws TotalADSNetException{
 		
 	      String totalADSRemoteDir="/tmp/totalads";
 	      String totalADSRemoteTrace=totalADSRemoteDir+"/kernel/";
-	   	  String  sessionName="totalads-trace-0";  
+	   	  String  sessionName="totalads-trace-"+getCurrentTimeStamp();  
 	   	  // If an exception occurs, don't execute further commands and let the exception be thrown
 	   	  executeSudoCommand("sudo -S -p  '' rm -rf "+totalADSRemoteTrace, sudoPassword);
 	   	  executeSudoCommand("sudo -S -p '' mkdir -p "+totalADSRemoteDir, sudoPassword);
@@ -164,9 +184,15 @@ public class SSHConnector {
 	      executeSudoCommand("sudo -S -p  '' lttng destroy "+sessionName, sudoPassword);
 	      executeSudoCommand("sudo -S -p  '' chmod -R 777 "+totalADSRemoteDir, sudoPassword);
 	      
-	      downloadTrace(session,totalADSRemoteTrace , totalADSLocalDir);
+	      String trace="trace-"+getCurrentTimeStamp(); 
+	      File localDir=new File(totalADSLocalDir+File.separator+trace);
+	      localDir.mkdir();
+	      
+	      downloadTrace(session,totalADSRemoteTrace , localDir.getPath());
 	      executeSudoCommand("sudo -S -p  '' rm -rf "+totalADSRemoteTrace, sudoPassword);
 	 	
+	      return localDir.getPath();
+	     
 	}
 	
 	 /**
@@ -178,8 +204,8 @@ public class SSHConnector {
 	private void executeSudoCommand(String command, String sudoPass)throws TotalADSNetException {
 		try{
 			 
-			Channel channel=session.openChannel("exec");
-			((ChannelExec)channel).setCommand(command);
+			 Channel channel=session.openChannel("exec");
+			 ((ChannelExec)channel).setCommand(command);
 			  ((ChannelExec)channel).setErrStream(System.err);
 		      InputStream in=channel.getInputStream();
 		      OutputStream out=channel.getOutputStream();
@@ -267,42 +293,35 @@ public class SSHConnector {
 	  * Closes the SSH connection and clears the trace from the local drive
 	  */
 	 public void close(){
-		 deleteFolderContents(new File(this.totalADSLocalDir));
+		 //deleteFolderContents(new File(this.totalADSLocalDir));
 		 session.disconnect();
 	 }
 	
 	 
-	 /**
-	  * Deletes all the contents of a folder. This function is used to delete an LTTng trace,
-	  * which is a collection of files in a folder 
-	  * @param folder Folder name
-	  */
-	 private  void deleteFolderContents(File folder) {
-		    File[] files = folder.listFiles();
-		    if(files!=null) { 
-		        for(File f: files) {
-		            if(f.isDirectory()) {
-		                deleteFolderContents(folder);
-		            } else {
-		                f.delete();
-		            }
-		        }
-		    }
-		   // folder.delete();
-		}
+/**
+ * 	 Get current time stamp
+ */
+private String getCurrentTimeStamp(){
+ 		  DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+		   //get current date time with Date()
+		   Date date = new Date();
+		    return dateFormat.format(date);
 	 
-	 
-	 
-	public static void main (String args[]){
-		SSHConnector ssh=new SSHConnector();
+		   //get current date time with Calendar()
+		 //  Calendar cal = Calendar.getInstance();
+		   //return dateFormat.format(cal.getTime());
+}
+
+	/*public static void main (String args[]){
+		
 		
 		try {
-			//ssh.openSSHConnection("shary@localhost", "grt_654321", 7225, null);
-			System.out.println(Configuration.getCurrentPath());
+			   SSHConnector sh =new SSHConnector();
+			   System.out.println(sh.getCurrentTimeStamp());
 			
 		} catch (Exception e) {
 			
 			e.printStackTrace();
 		}
-	}
+	}*/
 }

@@ -10,6 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +33,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 
 /**
- * This class evaluates an already created model by running in background as thread. it is instantiated and executed 
+ * This class evaluates an already created algorithm by running in background as thread. it is instantiated and executed 
  * from the {@link ModelLoader} class.
  * @author <p> Syed Shariyar Murtaza justssahry@hotmail.com </p>
  */
@@ -40,14 +41,15 @@ import org.eclipse.swt.widgets.MessageBox;
 public class BackgroundTesting extends Thread{
 	private String testDirectory;
 	private ITraceTypeReader traceReader;
-	private IDetectionAlgorithm model;
+	private IDetectionAlgorithm algorithm;
 	private String database;
 	private StatusBar statusBar;
 	private Button btnDelete;
 	private Button btnSettings;
 	private Button btnAnalysisEvaluateModels;
 	private ResultsAndFeedback resultsAndFeedback;
-	String []modelOptions;
+	private String []modelOptions;
+	
 	/**
 	 * Constructor to create an object of BackgroundTesting
 	 * @param testDirectory Test directory
@@ -66,7 +68,7 @@ public class BackgroundTesting extends Thread{
 				, String []algorithmSettings){
 		this.testDirectory=testDirectory;
 		this.traceReader=traceReader;
-		this.model=algorithm;
+		this.algorithm=algorithm;
 		this.database=database;
 		this.statusBar=statusBar;
 		this.btnDelete=btnDelete;
@@ -74,6 +76,8 @@ public class BackgroundTesting extends Thread{
 		this.btnAnalysisEvaluateModels=btnEvaluate;
 		this.resultsAndFeedback=resultsAndFeedback;
 		this.modelOptions=algorithmSettings;
+		this.resultsAndFeedback.registerAllModelNames(new String[]{database});
+		
 	}
 	
 	/**
@@ -86,7 +90,7 @@ public class BackgroundTesting extends Thread{
 			
 			try {
 				
-				testTheModel(testDirectory, traceReader, model, database);
+				testTheModel(testDirectory, traceReader, algorithm, database);
 							
 			} 
 			catch(TotalADSUIException ex){// handle UI exceptions here
@@ -149,16 +153,17 @@ public class BackgroundTesting extends Thread{
 	}// end of function
 			
 	/**
-	 * Tests the model agaisnt a set of traces
+	 * Tests the algorithm against a set of traces
 	 * @param testDirectory Test directory
 	 * @param traceReader Trace reader
-	 * @param algorithm Algorithm of the model
+	 * @param algorithm Algorithm of the algorithm
 	 * @param database Databse
 	 * @throws TotalADSUIException
 	 * @throws TotalADSReaderException 
 	 * @throws TotalADSDBMSException 
 	 * 
 	 */
+	
 	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database )
 			throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
 				
@@ -167,7 +172,7 @@ public class BackgroundTesting extends Thread{
 			Boolean isLastTrace=false;
 			Integer totalFiles;		
 			//if (!checkItemSelection())
-				//throw new TotalADSUIException("Please, first select a model!");
+				//throw new TotalADSUIException("Please, first select a algorithm!");
 	       if (testDirectory.isEmpty())
 	    	   throw new TotalADSUIException("Please, first select a trace!");
 			
@@ -189,39 +194,35 @@ public class BackgroundTesting extends Thread{
 			
 			// Second, start testing
 			totalFiles=fileList.length;
+			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<String, Double>();
+			
+			
 			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
-				 int counter=trcCnt+1;
+			  /// put for each model here
+				HashMap<String,Results> modelResults=new HashMap<String, Results>();
+				
+				int counter=trcCnt+1;
 				statusBar.setProgress("Processing trace #"+counter+"..."); 
 					 
 				ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 		 					
-		 		final Results results= algorithm.test(trace, database, connection, modelOptions);
+		 		Results results= algorithm.test(trace, database, connection, modelOptions);
+		 		modelResults.put(database,results);
 		 		final String traceName=fileList[trcCnt].getName();
 		 		
-		 		Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						
-						resultsAndFeedback.addTraceResult(traceName, results);
-						
-						
-					}
-				});
+		 		resultsAndFeedback.addTraceResult(traceName, modelResults);
 		 		
-			}
+						
+				}
 	       
 	     // Third, print summary
-			final String summary=algorithm.getSummaryOfTestResults();
-			final Integer totalTraces=totalFiles;
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					resultsAndFeedback.setTotalAnomalyCount(summary);
-					resultsAndFeedback.setTotalTraceCount(totalTraces.toString());
-					
-				}
-			});
+			
+			Double totalAnoms=algorithm.getTotalAnomalyPercentage();
+			modelsAndAnomalyCount.put(database,totalAnoms);
+			resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
+			
+			resultsAndFeedback.setTotalTraceCount(totalFiles.toString());
+		
 	
 	}
 	

@@ -1,11 +1,23 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +57,7 @@ public class BackgroundLiveMonitor extends Thread {
   	private HashMap<String,String[]> modelsAndSettings;
   	private ResultsAndFeedback results;
   	private MessageBox msgBox;
-  	private HashMap<String,LinkedList<Double>> modelsAndAnomalyCounts;
+  	private HashMap<String,LinkedList<Double>> modelsAndAnomaliesOnChart;
   	private Integer anomalyIdx=0;
 	private Integer maxPoints;
 	private LiveXYChart liveXYChart;
@@ -54,7 +66,9 @@ public class BackgroundLiveMonitor extends Thread {
 	private ITraceTypeReader lttngSyscallReader;
 	private LinkedList<Double> xSeries;
 	private boolean isTrainAndEval;
+	private Integer totalTraces;
 	private volatile boolean isExecuting=true;
+	private HashMap <String, Double> modelsAndAnomalyCount;
 	
 	/**
 	 * Constructor
@@ -96,16 +110,22 @@ public class BackgroundLiveMonitor extends Thread {
 		this.isTrainAndEval=isTrainEval;
 		
 		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
-		modelsAndAnomalyCounts=new HashMap<String, LinkedList<Double>>();
+		modelsAndAnomaliesOnChart=new HashMap<String, LinkedList<Double>>();
+		modelsAndAnomalyCount=new HashMap<String, Double>();
 		
 		seriesNames=new String[modelsAndSettings.size()];
 		int idx=0;
 		
 		for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
-			this.modelsAndAnomalyCounts.put(models.getKey(), anomalyCounts);
-			seriesNames[idx++]=models.getKey();
+			this.modelsAndAnomaliesOnChart.put(models.getKey(), anomalyCounts);
+			seriesNames[idx]=models.getKey();
+			modelsAndAnomalyCount.put(seriesNames[idx], 0.0);
+			idx++;
+			
 		}
 		
+		this.results.registerAllModelNames(seriesNames);
+		this.results.setMaxAllowableTrace(30);
 		
 		ssh = new SSHConnector();
 		msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
@@ -114,9 +134,8 @@ public class BackgroundLiveMonitor extends Thread {
 		lttngSyscallReader= TraceTypeFactory.getInstance().getCTFKernelorUserReader(true);
 		
 		xSeries=new LinkedList<Double>();
+		totalTraces=0;
 		
-		//for (idx=0;idx < maxPoints;idx++)
-		//	xSeries.add( intervalBetweenSnapshots.doubleValue()*idx);
 		
 	}
 
@@ -128,117 +147,58 @@ public class BackgroundLiveMonitor extends Thread {
 		String exception="";
 		try{
 			initialise();
+			
 			while (isExecuting){//keep running untill the stop function is called
 						//Getting a trace from remote system
-					ssh.collectATrace(sudoPassword);
-					String tracePath=ssh.getTrace();
+					String tracePath=ssh.collectATrace(sudoPassword);
+					//String tracePath=ssh.getTrace();
 					
-					if (xSeries.isEmpty()){
+					if (xSeries.isEmpty())
 						xSeries.add(0.0);
-						//liveXYChart.setXRange(0, 1);
-					}
+						
 					else{
 						if (anomalyIdx>maxPoints)
-							xSeries.remove();
+							xSeries.remove();// remove first point on the series
 						xSeries.add(intervalsBetweenSnapshots.doubleValue()+xSeries.getLast());
-						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue(),
-								100);
+						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue(),100);
 					}
 					//Convert it into a series for plotting a chart
 					Double []xVals=new Double[xSeries.size()];
 					xVals=xSeries.toArray(xVals);
 					
-					  
-					for (Map.Entry<String, String[]> modAndSettings:modelsAndSettings.entrySet()){
-						
-							String model=modAndSettings.getKey();
-							String []settings=modAndSettings.getValue();
-							
-							IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
-							
-							
-							
-							console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
-							console.printTextLn("Please wait while the trace is evaluated....");
-							//Getting a trace iterator
-							ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-							Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
-						
-							//put result if anomaly  into an array list for a key 
-							// by the name of a model in the map
-							// in the result and feedback class
-							// in the result and feedback class set upper limit to remove the first one automatically
-							//
-							if (isTrainAndEval){//if it is both training and evaluation, then first train it
-												// we are nit passing settings here because the assumption is that 
-												// database has already been created and settings for test are only passed to this threa
-												// in the constructor. Also, this will always be a last trace, and new db is false
-								
-								console.printTextLn("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
-								console.printTextLn("Please wait while the model is updated....");
-								traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-								algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
-							} 
-							
-							console.printTextLn("Execution  finished for "+model);
-							
-							LinkedList<Double> anomalies=modelsAndAnomalyCounts.get(model);
-							if (results.getAnomaly()){
-										anomalies.add(1.0);
-										console.printTextLn("It is an anomaly");
-										
-							}
-							else{
-										anomalies.add(0.0);
-										console.printTextLn("It is not an anomaly");
-							}
-							
-							console.printTextLn("Plotting anomaly on the chart");
-							
-							if (anomalyIdx>maxPoints){
-								anomalies.remove();//remove head
-								xSeries.remove();// remove head
-								anomalyIdx--;
-							}else
-								anomalyIdx++;
-							
-							//Convert it into a series for plotting a chart
-							Double []ySeries=new Double[anomalies.size()];
-						
-							ySeries=anomalies.toArray(ySeries);
-							
-							liveXYChart.addYSeriesValues(ySeries, model);
-							liveXYChart.addXSeriesValues(xVals,model);
-							liveXYChart.drawChart();
-			
+					processTraceOnModels(tracePath, xVals);
+					totalTraces++;
+					results.setTotalTraceCount(totalTraces.toString());	
+					//calcualte percentages
+					HashMap <String, Double> modelsAnoms=new HashMap<String,Double>();
+					for (int i=0;i<this.seriesNames.length;i++){
+						Double anoms=(modelsAndAnomalyCount.get(seriesNames[i])/totalTraces)*100;
+						modelsAnoms.put(seriesNames[i],anoms);
+					
+					}
+						results.setTotalAnomalyCount(modelsAnoms);
+					//
+					//Run on main GUI thread
+					//
+					Display.getDefault().syncExec(new Runnable() {
+						@Override
+						public void run() {
+							btnDetails.setEnabled(true);
 						}
+					});
+					
+					// Check if stop has been requested
+					if (isExecuting==false)
+						break;// break out of the loop 
+					
+					console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
+									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
+					try{
+						TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+						
+					} catch (InterruptedException ex){}
 			
-						
-						
-						
-						//ssh.close();
-						
-						//
-						//Run on main GUI thread
-						//
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								btnDetails.setEnabled(true);
-							}
-						});
-						
-						if (isExecuting==false)// Check if stop has been requested
-							break;// break out of the loop 
-						
-						console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
-										+ " the remote host "+userAtHost.replaceAll(".*@","" ));
-						try{
-							TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
-							
-						} catch (InterruptedException ex){}
-			
-		}// End of while
+		  }// End of while
 			
 		} 
 		catch (TotalADSNetException ex){
@@ -277,7 +237,7 @@ public class BackgroundLiveMonitor extends Thread {
 				@Override
 				public void run() {
 					
-					if (!err.isEmpty()){
+					if (err !=null && !err.isEmpty()){
 						msgBox.setMessage(err);
 						msgBox.open();
 					}
@@ -301,6 +261,107 @@ public class BackgroundLiveMonitor extends Thread {
 		console.printTextLn("It could take few minutes to safely stop the monitor");
 		console.printTextLn("Please wait...");		
 	}
+	/**
+	 * This is a key function that evaluates traces on models and trains the model on those traces if needed
+	 * @param tracePath
+	 * @param xVals
+	 * @throws TotalADSReaderException 
+	 * @throws TotalADSDBMSException 
+	 * @throws TotalADSUIException 
+	 */
+	private void processTraceOnModels(String tracePath, Double []xVals) throws TotalADSReaderException, TotalADSUIException, TotalADSDBMSException{
+		
+		HashMap<String, Results> modelsAndResults=new HashMap<String,Results>();
+		
+		for (Map.Entry<String, String[]> modAndSettings:modelsAndSettings.entrySet()){
+			
+				String model=modAndSettings.getKey();
+				String []settings=modAndSettings.getValue();
+				
+				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
+				
+				
+				
+				console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
+				console.printTextLn("Please wait while the trace is evaluated....");
+				//Getting a trace iterator
+				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
+				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
+				
+				Double anomCount=modelsAndAnomalyCount.get(model);
+				if (results.getAnomaly()==true)
+								if (anomCount==null)
+									modelsAndAnomalyCount.put(model, 1.0);
+								else
+									modelsAndAnomalyCount.put(model, ++anomCount);
+				
+				modelsAndResults.put(model, results);
+				
+				
+				if (isTrainAndEval){//if it is both training and evaluation, then first train it
+									// we are nit passing settings here because the assumption is that 
+									// database has already been created and settings for test are only passed to this threa
+									// in the constructor. Also, this will always be a last trace, and new db is false
+					
+					console.printTextLn("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
+					console.printTextLn("Please wait while the model is updated....");
+					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
+					algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
+				} 
+				
+				console.printTextLn("Execution  finished for "+model);
+				
+				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
+				if (results.getAnomaly()){
+							anomalies.add(1.0);
+							console.printTextLn("It is an anomaly");
+							
+				}
+				else{
+							anomalies.add(0.0);
+							console.printTextLn("It is not an anomaly");
+				}
+				
+				console.printTextLn("Plotting anomaly on the chart");
+				
+				if (anomalyIdx>maxPoints){
+					anomalies.remove();//remove head
+					xSeries.remove();// remove head
+					anomalyIdx--;
+				}else
+					anomalyIdx++;
+				
+				//Convert it into a series for plotting a chart
+				Double []ySeries=new Double[anomalies.size()];
+			
+				ySeries=anomalies.toArray(ySeries);
+				
+				liveXYChart.addYSeriesValues(ySeries, model);
+				liveXYChart.addXSeriesValues(xVals, model);
+				liveXYChart.drawChart();
+
+			}
+		
+		String traceName=tracePath.substring(tracePath.lastIndexOf(File.separator)+1, tracePath.length());
+		String traceToDelete=results.addTraceResult(traceName, modelsAndResults);
+		
+		if (!traceToDelete.isEmpty()){
+			// decrease total traces when a trace is removed from the reuslts
+			totalTraces--;
+			//Also decrease the count of total anoamlies for each model
+			Set<String> keys= modelsAndAnomalyCount.keySet();
+			Iterator<String> it=keys.iterator();
+			while (it.hasNext()){
+				String key=it.next();
+				Double anom=modelsAndAnomalyCount.get(key);
+				modelsAndAnomalyCount.put(key,--anom);;
+			}
+			
+			String folderName=tracePath.substring(0,tracePath.lastIndexOf(File.separator));
+		//	deleteLTTngTrace(new File(folderName+traceName));
+		}
+	}
+	
 	
 	/**
 	 * Initialises the connection and chart
@@ -317,10 +378,9 @@ public class BackgroundLiveMonitor extends Thread {
 		
 		liveXYChart.clearChart();
 		liveXYChart.inititaliseSeries(seriesNames);
-		liveXYChart.setXRange(1, 8,100);
-		liveXYChart.setYRange(0, 1);
+		liveXYChart.setXRange(1, 10,100);
+		liveXYChart.setYRange(-1, 2);
 		liveXYChart.drawChart();
-		
 		
 		
 		//
@@ -334,5 +394,25 @@ public class BackgroundLiveMonitor extends Thread {
 		});
 	}
 	
+	 /**
+	  * Deletes all the contents of a folder. This function is used to delete an LTTng trace,
+	  * which is a collection of files in a folder 
+	  * @param folder Folder name
+	  */
+	 private  void deleteLTTngTrace(File folder) {
+		    File[] files = folder.listFiles();
+		    if(files!=null) { 
+		        for(File f: files) {
+		            if(f.isDirectory()) {
+		                deleteLTTngTrace(folder);
+		            } else {
+		                f.delete();
+		            }
+		        }
+		    }
+		    folder.delete();
+		}
+	 
+
 	
 }

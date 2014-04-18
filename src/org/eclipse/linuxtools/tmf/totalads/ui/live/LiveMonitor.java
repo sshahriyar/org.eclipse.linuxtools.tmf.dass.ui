@@ -108,7 +108,7 @@ public class LiveMonitor {
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
 		tbItmDiagnosis.setControl(scrolCompAnom);
 		
-		//Desiging the Layout of the GUI Items  for the LiveMonitor Tab Item
+		//Designing the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
 		comptbItmDiagnosis.setLayoutData(gridData);
@@ -122,16 +122,9 @@ public class LiveMonitor {
 		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
 	
-		selectHostUsingSSH(compTraceTypeAndModel);
 		// Create GUI elements for a selection of a trace
 		
-		//Initialize a class which loads model names from db and create appropriate GUI elements
-		
-		//modelLoader=new ModelLoader(compTraceTypeAndModel);
-		//modelLoader.setTrace(currentlySelectedTracesPath);///////////////////////////////
-		//modelLoader.setTraceTypeSelector(traceTypeSelector);
-		
-		
+			
 		//////////////////////////////////////////////////////////////////////
 		// Creating GUI widgets for charts and console
 		//////////////////////////////////////////////////////////////////
@@ -139,7 +132,7 @@ public class LiveMonitor {
 		compButtonsChartConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compButtonsChartConsole.setLayout(new GridLayout(1, false));
 		
-		Composite compButtons=new Composite(compButtonsChartConsole, SWT.NONE);
+		Composite compButtons=new Composite(compTraceTypeAndModel, SWT.NONE);
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		compButtons.setLayout(new GridLayout(5, false));
 		
@@ -157,11 +150,14 @@ public class LiveMonitor {
 		btnDetails.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
 		btnDetails.setText("Details");
 		btnDetails.setEnabled(false);
+		
+
+		selectHostUsingSSH(compTraceTypeAndModel);
 		///////////////
 		///Creating a chart
 		///////////////
 		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
-		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,1,10));
+		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compChart.setLayout(new FillLayout());
 		liveChart=new LiveXYChart(compChart);
 		
@@ -172,14 +168,15 @@ public class LiveMonitor {
 		compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compConsole.setLayout(new GridLayout(1,false));
 		
-		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
+		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,false);
 		gridDataConsoleText.minimumHeight=160;
+		
 				
 		console =new ProgressConsole(compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
 				gridDataConsoleText);
 
 		
-		
+		resultsAndFeedback=new ResultsAndFeedback();
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
@@ -212,7 +209,7 @@ public class LiveMonitor {
 		
 		Label lblSudoPassword= new Label(grpSSHConfig, SWT.NONE);
 		lblSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
-		lblSudoPassword.setText("Sudo Password ");
+		lblSudoPassword.setText("Enter Password ");
 		
 		Label lblPort= new Label(grpSSHConfig, SWT.NONE);
 		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
@@ -232,9 +229,9 @@ public class LiveMonitor {
 		txtPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
 		txtPort.setText("22");
 		/////////
-		///SSH Password and Private Key
+		///SSH Password and Private Key: Currently disabling this to provide it in the next version
 		/////////
-		Group grpPrivacy = new Group(grpSSHConfig, SWT.NONE);
+		/*Group grpPrivacy = new Group(grpSSHConfig, SWT.NONE);
 		grpPrivacy.setText("SSH Password/Pvt. Key");
 		
 		grpPrivacy.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false,3,2));
@@ -261,6 +258,7 @@ public class LiveMonitor {
 		
 		trcbrowser=new FileBrowser(grpPrivacy, txtPvtKey, new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		trcbrowser.disableBrowsing();
+		*/
 		//////////
 		///End SSH password and private key
 		//////
@@ -369,8 +367,10 @@ public class LiveMonitor {
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-			
+				
 				if (findInvalidSSettings()==false){
+					resultsAndFeedback.clearData();
+					btnDetails.setEnabled(false);
 					
 					String password=""; 
 					String privateKey="";
@@ -381,11 +381,14 @@ public class LiveMonitor {
 					int snapshotIntervals=Integer.parseInt(cmbInterval.getItem(cmbInterval.getSelectionIndex()));
 					
 					
-				
+				 /*// Will be enabled in the next version
 					if (btnPassword.getSelection())
 						password=txtPassword.getText();
 					else if (btnPvtKey.getSelection())
 						privateKey=txtPvtKey.getText();
+					*/
+					//so doing the followign for this version
+					password=txtSudoPassword.getText();
 					
 					if (btnTrainingAndEval.getSelection())
 						isTrainAndEval=true;
@@ -397,6 +400,13 @@ public class LiveMonitor {
 					//IDetectionAlgorithm algorithms[]=modelSelectionHandler.getCurrentlySelectedAlgorithms();
 					HashMap<String,String[]> modelsAndSettings=modelSelectionHandler.getModelaAndSettings();
 					
+					if (modelsAndSettings.size() > 5){
+						 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+						 msgBox.setMessage("Please select less than six models");
+						 msgBox.open();
+						 return;
+					}
+
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
@@ -404,6 +414,7 @@ public class LiveMonitor {
 									  	isTrainAndEval, console);
 					liveExecutor.start();
 				}
+
 			}
 		
 		});
@@ -422,12 +433,12 @@ public class LiveMonitor {
 		btnDetails.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				
+				resultsAndFeedback.showForm();	
 			}
 		});
 		
-		//**** Pvt key button handler
-		btnPvtKey.addSelectionListener(new SelectionAdapter() {
+		//**** Pvt key button handler: Will be enabled in the next version
+		/*btnPvtKey.addSelectionListener(new SelectionAdapter() {
 					
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -436,10 +447,10 @@ public class LiveMonitor {
 				txtPassword.setEnabled(false);
 				txtPassword.setText("");
 			}
-			});
+			});*/
 		
 		//**** Password button key handler
-		 btnPassword.addSelectionListener(new SelectionAdapter() {
+		/* btnPassword.addSelectionListener(new SelectionAdapter() {
 							
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -449,7 +460,7 @@ public class LiveMonitor {
 						trcbrowser.disableBrowsing();
 						txtPassword.setEnabled(true);
 					}
-			});
+			});*/
 		
 	}
 	/**
@@ -457,15 +468,7 @@ public class LiveMonitor {
 	 * @return
 	 */
 	private Boolean findInvalidSSettings(){
-		/*private Text txtPassword;
-		private Text txtUserAtHost;
-		private Combo cmbSnapshot;
-		private Combo cmbInterval;
-		private Text txtPvtKey;
-		private Button btnPvtKey;
-		private Button btnPassword;
-		private Text txtPort;
-		private Text txtSudoPassword;*/
+		
 		String msg="";
 		if (txtUserAtHost.getText().isEmpty())
 				msg="User@Host cannot be empty";
@@ -473,10 +476,10 @@ public class LiveMonitor {
 			msg="Sudo password cannot be empty";
 		else if (txtPort.getText().isEmpty())
 			msg="Port cannot be empty";
-		else if (btnPassword.getSelection() && txtPassword.getText().isEmpty())
-			msg="SSH password cannot be empty";
-		else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
-           msg="Private key path cannot be empty";
+	//	else if (btnPassword.getSelection() && txtPassword.getText().isEmpty())
+		//	msg="SSH password cannot be empty";
+		//else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
+         //  msg="Private key path cannot be empty";
 		else if (this.modelSelectionHandler.getSelectedModelsCount()==0)
 			msg="Please, first select a model";
 		else {
@@ -496,5 +499,11 @@ public class LiveMonitor {
 			 return false;
 	}
 	
+	/**
+	 * Closes the results form if open
+	 */
+	public void destroy (){
+		this.resultsAndFeedback.destroy();
+	}
 	
 }

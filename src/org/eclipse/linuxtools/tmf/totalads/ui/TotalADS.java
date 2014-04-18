@@ -19,11 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
-<<<<<<< HEAD
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitor;
-import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveXYChart;
-=======
->>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.FillLayout;
@@ -51,10 +47,7 @@ import org.eclipse.swt.widgets.MessageBox;
 public class TotalADS  {
 	private Modeling modeling;
 	private Diagnosis diagnosis;
-<<<<<<< HEAD
 	private LiveMonitor liveDiagnosis;
-=======
->>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 	private CTabFolder tabFolderTotalADS;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
@@ -103,11 +96,8 @@ public class TotalADS  {
 			
 				
 			diagnosis=new Diagnosis(tabFolderTotalADS);
-<<<<<<< HEAD
-			liveDiagnosis=new LiveMonitor(tabFolderTotalADS);
-=======
->>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 			modeling =new Modeling(tabFolderTotalADS);
+			liveDiagnosis=new LiveMonitor(tabFolderTotalADS);
 			
 			////////////*********************************
 			
@@ -155,8 +145,12 @@ public class TotalADS  {
 	public void notifyOnTraceSelection(String tracePath, String traceTypeName){
 		diagnosis.updateOnTraceSelection(tracePath, traceTypeName);
 	}
-
-	   
+	/**
+	 * Destroys the instance with final processing
+	 */
+	public void destroy(){
+		this.liveDiagnosis.destroy();
+	}
 // For testing
 /*
   public static void main(String[] args) {

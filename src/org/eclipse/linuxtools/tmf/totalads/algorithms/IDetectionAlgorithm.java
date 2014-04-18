@@ -104,7 +104,7 @@ public Results test (ITraceIterator trace, String database, DBMS connection, Str
  */
 public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException;
 /** Returns the summary of the results **/
-public String getSummaryOfTestResults();
+public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 
  * @param traceIterator An iterator a trace**/
 public org.swtchart.Chart graphicalResults(ITraceIterator traceIterator);

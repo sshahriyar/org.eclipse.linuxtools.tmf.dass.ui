@@ -296,10 +296,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	/**
 	 * Returns textual result
 	 */
-	public String getSummaryOfTestResults(){
+	public Double getTotalAnomalyPercentage(){
 
 		Double anomalousPercentage=(testAnomalyCount.doubleValue()/testTraceCount.doubleValue())*100;
-		return anomalousPercentage.toString()+"%";
+		return anomalousPercentage;
 		
 	}
 	/**

@@ -336,8 +336,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  do {// This loop searches for the tree that starts with the first event of a new sequences, 
 	    			  // if not found it starts with a second event, then the third event and so on. Each time
 	    			  //it keeps on increasing the hamming distnace
-	    			   //nodes=sysCallSequences.get(seq[counter]);//load from database
-	    			   nodes=treeTransformer.loadTreeFromDatabase(seq[counter], database, connection);
+	    			   nodes=sysCallSequences.get(seq[counter]);//load from database
+	    			  // nodes=treeTransformer.loadTreeFromDatabase(seq[counter], database, connection);
 	    			   counter++;
 	    		  }while (nodes==null && counter <seq.length);
 	    		  
@@ -425,9 +425,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Text Results, an overriden method
 	 */
 	@Override
-	public String getSummaryOfTestResults() {
+	public Double getTotalAnomalyPercentage() {
 		Double anomalousPercentage=(testAnomalies.doubleValue()/testTraceCount.doubleValue())*100;
-		return anomalousPercentage.toString()+"%";
+		return anomalousPercentage;
 	}
 
 	/* 

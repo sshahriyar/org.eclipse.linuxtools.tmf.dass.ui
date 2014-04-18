@@ -10,6 +10,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 
+import java.io.File;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
@@ -73,7 +75,7 @@ public class Diagnosis {
 		currentlySelectedTracesPath=new StringBuilder();
 		//LiveMonitor Tab Item
 		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmDiagnosis.setText("Testing");
+		tbItmDiagnosis.setText("Diagnosis");
 		//Making scrollable tab item 
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
@@ -133,7 +135,7 @@ public class Diagnosis {
 		//progressBar.setSelection(5);
 		
 		
-		resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
+		resultsAndFeedback=new ResultsAndFeedback(compStatusResults,true);
 		modelLoader.setResultsAndFeedback(resultsAndFeedback);
 		modelLoader.setStautsBar(statusBar);
 		
@@ -269,7 +271,7 @@ public class Diagnosis {
 	 */
 	private void setTMFTraceToCurrentTracePath(){
 		txtTestTraceDir.setText("");
-		String traceName=tmfTracePath.substring(tmfTracePath.toString().lastIndexOf('/')+1, tmfTracePath.length());
+		String traceName=tmfTracePath.substring(tmfTracePath.toString().lastIndexOf(File.separator)+1, tmfTracePath.length());
 		
 		txtTMFTraceID.setText("");
 		

@@ -93,7 +93,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 
 	@Override
-	public String getSummaryOfTestResults() {
+	public Double getTotalAnomalyPercentage() {
 		// TODO Auto-generated method stub
 		return null;
 	}

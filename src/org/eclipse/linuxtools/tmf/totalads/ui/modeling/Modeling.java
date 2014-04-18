@@ -93,7 +93,7 @@ public class Modeling {
 	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
 	    compSettingAndEvaluation.setLayout(new GridLayout(6, false));
 	    
-		createAnEmptyModel(compSettingAndEvaluation);
+		//createAnEmptyModel(compSettingAndEvaluation);
 	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
 		//Initialize progress console
@@ -218,12 +218,12 @@ public class Modeling {
 	    */
 		private void createAnEmptyModel(Composite comptbItmModeling){
 			
-			Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
-			btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-			btnSettings.setText("Create an Empty Model");
+			/*Button btnEmpty=new Button(comptbItmModeling,SWT.NONE);
+			btnEmpty.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+			btnEmpty.setText("Create an Empty Model");
 			
-			//Event handler for Settings button
-			btnSettings.addMouseListener(new MouseAdapter() {
+			//Event handler for Empty model button
+			btnEmpty.addMouseListener(new MouseAdapter() {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -248,7 +248,7 @@ public class Modeling {
 					}
 					
 				}
-			 });
+			 });*/
 		}
 	
    /**
@@ -259,7 +259,7 @@ public class Modeling {
 	private void adjustSettings(Composite comptbItmModeling){
 		
 		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
-		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
+		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
 		btnSettings.setText("Adjust Settings");
 		
 		//Event handler for Settings button
