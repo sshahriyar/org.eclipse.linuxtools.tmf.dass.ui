@@ -40,7 +40,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
-
+/**
+ * This class connects to a remote system using SSH, evaluate algorithms on collected traces,
+ * trains them, and it also updates the live chart. It does all this by executing as a Thread
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class BackgroundLiveMonitor extends Thread {
 	private String userAtHost;
 	private String password;
@@ -106,7 +111,7 @@ public class BackgroundLiveMonitor extends Thread {
 		this.results=results;
 		this.liveXYChart=xyChart;
 		this.console=console;
-		this.maxPoints=intervalBetweenSnapshots*20;
+		this.maxPoints=intervalBetweenSnapshots*50;
 		this.isTrainAndEval=isTrainEval;
 		
 		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
@@ -195,7 +200,7 @@ public class BackgroundLiveMonitor extends Thread {
 									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
 					try{
 						//TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
-						TimeUnit.SECONDS.sleep(10);
+						TimeUnit.SECONDS.sleep(2);
 						
 					} catch (InterruptedException ex){}
 			

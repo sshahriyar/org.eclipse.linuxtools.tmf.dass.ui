@@ -192,8 +192,7 @@ public class SSHConnector {
 	      executeSudoCommand("sudo -S -p  '' rm -rf "+totalADSRemoteTrace, sudoPassword);
 	 	
 	      return localDir.getPath();
-	     
-	}
+	   	}
 	
 	 /**
 	  * Executes a sudo (root) command
@@ -202,9 +201,10 @@ public class SSHConnector {
 	 * 
 	  */
 	private void executeSudoCommand(String command, String sudoPass)throws TotalADSNetException {
+		Channel channel=null;
 		try{
 			 
-			 Channel channel=session.openChannel("exec");
+			  channel=session.openChannel("exec");
 			 ((ChannelExec)channel).setCommand(command);
 			  ((ChannelExec)channel).setErrStream(System.err);
 		      InputStream in=channel.getInputStream();
@@ -214,17 +214,20 @@ public class SSHConnector {
 		      out.write((sudoPass+"\n").getBytes());
 		      out.flush();
 		      displayStream(in, channel);
-		      channel.disconnect();
 		      
 		     
 	    }
 		 catch(IOException e){
 	    		console.printTextLn("Error:"+e.getMessage());
-	    		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
+	    		throw new TotalADSNetException(e);// Don't continue further
 	    }
 	    catch(JSchException e){
 	    		console.printTextLn("Error: "+e.getMessage());
-	    		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
+	    		throw new TotalADSNetException(e);// Don't continue further
+	    }finally{
+	    	if  (channel!=null)
+	    		 channel.disconnect();
+		     
 	    }
 	}
 	
@@ -264,9 +267,9 @@ public class SSHConnector {
 	 * @throws IOException 
 	 */
 	private void downloadTrace(Session session, String remoteFolder, String localDownloadFolder) throws TotalADSNetException {
-		  
+		ChannelSftp sftpChannel=null;
 		  try{
-				ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
+				sftpChannel = (ChannelSftp) session.openChannel("sftp");
 		        sftpChannel.connect();
 		        sftpChannel.cd(remoteFolder);
 		        java.util.Vector<ChannelSftp.LsEntry> list= sftpChannel.ls("*");
@@ -281,11 +284,14 @@ public class SSHConnector {
 		 
 		  catch(SftpException e){
 		 		 console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
-		 		throw new TotalADSNetException("SSH Communication error: "+e.getMessage() );// Don't continue further
+		 		throw new TotalADSNetException(e );// Don't continue further
 		   }
 		   catch(JSchException e){
 		   		console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
-		   		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
+		   		throw new TotalADSNetException(e);// Don't continue further
+		   	}finally{
+		   		if (sftpChannel!=null)
+		   			sftpChannel.exit();
 		   	}
 	
 	}
