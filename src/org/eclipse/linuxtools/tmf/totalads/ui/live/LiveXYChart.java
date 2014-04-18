@@ -8,6 +8,8 @@ import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 //import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 //import org.eclipse.swt.layout.FillLayout;
 //import org.eclipse.swt.layout.GridData;
 //import org.eclipse.swt.widgets.Button;
@@ -43,6 +45,8 @@ public class LiveXYChart {
 	public LiveXYChart(Composite compParent) {
 	   
 	   xyChart = new Chart(compParent, SWT.NONE);
+	   //xyChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	   //xyChart.setLayout(new GridLayout(1,false));
 	  //xyChart.getTitle().setText("Anomalies At Different Intervals");
 	   xyChart.getTitle().setVisible(false); // Keep title invisible to get more space for the chart
 	   xyChart.getAxisSet().getXAxis(0).getTitle().setText("Time (mins)");
@@ -230,7 +234,8 @@ public void drawChart(){
 			// adjust the axis range
 			xyChart.getAxisSet().adjustRange();
 			xyChart.redraw();
-			xyChart.updateLayout();
+			
+			//nxyChart.getParent().redraw();
 			//xyChart.redraw(, y, width, height, all);;
 		}
 	 });

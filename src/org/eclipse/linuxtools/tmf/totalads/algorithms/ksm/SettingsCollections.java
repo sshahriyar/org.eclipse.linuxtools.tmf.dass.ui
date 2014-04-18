@@ -25,6 +25,10 @@ public enum SettingsCollections{
 	 */
 	ALPHA("alpha"),
 	/**
+	 * Versions of the kernels
+	 */
+	KernelVersions("kernel_versions"),
+	/**
 	 * Update_time field in the collection
 	 */
 	UPDATE_TIME("update_time");

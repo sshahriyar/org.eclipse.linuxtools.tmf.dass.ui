@@ -49,6 +49,12 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		throw new TotalADSDBMSException("HMM is not implemented yet");
 
 	}
+	@Override
+	public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+	{}
+	
+	
+
 
 	@Override
 	public String[] getTrainingOptions() {
@@ -60,6 +66,11 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	public String[] getTestingOptions(String database, DBMS connection) {
 		
 		return null;
+	}
+   @Override
+	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+	{ 
+	   
 	}
 
 	@Override

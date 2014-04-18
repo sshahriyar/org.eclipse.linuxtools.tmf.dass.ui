@@ -268,7 +268,8 @@ public class ModelLoader {
 								return;
 							}
 							
-							settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
+							if (settingsDialog==null)
+									settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
 						
 							settingsDialog.showForm();
 							algorithmSettings=settingsDialog.getOptions();
@@ -276,6 +277,8 @@ public class ModelLoader {
 					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
+					}finally{
+						settingsDialog=null;
 					}
 				}
 			}

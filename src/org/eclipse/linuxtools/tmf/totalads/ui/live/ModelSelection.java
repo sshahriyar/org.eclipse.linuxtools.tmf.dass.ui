@@ -10,6 +10,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
@@ -110,7 +111,7 @@ public class ModelSelection {
 				
 				}
 				//if it reaches here then
-				if (item.getChecked())
+				if (item.getChecked() )
 					models.put(item.getText(),null);
 				else
 					models.remove(item.getText());
@@ -143,12 +144,19 @@ public class ModelSelection {
 						
 							settingsDialog.showForm();
 							String []algorithmSettings=settingsDialog.getOptions();
-							models.put(databases[0], algorithmSettings);
-							settingsDialog=null;
+							//models.put(databases[0], algorithmSettings);
+							if (algorithmSettings!=null)
+								algorithm[0].saveTestingOptions(algorithmSettings, databases[0], Configuration.connection);
+							//settingsDialog=null;
 						
 					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
+					}catch (TotalADSDBMSException ex) {
+						msgBox.setMessage(ex.getMessage());
+						msgBox.open();
+					}finally{
+						settingsDialog=null;
 					}
 				
 			}

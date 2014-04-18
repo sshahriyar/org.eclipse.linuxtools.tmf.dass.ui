@@ -194,7 +194,8 @@ public class BackgroundLiveMonitor extends Thread {
 					console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
 									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
 					try{
-						TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+						//TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+						TimeUnit.SECONDS.sleep(10);
 						
 					} catch (InterruptedException ex){}
 			
@@ -223,6 +224,7 @@ public class BackgroundLiveMonitor extends Thread {
 			exception=ex.getMessage();
 			
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
+			ex.printStackTrace();
 			
 		}
 		finally{

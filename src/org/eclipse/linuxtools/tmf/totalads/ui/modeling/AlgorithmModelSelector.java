@@ -213,14 +213,25 @@ public class AlgorithmModelSelector {
 		if (!checkItemSelection())
 			throw new TotalADSUIException("Please, first select an algorithm!");
 		// Getting training options
+		MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+		           ,SWT.ICON_ERROR|SWT.OK);
+	
 		String []options=currentlySelectedAlgorithm.getTrainingOptions();
 		if (options!=null){
-			settingsDialog= new Settings(options);
-			settingsDialog.showForm();
-			algorithmOptions=settingsDialog.getOptions();
-		}else{
-			MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-			           ,SWT.ICON_ERROR|SWT.OK);
+			try{
+				if (settingsDialog==null)
+					settingsDialog= new Settings(options);
+			
+				settingsDialog.showForm();
+				algorithmOptions=settingsDialog.getOptions();
+
+			}catch (TotalADSUIException ex){
+				msgBox.setMessage(ex.getMessage());
+				msgBox.open();
+			} finally{
+				settingsDialog=null;
+			}
+					}else{
 			msgBox.setMessage("Not implemented yet");
 			msgBox.open();
 		}

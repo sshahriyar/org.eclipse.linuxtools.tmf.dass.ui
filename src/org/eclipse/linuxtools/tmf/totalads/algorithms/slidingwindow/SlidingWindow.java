@@ -58,7 +58,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private Boolean intialize=false;
 	private Boolean isTestStarted=false;
 	private SlidingWindowTree treeTransformer;
-	
+	private int maxWinLimit=15;
 	/**
 	 * Constructor
 	 **/
@@ -79,10 +79,12 @@ public class SlidingWindow implements IDetectionAlgorithm {
 					DBObject dbObject=cursor.next();
  					Gson gson =new Gson();
  					String key=dbObject.get("_id").toString();
- 					
- 					Event []event = gson.fromJson(dbObject.get("tree").toString(), Event[].class);
- 					sysCallSequences.put(key, event);
-
+ 					Object obj=dbObject.get("tree");
+ 					if (obj!=null){
+ 						Event []event = gson.fromJson(obj.toString(), Event[].class);
+ 										sysCallSequences.put(key, event);
+ 					} //else
+ 						//System.out.println(key);
 					
 					treeExists=true;
 				}
@@ -112,7 +114,64 @@ public class SlidingWindow implements IDetectionAlgorithm {
     		return trainingOptions;
     	
     }
-    
+    /**
+     * Saves and validate training options
+     */
+    @Override
+    public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+    {
+    	  try{
+    		  if (treeExists==true)
+    			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
+    		  else if (options[0].equals(this.trainingOptions[0]))
+	    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
+    		  
+    		  //check for hamming distance
+    		  if (options[2].equals(this.trainingOptions[2]) )
+	    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
+		  
+		  }catch (Exception ex){// Capturing exception to send a UI error
+			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
+		  }
+		  
+		  if (maxWin > maxWinLimit)
+			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
+
+		// Update the settings collection for maxwin and maxhamm
+		  // this will throw excepton if databse doesnot exist
+	     saveSettings(database, connection);
+	     
+	    	  
+    }
+
+    /**
+     * saves test settings
+     */
+    @Override
+    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException{
+    	 
+    	if (options!=null && options[0].equals(this.testingOptions[0]) ){
+  		  	try {
+  		  		maxHamDis=Integer.parseInt(options[1]);
+  		  	}catch (NumberFormatException ex){
+  		  		throw new TotalADSUIException("Please, enter an integer value.");
+  		  	}
+  		   
+  		  	/// Get previous max window first
+  		  	DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
+			if (cursor !=null){
+				while (cursor.hasNext()){
+					DBObject dbObject=cursor.next();
+					maxWin=Integer.parseInt(dbObject.get(SettingsCollection.MAX_WIN.toString()).toString());
+					
+				}
+				cursor.close();
+			}
+  	        saveSettings(database, connection); // save maxHamm
+  	     }
+    	  
+    }
+
     /**
      * 
      * Set the settings of an algorithm as option name at index i and value ate index i+1
@@ -157,7 +216,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		 if (!intialize){
 			  validationTraceCount=0;
 			  validationAnomalies=0;
-			  int maxWinLimit=15;
+			  
 	    	
 	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
@@ -415,7 +474,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_WIN.toString(), maxWin);
 		  jsonObjToUpdate.addProperty(SettingsCollection.MAX_HAM_DIS.toString(), maxHamDis);
 		
-		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, TraceCollection.COLLECTION_NAME.toString());
+		  connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObjToUpdate, SettingsCollection.COLLECTION_NAME.toString());
 	 
 		 
 	}

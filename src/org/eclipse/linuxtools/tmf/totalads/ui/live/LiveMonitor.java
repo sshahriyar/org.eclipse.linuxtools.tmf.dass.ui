@@ -101,23 +101,23 @@ public class LiveMonitor {
 		//tmfTracePath=new StringBuilder();
 		//currentlySelectedTracesPath=new StringBuilder();
 		//LiveMonitor Tab Item
-		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmDiagnosis.setText("Live Monitor");
+		CTabItem tbItmLive = new CTabItem(tabFolderParent, SWT.NONE);
+		tbItmLive.setText("Live Monitor");
 		//Making scrollable tab item 
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
-		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
-		tbItmDiagnosis.setControl(scrolCompAnom);
+		Composite comptbItmLive = new Composite(scrolCompAnom,SWT.NONE);
+		tbItmLive.setControl(scrolCompAnom);
 		
 		//Designing the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
-		comptbItmDiagnosis.setLayoutData(gridData);
-		comptbItmDiagnosis.setLayout(new GridLayout(2, false));
+		comptbItmLive.setLayoutData(gridData);
+		comptbItmLive.setLayout(new GridLayout(2, false));
 	
 		///////////////////////////////////////////////////////////////////////////
 		//Creating GUI widgets for selection of a trace type and a selection of the model
 		///////////////////////////////////////////////////////////////////
-		Composite compTraceTypeAndModel=new Composite(comptbItmDiagnosis, SWT.NONE);
+		Composite compTraceTypeAndModel=new Composite(comptbItmLive, SWT.NONE);
 		compTraceTypeAndModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
@@ -128,7 +128,7 @@ public class LiveMonitor {
 		//////////////////////////////////////////////////////////////////////
 		// Creating GUI widgets for charts and console
 		//////////////////////////////////////////////////////////////////
-		Composite compButtonsChartConsole=new Composite(comptbItmDiagnosis, SWT.NONE);
+		Composite compButtonsChartConsole=new Composite(comptbItmLive, SWT.NONE);
 		compButtonsChartConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compButtonsChartConsole.setLayout(new GridLayout(1, false));
 		
@@ -156,6 +156,8 @@ public class LiveMonitor {
 		///////////////
 		///Creating a chart
 		///////////////
+		;
+		
 		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
 		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compChart.setLayout(new FillLayout());
@@ -168,17 +170,15 @@ public class LiveMonitor {
 		compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compConsole.setLayout(new GridLayout(1,false));
 		
-		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,false);
+		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
 		gridDataConsoleText.minimumHeight=160;
-		
-				
-		console =new ProgressConsole(compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
+		console =new ProgressConsole (compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
 				gridDataConsoleText);
 
 		
 		resultsAndFeedback=new ResultsAndFeedback();
 		//Adjust settings for scrollable LiveMonitor Tab Item
-		scrolCompAnom.setContent(comptbItmDiagnosis);
+		scrolCompAnom.setContent(comptbItmLive);
 		 // Set the minimum size
 		scrolCompAnom.setMinSize(500, 500);
 	    // Expand both horizontally and vertically
@@ -419,7 +419,7 @@ public class LiveMonitor {
 		
 		});
 		/**
-		 * 
+		 * stop event handler
 		 */
 		btnStop.addMouseListener(new MouseAdapter() {
 			@Override
@@ -428,7 +428,7 @@ public class LiveMonitor {
 			}
 		});
 		/**
-		 * 
+		 * details event handler
 		 */
 		btnDetails.addMouseListener(new MouseAdapter() {
 			@Override

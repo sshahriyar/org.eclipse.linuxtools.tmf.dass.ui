@@ -35,6 +35,17 @@ public void createDatabase(String databaseName, DBMS connection) throws TotalADS
  */
 public String[] getTrainingOptions();
 /**
+ * Validates the training options and saves them into the database. On error throws exception
+ * @param options
+ * @param database
+ * @param connection
+ * @throws TotalADSUIException
+ * @throws TotalADSDBMSException TODO
+ */
+public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException;
+
+
+/**
  * Returns the testing options/settings of an algorithm as option name at index i and value ate index i+1.
  * It takes database name and connection information, in case if the model is already created and previously 
  * modified settings exist in the database
@@ -43,7 +54,15 @@ public String[] getTrainingOptions();
  * @return An array of String as options/settings
  */
 public String[] getTestingOptions(String database, DBMS connection);
-
+/**
+ * Validates the testing options and saves them into the database. On error throws exception
+ * @param options
+ * @param database
+ * @param connection
+ * @throws TotalADSUIException
+ * @throws TotalADSDBMSException 
+ */
+public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException;
 /**
  * An algorithm will take a  trace through this function. Some algorithms can train on 
  * the traces as they come and some need to wait till the last trace. Caller

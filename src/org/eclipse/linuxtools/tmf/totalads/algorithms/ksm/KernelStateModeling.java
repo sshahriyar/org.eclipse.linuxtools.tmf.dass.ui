@@ -114,11 +114,62 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     	
     }
     /**
+     * Saves and validates training options
+     */
+    @Override
+    public void saveTrainingOptions(String [] options, String database, DBMS connection) 	throws TotalADSUIException, TotalADSDBMSException
+    {
+    	alpha=0.0;
+  	   
+  	  	if (options!=null){
+  		  int trueCount=0;
+  		   for (int count=1; count<trainingOptions.length; count+=2)
+  			 if (options[count].equals("true")){
+  			  		trainingOptions[count]="true";
+  			  		trueCount++;
+  			  		if (trueCount>1){
+  			  			trainingOptions[count]="false";
+  			  			throw new TotalADSUIException("Please, select only one option as true.");
+  			  		}
+  			 }
+  			 else  if (options[count].equals("false")) // if it is not true then it must be false
+  				    trainingOptions[count]="false";
+  			 else
+  				 throw new TotalADSUIException("Please, type true or false only.");
+		      
+  			if (trueCount==0)	  
+  		      throw new TotalADSUIException("Please, type true for one of the options.");
+  	    }
+  		
+  	    // this will throw an exception if databse doesnot exist		
+  	  	saveSettingsInDatabase(alpha, database, connection);
+	
+  
+    }
+    /**
+     * Saves and validates test settings in the database
+     */
+    @Override
+    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+    {
+    	try {
+			alpha= Double.parseDouble(options[1]);
+		}catch (NumberFormatException ex){
+			throw new TotalADSUIException("Please, enter only decimal values.");
+		}
+    	// first read settings-- just one row
+    	getSettingsFromDatabase(database, connection);
+		// now updat to avoid any error
+    	saveSettingsInDatabase(alpha, database, connection);
+    	
+    }
+
+    /**
      * Set the settings of an algorithm as option name at index i and value ate index i+1
      */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
-    	Double alphaVal=getAlphaFromDatabase(database, connection);
+    	Double alphaVal=getSettingsFromDatabase(database, connection);
 		if(alphaVal!=null)
 			 alpha=alphaVal;
 		testingOptions[1]=alpha.toString();
@@ -212,7 +263,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 			  	console.printTextLn("Updating database");
 			  	
 				
-				saveAlphaInDatabase(alpha, database, connection);
+				saveSettingsInDatabase(alpha, database, connection);
 				
 				  
 			  	console.printTextLn("Database updated with final alpha: "+alpha);
@@ -253,16 +304,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
+			Double alphaVal=getSettingsFromDatabase(database, connection);
 			if (options!=null ){
 				try {
 					alpha= Double.parseDouble(options[1]);
 				}catch (NumberFormatException ex){
 					throw new TotalADSUIException("Please, enter only decimal values.");
 				}
-				saveAlphaInDatabase(alpha, database, connection);
+				saveSettingsInDatabase(alpha, database, connection);
 			}
 			else{
-				Double alphaVal=getAlphaFromDatabase(database, connection);
+				
 				if(alphaVal!=null)
 					 alpha=alphaVal;
 			}
@@ -479,7 +531,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @throws IllegalArgumentException 
 	 * @throws Exception
 	 */
-	private void saveAlphaInDatabase(Double alpha, String database, DBMS connection) 
+	private void saveSettingsInDatabase(Double alpha, String database, DBMS connection) 
 			throws  TotalADSDBMSException {
 		 String settingsKey ="KSM_SETTINGS";
 		//Both methods work 
@@ -509,6 +561,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		  JsonObject jsonObjToUpdate= new JsonObject();
 		  jsonObjToUpdate.addProperty(SettingsCollections.KEY.toString(), settingsKey);
 		  jsonObjToUpdate.addProperty(SettingsCollections.ALPHA.toString(), alpha);
+		  
+		  String kernel="";
+		  for (int count=1; count<trainingOptions.length; count+=2)
+ 			   if (trainingOptions[count].equalsIgnoreCase("true")){
+ 				   kernel=trainingOptions[count-1];
+ 				   break;//only one option can be true
+ 			   }
+ 				   
+ 				   
+		  jsonObjToUpdate.addProperty(SettingsCollections.KernelVersions.toString(), kernel);
+			  
 		  String time= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
 		  jsonObjToUpdate.addProperty(SettingsCollections.UPDATE_TIME.toString(), time);
 				
@@ -521,15 +584,25 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param database
 	 * @param connection
 	 */
-	
-	private Double getAlphaFromDatabase(String database, DBMS connection){
+	private Double getSettingsFromDatabase(String database, DBMS connection){
 	    String settingsKey ="KSM_SETTINGS";
 	    Double alphaValue=null;
+	    String kernelVersion="";
 		DBCursor cursor= connection.select(SettingsCollections.KEY.toString(), "",settingsKey, database, SETTINGS_COLLECTION);
 		if (cursor!=null && cursor.hasNext()){
 			DBObject dbObject=cursor.next();
 			alphaValue=Double.parseDouble(dbObject.get(SettingsCollections.ALPHA.toString()).toString());
+			kernelVersion=dbObject.get(SettingsCollections.KernelVersions.toString()).toString();
 		}
+		
+		 for (int count=0; count<trainingOptions.length; count+=2)
+			   if (trainingOptions[count].equalsIgnoreCase(kernelVersion)){
+				   trainingOptions[count+1]="true";
+				   //only one option can be true
+			   }else// else it is false
+				   trainingOptions[count+1]="false";
+		
+		
 		return alphaValue;
 	}
 	/**

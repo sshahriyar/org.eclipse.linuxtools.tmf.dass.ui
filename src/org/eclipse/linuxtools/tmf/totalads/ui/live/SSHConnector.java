@@ -219,12 +219,12 @@ public class SSHConnector {
 		     
 	    }
 		 catch(IOException e){
-	    		console.printTextLn(e.getMessage());
-	    		throw new TotalADSNetException("SSH Communication error");// Don't continue further
+	    		console.printTextLn("Error:"+e.getMessage());
+	    		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
 	    }
 	    catch(JSchException e){
-	    		console.printTextLn(e.getMessage());
-	    		throw new TotalADSNetException("SSH Communication error");// Don't continue further
+	    		console.printTextLn("Error: "+e.getMessage());
+	    		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
 	    }
 	}
 	
@@ -280,12 +280,12 @@ public class SSHConnector {
 			}
 		 
 		  catch(SftpException e){
-		 		 console.printTextLn(e.getCause().getMessage()); // Exception printed
-		 		throw new TotalADSNetException("SSH Communication error");// Don't continue further
+		 		 console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
+		 		throw new TotalADSNetException("SSH Communication error: "+e.getMessage() );// Don't continue further
 		   }
 		   catch(JSchException e){
-		   		console.printTextLn(e.getCause().getMessage()); // Exception printed
-		   		throw new TotalADSNetException("SSH Communication error");// Don't continue further
+		   		console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
+		   		throw new TotalADSNetException("SSH Communication error: "+e.getMessage());// Don't continue further
 		   	}
 	
 	}
