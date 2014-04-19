@@ -51,7 +51,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 	@Override
 	public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
-	{}
+	{
+		
+	}
 	
 	
 

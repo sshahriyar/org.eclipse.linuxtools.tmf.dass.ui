@@ -13,15 +13,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources;bundle-version="3.8.101",
  org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: swing2swt.jar,
- lib/mongo-java-driver-2.11.3.jar,
+Bundle-ClassPath: lib/mongo-java-driver-2.11.3.jar,
  lib/org.swtchart_0.8.0.v20120301.jar,
- lib/mongo-java-driver-2.11.3-javadoc.jar,
  src/,
  lib/reflections-0.9.9-RC1.jar,
- lib/gson-2.2.4-javadoc.jar,
  lib/gson-2.2.4.jar,
- lib/jsch-0.1.51.jar
+ lib/jsch-0.1.51.jar,
+ lib/swing2swt.jar,
+ lib/jahmm-0.6.1.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.linuxtools.ctf.core.tests.shared,
  org.eclipse.linuxtools.ctf.core.trace,
