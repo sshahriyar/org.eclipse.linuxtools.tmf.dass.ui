@@ -9,6 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
@@ -17,6 +18,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
@@ -28,6 +30,9 @@ import org.swtchart.Chart;
  */
 public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private String []trainingSettings;
+	private int seqLength;
+	private  HMM hmm;
+	private NameToIDMapper nameToID;
 
 	/**
 	 * Constructor
@@ -40,7 +45,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		trainingSettings[3]="350";
 		trainingSettings[4]=SettingsCollection.SEQ_LENGTH.toString();
 		trainingSettings[5]="50";
-				
+		nameToID=new NameToIDMapper();		
 		
 	}
 
@@ -61,7 +66,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				                  , NameToIDCollection.COLLECTION_NAME.toString() };
 		
 		connection.createDatabase(databaseName, collectionNames);
-		String []settings={ SettingsCollection.KEY.toString(),"_id",
+		String []settings={ SettingsCollection.KEY.toString(),"hmm",
 							SettingsCollection.NUM_STATES.toString(),"0",
 						    SettingsCollection.NUM_SYMBOLS.toString(), "0"
 						   ,SettingsCollection.SEQ_LENGTH.toString(),"0",
@@ -101,7 +106,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * Gets Test settings
 	 * @param database
 	 * @param connection
-	 * @return
+	 * @return  An array of String 
 	 */
 	@Override
 	public String[] getTestingOptions(String database, DBMS connection) {
@@ -131,24 +136,20 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   HMM hmm=new HMM();
 	   hmm.saveSettings(options, database, connection);
 	}
-   /**
-    * tRains an HMM
-    * @param trace
-    * @param isLastTrace
-    * @param database
-    * @param connection
-    * @param console
-    * @param options
-    * @param isNewDB
-    * @throws TotalADSUIException
-    */
-   private int seqLength;
-   private  HMM hmm;
-	@Override
+ 
+  /**
+   * 
+   * Trains an HMM
+   */
+   private boolean isIntialized=false;
+   private int numStates, numSymbols;
+   @Override
+	
 	public void train(ITraceIterator trace, Boolean isLastTrace,
 			String database, DBMS connection, ProgressConsole console,
-			String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException {
+			String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
+	   if (!isIntialized){
 		 hmm=new HMM();
 		 if (isNewDB)
 			 createDatabase(database, connection);
@@ -159,26 +160,30 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			 if (isNewDB) options=trainingSettings;
 			 else options=hmm.loadSettings(database, connection);
 		 } 
-		 int numStates=Integer.parseInt(options[1]);
-		 int numSymbols=Integer.parseInt(options[3]);
-		 seqLength=Integer.parseInt(options[5]);
+		 	 numStates=Integer.parseInt(options[1]);
+		 	 numSymbols=Integer.parseInt(options[3]);
+		 	seqLength=Integer.parseInt(options[5]);
+		 	
+		 	isIntialized=true;
+		}
 		 int numIterations=10;
-		 hmm.initializeHMM(numSymbols, numStates);
-		
+		 console.printTextLn("Starting to extract sequences");
+		 
 		 int winWidth=0,seqCount=0;
-		 LinkedList<String> newSequence=new LinkedList<String>();
+		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	 
 		 while (trace.advance()) {
 	    	  	    	
-	    	  newSequence.add(trace.getCurrentEvent());
+	    	  newSequence.add(nameToID.getId(trace.getCurrentEvent()));
 	    	 
 	    	  winWidth++;
 	    	      	  
 	    	  if(winWidth >= seqLength){
 	    		  		
 	    		  winWidth--;
-	    		  String[] seq=new String[seqLength];
+	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
+	    		 // console.printTextLn("Seq: "+Arrays.toString(seq));
 	    		  // searching and adding to db
 	    		  if (seqCount==0) 
 	    			  hmm.generateSequences(seq, false);
@@ -187,12 +192,20 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	
 	    		  newSequence.remove(0);
 	    		  seqCount++;
+	    		  if (seqCount%1000==0)
+	    			  console.printTextLn("Processing Sequence "+ seqCount + Arrays.toString(seq));
 	    	  }
 	    		  
 	     }
 	     if (isLastTrace){ 
-	    	  	 hmm.learnUsingBaumWelch(numIterations);
+	    	     numSymbols=nameToID.getSize();
+	    	     hmm.initializeHMM(numSymbols, numStates);
+	 		     console.printTextLn("Learning using BaumWelch");
+	    	     hmm.learnUsingBaumWelch(numIterations);
+	    	  	 console.printTextLn("Saving HMM");
+	    	  	 console.printTextLn(hmm.printHMM());
 	    	  	 hmm.saveHMM(database, connection);
+	    	  	 
 	     }
 		 
 		
@@ -206,43 +219,47 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param console
 	 * @throws TotalADSUIException
 	 * @throws TotalADSDBMSException
+	 * @throws TotalADSReaderException 
 	 */
 	@Override
-	
-	public void validate(ITraceIterator trace, String database,
-			DBMS connection, Boolean isLastTrace, ProgressConsole console)
-			throws TotalADSUIException, TotalADSDBMSException {
+	public void validate(ITraceIterator trace, String database,DBMS connection, 
+			Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0;
 		String []options=hmm.loadSettings(database, connection);
 		Double probThreshold=Double.parseDouble(options[7]);
-				
-		LinkedList<String> newSequence=new LinkedList<String>();
-	   	 
-		 while (trace.advance()) {
+		LinkedList<Integer> newSequence=new LinkedList<Integer>();
+	   	console.printTextLn("Starting validation"); 
+		while (trace.advance()) {
 	    	  	    	
-	    	  newSequence.add(trace.getCurrentEvent());
+	    	  newSequence.add(nameToID.getId(trace.getCurrentEvent()));
 	    	 
 	    	  winWidth++;
 	    	      	  
 	    	  if(winWidth >= seqLength){
 	    		  		
 	    		  winWidth--;
-	    		  String[] seq=new String[seqLength];
+	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		   
 	    		  hmm.generateSequences(seq, false);
 	    		  
 	    		  double prob=hmm.observationProbability(seq);
-	    		  if (prob<probThreshold)
+	    		  if (prob<probThreshold){
 	    			  probThreshold=prob;
+	    			  //console.printTextLn(Arrays.toString(seq));
+	    			  console.printTextLn("Min Threshold: "+probThreshold.toString());
+	    			 
+	    		  }
 	    		  newSequence.remove(0);
 	    	
 	    	  }
 	    		  
 	     }
 		options[7]=probThreshold.toString();
+		console.printTextLn("Final Min Threshold: "+probThreshold.toString());
+		 
 		hmm.saveSettings(options, database, connection); 
 	}
 	/**

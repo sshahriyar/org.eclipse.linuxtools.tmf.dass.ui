@@ -1,4 +1,127 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
+<record>
+  <date>2014-04-21T02:17:01</date>
+  <millis>1398061021954</millis>
+  <sequence>0</sequence>
+  <logger>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</logger>
+  <level>SEVERE</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+  <method>run</method>
+  <thread>10</thread>
+  <message>Severe error: see log.</message>
+  <exception>
+    <message>java.lang.NullPointerException</message>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HMM</class>
+      <method>loadSettings</method>
+      <line>169</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HiddenMarkovModel</class>
+      <method>train</method>
+      <line>161</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.AlgorithmModelSelector</class>
+      <method>trainAndValidateModels</method>
+      <line>509</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+      <method>run</method>
+      <line>68</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor</class>
+      <method>runWorker</method>
+      <line>1146</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor$Worker</class>
+      <method>run</method>
+      <line>615</line>
+    </frame>
+    <frame>
+      <class>java.lang.Thread</class>
+      <method>run</method>
+      <line>701</line>
+    </frame>
+  </exception>
+</record>
+<record>
+  <date>2014-04-21T02:18:23</date>
+  <millis>1398061103550</millis>
+  <sequence>1</sequence>
+  <logger>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</logger>
+  <level>SEVERE</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+  <method>run</method>
+  <thread>11</thread>
+  <message>Failed to execute runnable (org.eclipse.swt.SWTException: Widget is disposed)</message>
+  <exception>
+    <message>org.eclipse.swt.SWTException: Failed to execute runnable (org.eclipse.swt.SWTException: Widget is disposed)</message>
+    <frame>
+      <class>org.eclipse.swt.SWT</class>
+      <method>error</method>
+      <line>4397</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.swt.SWT</class>
+      <method>error</method>
+      <line>4312</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.swt.widgets.Synchronizer</class>
+      <method>syncExec</method>
+      <line>196</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.ui.internal.UISynchronizer</class>
+      <method>syncExec</method>
+      <line>150</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.swt.widgets.Display</class>
+      <method>syncExec</method>
+      <line>4491</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole</class>
+      <method>printTextLn</method>
+      <line>121</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HiddenMarkovModel</class>
+      <method>train</method>
+      <line>196</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.AlgorithmModelSelector</class>
+      <method>trainAndValidateModels</method>
+      <line>509</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+      <method>run</method>
+      <line>68</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor</class>
+      <method>runWorker</method>
+      <line>1146</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor$Worker</class>
+      <method>run</method>
+      <line>615</line>
+    </frame>
+    <frame>
+      <class>java.lang.Thread</class>
+      <method>run</method>
+      <line>701</line>
+    </frame>
+  </exception>
+</record>
 </log>

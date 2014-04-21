@@ -106,12 +106,12 @@ public class HMM {
 	public void saveSettings(String []settings, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException{
 		int i=0;
 		JsonObject settingObject=new JsonObject();
-		for (int j=0; j<settings.length;j++){ 
+		for (int j=0; j<settings.length;j+=2){ 
 			
 		     if (SettingsCollection.NUM_STATES.toString().equalsIgnoreCase(settings[i])){
 					  try {
 						  Integer num_states=Integer.parseInt(settings[i+1]);
-						  settingObject.add(SettingsCollection.NUM_STATES.toString(), new JsonPrimitive(num_states));
+						  settingObject.add(SettingsCollection.NUM_STATES.toString(), new JsonPrimitive(num_states.toString()));
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select an integer for number of states");
 					  }
@@ -119,14 +119,14 @@ public class HMM {
 				}else if (SettingsCollection.NUM_SYMBOLS.toString().equalsIgnoreCase(settings[i])){
 					  try {
 						  Integer num_symbols=Integer.parseInt(settings[i+1]);
-						  settingObject.add(SettingsCollection.NUM_SYMBOLS.toString(), new JsonPrimitive(num_symbols));
+						  settingObject.add(SettingsCollection.NUM_SYMBOLS.toString(), new JsonPrimitive(num_symbols.toString()));
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select an integer for number of symbols");
 					  }
 			   	}else if (SettingsCollection.SEQ_LENGTH.toString().equalsIgnoreCase(settings[i])){
 					  try {
 						  Integer seqLength=Integer.parseInt(settings[i+1]);
-						  settingObject.add(SettingsCollection.SEQ_LENGTH.toString(), new JsonPrimitive(seqLength));
+						  settingObject.add(SettingsCollection.SEQ_LENGTH.toString(), new JsonPrimitive(seqLength.toString()));
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select an integer for sequence length");
 					  }
@@ -134,7 +134,7 @@ public class HMM {
 					  try {
 						  Double prob=Double.parseDouble(settings[i+1]);
 						   if (prob >1.0) throw new TotalADSUIException("Probability can't be > 1");
-						   settingObject.add(SettingsCollection.PROBABILITY_THRESHOLD.toString().toString(), new JsonPrimitive(prob));
+						   settingObject.add(SettingsCollection.PROBABILITY_THRESHOLD.toString().toString(), new JsonPrimitive(prob.toString()));
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select a decimal number for the probability threshold");
 					  }
@@ -153,7 +153,7 @@ public class HMM {
 	}
 	
 	/**
-	 * Laods settings from the database
+	 * Loads settings from the database
 	 * @param database
 	 * @param connection
 	 * @return Settings as an array of String 
@@ -166,7 +166,7 @@ public class HMM {
 				 Gson gson =new Gson();
 				 DBObject dbObject=cursor.next();
 				 settings[0]=SettingsCollection.NUM_STATES.toString();
-				 settings[1]=(String)dbObject.get(SettingsCollection.NUM_STATES.toString());
+				 settings[1]=(String)dbObject.get(SettingsCollection.NUM_STATES.toString()).toString();
 				 settings[2]=SettingsCollection.NUM_SYMBOLS.toString();
 				 settings[3]=(String)dbObject.get(SettingsCollection.NUM_SYMBOLS.toString());
 				 settings[4]=SettingsCollection.SEQ_LENGTH.toString();
@@ -212,12 +212,12 @@ public class HMM {
 	 * @param seq
 	 * @return
 	 */
-	private List<ObservationInteger> generateASequence(int []seq){
+	private List<ObservationInteger> generateASequence(Integer []seq){
 		
 		List<ObservationInteger> sequence = new ArrayList<ObservationInteger>(); 
 		
 		for (int j=0; j<seq.length;j++)
-			sequence.add(new ObservationInteger(seq[j]));
+			sequence.add(new ObservationInteger(seq[j].intValue()));
 		
 		return sequence;
 	}
@@ -227,7 +227,7 @@ public class HMM {
 	 * @param seq
 	 * @param isAppend if false then a new sequence is created, else previous one is appended
 	 */
-	public void  generateSequences(int []seq, boolean isAppend){
+	public void  generateSequences(Integer []seq, Boolean isAppend){
 		if (!isAppend) //isAppend==false
 			sequences=new ArrayList<List<ObservationInteger>>();
 		sequences.add(generateASequence(seq));
@@ -237,7 +237,7 @@ public class HMM {
 	 * @param seq
 	 * @return
 	 */
-	public double observationProbability(int [] seq){
+	public double observationProbability(Integer [] seq){
 		return hmm.probability(generateASequence(seq));
 	}
 	/**
@@ -368,7 +368,7 @@ public class HMM {
 	 * Used for verification/testing of the model
 	 * @return
 	 */
-	private String printHMM(){
+	public String printHMM(){
 		return hmm.toString(new DecimalFormat("####.###################"));
 		
 	}
@@ -381,24 +381,24 @@ public class HMM {
 		myHMM.initializeHMM(5, 5);
 	
 		
-		myHMM.generateSequences(new int[]{1,2,3,4,0,1,2,3,4,0},false );
-		myHMM.generateSequences(new int[]{1,1,1,1,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,4,2,1,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,3,2,1,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,2,2,2,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,4,2,4,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,2,3,2,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,2,4,4,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,2,3,4,0,1,2,3,4,0},true );
-		myHMM.generateSequences(new int[]{1,1,1,1,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,4,2,1,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,3,2,1,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,2,2,2,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,4,2,4,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,2,3,2,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,2,4,4,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,2,3,4,0,1,1,1,1,0},true );
-		myHMM.generateSequences(new int[]{1,1,1,1,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,3,4,0,1,2,3,4,0},false );
+		myHMM.generateSequences(new Integer[]{1,1,1,1,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,4,2,1,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,3,2,1,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,2,2,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,4,2,4,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,3,2,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,4,4,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,3,4,0,1,2,3,4,0},true );
+		myHMM.generateSequences(new Integer[]{1,1,1,1,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,4,2,1,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,3,2,1,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,2,2,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,4,2,4,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,3,2,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,4,4,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,2,3,4,0,1,1,1,1,0},true );
+		myHMM.generateSequences(new Integer[]{1,1,1,1,0,1,1,1,1,0},true );
 		
 	
 		
@@ -406,7 +406,7 @@ public class HMM {
 		myHMM.learnUsingBaumWelch(100);
 		myHMM.learnUsingBaumWelch(100);
 		System.out.println(myHMM.printHMM());
-		System.out.println(myHMM.observationProbability(new int[]{1,2,4,4,0,1,1,1,1,0}));
+		System.out.println(myHMM.observationProbability(new Integer[]{1,2,4,4,0,1,1,1,1,0}));
 		
 		/*myHMM.generateSequences(new int[]{1,4,2,1,0,1,1,1,1,0,1,4,2,1,0,1,1,1,1,0},false );
 		myHMM.generateSequences(new int[]{1,4,2,1,0,1,1,1,1,0,1,4,2,1,0,1,1,1,1,0},true );
@@ -425,9 +425,9 @@ public class HMM {
 		//myHMM.learnUsingBaumWelch(100);
 		
 		//System.out.println(myHMM.printHMM());
-		System.out.println(myHMM.observationProbability(new int[]{1,2,4,4,0}));
+		System.out.println(myHMM.observationProbability(new Integer[]{1,2,4,4,0}));
 		
-		myHMM.saveHMM();
+		//myHMM.saveHMM();
 		//sequences.add
 		//hmm.learnUsingBaumWelch(numIterations, initialHMM, sequences); 
 		
