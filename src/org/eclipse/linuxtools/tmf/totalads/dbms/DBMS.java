@@ -75,8 +75,7 @@ public class DBMS implements ISubject {
 			
 			mongoClient = new MongoClient( host , port );
 			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
-		
-			
+					
 			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
 											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
 		} catch (UnknownHostException ex) {
@@ -272,7 +271,7 @@ public class DBMS implements ISubject {
 	 * @param record Object from which to extract fields and values
 	 * @param database Database name
 	 * @param collection Collection name
-	 * @throws TotalADSDBMSException,
+	 * @throws TotalADSDBMSException
 	 * @throws IllegalAccessException
 	 * @throws IllegalAccessException
 	 */
@@ -325,8 +324,10 @@ public class DBMS implements ISubject {
 	 * Inserts or updates (if already exists) an object in the form of JSON representation into the database. Any kind of complex
 	 *  data structure can be converted to JSON using gson library and passed to this function 
 	 * @param database Database name
-	 * @param jsonObject JSON Object
-	 * @param collection collection name
+	 * @param keytoSearch The indexed field and its value as a JSON object which is to be searched
+	 * @param jsonObjectToUpdate The datastructure as a JSON object which is to be updated
+	 * @param collection Name of the collection (table)
+	 * @throws TotalADSDBMSException
 	 */
 	public void insertOrUpdateUsingJSON(String database, JsonObject keytoSearch, 
 						JsonObject jsonObjectToUpdate, String collection) throws TotalADSDBMSException{

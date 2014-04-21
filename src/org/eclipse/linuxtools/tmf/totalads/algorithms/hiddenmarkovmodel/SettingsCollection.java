@@ -8,34 +8,46 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of  a trace collection in the MongoDB.
- * In the case of trace collection the fields are the system call tree generated from the trace
+ * This class represents the fields of the settings collection for HMM in the DB.
+ * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-enum TraceCollection{
+enum SettingsCollection{
 	
 	/**
 	 * The name of collection itself
 	 */
-	COLLECTION_NAME("trace_data"),
+	COLLECTION_NAME("settings"),
 	/**
-	 * key
+	 * Key field name
 	 */
-	KEY("_id"),
-	/**
-	 * Tree field
-	 */
-	TREE("tree");
-	
+	 KEY("_id"),
+	 /**
+	  * Number of states
+	  */
+	 NUM_STATES("num_states"),
+	 /**
+	  * Number of symbols
+	  */
+	 NUM_SYMBOLS("num_symbols"),
+	 /**
+	  * Sequence length
+	  */
+	 SEQ_LENGTH("seq_length"),
+	 /**
+	  * Probability threshold
+	  */
+	 PROBABILITY_THRESHOLD("prob_threshold");
+	 
 	private String fieldName;
 	/**
 	 * Constructor
 	 * @param fieldName
 	 */
-	private TraceCollection(String fieldName){
+	private SettingsCollection(String fieldName){
 		this.fieldName=fieldName;
 	}
 	/**

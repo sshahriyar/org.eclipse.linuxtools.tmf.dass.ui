@@ -16,7 +16,7 @@ import java.util.ArrayList;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class Event{
+class Event{
 	// Data variables
 	 private String event; 
 	 private ArrayList<Event[]> branches;  

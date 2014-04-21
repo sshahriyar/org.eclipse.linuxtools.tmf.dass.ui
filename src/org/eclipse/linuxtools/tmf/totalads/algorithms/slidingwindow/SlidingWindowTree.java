@@ -29,7 +29,7 @@ import com.mongodb.DBObject;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  * 
  */
-public class SlidingWindowTree {
+class SlidingWindowTree {
 	/**
 	 * Constructor
 	 */
@@ -79,7 +79,7 @@ public class SlidingWindowTree {
 		}
 		// putting the sequence (graph actually) to the starting event (node) as a key
 		sysCallSequences.put(newSequence[0],eventSequence);//add to database
-		//saveTreeInDatabase( database, connection, eventSequence, TraceCollection.COLLECTION_NAME.toString());
+		//saveTreeInDatabase( database, connection, eventSequence, HmmModelCollection.COLLECTION_NAME.toString());
 	}
 	
 	/**
@@ -179,7 +179,7 @@ public class SlidingWindowTree {
 	 * @throws TotalADSDBMSException
 	 */
 	public void saveinDatabase(ProgressConsole console, String database, DBMS connection,HashMap<String, 
-			Event[]> sysCallSequences, String collectionName) throws TotalADSDBMSException{
+			Event[]> sysCallSequences) throws TotalADSDBMSException{
 		console.printTextLn("Saving in database.....");
 		
 		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
@@ -192,14 +192,14 @@ public class SlidingWindowTree {
 			
 			JsonElement jsonArray= gson.toJsonTree(events);
 			JsonObject jsonObject= new JsonObject();
-			jsonObject.addProperty("_id", nodes.getKey());
-			jsonObject.add("tree", jsonArray);
+			jsonObject.addProperty(TraceCollection.KEY.toString(), nodes.getKey());
+			jsonObject.add(TraceCollection.TREE.toString(), jsonArray);
 			
 			JsonObject jsonKey=new JsonObject();
-			jsonKey.addProperty("_id", nodes.getKey());
+			jsonKey.addProperty(TraceCollection.KEY.toString(), nodes.getKey());
 			
 			//console.printTextLn(jsonObject.toString());
-			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, collectionName);
+			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, TraceCollection.COLLECTION_NAME.toString());
 			
 		}
 	}

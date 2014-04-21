@@ -86,7 +86,7 @@ import java.util.Map;
  * <p>@author Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class KSMSyscallStateMapper {
+class KSMSyscallStateMapper {
 	private BufferedReader buffReader;
 	private HashMap<String, HashSet<String>> list;
 	/**

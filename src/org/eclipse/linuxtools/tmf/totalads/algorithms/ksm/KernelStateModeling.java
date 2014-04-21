@@ -129,16 +129,16 @@ public class KernelStateModeling implements IDetectionAlgorithm {
   			  		trueCount++;
   			  		if (trueCount>1){
   			  			trainingOptions[count]="false";
-  			  			throw new TotalADSUIException("Please, select only one option as true.");
+  			  			throw new TotalADSUIException("Please, select only one option as true");
   			  		}
   			 }
   			 else  if (options[count].equals("false")) // if it is not true then it must be false
   				    trainingOptions[count]="false";
   			 else
-  				 throw new TotalADSUIException("Please, type true or false only.");
+  				 throw new TotalADSUIException("Please, type true or false only");
 		      
   			if (trueCount==0)	  
-  		      throw new TotalADSUIException("Please, type true for one of the options.");
+  		      throw new TotalADSUIException("Please, type true for one of the options");
   	    }
   		
   	    // this will throw an exception if databse doesnot exist		
@@ -220,14 +220,14 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		// if everything is fine up till now then carry on and insert it into the database
 		
 		try {
-			// If it has reached up till here now create the database and inserts. In case of incorrect trace format,
-			//it may have exited earlier
-			if (isNewDB && !initialize){
-	    		 createDatabase(database, connection);
-	    		 initialize=true;// make it true so we don't execute it again
-			}
+				// If it has reached up till here now create the database and inserts. In case of incorrect trace format,
+				//it may have exited earlier
+				if (isNewDB && !initialize){
+		    		 createDatabase(database, connection);
+		    		 initialize=true;// make it true so we don't execute it again
+				}
 			
-			connection.insert(states, database,TRACE_COLLECTION);
+				connection.insert(states, database,TRACE_COLLECTION);
 		} catch (IllegalAccessException ex) {
 			
 			throw new TotalADSDBMSException(ex.getMessage());
@@ -580,7 +580,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * Gets alpha from the database
+	 * Gets alpha and other settings from the database
 	 * @param database
 	 * @param connection
 	 */
@@ -588,6 +588,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	    String settingsKey ="KSM_SETTINGS";
 	    Double alphaValue=null;
 	    String kernelVersion="";
+	    
 		DBCursor cursor= connection.select(SettingsCollections.KEY.toString(), "",settingsKey, database, SETTINGS_COLLECTION);
 		if (cursor!=null && cursor.hasNext()){
 			DBObject dbObject=cursor.next();

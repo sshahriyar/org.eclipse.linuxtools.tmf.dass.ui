@@ -128,11 +128,6 @@ public class Diagnosis {
 		lblStatus.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_GREEN));
 		lblStatus.setText("        "); */
 		
-		//ProgressBar progressBar = new ProgressBar(compStatus, SWT.NONE);
-		//progressBar.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
-		//progressBar.setMaximum(5);
-		
-		//progressBar.setSelection(5);
 		
 		
 		resultsAndFeedback=new ResultsAndFeedback(compStatusResults,true);

@@ -29,7 +29,7 @@ import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
+//import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 
 /**
@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.MessageBox;
  * @author <p> Syed Shariyar Murtaza justssahry@hotmail.com </p>
  */
 
-public class BackgroundTesting extends Thread{
+public class BackgroundTesting implements Runnable{
 	private String testDirectory;
 	private ITraceTypeReader traceReader;
 	private IDetectionAlgorithm algorithm;

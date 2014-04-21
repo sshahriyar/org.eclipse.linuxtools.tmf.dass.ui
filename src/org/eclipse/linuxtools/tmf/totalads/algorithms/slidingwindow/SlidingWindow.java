@@ -78,13 +78,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
 				while (cursor.hasNext()){
 					DBObject dbObject=cursor.next();
  					Gson gson =new Gson();
- 					String key=dbObject.get("_id").toString();
- 					Object obj=dbObject.get("tree");
+ 					String key=dbObject.get(TraceCollection.KEY.toString()).toString();
+ 					Object obj=dbObject.get(TraceCollection.TREE.toString());
  					if (obj!=null){
  						Event []event = gson.fromJson(obj.toString(), Event[].class);
- 										sysCallSequences.put(key, event);
+ 						sysCallSequences.put(key, event);
  					} //else
- 						//System.out.println(key);
+ 					 //System.out.println(key);
 					
 					treeExists=true;
 				}
@@ -92,7 +92,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 				cursor.close();
 			}else
 				treeExists=false;
-			// get the maxwin
+			
+			// Get the maxwin
 			cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
 				while (cursor.hasNext()){
@@ -277,7 +278,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
 	    	 
-	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences, TraceCollection.COLLECTION_NAME.toString());
+	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences);
 	    	 intialize=false;
 	     }
 	     

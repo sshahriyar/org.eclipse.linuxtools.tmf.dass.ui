@@ -8,34 +8,36 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of  a trace collection in the MongoDB.
- * In the case of trace collection the fields are the system call tree generated from the trace
+ * This class represents the fields of the name to id collection for HMM in the DB.
+ * It stores the name of the event with its corresponding integer number
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-enum TraceCollection{
+enum NameToIDCollection{
 	
 	/**
 	 * The name of collection itself
 	 */
-	COLLECTION_NAME("trace_data"),
+	COLLECTION_NAME("name_to_id"),
 	/**
-	 * key
+	 * Key field name
 	 */
-	KEY("_id"),
-	/**
-	 * Tree field
-	 */
-	TREE("tree");
-	
+	 KEY("_id"),
+	 /**
+	  * Mapper name, this field will contain the map of key to ids
+	  * it can be converted to a hashmap directly
+	  */
+	 map("map");
+	 
+	 
 	private String fieldName;
 	/**
 	 * Constructor
 	 * @param fieldName
 	 */
-	private TraceCollection(String fieldName){
+	private NameToIDCollection(String fieldName){
 		this.fieldName=fieldName;
 	}
 	/**

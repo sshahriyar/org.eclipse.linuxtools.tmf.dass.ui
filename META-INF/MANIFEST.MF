@@ -20,7 +20,8 @@ Bundle-ClassPath: lib/mongo-java-driver-2.11.3.jar,
  lib/gson-2.2.4.jar,
  lib/jsch-0.1.51.jar,
  lib/swing2swt.jar,
- lib/jahmm-0.6.1.jar
+ lib/jahmm-0.6.1.jar,
+ lib/mongo-java-driver-2.11.3-javadoc.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.linuxtools.ctf.core.tests.shared,
  org.eclipse.linuxtools.ctf.core.trace,

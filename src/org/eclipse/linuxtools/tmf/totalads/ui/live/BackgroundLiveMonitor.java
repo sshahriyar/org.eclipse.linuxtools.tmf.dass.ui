@@ -11,8 +11,6 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,7 +32,6 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -46,7 +43,7 @@ import org.eclipse.swt.widgets.MessageBox;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class BackgroundLiveMonitor extends Thread {
+public class BackgroundLiveMonitor implements Runnable {
 	private String userAtHost;
 	private String password;
 	private String sudoPassword;

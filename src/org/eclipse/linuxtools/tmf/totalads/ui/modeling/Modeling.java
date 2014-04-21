@@ -10,6 +10,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -326,7 +328,9 @@ public class Modeling {
 						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, 
 												validationTraces,traceReader,algorithmSelector,progConsole,
 												btnBuildModel);
-						modeling.start();
+						ExecutorService executor = Executors.newSingleThreadExecutor();
+						executor.execute(modeling);
+						executor.shutdown();
 				
 				
 			}

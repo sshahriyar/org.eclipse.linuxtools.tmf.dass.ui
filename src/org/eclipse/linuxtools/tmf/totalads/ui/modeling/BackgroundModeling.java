@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.MessageBox;
  *
  */
 
-public class BackgroundModeling extends Thread{
+public class BackgroundModeling implements Runnable{
 	String trainingTraces;
 	String validationTraces;
 	ITraceTypeReader traceReader;

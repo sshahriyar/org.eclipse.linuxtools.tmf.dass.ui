@@ -10,6 +10,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.linuxtools.tmf.totalads.ui.FileBrowser;
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -412,7 +414,9 @@ public class LiveMonitor {
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
 									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,liveChart,
 									  	isTrainAndEval, console);
-					liveExecutor.start();
+					 ExecutorService executor = Executors.newSingleThreadExecutor();
+					 executor.execute(liveExecutor);
+					 executor.shutdown();
 				}
 
 			}

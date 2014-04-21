@@ -15,7 +15,7 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-public enum SettingsCollections{
+enum SettingsCollections{
 	/**
 	 * The Key name in the collection
 	 */

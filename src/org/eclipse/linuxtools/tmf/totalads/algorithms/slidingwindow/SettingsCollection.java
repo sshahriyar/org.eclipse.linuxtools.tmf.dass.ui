@@ -10,12 +10,12 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 /**
- * This class represents the fields of  a settings collection in the MongoDB.
+ * This class represents the fields of the settings collection in the MongoDB.
  * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-public enum SettingsCollection{
+enum SettingsCollection{
 	/**
 	 * The Key name in the collection
 	 */

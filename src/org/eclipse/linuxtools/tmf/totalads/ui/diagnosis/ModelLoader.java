@@ -16,6 +16,12 @@ import java.util.List;
 
 
 
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+
+
 //import java.lang.reflect.Method;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -122,8 +128,7 @@ public class ModelLoader {
 		lblProgress.setText("Processing........");
 		lblProgress.setVisible(false);*/
 		
-		/*resultsAndFeedback=new ResultsAndFeedback(statusAndResults);
-		*/
+	
 		
 		populateTreeWithModels();
 		addEventHandlers();		
@@ -203,8 +208,9 @@ public class ModelLoader {
 				
 				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, algorithm, database,
 							statusBar, btnDelete, btnSettings, btnEvaluateModels, resultsAndFeedback, algorithmSettings);
-				testTheModel.start();
-				
+				 ExecutorService executor = Executors.newSingleThreadExecutor();
+				 executor.execute(testTheModel);
+				 executor.shutdown();
 				
 			}
 		});
