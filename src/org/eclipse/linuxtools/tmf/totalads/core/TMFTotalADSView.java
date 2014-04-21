@@ -28,7 +28,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public class TMFTotalADSView extends TmfView {
 	//Variables
-	private static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.ADS01";
+	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.ADS01";
 	private ITmfTrace currentTrace;
 	private TotalADS comp;
 	/**
@@ -43,15 +43,13 @@ public class TMFTotalADSView extends TmfView {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		System.out.println("TotalADSView created!");
 		comp=new TotalADS(parent,SWT.NONE);
 		comp.setFocus();
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
-        }
-       
-         
+        }        
        
 	}
    /**
