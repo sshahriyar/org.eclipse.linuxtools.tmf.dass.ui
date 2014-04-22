@@ -60,6 +60,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         
         IFolderLayout topRightRightBottomFolder = layout.createFolder(
                 "topRightRightBottomFolder", IPageLayout.BOTTOM, 0.50f,"topRightRightFolder"); //$NON-NLS-1$
+        topRightRightBottomFolder.addView(GenericView.ID);
         topRightRightBottomFolder.addView(IPageLayout.ID_PROP_SHEET);
         
 		// Project and control view on the left

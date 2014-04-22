@@ -43,6 +43,12 @@
              name="Models DB"
              restorable="true">
        </view>
+       <view
+             class="org.eclipse.linuxtools.tmf.totalads.GenericView"
+             id="org.eclipse.linuxtools.tmf.totalads.GenericView"
+             name="Generic View"
+             restorable="true">
+       </view>
    
      <!-- <extension  point="org.eclipse.ui.perspectives">
       <perspective
