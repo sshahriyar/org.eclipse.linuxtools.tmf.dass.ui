@@ -31,7 +31,7 @@ import org.swtchart.Chart;
 public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private String []trainingSettings;
 	private int seqLength;
-	private  HmmCore hmm;
+	private  HmmMahout hmm;
 	private NameToIDMapper nameToID;
 
 	/**
@@ -108,7 +108,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public String[] getTestingOptions(String database, DBMS connection) {
-		HmmCore hmm =new HmmCore();
+		
 		String []settings=hmm.loadSettings(database, connection);
 		if (settings==null)
 			return null;
@@ -146,7 +146,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 	    if (!isTrainIntialized){
-				 hmm=new HmmCore();
+				 hmm=new HmmMahout();
 								 
 				 if (options!=null){
 					 if (isNewDB){// add all settings to the db if this is a new database
@@ -155,10 +155,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 						 setting[1]="hmm";
 						 for (int i=0;i<options.length;i++)
 							 setting[i+2]=options[i];
-						 setting[options.length+1]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
-						 setting[options.length+1]="1.0";
+						 setting[options.length+2]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
+						 setting[options.length+3]="1.0";
 						 
-						 hmm.verifySaveSettingsCreateDb(options, database, connection,true,true);
+						 hmm.verifySaveSettingsCreateDb(setting, database, connection,true,true);
 					 }else
 						 hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 				 }					 
@@ -179,7 +179,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 }
 	   
 		 int numIterations=10;
-		 console.printTextLn("Starting to extract sequences");
+		 console.printTextLn("Learning using BaumWelch");
 		 
 		 int winWidth=0,seqCount=0;
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
@@ -197,27 +197,26 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  seq=newSequence.toArray(seq);
 	    		 // console.printTextLn("Seq: "+Arrays.toString(seq));
 	    		  // searching and adding to db
-	    		  if (seqCount==0) 
-	    			  hmm.generateSequences(seq, false);
-	    		  else
-	    			  hmm.generateSequences(seq, true);
+	    		  //if (seqCount==0) 
+	    			//  hmm.generateSequences(seq, false);
+	    		 // else
+	    			//  hmm.generateSequences(seq, true);
 	    	
+	    		  hmm.learnUsingBaumWelch(numIterations, seq);
 	    		  newSequence.remove(0);
 	    		  seqCount++;
-	    		  if (seqCount%1000==0){
-	    			  //console.printTextLn("Processing Sequence "+ seqCount + Arrays.toString(seq));
-	    			  console.printTextLn("Learning using BaumWelch");
-	 	    	      hmm.learnUsingBaumWelch(numIterations);
-	 	    	      seqCount=0;
-	    		  }
+	    		  if (seqCount%100==0)
+	    			  console.printTextLn("Training on "+seqCount+"th sequence");
+	 	    	      
+	    		  
 	    	  }
 	    		  
 	     }
 	     if (isLastTrace){ 
 	    	     numSymbols=nameToID.getSize();
 	    	     //hmm.initializeHMM(numSymbols, numStates);
-	 		     console.printTextLn("Learning using BaumWelch");
-	    	     hmm.learnUsingBaumWelch(numIterations);
+	 		     console.printTextLn("Training finished..");
+	    	     //hmm.learnUsingBaumWelch(numIterations);
 	    	  	 console.printTextLn("Saving HMM");
 	    	  	 console.printTextLn(hmm.printHMM());
 	    	  	 hmm.saveHMM(database, connection);
@@ -227,7 +226,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 	}
 	/**
-	 * Validates HmmCore
+	 * Validates HMM
 	 * @param trace
 	 * @param database
 	 * @param connection
@@ -259,10 +258,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		   
-	    		  hmm.generateSequences(seq, false);
 	    		  double prob=1.0;
 	    		  try{
-	    			  prob=hmm.observationProbability(seq);
+	    			  prob=hmm.observationLikelihood(seq);
 	    		  } catch (Exception ex){
 	    			  console.printTextLn("Unknown events in seq: "+Arrays.toString(seq));
 	    		  }
@@ -286,7 +284,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			nameToID.saveMap(connection, database);
 	}
 	/**
-	 * Tests an HmmCore
+	 * Tests an HMM
 	 */
 	@Override
 	public Results test(ITraceIterator trace, String database, DBMS connection,
@@ -294,14 +292,18 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		throw new TotalADSUIException("HmmCore is not implemented yet");
 		
 	}
-
+	/**
+	 * Cross Validation
+	 */
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
 			ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException {
 	
 
 	}
-
+	/**
+	 * Returns the total anomalies found during testing
+	 */
 	@Override
 	public Double getTotalAnomalyPercentage() {
 	

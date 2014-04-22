@@ -29,7 +29,7 @@ import org.apache.mahout.classifier.sequencelearning.hmm.*;
  */
 public class HmmMahout {
 	private List <List <ObservationInteger>> sequences;
-	private Hmm<ObservationInteger> hmm;
+	private HmmModel hmm;
 	private BaumWelchLearner bwl = new BaumWelchLearner();
 	private int numStates;
 	private int numSymbols;
@@ -42,58 +42,10 @@ public class HmmMahout {
 	 */
 	public void initializeHMM(int numSymbols, int numStates){
 		
-		OpdfIntegerFactory factory = new OpdfIntegerFactory(numSymbols);
-		hmm = new Hmm<ObservationInteger>(numStates,factory);
 		this.numSymbols=numSymbols;
 		this.numStates=numStates;
+		hmm=new HmmModel(numStates, numSymbols);
 		
-		/// Generating transition probabilities with random numbers
-		Random random = new Random();
-		double start=0.0001;
-		double end=1.0000;
-		double tansitionProbabilities[][]=new double[numStates][numStates];
-		double []rowSums=new double[numStates];	
-		Arrays.fill(rowSums,0.0);
-		
-		for (int row=0;row<numStates; row++)
-			for (int col = 0; col < numStates; col++){
-				tansitionProbabilities[row][col]=getRandomRealNumber(start, end, random);
-				rowSums[row]+=tansitionProbabilities[row][col];
-			}
-		
-		for (int row=0;row<numStates; row++)
-			for (int col = 0; col < numStates; col++)
-				tansitionProbabilities[row][col]=tansitionProbabilities[row][col]/rowSums[row];
-
-		
-		// Assigning initial state probabilities Pi; i.e. probabilities at time 1
-		for (int idx=0; idx<numStates; idx++ )
-			   hmm.setPi(idx, tansitionProbabilities[0][idx]);
-		
-		//Assigning transition probabilities
-		for (int row=0;row<numStates; row++)
-			for (int col = 0; col < numStates; col++)
-				hmm.setAij(row, col,tansitionProbabilities[row][col]);
-		
-		// Measuring emission probabilities of each symbol
-		double emissionProbabilities[][]=new double[numStates][numSymbols];
-		Arrays.fill(rowSums,0.0);// Utilizing the same rowSums variable 
-		random = new Random();
-		
-		for (int row=0;row<numStates; row++)
-			for (int col = 0; col < numSymbols; col++){
-				emissionProbabilities[row][col]=getRandomRealNumber(start, end, random);
-				rowSums[row]+=emissionProbabilities[row][col];
-			}
-		
-		for (int row=0;row<numStates; row++)
-			for (int col = 0; col < numSymbols; col++)
-				emissionProbabilities[row][col]=emissionProbabilities[row][col]/rowSums[row];
-		
-		//Assigning emission probabilities of symbols  to states
-		for (int row=0;row<numStates; row++)
-			hmm.setOpdf(row, new OpdfInteger(emissionProbabilities[row]));
-			
 	}
 	
 	/**
@@ -207,51 +159,48 @@ public class HmmMahout {
 	  }
 		  
 	/**
-	 * Trains an HmmCore using the BaumWelch algorithm
+	 * Trains an HMM on a sequence using the BaumWelch algorithm
 	 * @param numIterations
-	 * @param initialHMM
-	 * @param sequences
+	 * @param observedSequence
 	 */
-	public  void learnUsingBaumWelch(Integer numIterations){
-
-		 //BaumWelchLearner bwl = new BaumWelchLearner();
-			for (int i = 0; i < numIterations; i++) 
-					hmm = bwl.iterate(hmm, sequences);
-	
+	public  void learnUsingBaumWelch(Integer numIterations, Integer []observedSequence){
+		
+		int []seq=new int[observedSequence.length];
+		for (int i=0;i<seq.length;i++)
+			seq[i]=observedSequence[i];
+		HmmTrainer.trainBaumWelch(hmm,seq , 0.000000001, numIterations,false);
+					
+	}
+	/**
+	 * Trains an HMM on a sequence using the BaumWelch algorithm
+	 * @param numIterations
+	 * @param observedSequence
+	 */
+	public  void learnUsingBaumWelch(Integer numIterations, int []observedSequence){
+		
+		HmmTrainer.trainBaumWelch(hmm,observedSequence , 0.000000001, numIterations,false);
+					
 	}
 	
+	
 	/**
-	 * Converts an int array sequence into a List sequence on which an HmmCore can be trained
-	 * @param seq
+	 * Returns the Observation probability of a sequences based on a model
+	 * @param sequence Integer array of sequences
 	 * @return
 	 */
-	private List<ObservationInteger> generateASequence(Integer []seq){
-		
-		List<ObservationInteger> sequence = new ArrayList<ObservationInteger>(); 
-		
-		for (int j=0; j<seq.length;j++)
-			sequence.add(new ObservationInteger(seq[j].intValue()));
-		
-		return sequence;
-	}
-	
-	/**
-	 * 
-	 * @param seq
-	 * @param isAppend if false then a new sequence is created, else previous one is appended
-	 */
-	public void  generateSequences(Integer []seq, Boolean isAppend){
-		if (!isAppend) //isAppend==false
-			sequences=new ArrayList<List<ObservationInteger>>();
-		sequences.add(generateASequence(seq));
+	public double observationLikelihood(int[] sequence){
+		return HmmEvaluator.modelLikelihood(hmm, sequence, false);
 	}
 	/**
 	 * Returns the Observation probability of a sequences based on a model
-	 * @param seq Integer array of sequences
+	 * @param sequence Integer array of sequences
 	 * @return
 	 */
-	public double observationProbability(Integer [] seq){
-		return hmm.probability(generateASequence(seq));
+	public double observationLikelihood(Integer[] sequence){
+		int []seq=new int[sequence.length];
+		for (int i=0; i<sequence.length;i++)
+			seq[i]=sequence[i];
+		return HmmEvaluator.modelLikelihood(hmm, seq, false);
 	}
 	/**
 	 * Loads the model directly from the database
@@ -262,39 +211,13 @@ public class HmmMahout {
 	   
 		DBCursor cursor=connection.selectAll(database, HmmModelCollection.COLLECTION_NAME.toString());
 		if (cursor!=null){
-				 
 				 Gson gson =new Gson();
-				 int stateCounter=0;
-				
-				 while (cursor.hasNext()){	
-			
+				 if (cursor.hasNext()){	
 					DBObject dbObject=cursor.next();
-					Object obj=dbObject.get(HmmModelCollection.STATE.toString());
-					
-					if (obj!=null){
-					
-						State stateJ = gson.fromJson(obj.toString(), State.class);
-						numStates= stateJ.getTransitionSize();
-					    numSymbols=stateJ.getEmissionSize();
-						
-						if (stateCounter==0){ // create an object in the first iteration only
-							OpdfIntegerFactory factory = new OpdfIntegerFactory(numSymbols);
-							hmm = new Hmm<ObservationInteger>(numStates,factory);
-						}
-											
-						// Assigning initial state probabilities
-						hmm.setPi(stateCounter, stateJ.getInitialProb());
-						
-						//Assigning transition probabilities
-						double []aij=stateJ.getTransition();
-						for (int col = 0; col < numStates; col++)
-								hmm.setAij(stateCounter, col,aij[col]);
-						// Assigning emission probabilities	
-						hmm.setOpdf(stateCounter, new OpdfInteger(stateJ.getEmission()));
-				
-					} 
-					
-				}// end while
+					Object obj=dbObject.get(HmmModelCollection.MODEL.toString());
+					if (obj!=null)
+						hmm = gson.fromJson(obj.toString(), HmmModel.class);
+				}
 		}
 	}
 	
@@ -306,52 +229,22 @@ public class HmmMahout {
 	 */
 	public void saveHMM(String database, DBMS connection) throws TotalADSDBMSException{
 		
-		int states= hmm.nbStates();
 		
 		/// Inserting the states and probabilities
-		for (int stateCount=0; stateCount <states; stateCount++){
-			
-			JsonObject stateProperties=new JsonObject();
-			//Saving initial state probabilities
-			JsonPrimitive pi=new JsonPrimitive(hmm.getPi(stateCount));
-			//pi.addProperty(HmmModelCollection.STATE_INTITIALPROB.toString(), hmm.getPi(stateCount));
-			
-			//Saving transition probabilities
-			JsonArray transitionMatrix =new JsonArray();
-			for (int transCount=0;transCount <states;transCount++){
-				JsonPrimitive aij=new JsonPrimitive(hmm.getAij(stateCount, transCount));
-				transitionMatrix.add(aij);
-			}
-			
-			// Saving emission probabilities of output symbols
-			JsonArray emissionMatrix =new JsonArray();
-			Opdf<ObservationInteger> opdf= hmm.getOpdf(stateCount);
-		
-			for (int emissionCount=0;emissionCount <numSymbols;emissionCount++){
-				//since symbols are integer numbers in an order, we can use emissionCount as a symbol
-				double stateOi=opdf.probability(new ObservationInteger(emissionCount));
-				JsonPrimitive stateOuti=new JsonPrimitive(stateOi);
-				emissionMatrix.add(stateOuti);
-			}
-			
-			// Adding them in an array
-			stateProperties.add(HmmModelCollection.STATE_INTITIALPROB.toString(),pi);
-			stateProperties.add(HmmModelCollection.STATE_TRANSITION.toString(), transitionMatrix);
-			stateProperties.add(HmmModelCollection.STATE_EMISSION.toString(), emissionMatrix);
-			String key="state_"+stateCount;
-			
 			// Creating states ids
-			JsonObject state=new JsonObject();
-			state.add(HmmModelCollection.KEY.toString(),new JsonPrimitive(key));
-			state.add("state", stateProperties);
+			String key="hmm";
+			Gson gson=new Gson();
+			JsonElement jsonHMM=gson.toJsonTree(hmm) ;
+			JsonObject hmmDoc=new JsonObject();
+			hmmDoc.add(HmmModelCollection.KEY.toString(),new JsonPrimitive(key));
+			hmmDoc.add(HmmModelCollection.MODEL.toString(), jsonHMM);
 			
 			// Creating id for query searching
 			JsonObject jsonTheKey=new JsonObject();
 			jsonTheKey.addProperty(HmmModelCollection.KEY.toString(),key);
 			
-			System.out.println(state.toString());
-			connection.insertOrUpdateUsingJSON(database, jsonTheKey, state,	HmmModelCollection.COLLECTION_NAME.toString());
-		}
+			System.out.println(hmmDoc.toString());
+			connection.insertOrUpdateUsingJSON(database, jsonTheKey, hmmDoc,HmmModelCollection.COLLECTION_NAME.toString());
 		
 	}
 	
@@ -361,7 +254,7 @@ public class HmmMahout {
 	 */
 	public String printHMM(){
 		
-		return hmm.toString(new DecimalFormat("####.###################"));
+		return hmm.toString();
 		
 	}
 	/**
@@ -377,5 +270,8 @@ public class HmmMahout {
 		HmmTrainer.trainBaumWelch(hmmModel,a , 0.000000001, 10,true);
 		System.out.println(hmmModel.getEmissionMatrix());
 		System.out.println(hmmModel.getTransitionMatrix());
+		Gson gson=new Gson();
+		
+		System.out.println(gson.toJson(hmmModel));
 	}
 }

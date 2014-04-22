@@ -28,7 +28,7 @@ enum HmmModelCollection{
 	 /**
 	  * State properties
 	  */
-	 STATE("state"),
+	 MODEL("model"),
 	 /**
 	  * Initial state probabilities, found within the state document
 	  */

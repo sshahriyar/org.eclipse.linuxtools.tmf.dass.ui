@@ -7,6 +7,8 @@ import java.util.Map;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -21,12 +23,13 @@ import com.mongodb.DBObject;
  */
 public class NameToIDMapper {
 	
-	private HashMap <String, Integer> nameToID;
+	private HashBiMap <String, Integer> nameToID;
+	
 	/**
 	 * Constructor
 	 */
 	public NameToIDMapper(){
-		nameToID=new HashMap<String, Integer>();
+		nameToID=HashBiMap.create();
 	}
 	/**
 	 * Returns the id mapped to a name
@@ -58,6 +61,14 @@ public class NameToIDMapper {
 	public Integer getSize(){
 		return nameToID.size();
 		
+	}
+	/**
+	 * Returns the name for an id
+	 * @param id Integer id
+	 * @return Key 
+	 */
+	public String getKey(Integer id){
+		return nameToID.inverse().get(id);
 	}
 	
 	/**

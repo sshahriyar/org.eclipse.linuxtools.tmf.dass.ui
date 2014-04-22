@@ -272,7 +272,7 @@ public class HmmCore {
 				 while (cursor.hasNext()){	
 			
 					DBObject dbObject=cursor.next();
-					Object obj=dbObject.get(HmmModelCollection.STATE.toString());
+					Object obj=dbObject.get(HmmModelCollection.MODEL.toString());
 					
 					if (obj!=null){
 					
