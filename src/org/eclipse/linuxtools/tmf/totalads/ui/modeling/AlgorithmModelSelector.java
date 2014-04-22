@@ -215,8 +215,20 @@ public class AlgorithmModelSelector {
 		// Getting training options
 		MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
 		           ,SWT.ICON_ERROR|SWT.OK);
-	
-		String []options=currentlySelectedAlgorithm.getTrainingOptions();
+		//Get the model/database name
+		String exception=retreiveModelName();
+		if (!exception.isEmpty()){
+			msgBox.setMessage(exception);
+			msgBox.open();
+			return;
+		}
+		// we only need to know if it is a new model or an existing model with its name
+		// so get the information from the class variables
+		Boolean isCreateDB=isNewOrOldModel;
+		String database=modelNameRetreival;
+				
+		
+		String []options=currentlySelectedAlgorithm.getTrainingOptions(Configuration.connection, database,isCreateDB);
 		if (options!=null){
 			try{
 				if (settingsDialog==null)
@@ -231,7 +243,7 @@ public class AlgorithmModelSelector {
 			} finally{
 				settingsDialog=null;
 			}
-					}else{
+		}else{
 			msgBox.setMessage("Not implemented yet");
 			msgBox.open();
 		}
@@ -285,7 +297,7 @@ public class AlgorithmModelSelector {
 				txtNewDBName.setEnabled(true);
 				cmbDBNames.setEnabled(false);
 				cmbDBNames.removeAll();
-				
+				algorithmOptions=null;
 			}
 			
 		});
@@ -302,7 +314,15 @@ public class AlgorithmModelSelector {
 			}
 			
 		});
-		
+		// adds an event listener to combo selection
+		cmbDBNames.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				algorithmOptions=null;
+				
+			}
+			
+		});
 		
 	   // Add an observer to DBMS connection to automatically update 
 	  //the list of databases when new ones are created and old ones are deleted
@@ -335,7 +355,7 @@ public class AlgorithmModelSelector {
 	 *
 	 */
 	private void populateComboWithDatabaseList(){
-		
+		algorithmOptions=null;
 		if (checkItemSelection() && btnSelectDB.getSelection()){
 			String filter =currentlySelectedAlgorithm.getAcronym();	
 			// First clear it

@@ -29,7 +29,7 @@ import be.ac.ulg.montefiore.run.jahmm.toolbox.MarkovGenerator;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class HmmCore {
+public class HmmJahmm {
 	private List <List <ObservationInteger>> sequences;
 	private Hmm<ObservationInteger> hmm;
 	private BaumWelchLearner bwl = new BaumWelchLearner();
@@ -210,7 +210,7 @@ public class HmmCore {
 	  }
 		  
 	/**
-	 * Trains an HmmCore using the BaumWelch algorithm
+	 * Trains an HmmJahmm using the BaumWelch algorithm
 	 * @param numIterations
 	 * @param initialHMM
 	 * @param sequences
@@ -224,7 +224,7 @@ public class HmmCore {
 	}
 	
 	/**
-	 * Converts an int array sequence into a List sequence on which an HmmCore can be trained
+	 * Converts an int array sequence into a List sequence on which an HmmJahmm can be trained
 	 * @param seq
 	 * @return
 	 */
@@ -302,7 +302,7 @@ public class HmmCore {
 	}
 	
 	/**
-	 * This functions saves the HmmCore model into the database
+	 * This functions saves the HmmJahmm model into the database
 	 * @param database
 	 * @param connection
 	 * @throws TotalADSDBMSException
@@ -317,7 +317,7 @@ public class HmmCore {
 			JsonObject stateProperties=new JsonObject();
 			//Saving initial state probabilities
 			JsonPrimitive pi=new JsonPrimitive(hmm.getPi(stateCount));
-			//pi.addProperty(HmmModelCollection.STATE_INTITIALPROB.toString(), hmm.getPi(stateCount));
+			//pi.addProperty(HmmModelCollection.INTITIALPROB.toString(), hmm.getPi(stateCount));
 			
 			//Saving transition probabilities
 			JsonArray transitionMatrix =new JsonArray();
@@ -338,9 +338,9 @@ public class HmmCore {
 			}
 			
 			// Adding them in an array
-			stateProperties.add(HmmModelCollection.STATE_INTITIALPROB.toString(),pi);
-			stateProperties.add(HmmModelCollection.STATE_TRANSITION.toString(), transitionMatrix);
-			stateProperties.add(HmmModelCollection.STATE_EMISSION.toString(), emissionMatrix);
+			stateProperties.add(HmmModelCollection.INTITIALPROB.toString(),pi);
+			stateProperties.add(HmmModelCollection.TRANSITIONPROB.toString(), transitionMatrix);
+			stateProperties.add(HmmModelCollection.EMISSIONPROB.toString(), emissionMatrix);
 			String key="state_"+stateCount;
 			
 			// Creating states ids
@@ -372,7 +372,7 @@ public class HmmCore {
 	 * @param args
 	 */
 	public static void main (String args[]){
-	/*	HmmCore myHMM=new HmmCore();
+	/*	HmmJahmm myHMM=new HmmJahmm();
 		myHMM.initializeHMM(5, 5);
 	
 		Gson gson =new Gson();
@@ -436,7 +436,7 @@ public class HmmCore {
 		}*/
 		DBMS conn=new DBMS();
 		conn.connect(Configuration.host, Configuration.port);
-		HmmCore myHMM=new HmmCore();
+		HmmJahmm myHMM=new HmmJahmm();
 		myHMM.loadHmm(conn, "TATA_HMM");
 		//myHMM.saveHMM();
 		//sequences.add

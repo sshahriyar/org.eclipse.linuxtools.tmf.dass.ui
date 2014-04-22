@@ -63,8 +63,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Constructor
 	 **/
 	public SlidingWindow() {
+		treeExists=false;
 		sysCallSequences= new HashMap<String, Event[]>();
 		treeTransformer=new SlidingWindowTree();
+		
 	}
 	/**
 	 * Initializes the model if already exists in the database
@@ -83,10 +85,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
  					if (obj!=null){
  						Event []event = gson.fromJson(obj.toString(), Event[].class);
  						sysCallSequences.put(key, event);
- 					} //else
- 					 //System.out.println(key);
-					
-					treeExists=true;
+ 					} 
+				 treeExists=true;
 				}
 				
 				cursor.close();
@@ -111,8 +111,15 @@ public class SlidingWindow implements IDetectionAlgorithm {
      * @return String[] Array of String
      */
     @Override
-    public String[] getTrainingOptions(){
-    		return trainingOptions;
+    public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase){
+    	   if (isNewDatabase)
+    		  return trainingOptions;
+    	   else{
+    		   loadSetings(database, connection);
+    		   String []options={"Max Hamming Distance",maxHamDis.toString()};
+    		   return options;
+    	   }
+    		   
     	
     }
     /**
@@ -121,7 +128,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
     @Override
     public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
     {
-    	  try{
+    	/*  try{
     		  if (treeExists==true)
     			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
     		  else if (options[0].equals(this.trainingOptions[0]))
@@ -140,7 +147,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
 		// Update the settings collection for maxwin and maxhamm
 		  // this will throw excepton if databse doesnot exist
-	     saveSettings(database, connection);
+	     saveSettings(database, connection);*/
 	     
 	    	  
     }
@@ -150,24 +157,17 @@ public class SlidingWindow implements IDetectionAlgorithm {
      */
     @Override
     public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException{
-    	 
+    	 Integer theMaxHamDis=0;
     	if (options!=null && options[0].equals(this.testingOptions[0]) ){
   		  	try {
-  		  		maxHamDis=Integer.parseInt(options[1]);
+  		  		theMaxHamDis=Integer.parseInt(options[1]);
   		  	}catch (NumberFormatException ex){
   		  		throw new TotalADSUIException("Please, enter an integer value.");
   		  	}
   		   
   		  	/// Get previous max window first
-  		  	DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
-			if (cursor !=null){
-				while (cursor.hasNext()){
-					DBObject dbObject=cursor.next();
-					maxWin=Integer.parseInt(dbObject.get(SettingsCollection.MAX_WIN.toString()).toString());
-					
-				}
-				cursor.close();
-			}
+  		    loadSetings(database, connection);
+  		    maxHamDis=theMaxHamDis;// change the maxHam
   	        saveSettings(database, connection); // save maxHamm
   	     }
     	  
@@ -181,15 +181,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
      */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
-    	DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
-		if (cursor !=null){
-			while (cursor.hasNext()){
-				DBObject dbObject=cursor.next();
-				//maxWin=Integer.parseInt(dbObject.get(SETTINGS_COLL_FIELDS.MAX_WIN).toString());
-				maxHamDis=Integer.parseInt(dbObject.get(SettingsCollection.MAX_HAM_DIS.toString()).toString());
-			}
-			cursor.close();
-		}
+    	loadSetings(database, connection);
     	testingOptions[1]=maxHamDis.toString(); 		
     	return testingOptions;
     	
@@ -218,20 +210,20 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			  validationTraceCount=0;
 			  validationAnomalies=0;
 			  
-	    	
+			  if (!isNewDB)
+			     initialize(connection,database);
 	    	  // If the option name is the same and database has no model then take the maxwin from user
 	    	  // else maxwin aleady exists in the database. We cannot change it
 	    	  if ( options!=null){
 	    		  try{
-		    		  if (treeExists==true)
-		    			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
-		    		  else if (options[0].equals(this.trainingOptions[0]))
-			    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
-		    		  
-		    		  //check for hamming distance
-		    		  if (options[2].equals(this.trainingOptions[2]) )
-			    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
-	    		  
+		    		
+		    		  for (int i=0; i<options.length;i++){
+		    			  
+		    			   if (options[i].equals(this.trainingOptions[0]))
+				    		  	maxWin=Integer.parseInt(options[i+1]);// on error exception will be thrown automatically
+		    			   else	 if (options[i].equals(this.trainingOptions[2]) )
+				    		  	maxHamDis=Integer.parseInt(options[i+1]);// on error exception will be thrown automatically
+		    		  }
 	    		  }catch (Exception ex){// Capturing exception to send a UI error
 	    			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
 	    		  }
@@ -241,10 +233,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	  }
 	    		
 	    	  intialize=true;
-		    	 // Initializing 
-		       	  	 if (isNewDB)
-		    	  		  createDatabase(database, connection);
-		    		 initialize(connection,database);
+		      // Now create database 
+		      if (isNewDB){
+		     		  createDatabase(database, connection);
+		     		 // initialize(connection,database);
+		      }
 		    
 	    		    	  
 	      }
@@ -479,8 +472,22 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 
 		 
 	}
-	
-	
+	/**
+	 * Loads settings into the class variables maxWin and maxHamDis
+	 * @param database
+	 * @param connection
+	 */
+	private void loadSetings(String database, DBMS connection){
+		DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
+		if (cursor !=null){
+			while (cursor.hasNext()){
+				DBObject dbObject=cursor.next();
+				maxWin=Integer.parseInt(dbObject.get(SettingsCollection.MAX_WIN.toString()).toString());
+				maxHamDis=Integer.parseInt(dbObject.get(SettingsCollection.MAX_HAM_DIS.toString()).toString());
+			}
+			cursor.close();
+		}
+	}
 	/** 
 	 * Text Results, an overriden method
 	 */

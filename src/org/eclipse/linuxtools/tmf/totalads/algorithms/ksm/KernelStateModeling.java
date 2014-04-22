@@ -109,8 +109,14 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @return String[]
      */
     @Override
-    public String[] getTrainingOptions(){
-    		return trainingOptions;
+    public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase){
+    		if (isNewDatabase)
+    			return trainingOptions;
+    		else{
+    			getSettingsFromDatabase(database, connection);// Settings are loaded in the trainingOptions array
+    			return trainingOptions;
+    		}
+    			
     	
     }
     /**
@@ -119,7 +125,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     @Override
     public void saveTrainingOptions(String [] options, String database, DBMS connection) 	throws TotalADSUIException, TotalADSDBMSException
     {
-    	alpha=0.0;
+    	/*alpha=0.0;
   	   
   	  	if (options!=null){
   		  int trueCount=0;
@@ -143,7 +149,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
   		
   	    // this will throw an exception if databse doesnot exist		
   	  	saveSettingsInDatabase(alpha, database, connection);
-	
+	 */
   
     }
     /**
@@ -580,7 +586,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * Gets alpha and other settings from the database
+	 * Gets alpha and other settings from the database. alpha is returned and other settings are
+	 * put in a class level string array trainingOptions
 	 * @param database
 	 * @param connection
 	 */

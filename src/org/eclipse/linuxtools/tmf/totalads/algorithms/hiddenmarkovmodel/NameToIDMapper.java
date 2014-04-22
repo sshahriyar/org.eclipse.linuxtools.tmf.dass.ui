@@ -82,7 +82,7 @@ public class NameToIDMapper {
 		JsonElement jsonMap= gson.toJsonTree(nameToID);
 		JsonObject jsonObject= new JsonObject();
 		jsonObject.addProperty(NameToIDCollection.KEY.toString(), "nametoid");
-		jsonObject.add(NameToIDCollection.map.toString(), jsonMap);
+		jsonObject.add(NameToIDCollection.MAP.toString(), jsonMap);
 		
 		JsonObject jsonKey=new JsonObject();
 		jsonKey.addProperty(NameToIDCollection.KEY.toString(), "nametoid");
@@ -102,12 +102,12 @@ public class NameToIDMapper {
 		if (cursor!=null){
 			 Gson gson =new Gson();
 		     DBObject dbObject=cursor.next();
-			 Object obj=dbObject.get(NameToIDCollection.map.toString());
+			 Object obj=dbObject.get(NameToIDCollection.MAP.toString());
 			 if (obj!=null){
-				 	Type stringIntMap = new TypeToken<HashMap<String, Integer>>(){}.getType();
+				 	Type stringIntMap = new TypeToken<BiMap<String, Integer>>(){}.getType();
 					 nameToID= gson.fromJson(obj.toString(), stringIntMap);
 			 }
-			
+			cursor.close();
 	     }
 	}
 	

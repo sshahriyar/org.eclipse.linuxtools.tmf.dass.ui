@@ -31,14 +31,17 @@ public interface IDetectionAlgorithm {
 public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException; 
 /**
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
+ * @param connection Database connection object
+ * @param database database name
+ * @param isNewDatabase True if it is a new databse else it is false
  * @return Array of Strings as options/settings
  */
-public String[] getTrainingOptions();
+public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase);
 /**
  * Validates the training options and saves them into the database. On error throws exception
- * @param options
- * @param database
- * @param connection
+ * @param options Settings array
+ * @param database Database name
+ * @param connection Databse connection object
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException TODO
  */

@@ -1,7 +1,5 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
-import java.lang.reflect.Type;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+
 import java.util.*;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
@@ -10,27 +8,29 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.reflect.TypeToken;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
-import be.ac.ulg.montefiore.run.jahmm.*;
-import be.ac.ulg.montefiore.run.jahmm.learn.BaumWelchLearner;
+
+
+
+
 
 import org.apache.mahout.classifier.sequencelearning.hmm.*;
+import org.apache.mahout.math.DenseMatrix;
+import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Vector;
 /**
  * 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class HmmMahout {
-	private List <List <ObservationInteger>> sequences;
+	
 	private HmmModel hmm;
-	private BaumWelchLearner bwl = new BaumWelchLearner();
 	private int numStates;
 	private int numSymbols;
 	
@@ -49,7 +49,7 @@ public class HmmMahout {
 	}
 	
 	/**
-	 * Validates settings and saves them into the database after creating a new databse if requried
+	 * Validates settings and saves them into the database after creating a new database if required
 	 * @param settings Settings array
 	 * @param database Database name
 	 * @param connection DBMS object
@@ -138,6 +138,7 @@ public class HmmMahout {
 				 settings[5]=dbObject.get(SettingsCollection.SEQ_LENGTH.toString()).toString();
 				 settings[6]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
 				 settings[7]=dbObject.get(SettingsCollection.PROBABILITY_THRESHOLD.toString()).toString();
+				 cursor.close();
 		}
 		return settings;
 	}
@@ -168,7 +169,7 @@ public class HmmMahout {
 		int []seq=new int[observedSequence.length];
 		for (int i=0;i<seq.length;i++)
 			seq[i]=observedSequence[i];
-		HmmTrainer.trainBaumWelch(hmm,seq , 0.000000001, numIterations,false);
+		HmmTrainer.trainBaumWelch(hmm,seq , 0.0001, numIterations,false);
 					
 	}
 	/**
@@ -203,7 +204,7 @@ public class HmmMahout {
 		return HmmEvaluator.modelLikelihood(hmm, seq, false);
 	}
 	/**
-	 * Loads the model directly from the database
+	 * Loads the model directly from a database
 	 * @param connection
 	 * @param database
 	 */
@@ -214,15 +215,22 @@ public class HmmMahout {
 				 Gson gson =new Gson();
 				 if (cursor.hasNext()){	
 					DBObject dbObject=cursor.next();
-					Object obj=dbObject.get(HmmModelCollection.MODEL.toString());
-					if (obj!=null)
-						hmm = gson.fromJson(obj.toString(), HmmModel.class);
+					Object emissionProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
+					Object transsitionProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
+					Object initialProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
+					
+					DenseMatrix emissionMatrix = gson.fromJson(emissionProb.toString(), DenseMatrix.class);
+					DenseMatrix transitionMatrix = gson.fromJson(transsitionProb.toString(), DenseMatrix.class);
+					DenseVector initialProbVector=gson.fromJson(initialProb.toString(), DenseVector.class);
+					
+					hmm=new HmmModel(transitionMatrix, emissionMatrix, initialProbVector);
 				}
+				cursor.close(); 
 		}
 	}
 	
 	/**
-	 * This functions saves the HmmCore model into the database
+	 * This functions saves the HmmJahmm model into the database
 	 * @param database
 	 * @param connection
 	 * @throws TotalADSDBMSException
@@ -230,20 +238,29 @@ public class HmmMahout {
 	public void saveHMM(String database, DBMS connection) throws TotalADSDBMSException{
 		
 		
-		/// Inserting the states and probabilities
+		   /// Inserting the states and probabilities
 			// Creating states ids
 			String key="hmm";
 			Gson gson=new Gson();
-			JsonElement jsonHMM=gson.toJsonTree(hmm) ;
+			
+			DenseMatrix emissionMatrix=(DenseMatrix) hmm.getEmissionMatrix();
+			DenseMatrix transitionMatrix=(DenseMatrix) hmm.getTransitionMatrix();
+			Vector initialProb=  hmm.getInitialProbabilities();
+			
+			
 			JsonObject hmmDoc=new JsonObject();
 			hmmDoc.add(HmmModelCollection.KEY.toString(),new JsonPrimitive(key));
-			hmmDoc.add(HmmModelCollection.MODEL.toString(), jsonHMM);
+			hmmDoc.add(HmmModelCollection.EMISSIONPROB.toString(), gson.toJsonTree(emissionMatrix));
+			hmmDoc.add(HmmModelCollection.TRANSITIONPROB.toString(), gson.toJsonTree(transitionMatrix));
+			hmmDoc.add(HmmModelCollection.INTITIALPROB.toString(), gson.toJsonTree(initialProb));
 			
 			// Creating id for query searching
 			JsonObject jsonTheKey=new JsonObject();
 			jsonTheKey.addProperty(HmmModelCollection.KEY.toString(),key);
 			
 			System.out.println(hmmDoc.toString());
+			
+			
 			connection.insertOrUpdateUsingJSON(database, jsonTheKey, hmmDoc,HmmModelCollection.COLLECTION_NAME.toString());
 		
 	}
@@ -263,15 +280,41 @@ public class HmmMahout {
 	 */
 	public static void main (String args[]){
 	
-		HmmModel hmmModel=new HmmModel(5, 20);
+		/*HmmModel hmmModel=new HmmModel(5, 20);
 		int a[]={1,2,10,8,7,6,7,8,9,0,19,18};
+		
 		System.out.println(hmmModel.getEmissionMatrix());
 		System.out.println(hmmModel.getTransitionMatrix());
 		HmmTrainer.trainBaumWelch(hmmModel,a , 0.000000001, 10,true);
 		System.out.println(hmmModel.getEmissionMatrix());
 		System.out.println(hmmModel.getTransitionMatrix());
-		Gson gson=new Gson();
+		*/
+		HmmMahout hmm=new HmmMahout();
+		hmm.initializeHMM(100, 20);
+		HmmModel hmmModel=new HmmModel(3, 5);
+		DenseMatrix emission=(DenseMatrix) hmmModel.getEmissionMatrix();
+		DenseMatrix transition=(DenseMatrix) hmmModel.getTransitionMatrix();
+		DenseVector initialProb= (DenseVector)hmmModel.getInitialProbabilities();
+		System.out.println(emission);
+		//System.out.println(hmmModel.getTransitionMatrix());
 		
-		System.out.println(gson.toJson(hmmModel));
+		Gson gson=new Gson();
+		JsonElement em=gson.toJsonTree(initialProb);
+		System.out.println("eee");
+		System.out.println(em.toString());
+		DenseVector e=  gson.fromJson(em, DenseVector.class);
+		System.out.println("jjj");
+		System.out.println(e);
+		
+		DBMS conn=new DBMS();
+		conn.connect(Configuration.host, Configuration.port);
+		try{
+			hmm.saveHMM("HIJ_HMM", conn);
+			hmm.loadHmm(conn, "HIJ_HMM");
+		} catch (Exception ex){
+			ex.printStackTrace();
+		}
+		
+		//System.out.println(gson.toJson(hmm));
 	}
 }

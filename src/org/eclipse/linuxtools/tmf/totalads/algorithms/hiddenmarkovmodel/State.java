@@ -1,6 +1,6 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class is used to fill properties of an HmmCore model by using Gson library from the database
+ * This class is used to fill properties of an HmmJahmm model by using Gson library from the database
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */

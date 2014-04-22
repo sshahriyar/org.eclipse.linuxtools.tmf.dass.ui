@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of the trace collection  for HmmCore in the DB.
+ * This class represents the fields of the trace collection  for HmmJahmm in the DB.
  * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
@@ -26,21 +26,21 @@ enum HmmModelCollection{
 	 */
 	 KEY("_id"),
 	 /**
-	  * State properties
+	  * Model
 	  */
 	 MODEL("model"),
 	 /**
 	  * Initial state probabilities, found within the state document
 	  */
-	 STATE_INTITIALPROB("Pi"),
+	 INTITIALPROB("Pi"),
 	 /**
 	  * Transition probabilities, found within the state document
 	  */
-	 STATE_TRANSITION("Aij"),
+	 TRANSITIONPROB("Aij"),
 	 /**
 	  * Emission probabilities, found within the state document
 	  */
-	 STATE_EMISSION("Opdf");
+	 EMISSIONPROB("Opdf");
 	/**
 	 * Private field to hold the name
 	 */

@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of the name to id collection for HmmCore in the DB.
+ * This class represents the fields of the name to id collection for HmmJahmm in the DB.
  * It stores the name of the event with its corresponding integer number
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
@@ -29,7 +29,7 @@ enum NameToIDCollection{
 	  * Mapper name, this field will contain the map of key to ids
 	  * it can be converted to a hashmap directly
 	  */
-	 map("map");
+	 MAP("map");
 	 
 	 
 	private String fieldName;
