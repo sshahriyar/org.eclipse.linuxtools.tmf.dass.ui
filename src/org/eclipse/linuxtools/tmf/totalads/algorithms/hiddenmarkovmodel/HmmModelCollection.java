@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of the trace collection  for HMM in the DB.
+ * This class represents the fields of the trace collection  for HmmCore in the DB.
  * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *

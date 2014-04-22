@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of the settings collection for HMM in the DB.
+ * This class represents the fields of the settings collection for HmmCore in the DB.
  * 
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *

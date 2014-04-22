@@ -31,7 +31,7 @@ import org.swtchart.Chart;
 public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private String []trainingSettings;
 	private int seqLength;
-	private  HMM hmm;
+	private  HmmCore hmm;
 	private NameToIDMapper nameToID;
 
 	/**
@@ -44,7 +44,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		trainingSettings[2]= SettingsCollection.NUM_SYMBOLS.toString();
 		trainingSettings[3]="350";
 		trainingSettings[4]=SettingsCollection.SEQ_LENGTH.toString();
-		trainingSettings[5]="50";
+		trainingSettings[5]="20";
 		nameToID=new NameToIDMapper();		
 		
 	}
@@ -62,19 +62,17 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void createDatabase(String databaseName, DBMS connection)throws TotalADSDBMSException {
-		String []collectionNames={HmmModelCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString()
-				                  , NameToIDCollection.COLLECTION_NAME.toString() };
 		
-		connection.createDatabase(databaseName, collectionNames);
+		
 		String []settings={ SettingsCollection.KEY.toString(),"hmm",
-							SettingsCollection.NUM_STATES.toString(),"0",
-						    SettingsCollection.NUM_SYMBOLS.toString(), "0"
-						   ,SettingsCollection.SEQ_LENGTH.toString(),"0",
-							SettingsCollection.PROBABILITY_THRESHOLD.toString(),"0.0"};
+							SettingsCollection.NUM_STATES.toString(),"5",
+						    SettingsCollection.NUM_SYMBOLS.toString(), "100"
+						   ,SettingsCollection.SEQ_LENGTH.toString(),"20",
+							SettingsCollection.PROBABILITY_THRESHOLD.toString(),"1.0"};
 		
 		try {
-			HMM hmm=new HMM();
-			hmm.saveSettings(settings, databaseName, connection);
+			
+			hmm.verifySaveSettingsCreateDb(settings, databaseName, connection,true,true);
 		} catch (TotalADSUIException e) {}
 
 	}
@@ -89,8 +87,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
 	{
-		HMM hmm=new HMM();
-		hmm.saveSettings(options, database, connection);
+		
+		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 		
 	}
 	/**
@@ -110,7 +108,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public String[] getTestingOptions(String database, DBMS connection) {
-		HMM hmm =new HMM();
+		HmmCore hmm =new HmmCore();
 		String []settings=hmm.loadSettings(database, connection);
 		if (settings==null)
 			return null;
@@ -133,39 +131,53 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    @Override
 	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
 	{ 
-	   HMM hmm=new HMM();
-	   hmm.saveSettings(options, database, connection);
+	   
+	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 	}
  
   /**
    * 
-   * Trains an HMM
+   * Trains an HmmCore
    */
-   private boolean isIntialized=false;
+   private boolean isTrainIntialized=false;
    private int numStates, numSymbols;
    @Override
-	
-	public void train(ITraceIterator trace, Boolean isLastTrace,
-			String database, DBMS connection, ProgressConsole console,
-			String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console,
+		String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
-	   if (!isIntialized){
-		 hmm=new HMM();
-		 if (isNewDB)
-			 createDatabase(database, connection);
-		 
-		 if (options!=null)
-			 hmm.saveSettings(options, database, connection);
-		 else{
-			 if (isNewDB) options=trainingSettings;
-			 else options=hmm.loadSettings(database, connection);
-		 } 
-		 	 numStates=Integer.parseInt(options[1]);
-		 	 numSymbols=Integer.parseInt(options[3]);
-		 	seqLength=Integer.parseInt(options[5]);
-		 	
-		 	isIntialized=true;
-		}
+	    if (!isTrainIntialized){
+				 hmm=new HmmCore();
+								 
+				 if (options!=null){
+					 if (isNewDB){// add all settings to the db if this is a new database
+						 String []setting=new String[options.length+4];
+						 setting[0]=SettingsCollection.KEY.toString(); 
+						 setting[1]="hmm";
+						 for (int i=0;i<options.length;i++)
+							 setting[i+2]=options[i];
+						 setting[options.length+1]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
+						 setting[options.length+1]="1.0";
+						 
+						 hmm.verifySaveSettingsCreateDb(options, database, connection,true,true);
+					 }else
+						 hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
+				 }					 
+				 else{
+					 if (isNewDB) 
+						createDatabase(database, connection); // with default settings
+					  options=hmm.loadSettings(database, connection);// get settings from db
+				 } 
+				 numStates=Integer.parseInt(options[1]);
+				 numSymbols=Integer.parseInt(options[3]);
+				 seqLength=Integer.parseInt(options[5]);
+				 if (isNewDB)
+					 hmm.initializeHMM(numSymbols, numStates);
+				 else
+					 hmm.loadHmm(connection, database);	
+				 nameToID.loadMap(connection, database);
+				 isTrainIntialized=true;
+		 }
+	   
 		 int numIterations=10;
 		 console.printTextLn("Starting to extract sequences");
 		 
@@ -192,26 +204,30 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	
 	    		  newSequence.remove(0);
 	    		  seqCount++;
-	    		  if (seqCount%1000==0)
-	    			  console.printTextLn("Processing Sequence "+ seqCount + Arrays.toString(seq));
+	    		  if (seqCount%1000==0){
+	    			  //console.printTextLn("Processing Sequence "+ seqCount + Arrays.toString(seq));
+	    			  console.printTextLn("Learning using BaumWelch");
+	 	    	      hmm.learnUsingBaumWelch(numIterations);
+	 	    	      seqCount=0;
+	    		  }
 	    	  }
 	    		  
 	     }
 	     if (isLastTrace){ 
 	    	     numSymbols=nameToID.getSize();
-	    	     hmm.initializeHMM(numSymbols, numStates);
+	    	     //hmm.initializeHMM(numSymbols, numStates);
 	 		     console.printTextLn("Learning using BaumWelch");
 	    	     hmm.learnUsingBaumWelch(numIterations);
 	    	  	 console.printTextLn("Saving HMM");
 	    	  	 console.printTextLn(hmm.printHMM());
 	    	  	 hmm.saveHMM(database, connection);
-	    	  	 
+	    	  	 nameToID.saveMap(connection, database);
 	     }
 		 
 		
 	}
 	/**
-	 * Validates HMM
+	 * Validates HmmCore
 	 * @param trace
 	 * @param database
 	 * @param connection
@@ -244,8 +260,13 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  // searching and adding to db
 	    		   
 	    		  hmm.generateSequences(seq, false);
+	    		  double prob=1.0;
+	    		  try{
+	    			  prob=hmm.observationProbability(seq);
+	    		  } catch (Exception ex){
+	    			  console.printTextLn("Unknown events in seq: "+Arrays.toString(seq));
+	    		  }
 	    		  
-	    		  double prob=hmm.observationProbability(seq);
 	    		  if (prob<probThreshold){
 	    			  probThreshold=prob;
 	    			  //console.printTextLn(Arrays.toString(seq));
@@ -260,28 +281,30 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		options[7]=probThreshold.toString();
 		console.printTextLn("Final Min Threshold: "+probThreshold.toString());
 		 
-		hmm.saveSettings(options, database, connection); 
+		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
+		if (isLastTrace)
+			nameToID.saveMap(connection, database);
 	}
 	/**
-	 * Tests an HMM
+	 * Tests an HmmCore
 	 */
 	@Override
 	public Results test(ITraceIterator trace, String database, DBMS connection,
 			String[] options) throws TotalADSUIException, TotalADSDBMSException {
-		throw new TotalADSUIException("HMM is not implemented yet");
+		throw new TotalADSUIException("HmmCore is not implemented yet");
 		
 	}
 
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
 			ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException {
-		// TODO Auto-generated method stub
+	
 
 	}
 
 	@Override
 	public Double getTotalAnomalyPercentage() {
-		// TODO Auto-generated method stub
+	
 		return null;
 	}
 

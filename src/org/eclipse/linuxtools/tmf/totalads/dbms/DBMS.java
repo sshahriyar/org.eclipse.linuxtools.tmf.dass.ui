@@ -322,7 +322,8 @@ public class DBMS implements ISubject {
 
 	/**
 	 * Inserts or updates (if already exists) an object in the form of JSON representation into the database. Any kind of complex
-	 *  data structure can be converted to JSON using gson library and passed to this function 
+	 *  data structure can be converted to JSON using gson library and passed to this function. This function replaces the entire document with a new
+	 *  document of a matching key. E.g., If a document {"_id": 1, a:4, b:6} is updated with {b:8} then the new document would be {"_id":1, b:8} 
 	 * @param database Database name
 	 * @param keytoSearch The indexed field and its value as a JSON object which is to be searched
 	 * @param jsonObjectToUpdate The datastructure as a JSON object which is to be updated
@@ -344,6 +345,33 @@ public class DBMS implements ISubject {
 		   if( !cmdResult.ok()) 
 			         throw new TotalADSDBMSException ("Error : "+cmdResult.getErrorMessage());
 		
+	}
+	/**
+	 * Updates fields in an existing document.
+	 * @param database
+	 * @param keytoSearch
+	 * @param jsonObjectToUpdate
+	 * @param collection
+	 * @throws TotalADSDBMSException
+	 */
+	public void updateFieldsInExistingDocUsingJSON(String database, JsonObject keytoSearch, JsonObject jsonObjectToUpdate, String collection) 
+				throws TotalADSDBMSException{
+		
+		DB db = mongoClient.getDB(database);			
+		DBCollection col = db.getCollection(collection);
+
+		BasicDBObject query = (BasicDBObject)JSON.parse(keytoSearch.toString());
+		//new BasicDBObject();
+		//query.put("name", "MongoDB");
+
+		BasicDBObject newDocument = (BasicDBObject)JSON.parse(jsonObjectToUpdate.toString());
+		//newDocument.put("name", "MongoDB-updated");
+
+		BasicDBObject updateObj = new BasicDBObject();
+		updateObj.put("$set", newDocument);
+
+		col.update(query, updateObj);
+
 	}
 	/**
 	 * Selects a max value from a collection (table)

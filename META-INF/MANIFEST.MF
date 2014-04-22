@@ -21,7 +21,13 @@ Bundle-ClassPath: lib/mongo-java-driver-2.11.3.jar,
  lib/jsch-0.1.51.jar,
  lib/swing2swt.jar,
  lib/jahmm-0.6.1.jar,
- lib/mongo-java-driver-2.11.3-javadoc.jar
+ lib/mongo-java-driver-2.11.3-javadoc.jar,
+ lib/commons-math3-3.2-javadoc.jar,
+ lib/guava-16.0.1.jar,
+ lib/mahout-core-0.9.jar,
+ lib/mahout-integration-0.9.jar,
+ lib/mahout-math-0.9.jar,
+ lib/mahout-core-0.9-job.jar
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.linuxtools.ctf.core.tests.shared,
  org.eclipse.linuxtools.ctf.core.trace,

@@ -10,7 +10,7 @@
 
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 /**
- * This class represents the fields of the name to id collection for HMM in the DB.
+ * This class represents the fields of the name to id collection for HmmCore in the DB.
  * It stores the name of the event with its corresponding integer number
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *

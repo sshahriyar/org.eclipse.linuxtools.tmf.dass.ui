@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/commons-math3-3.2-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-16.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mahout-core-0.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mahout-math-0.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mahout-core-0.9-job.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mahout-integration-0.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jahmm-0.6.1.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/org.eclipse.linuxtools.tmf.totalads/lib/jahmm-0.6.1-javadoc.zip!/"/>
