@@ -51,8 +51,13 @@ public class LiveXYChart {
 	   xyChart.getTitle().setVisible(false); // Keep title invisible to get more space for the chart
 	   xyChart.getAxisSet().getXAxis(0).getTitle().setText("Time (mins)");
 	   xyChart.getAxisSet().getYAxis(0).getTitle().setText("Anomalies");
-	   setXRange(1, 8,100);
-	   setYRange(0, 1);
+	   Double []x={55.0,56.0,57.0,58.0,59.0,60.0,61.0,62.0,63.0,64.0,65.0,66.0,67.0,68.0,69.0,70.0};
+	   Double []y={0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+	   
+	   		
+		setXRange(0, 9,100);
+		setYRange(-1, 2);
+		
 	   
 	   plotSymbols=new PlotSymbolType[MAX_SERIES];
 	   plotSymbols[0]=PlotSymbolType.CIRCLE;
@@ -261,5 +266,7 @@ public void clearChart(){
 	});
 	
 }
+
+
 
 }

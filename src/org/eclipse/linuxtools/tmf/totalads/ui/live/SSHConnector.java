@@ -192,6 +192,7 @@ public class SSHConnector {
 	      executeSudoCommand("sudo -S -p  '' rm -rf "+totalADSRemoteTrace, sudoPassword);
 	 	
 	      return localDir.getPath();
+		//return "/home/shary/totalads-attacks-normal-trace/new_totaladstraces/trace-2014-04-22-23-42";
 	   	}
 	
 	 /**

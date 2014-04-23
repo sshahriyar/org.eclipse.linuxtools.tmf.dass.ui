@@ -149,12 +149,12 @@ public class BackgroundLiveMonitor implements Runnable {
 		String exception="";
 		try{
 			initialise();
-			
+		
 			while (isExecuting){//keep running untill the stop function is called
 						//Getting a trace from remote system
 					String tracePath=ssh.collectATrace(sudoPassword);
 					//String tracePath=ssh.getTrace();
-					
+					//System.out.println(anomalyIdx + " "+maxPoints);
 					if (xSeries.isEmpty())
 						xSeries.add(0.0);
 						
@@ -276,7 +276,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	private void processTraceOnModels(String tracePath, Double []xVals) throws TotalADSReaderException, TotalADSUIException, TotalADSDBMSException{
 		
 		HashMap<String, Results> modelsAndResults=new HashMap<String,Results>();
-		
+		boolean isAnomCountThres=false;
 		for (Map.Entry<String, String[]> modAndSettings:modelsAndSettings.entrySet()){
 			
 				String model=modAndSettings.getKey();
@@ -330,10 +330,10 @@ public class BackgroundLiveMonitor implements Runnable {
 				
 				if (anomalyIdx>maxPoints){
 					anomalies.remove();//remove head
-					xSeries.remove();// remove head
-					anomalyIdx--;
+				
+					isAnomCountThres=true;
 				}else
-					anomalyIdx++;
+					isAnomCountThres=false;
 				
 				//Convert it into a series for plotting a chart
 				Double []ySeries=new Double[anomalies.size()];
@@ -345,6 +345,11 @@ public class BackgroundLiveMonitor implements Runnable {
 				liveXYChart.drawChart();
 
 			}
+		
+		if (isAnomCountThres)// only increment or decrement this once for all algorithms
+			anomalyIdx--;
+		else
+			anomalyIdx++;
 		
 		String traceName=tracePath.substring(tracePath.lastIndexOf(File.separator)+1, tracePath.length());
 		String traceToDelete=results.addTraceResult(traceName, modelsAndResults);

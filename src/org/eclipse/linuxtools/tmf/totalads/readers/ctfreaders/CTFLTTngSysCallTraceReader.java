@@ -164,7 +164,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
 	            
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
-	            throw new TotalADSReaderException(e.getMessage());
+	            throw new TotalADSReaderException(e.getMessage()+"\n File: "+file.getName());
 	      }
 		 
 		 return new CTFSystemCallIterator(fTrace);

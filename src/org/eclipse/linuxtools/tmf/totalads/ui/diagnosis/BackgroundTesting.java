@@ -24,6 +24,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.swt.SWT;
@@ -231,7 +232,7 @@ public class BackgroundTesting implements Runnable{
 	 * @param testDirectory Test directory
 	 * @param traceReader Trace reader
 	 * @return list of files
-	 */
+	 
 	private File[] getDirectoryHandler(String testDirectory, ITraceTypeReader traceReader){
 		
 		File traces=new File(testDirectory);
@@ -260,7 +261,110 @@ public class BackgroundTesting implements Runnable{
 		
 		
 		return fileList;
+	}*/
+	
+	/**
+	 * 
+	 * @param directory The name of the directory
+	 * @param traceReader An object of the trace reader
+	 * @return An array list of traces sutied for the appropriate type
+	 * @throws TotalADSUIException
+	 */
+	
+	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSUIException{
+		File traces=new File(directory);
+		
+		CTFLTTngSysCallTraceReader kernelReader=new CTFLTTngSysCallTraceReader();
+		if (traceReader.getAcronym().equals(kernelReader.getAcronym()))
+			return getDirectoryHandlerforLTTngTraces(traces);
+		else // It is a text trace or any other 
+			return getDirectoryHandlerforTextTraces(traces);
 	}
+	/**
+	 * Get an array of trace list for a directory or just one file handler if there is only one file
+	 * @param traces File object representing traces
+	 * @return the file handler to the correct path
+	 * @throws TotalADSUIException 
+	 */
+	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSUIException{
+		
+		File []fileList;
+				
+		if (traces.isDirectory()){ // if it is a directory return the list of all files
+			    Boolean isAllFiles=false, isAllFolders=false;
+			    fileList=traces.listFiles();
+			    for (File file: fileList){
+				
+				   if (file.isDirectory())
+					   isAllFolders=true;
+				   else if (file.isFile())
+					   isAllFiles=true;
+			   
+				   if (isAllFolders) // there is no need to continue further throw this msg	   
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains"
+					   		+ " directories. Please put only trace files in it.");
+			   
+			    }
+			    
+			    if (!isAllFiles && !isAllFolders)
+			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+				 
+		}
+	    else{// if it is a single file return the single file; however, this code will never be reached
+	    	// as in GUI we are only using a directory handle, but if in futre we decide to change 
+	    	// this could come handy
+	            fileList= new File[1];
+	            fileList[0]=traces;
+	    }
+		
+			 return fileList;
+	}
+	
+	/**
+	 * Gets an array of list of directories 
+	 * @param traces File object representing traces
+	 * @return Handler to the correct path of files
+	 * @throws TotalADSUIException
+	 */
+	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSUIException{
+		
+				
+		if (traces.isDirectory()){
+				File []fileList=traces.listFiles();
+				File []fileHandler;
+			    Boolean isAllFiles=false, isAllFolders=false;
+			   
+			    for (File file: fileList){
+				
+				   if (file.isDirectory())
+					   isAllFolders=true;
+				   else if (file.isFile())
+					   isAllFiles=true;
+			   
+				   if (isAllFiles && isAllFolders) // there is no need to continue further throw this msg	   
+				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix of"+
+					   		 " files and directories. Please put only LTTng traces' directories in it.");
+			   
+			    }
+			    // if it has reached this far 
+			    if (!isAllFiles && !isAllFolders)
+			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    else if (isAllFiles){ // return the name of folder as a trace
+			    	fileHandler =new File[1];
+			    	fileHandler[0]=traces;
+   		      } 
+			    else // if all folders then return the list of all folders
+			    	fileHandler=fileList;
+			   
+			     return fileHandler;
+			   
+			    
+	    } else// this will not happen currently as we are only using the directory 
+	    	  //loader in the main view
+	    	throw new TotalADSUIException("You have selected a file"+traces.getName()+", select a folder");
+	
+	}
+
 	
 // End of BackgroundTesting class	
 }
