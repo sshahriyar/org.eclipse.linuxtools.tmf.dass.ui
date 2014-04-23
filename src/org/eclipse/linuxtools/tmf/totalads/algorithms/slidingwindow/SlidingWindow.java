@@ -246,10 +246,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		  int  winWidth=0;
 		  int seqCount=1;
 	      LinkedList<String> newSequence=new LinkedList<String>();
-	     
-	      while (trace.advance()) {
+	     String event=null;
+	      while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
 	    	  	    	
-	    	  newSequence.add(trace.getCurrentEvent());
+	    	  newSequence.add(event);
 	    	 
 	    	  winWidth++;
 	    	      	  
@@ -369,10 +369,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		  
 	      LinkedList<String> newSequence=new LinkedList<String>();
 	      //System.out.println(maxWin);
-	      while (trace.advance()) {
+	      String event=null;
+	      while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
 	    	 
 	    	
-	    	  newSequence.add(trace.getCurrentEvent());
+	    	  newSequence.add(event);
 	    	 
 	    	  winWidth++;
 	    	      	  
@@ -404,10 +405,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			    if (hammDis >= 1){// if we have found a tree that does not start with the 
 	    			    				 // first event of a new sequence in the above loop then we pass the sequence 
 	    			    				// from where it matched with the root of the tree in the above loop
-	    			    	if (seq.length==counter){
-	    			    		int a=0;
-	    			    		a++;
-	    			    	}
+	    			    	
 	    			    		
 	    			    	tmp=new String[seq.length-(counter-1)];
 	    			    	for (int i=counter-1; i<tmp.length;i++)

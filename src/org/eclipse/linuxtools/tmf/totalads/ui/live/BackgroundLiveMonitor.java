@@ -108,7 +108,7 @@ public class BackgroundLiveMonitor implements Runnable {
 		this.results=results;
 		this.liveXYChart=xyChart;
 		this.console=console;
-		this.maxPoints=intervalBetweenSnapshots*50;
+		this.maxPoints=intervalBetweenSnapshots*30;
 		this.isTrainAndEval=isTrainEval;
 		
 		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
