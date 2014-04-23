@@ -26,6 +26,7 @@ public class Results {
 	 */
 	public Results() {
 		details=new StringBuilder();
+		isAnomaly=false;
 	}
 	/**
 	 * Returns whether a trace is an anomaly or not
@@ -64,8 +65,9 @@ public class Results {
 	 public StringBuilder getDetails(){
 		 return details;
 	 }
-	 /*
+	 /**
 	  * Appends details to the existing details about a trace
+	  * @param information
 	  */
 	 public void setDetails(String information){
 		 details.append(information);

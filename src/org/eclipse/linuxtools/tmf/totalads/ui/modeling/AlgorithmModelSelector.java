@@ -240,7 +240,14 @@ public class AlgorithmModelSelector {
 			}catch (TotalADSUIException ex){
 				msgBox.setMessage(ex.getMessage());
 				msgBox.open();
-			} finally{
+			} catch (Exception ex){
+				String msg="Problems in settings from "+currentlySelectedAlgorithm.getName()+"\n";
+				if (ex.getMessage()!=null)
+					msg+=ex.getMessage();
+				msgBox.setMessage(msg);
+				msgBox.open();
+			}
+			finally{
 				settingsDialog=null;
 			}
 		}else{
@@ -640,7 +647,9 @@ public class AlgorithmModelSelector {
 			   
 			    }
 			    
-			 
+			    if (!isAllFiles && !isAllFolders)
+			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+				 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached
 	    	// as in GUI we are only using a directory handle, but if in futre we decide to change 
@@ -648,7 +657,8 @@ public class AlgorithmModelSelector {
 	            fileList= new File[1];
 	            fileList[0]=traces;
 	    }
-		return fileList;
+		
+			 return fileList;
 	}
 	
 	/**
@@ -678,11 +688,12 @@ public class AlgorithmModelSelector {
 			   
 			    }
 			    // if it has reached this far 
-			    if (isAllFiles){ // return the name of folder as a trace
+			    if (!isAllFiles && !isAllFolders)
+			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    else if (isAllFiles){ // return the name of folder as a trace
 			    	fileHandler =new File[1];
 			    	fileHandler[0]=traces;
-			    	
-			    } 
+   		      } 
 			    else // if all folders then return the list of all folders
 			    	fileHandler=fileList;
 			   

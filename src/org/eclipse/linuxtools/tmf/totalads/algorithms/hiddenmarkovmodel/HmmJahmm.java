@@ -136,11 +136,11 @@ public class HmmJahmm {
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select an integer for sequence length");
 					  }
-			   	}else if (SettingsCollection.PROBABILITY_THRESHOLD.toString().equalsIgnoreCase(settings[i])){
+			   	}else if (SettingsCollection.LOG_LIKELIHOOD.toString().equalsIgnoreCase(settings[i])){
 					  try {
 						   Double prob=Double.parseDouble(settings[i+1]);
 						   if (prob >1.0) throw new TotalADSUIException("Probability can't be > 1");
-						   settingObject.add(SettingsCollection.PROBABILITY_THRESHOLD.toString().toString(), new JsonPrimitive(prob));
+						   settingObject.add(SettingsCollection.LOG_LIKELIHOOD.toString().toString(), new JsonPrimitive(prob));
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select a decimal number for the probability threshold");
 					  }
@@ -187,8 +187,8 @@ public class HmmJahmm {
 				 settings[3]=dbObject.get(SettingsCollection.NUM_SYMBOLS.toString()).toString();
 				 settings[4]=SettingsCollection.SEQ_LENGTH.toString();
 				 settings[5]=dbObject.get(SettingsCollection.SEQ_LENGTH.toString()).toString();
-				 settings[6]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
-				 settings[7]=dbObject.get(SettingsCollection.PROBABILITY_THRESHOLD.toString()).toString();
+				 settings[6]=SettingsCollection.LOG_LIKELIHOOD.toString();
+				 settings[7]=dbObject.get(SettingsCollection.LOG_LIKELIHOOD.toString()).toString();
 		}
 		return settings;
 	}

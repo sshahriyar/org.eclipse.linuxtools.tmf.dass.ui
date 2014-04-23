@@ -30,17 +30,20 @@ import org.swtchart.Chart;
  */
 public class HiddenMarkovModel implements IDetectionAlgorithm {
 	//private String []trainingSettings;
-	private int seqLength;
+	private Integer seqLength;
 	private  HmmMahout hmm;
 	private NameToIDMapper nameToID;
-	   private boolean isTrainIntialized=false;
-	   private int numStates, numSymbols;
+	private boolean isTrainIntialized=false, isValidationInitialized=false, isTestInitialized=false;
+	private int numStates, numSymbols, numIterations, testNameToIDSize;
+	private Double totalTestAnomalies=0.0, totalTestTraces=0.0;
+	
 	/**
 	 * Constructor
 	 */
 	public HiddenMarkovModel() {
 		
-		nameToID=new NameToIDMapper();		
+		nameToID=new NameToIDMapper();	
+		seqLength=10000000;
 		
 	}
 
@@ -51,6 +54,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		HiddenMarkovModel hmm=new HiddenMarkovModel();
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  hmm);
+		
 	}
 	/**
 	 * Creates database
@@ -61,9 +65,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 		String []settings={ SettingsCollection.KEY.toString(),"hmm",
 							SettingsCollection.NUM_STATES.toString(),"5",
-						    SettingsCollection.NUM_SYMBOLS.toString(), "100"
-						   ,SettingsCollection.SEQ_LENGTH.toString(),"20",
-							SettingsCollection.PROBABILITY_THRESHOLD.toString(),"1.0"};
+						    SettingsCollection.NUM_SYMBOLS.toString(), "300",
+						    SettingsCollection.NUMBER_OF_ITERATIONS.toString(),"10",
+							SettingsCollection.LOG_LIKELIHOOD.toString(),"0.0",
+						    SettingsCollection.SEQ_LENGTH.toString(),seqLength.toString()};
 		
 		try {
 			
@@ -82,7 +87,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
 	{
-		
+		HmmMahout hmm=new HmmMahout();
 		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 		
 	}
@@ -92,14 +97,22 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase) {
-		String [] trainingSettings=new String[6];
-		trainingSettings[0]=SettingsCollection.NUM_STATES.toString();
-		trainingSettings[1]="5";
-		trainingSettings[2]= SettingsCollection.NUM_SYMBOLS.toString();
-		trainingSettings[3]="350";
-		trainingSettings[4]=SettingsCollection.SEQ_LENGTH.toString();
-		trainingSettings[5]="20";
-		return trainingSettings;
+		if (isNewDatabase){
+			String [] trainingSettings=new String[6];
+			trainingSettings[0]=SettingsCollection.NUM_STATES.toString();
+			trainingSettings[1]="5";
+			trainingSettings[2]= SettingsCollection.NUM_SYMBOLS.toString();
+			trainingSettings[3]="300";
+			trainingSettings[4]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
+			trainingSettings[5]="10";
+			return trainingSettings;
+		}else{
+			String [] trainingSettings=new String[2];
+			trainingSettings[0]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
+			trainingSettings[1]="10";
+			return trainingSettings;
+		}
+			
 	}
 	/**
 	 * Gets Test settings
@@ -109,16 +122,16 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public String[] getTestingOptions(String database, DBMS connection) {
-		
+		 HmmMahout hmm=new HmmMahout();
 		String []settings=hmm.loadSettings(database, connection);
 		if (settings==null)
 			return null;
 		
-		String []testingSettings=new String[4];
-		testingSettings[0]=SettingsCollection.SEQ_LENGTH.toString();
-		testingSettings[1]=settings[5];// seq length
-		testingSettings[2]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
-		testingSettings[3]=settings[7]; // probaility
+		String []testingSettings=new String[2];
+		//testingSettings[0]=SettingsCollection.SEQ_LENGTH.toString();
+		//testingSettings[1]=settings[5];// seq length
+		testingSettings[0]=SettingsCollection.LOG_LIKELIHOOD.toString();
+		testingSettings[1]=settings[7]; // probaility
 		return testingSettings;
 	}
 	/**
@@ -132,7 +145,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    @Override
 	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
 	{ 
-	   
+	   HmmMahout hmm=new HmmMahout();
 	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 	}
  
@@ -140,53 +153,55 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    * 
    * Trains an Hmm
    */
-
+   
    @Override
 	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console,
 		String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
-		
+	   
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
 								 
 				 if (options!=null){
 					 if (isNewDB){// add all settings to the db if this is a new database
-						 String []setting=new String[options.length+4];
+						 String []setting=new String[options.length+6];
 						 setting[0]=SettingsCollection.KEY.toString(); 
 						 setting[1]="hmm";
 						 for (int i=0;i<options.length;i++)
 							 setting[i+2]=options[i];
-						 setting[options.length+2]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
-						 setting[options.length+3]="1.0";
-						 
+						 setting[options.length+2]=SettingsCollection.LOG_LIKELIHOOD.toString();
+						 setting[options.length+3]="0.0";
+						 setting[options.length+4]=SettingsCollection.SEQ_LENGTH.toString();
+						 setting[options.length+5]=seqLength.toString();
 						 hmm.verifySaveSettingsCreateDb(setting, database, connection,true,true);
 					 }else
 						 hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 				 }					 
 				 else{
 					 if (isNewDB) 
-						createDatabase(database, connection); // with default settings
-					 options=hmm.loadSettings(database, connection);// get settings from db
+						createDatabase(database, connection); // with default settings if no settings selected
 				 } 
+				 options=hmm.loadSettings(database, connection);// get settings from db
 				 numStates=Integer.parseInt(options[1]);
 				 numSymbols=Integer.parseInt(options[3]);
-				 seqLength=Integer.parseInt(options[5]);
+				 numIterations=Integer.parseInt(options[5]);
 				 if (isNewDB)
 					 hmm.initializeHMM(numSymbols, numStates);
 				 else
 					 hmm.loadHmm(connection, database);	
 				 nameToID.loadMap(connection, database);
 				 isTrainIntialized=true;
-		 }
+		 }	
 	   
-		 int numIterations=10;
-		 console.printTextLn("Extracting sequence");
+		 
+		 console.printTextLn("Extracting sequences, please wait....");
 		 
 		 int winWidth=0,seqCount=0;
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	 Boolean isTrained=true;
-		 while (trace.advance()) {
-			 trace.getCurrentEvent();	
-	    	  newSequence.add(nameToID.getId(trace.getCurrentEvent()));
+	   	 String event=null;
+		 while (trace.advance() && (event=trace.getCurrentEvent())!=null ) {
+			
+	    	  newSequence.add(nameToID.getId(event));
 	    	 // newSequence.add(1);
 	    	  winWidth++;
 	    	  isTrained=false; 	  
@@ -195,23 +210,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  winWidth--;
 	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
-	    		 // console.printTextLn("Seq: "+Arrays.toString(seq));
-	    		  // searching and adding to db
-	    		  //if (seqCount==0) 
-	    			//  hmm.generateSequences(seq, false);
-	    		 // else
-	    			//  hmm.generateSequences(seq, true);
-	    		  if (seqCount==0){
-	    		     console.printTextLn("Learning using BaumWelch algorithm");
-	    		     console.printTextLn(Integer.toString(seqLength));
-	    		  }
-	    		  hmm.learnUsingBaumWelch(numIterations, seq);
+	    		  console.printTextLn("Learning using the BaumWelch algorithm");
+	    		  trainBaumWelch(seq);
 	    		  newSequence.remove(0);
 	    		  seqCount++;
-	    		  if (seqCount%100==0)
-	    			  console.printTextLn("Learning on "+seqCount+"th sequence");
-	 	    	      
-	    		  
 	    	  }
 	    	  
 	    		  
@@ -219,8 +221,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 if (isTrained==false){// train on the last missing sequences in the previous loop
 			 Integer[] seq=new Integer[newSequence.size()];
    		     seq=newSequence.toArray(seq);
-   		     console.printTextLn("Learning on the last sequence using BaumWelch algorithm");
-   		     hmm.learnUsingBaumWelch(numIterations, seq);
+   		     console.printTextLn("Learning on sequences using BaumWelch algorithm");
+   		     trainBaumWelch(seq);
 		 }
 		 
 	     if (isLastTrace){ 
@@ -229,13 +231,29 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 		     console.printTextLn("Training finished..");
 	    	     //hmm.learnUsingBaumWelch(numIterations);
 	    	  	 console.printTextLn("Saving HMM");
-	    	  	 console.printTextLn(hmm.printHMM());
+	    	  	 console.printTextLn(hmm.toString());
 	    	  	 hmm.saveHMM(database, connection);
 	    	  	 nameToID.saveMap(connection, database);
 	     }
 		 
 		
 	}
+   /**
+    *  Trains Using BaumWelch
+    * @param seq
+    * @throws TotalADSUIException
+    */
+   private void trainBaumWelch(Integer []seq) throws TotalADSUIException{
+	   try{
+		    	 hmm.learnUsingBaumWelch(numIterations, seq);
+		     } catch (Exception ex){
+		    	 if (nameToID.getSize()>numSymbols)
+		    		 throw new  TotalADSUIException("More events were found in the trace than you mentioned."
+		    		 		+ " Please, select larger number of unique events and start fresh with a new model");
+		    	 else
+		    		 throw new TotalADSUIException(ex);
+		     }
+   }
 	/**
 	 * Validates HMM
 	 * @param trace
@@ -251,57 +269,198 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	public void validate(ITraceIterator trace, String database,DBMS connection, 
 			Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
-		int winWidth=0;
+		int winWidth=0,validationSeqLength=seqLength;
+		Double probThreshold;
 		String []options=hmm.loadSettings(database, connection);
-		Double probThreshold=Double.parseDouble(options[7]);
+		 probThreshold=Double.parseDouble(options[7]);
+		
 		LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	   	console.printTextLn("Starting validation"); 
-		while (trace.advance()) {
-	    	  	    	
-	    	  newSequence.add(nameToID.getId(trace.getCurrentEvent()));
+	   	console.printTextLn("Starting validation");
+	   	Boolean isValidated=true;
+	   	console.printTextLn("Extracting sequences, please wait...");
+	   	
+		 String event=null;
+		 while (trace.advance() && (event=trace.getCurrentEvent())!=null ) {
+			
+	    	  newSequence.add(nameToID.getId(event));
 	    	 
 	    	  winWidth++;
-	    	      	  
-	    	  if(winWidth >= seqLength){
-	    		  		
+	    	  isValidated=false;    	  
+	    	  if(winWidth >= validationSeqLength){
+	    		  isValidated=true;		
 	    		  winWidth--;
-	    		  Integer[] seq=new Integer[seqLength];
+	    		  Integer[] seq=new Integer[validationSeqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
-	    		   
-	    		  double prob=1.0;
-	    		  try{
-	    			  prob=hmm.observationLikelihood(seq);
-	    		  } catch (Exception ex){
-	    			  console.printTextLn("Unknown events in seq: "+Arrays.toString(seq));
-	    		  }
-	    		  
-	    		  if (prob<probThreshold){
-	    			  probThreshold=prob;
-	    			  //console.printTextLn(Arrays.toString(seq));
-	    			  console.printTextLn("Min Threshold: "+probThreshold.toString());
-	    			 
-	    		  }
+	    		   probThreshold= validationEvaluation(console, probThreshold, seq);
+	    		
 	    		  newSequence.remove(0);
 	    	
 	    	  }
 	    		  
 	     }
+		if (!isValidated){
+			 Integer[] seq=new Integer[newSequence.size()];
+   		  	 seq=newSequence.toArray(seq);
+			 probThreshold=validationEvaluation(console, probThreshold, seq);
+		}
+		
 		options[7]=probThreshold.toString();
-		console.printTextLn("Final Min Threshold: "+probThreshold.toString());
+		console.printTextLn("Final Minimum Log Likelihood Threshold: "+probThreshold.toString());
 		 
 		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
 		if (isLastTrace)
 			nameToID.saveMap(connection, database);
 	}
+	
+	/**
+	 * Performs the evaluation for a likelihood of a sequence during validation
+	 * @param console
+	 * @param probThreshold
+	 * @param seq
+	 */
+	private Double validationEvaluation(ProgressConsole console, Double probThreshold, Integer []seq){
+		  Double prob=1.0;
+		  try{
+			  prob=hmm.observationLikelihood(seq);
+			 // console.printTextLn("Sequence likelhood: "+prob.toString());
+		  } catch (Exception ex){
+			  console.printTextLn("Unknown events in your sequences. Retrain using larger number of unique events");
+			 // ex.printStackTrace();
+		  }
+		  
+		  if (prob<probThreshold){
+			  probThreshold=prob;
+			  //console.printTextLn(Arrays.toString(seq));
+			  console.printTextLn("Min Log Likelihood Threshold: "+probThreshold.toString());
+			 
+		  }
+		  return probThreshold;
+	}
 	/**
 	 * Tests an HMM
+	 * @throws TotalADSReaderException 
 	 */
 	@Override
 	public Results test(ITraceIterator trace, String database, DBMS connection,
-			String[] options) throws TotalADSUIException, TotalADSDBMSException {
-		throw new TotalADSUIException("HmmJahmm is not implemented yet");
+			String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
+		int winWidth=0,testSeqLength=seqLength;
+		Double logThreshold=0.0;
+		
+		if (!isTestInitialized){
+			hmm=new HmmMahout();
+			if (options!=null){
+				hmm.verifySaveSettingsCreateDb(options, database, connection, false, false);
+				logThreshold=Double.parseDouble(options[1]);
+			}else{
+				options=hmm.loadSettings(database, connection);
+				logThreshold=Double.parseDouble(options[7]);
+			}
+			hmm.loadHmm(connection, database);
+			nameToID.loadMap(connection, database);
+			testNameToIDSize=nameToID.getSize();
+			isTestInitialized=true;
+		}
+		
+		Results results=new Results();
+		LinkedList<Integer> newSequence=new LinkedList<Integer>();
+	   	Boolean isTested=true;
+	    totalTestTraces++;
+	    String event=null;
+	   	while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
+	   		
+	   		 newSequence.add(nameToID.getId(event));
+	    	  winWidth++;
+	    	  isTested=false;    	  
+	    	  if(winWidth >= testSeqLength){
+	    		  isTested=true;		
+	    		  winWidth--;
+	    		  Integer[] seq=new Integer[testSeqLength];
+	    		  seq=newSequence.toArray(seq);
+	    		  // searching and adding to db
+	    		  if (testEvaluation(results, logThreshold, seq)==true)
+	 				break;
+	    		  //testEvaluation(results, logThreshold, seq);
+	    		  newSequence.remove(0);
+	    		  
+	    	  }
+	    		  
+	     }
+		if (!isTested){
+			 Integer[] seq=new Integer[newSequence.size()];
+   		  	 seq=newSequence.toArray(seq);
+			 testEvaluation(results, logThreshold, seq);
+		}
+		
+		
+		return results; 
+		
+	}
+	/**
+	 * 
+	 * @param result
+	 * @param probThreshold
+	 * @param seq
+	 * @return Return true if anomaly else false
+	 */
+	private boolean testEvaluation(Results result, Double probThreshold, Integer []seq){
+		  Double prob=1.0;
+		  try{
+			  prob=hmm.observationLikelihood(seq);
+			
+		  } catch (Exception ex){
+				 result.setAnomaly(true);
+				 if (nameToID.getSize() > testNameToIDSize){
+					 Integer diff=nameToID.getSize()-testNameToIDSize;
+					 
+					 if (diff >100)
+						 result.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
+					 else
+						 result.setDetails("\nUnknown events: \n");
+					 int eventCount=0;
+					 for (int i=testNameToIDSize; i<testNameToIDSize+diff;i++){// All these events are unknown
+						   result.setDetails(nameToID.getKey(i)+", ");
+						   eventCount++;
+						   if ((eventCount)%10==0)
+							   result.setDetails("\n");   
+					 }
+				 }
+			totalTestAnomalies++; 
+			return true;	 
+		  }
+		  
+		  if (prob<probThreshold){
+			  probThreshold=prob;
+			  result.setDetails("Anomalous pattern of events found in the sequence: \n");
+			  
+			  int firstRange=10;
+			   if (seq.length <10)
+				  firstRange=seq.length;
+			  for (int id=0; id<firstRange;id++)
+			    	result.setDetails(nameToID.getKey(seq[id])+", ");
+			  
+			  int secondRange=seq.length/2;
+			  if (secondRange+10<seq.length){
+				  result.setDetails("\n.........................................................\n");
+				  for (int id=secondRange; id<secondRange+10;id++)
+					  result.setDetails(nameToID.getKey(seq[id])+", ");
+			  }
+			
+			  int thirdRange=seq.length;  
+			  if (thirdRange-10>secondRange+10){
+				  result.setDetails("\n.........................................................\n");	
+				  for (int id=secondRange; id<secondRange+10;id++)
+					  result.setDetails(nameToID.getKey(seq[id])+", ");
+			  }
+			  result.setAnomaly(true);
+			  totalTestAnomalies++;
+			  return true;
+		  }else{
+			  result.setAnomaly(false);
+			  return false;
+		  }
+		  
 	}
 	/**
 	 * Cross Validation
@@ -318,7 +477,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public Double getTotalAnomalyPercentage() {
 	
-		return null;
+		 Double anomalyPercentage= (totalTestAnomalies/totalTestTraces) *100;
+		 return anomalyPercentage;
 	}
 
 	@Override
@@ -344,5 +504,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 		return "HMM";
 	}
+	
+	
 
 }

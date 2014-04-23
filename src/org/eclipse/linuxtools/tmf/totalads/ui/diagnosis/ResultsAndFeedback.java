@@ -466,9 +466,10 @@ public class ResultsAndFeedback {
 				if (cmbModels.getItemCount() >0){
 					int index=cmbModels.getSelectionIndex();
 					if (index==-1) index=0;
-					String anomalies=modelAndAnomalyCount.get(cmbModels.getItem(index)).toString();
-					if (anomalies!=null)
-						txtAnomalySummary.setText(anomalies);
+					Double anomCount=modelAndAnomalyCount.get(cmbModels.getItem(index));
+					if (anomCount!=null)
+							txtAnomalySummary.setText(anomCount.toString());
+					
 				}
 			}
 		});

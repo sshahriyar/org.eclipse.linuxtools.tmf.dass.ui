@@ -104,8 +104,13 @@ public class NameToIDMapper {
 		     DBObject dbObject=cursor.next();
 			 Object obj=dbObject.get(NameToIDCollection.MAP.toString());
 			 if (obj!=null){
-				 	Type stringIntMap = new TypeToken<BiMap<String, Integer>>(){}.getType();
-					 nameToID= gson.fromJson(obj.toString(), stringIntMap);
+				 	Type stringIntMap = new TypeToken<HashBiMap<String, Integer>>(){}.getType();
+				 	//gson doesn't recognize bimap and always return a map, which can not be casted to a bimap, strangely
+				    Map <String, Integer> guavaLinkedMap= gson.fromJson(obj.toString(), stringIntMap);
+				    nameToID.putAll(guavaLinkedMap);
+				    guavaLinkedMap.clear();// now get rid of it
+				    guavaLinkedMap=null;
+				    
 			 }
 			cursor.close();
 	     }

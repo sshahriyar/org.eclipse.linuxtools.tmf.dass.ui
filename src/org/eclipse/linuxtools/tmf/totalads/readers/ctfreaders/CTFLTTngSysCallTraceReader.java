@@ -72,7 +72,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
     			if (syscall.isEmpty())
     				return null;
     			else 
-    				return syscall;
+    			 return syscall;
     			
     		}
     	

@@ -28,19 +28,23 @@ enum SettingsCollection{
 	 /**
 	  * Number of states
 	  */
-	 NUM_STATES("num_states"),
+	 NUM_STATES("Number of States"),
 	 /**
 	  * Number of symbols
 	  */
-	 NUM_SYMBOLS("num_symbols"),
+	 NUM_SYMBOLS("Number of Unique Events"),
 	 /**
 	  * Sequence length
 	  */
-	 SEQ_LENGTH("seq_length"),
+	 NUMBER_OF_ITERATIONS("Number of Iterations"),
 	 /**
 	  * Probability threshold
 	  */
-	 PROBABILITY_THRESHOLD("prob_threshold");
+	 SEQ_LENGTH("Sequence Length"),
+	 /**
+	  * Probability threshold
+	  */
+	 LOG_LIKELIHOOD("Log Likelihood");
 	 
 	private String fieldName;
 	/**

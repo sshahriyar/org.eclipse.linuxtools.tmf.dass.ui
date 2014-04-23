@@ -19,9 +19,11 @@ import com.mongodb.DBObject;
 
 
 
+
 import org.apache.mahout.classifier.sequencelearning.hmm.*;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
+import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
 /**
  * 
@@ -85,15 +87,23 @@ public class HmmMahout {
 					  }catch (Exception ex){
 						  throw new TotalADSUIException("Select an integer for sequence length");
 					  }
-			   	}else if (SettingsCollection.PROBABILITY_THRESHOLD.toString().equalsIgnoreCase(settings[i])){
+			   	}else if (SettingsCollection.LOG_LIKELIHOOD.toString().equalsIgnoreCase(settings[i])){
 					  try {
 						   Double prob=Double.parseDouble(settings[i+1]);
-						   if (prob >1.0) throw new TotalADSUIException("Probability can't be > 1");
-						   settingObject.add(SettingsCollection.PROBABILITY_THRESHOLD.toString().toString(), new JsonPrimitive(prob));
+						   if (prob >0.0 ) throw new TotalADSUIException("Log likelihood should be a negative decimal number");
+						   settingObject.add(SettingsCollection.LOG_LIKELIHOOD.toString().toString(), new JsonPrimitive(prob));
 					  }catch (Exception ex){
-						  throw new TotalADSUIException("Select a decimal number for the probability threshold");
+						  throw new TotalADSUIException("Select a decimal number for the log likelihood threshold");
 					  }
-			   	} else if (SettingsCollection.KEY.toString().equalsIgnoreCase(settings[i])){
+			   	}else if (SettingsCollection.NUMBER_OF_ITERATIONS.toString().equalsIgnoreCase(settings[i])){
+					  try {
+						   Integer it=Integer.parseInt(settings[i+1]);
+						   if (it <= 0) throw new TotalADSUIException("Number of iterations can't be 0 or less");
+						   settingObject.add(SettingsCollection.NUMBER_OF_ITERATIONS.toString().toString(), new JsonPrimitive(it));
+					  }catch (Exception ex){
+						  throw new TotalADSUIException("Select a integer for number of iterations");
+					  }
+			   	} 	else if (SettingsCollection.KEY.toString().equalsIgnoreCase(settings[i])){
 			   		settingObject.add(SettingsCollection.KEY.toString(), new JsonPrimitive("hmm"));
 			   	}
 		}
@@ -127,17 +137,20 @@ public class HmmMahout {
 		String [] settings=null;
 		DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 		if (cursor!=null){
-				 settings=new String[8];
+				 settings=new String[10];
 				 Gson gson =new Gson();
 				 DBObject dbObject=cursor.next();
 				 settings[0]=SettingsCollection.NUM_STATES.toString();
 				 settings[1]=dbObject.get(SettingsCollection.NUM_STATES.toString()).toString();
 				 settings[2]=SettingsCollection.NUM_SYMBOLS.toString();
 				 settings[3]=dbObject.get(SettingsCollection.NUM_SYMBOLS.toString()).toString();
-				 settings[4]=SettingsCollection.SEQ_LENGTH.toString();
-				 settings[5]=dbObject.get(SettingsCollection.SEQ_LENGTH.toString()).toString();
-				 settings[6]=SettingsCollection.PROBABILITY_THRESHOLD.toString();
-				 settings[7]=dbObject.get(SettingsCollection.PROBABILITY_THRESHOLD.toString()).toString();
+				 settings[4]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
+				 settings[5]=dbObject.get(SettingsCollection.NUMBER_OF_ITERATIONS.toString()).toString();
+				 settings[6]=SettingsCollection.LOG_LIKELIHOOD.toString();
+				 settings[7]=dbObject.get(SettingsCollection.LOG_LIKELIHOOD.toString()).toString();
+				 settings[8]=SettingsCollection.SEQ_LENGTH.toString();
+				 settings[9]=dbObject.get(SettingsCollection.SEQ_LENGTH.toString()).toString();
+				
 				 cursor.close();
 		}
 		return settings;
@@ -179,10 +192,9 @@ public class HmmMahout {
 	 */
 	public  void learnUsingBaumWelch(Integer numIterations, int []observedSequence){
 		
-		HmmTrainer.trainBaumWelch(hmm,observedSequence , 0.000000001, numIterations,false);
+		HmmTrainer.trainBaumWelch(hmm,observedSequence , 0.000000001, numIterations,true);
 					
 	}
-	
 	
 	/**
 	 * Returns the Observation probability of a sequences based on a model
@@ -190,7 +202,7 @@ public class HmmMahout {
 	 * @return
 	 */
 	public double observationLikelihood(int[] sequence){
-		return HmmEvaluator.modelLikelihood(hmm, sequence, false);
+		return HmmEvaluator.modelLikelihood(hmm, sequence, true);
 	}
 	/**
 	 * Returns the Observation probability of a sequences based on a model
@@ -201,7 +213,10 @@ public class HmmMahout {
 		int []seq=new int[sequence.length];
 		for (int i=0; i<sequence.length;i++)
 			seq[i]=sequence[i];
-		return HmmEvaluator.modelLikelihood(hmm, seq, false);
+		Matrix m=HmmAlgorithms.forwardAlgorithm(hmm, seq, true);
+		return m.zSum();
+		//System.out.println(HmmAlgorithms.forwardAlgorithm(hmm, seq, true));
+			//return HmmEvaluator.modelLikelihood(hmm, seq, true);
 	}
 	/**
 	 * Loads the model directly from a database
@@ -216,8 +231,8 @@ public class HmmMahout {
 				 if (cursor.hasNext()){	
 					DBObject dbObject=cursor.next();
 					Object emissionProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
-					Object transsitionProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
-					Object initialProb=dbObject.get(HmmModelCollection.EMISSIONPROB.toString());
+					Object transsitionProb=dbObject.get(HmmModelCollection.TRANSITIONPROB.toString());
+					Object initialProb=dbObject.get(HmmModelCollection.INTITIALPROB.toString());
 					
 					DenseMatrix emissionMatrix = gson.fromJson(emissionProb.toString(), DenseMatrix.class);
 					DenseMatrix transitionMatrix = gson.fromJson(transsitionProb.toString(), DenseMatrix.class);
@@ -236,9 +251,7 @@ public class HmmMahout {
 	 * @throws TotalADSDBMSException
 	 */
 	public void saveHMM(String database, DBMS connection) throws TotalADSDBMSException{
-		
-		
-		   /// Inserting the states and probabilities
+			   /// Inserting the states and probabilities
 			// Creating states ids
 			String key="hmm";
 			Gson gson=new Gson();
@@ -258,9 +271,6 @@ public class HmmMahout {
 			JsonObject jsonTheKey=new JsonObject();
 			jsonTheKey.addProperty(HmmModelCollection.KEY.toString(),key);
 			
-			System.out.println(hmmDoc.toString());
-			
-			
 			connection.insertOrUpdateUsingJSON(database, jsonTheKey, hmmDoc,HmmModelCollection.COLLECTION_NAME.toString());
 		
 	}
@@ -269,52 +279,34 @@ public class HmmMahout {
 	 * Used for verification/testing of the model
 	 * @return
 	 */
-	public String printHMM(){
+	public String toString(){
 		
-		return hmm.toString();
+		return "HMM built for " + hmm.getNrOfHiddenStates() + " hidden states and "+hmm.getNrOfOutputStates()+" observable events"
+				 + "\n Emission Probabilities:\n "+hmm.getEmissionMatrix().toString()+" \n "
+				 		+ "Transition Probabilities: \n"+hmm.getTransitionMatrix().toString()
+				 		+" \n Initial Probabilities \n "+hmm.getInitialProbabilities();
 		
 	}
 	/**
-	 * 
+	 * for testing
 	 * @param args
 	 */
 	public static void main (String args[]){
 	
-		/*HmmModel hmmModel=new HmmModel(5, 20);
-		int a[]={1,2,10,8,7,6,7,8,9,0,19,18};
 		
-		System.out.println(hmmModel.getEmissionMatrix());
-		System.out.println(hmmModel.getTransitionMatrix());
-		HmmTrainer.trainBaumWelch(hmmModel,a , 0.000000001, 10,true);
-		System.out.println(hmmModel.getEmissionMatrix());
-		System.out.println(hmmModel.getTransitionMatrix());
-		*/
 		HmmMahout hmm=new HmmMahout();
-		hmm.initializeHMM(100, 20);
-		HmmModel hmmModel=new HmmModel(3, 5);
-		DenseMatrix emission=(DenseMatrix) hmmModel.getEmissionMatrix();
-		DenseMatrix transition=(DenseMatrix) hmmModel.getTransitionMatrix();
-		DenseVector initialProb= (DenseVector)hmmModel.getInitialProbabilities();
-		System.out.println(emission);
-		//System.out.println(hmmModel.getTransitionMatrix());
-		
-		Gson gson=new Gson();
-		JsonElement em=gson.toJsonTree(initialProb);
-		System.out.println("eee");
-		System.out.println(em.toString());
-		DenseVector e=  gson.fromJson(em, DenseVector.class);
-		System.out.println("jjj");
-		System.out.println(e);
 		
 		DBMS conn=new DBMS();
 		conn.connect(Configuration.host, Configuration.port);
 		try{
-			hmm.saveHMM("HIJ_HMM", conn);
-			hmm.loadHmm(conn, "HIJ_HMM");
+		
+			//hmm.loadHmm(conn, "NEWEST_HMM");
 		} catch (Exception ex){
 			ex.printStackTrace();
 		}
-		
+		hmm.initializeHMM(20, 5);
+		Integer a[]={1,2,10,8,7,6,7,8,9,0,19,18};
+		System.out.println(hmm.observationLikelihood(a));
 		//System.out.println(gson.toJson(hmm));
 	}
 }
