@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
 /**
- * This class maps a name to integer id
+ * This class maps a name to integer id and id to name.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */

@@ -346,6 +346,8 @@ public class DBMS implements ISubject {
 			         throw new TotalADSDBMSException ("Error : "+cmdResult.getErrorMessage());
 		
 	}
+	
+	
 	/**
 	 * Updates fields in an existing document.
 	 * @param database

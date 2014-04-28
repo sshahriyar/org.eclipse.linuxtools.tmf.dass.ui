@@ -47,7 +47,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private Integer maxWin=5;
 	private Integer maxHamDis=0;
 	private String warningMessage="";
-	private HashMap<String, Event[]> sysCallSequences;
+	private HashMap<Integer, Event[]> sysCallSequences;
 	private Boolean treeExists;
 	private String []trainingOptions={"Max Win","5", "Max Hamming Distance","0"};
 	private String []testingOptions={"Max Hamming Distance","0"};
@@ -58,14 +58,17 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private Boolean intialize=false;
 	private Boolean isTestStarted=false;
 	private SlidingWindowTree treeTransformer;
-	private int maxWinLimit=15;
+	private int maxWinLimit=25;
+	private NameToIDMapper nameToID;
+	private int testNameToIDSize; 
 	/**
 	 * Constructor
 	 **/
 	public SlidingWindow() {
 		treeExists=false;
-		sysCallSequences= new HashMap<String, Event[]>();
+		sysCallSequences= new HashMap<Integer, Event[]>();
 		treeTransformer=new SlidingWindowTree();
+		nameToID=new NameToIDMapper();
 		
 	}
 	/**
@@ -80,7 +83,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 				while (cursor.hasNext()){
 					DBObject dbObject=cursor.next();
  					Gson gson =new Gson();
- 					String key=dbObject.get(TraceCollection.KEY.toString()).toString();
+ 					Integer key=(Integer) dbObject.get(TraceCollection.KEY.toString());
  					Object obj=dbObject.get(TraceCollection.TREE.toString());
  					if (obj!=null){
  						Event []event = gson.fromJson(obj.toString(), Event[].class);
@@ -192,7 +195,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException{
-		String []collectionNames={TraceCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString()};
+		String []collectionNames={TraceCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString(),
+								  NameToIDCollection.COLLECTION_NAME.toString()};
 		connection.createDatabase(databaseName, collectionNames);
 	}
 	
@@ -232,31 +236,33 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
 	    	  }
 	    		
-	    	  intialize=true;
+	    	  
 		      // Now create database 
 		      if (isNewDB){
 		     		  createDatabase(database, connection);
 		     		 // initialize(connection,database);
 		      }
-		    
+		      intialize=true;
+		      nameToID.loadMap(connection, database);
 	    		    	  
 	      }
 	    	  
 	    	  
 		  int  winWidth=0;
 		  int seqCount=1;
-	      LinkedList<String> newSequence=new LinkedList<String>();
+	      LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	     String event=null;
-	      while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
-	    	  	    	
-	    	  newSequence.add(event);
+	      while (trace.advance()) {
+	    	  event=trace.getCurrentEvent();
+	    	  
+	    	  newSequence.add(nameToID.getId(event));
 	    	 
 	    	  winWidth++;
 	    	      	  
 	    	  if(winWidth >= maxWin){
 	    		  		
 	    		  winWidth--;
-	    		  String[] seq=new String[maxWin];
+	    		  Integer[] seq=new Integer[maxWin];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		 // System.out.println(Arrays.toString(seq));
@@ -273,6 +279,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	 
 	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences);
 	    	 intialize=false;
+	    	 nameToID.saveMap(connection, database);
 	     }
 	     
 	
@@ -345,6 +352,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	        saveSettings(database, connection); // save maxHamm
 	    	   }
 			  isTestStarted=true;
+			  nameToID.loadMap(connection, database);
+			  testNameToIDSize=nameToID.getSize();
 		  }
 		  
 		  return evaluateTrace(trace, database, connection);
@@ -367,13 +376,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		 results.setAnomaly(false);
 		 testTraceCount++;
 		  
-	      LinkedList<String> newSequence=new LinkedList<String>();
+	      LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	      //System.out.println(maxWin);
 	      String event=null;
-	      while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
-	    	 
+	      while (trace.advance()) {
+	    	  event=trace.getCurrentEvent();
 	    	
-	    	  newSequence.add(event);
+	    	  newSequence.add(nameToID.getId(event));
 	    	 
 	    	  winWidth++;
 	    	      	  
@@ -381,7 +390,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  		
 	    		  winWidth--;
 	    		  
-	    		  String[] seq=new String[maxWin];
+	    		  Integer[] seq=new Integer[maxWin];
 	    		  seq=newSequence.toArray(seq);
 	    		  
 	    		  Event[] nodes=null;
@@ -400,14 +409,14 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		 
 	    		  if (nodes!=null){ // if a tree has been found then we go inside this condition
 	    			   
-	    			  String []tmp;
+	    			  Integer []tmp;
 	    			   
 	    			    if (hammDis >= 1){// if we have found a tree that does not start with the 
 	    			    				 // first event of a new sequence in the above loop then we pass the sequence 
 	    			    				// from where it matched with the root of the tree in the above loop
 	    			    	
 	    			    		
-	    			    	tmp=new String[seq.length-(counter-1)];
+	    			    	tmp=new Integer[seq.length-(counter-1)];
 	    			    	for (int i=counter-1; i<tmp.length;i++)
 	    			    			tmp[i]=seq[i+1];
 	    			    	hammDis=hammDis+treeTransformer.getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
@@ -424,8 +433,17 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			  results.setAnomaly(true);
 	    			  
 	    			  if (anomalousSequencesToReturn % maxWin==0){ // add a new sequence when the previous events are gone
-	    				  results.setDetails(Arrays.toString(seq)+"::"+hammDis+"\n");
-	    			      displaySeqCount++;
+	    				
+	    				  StringBuilder seqName=new StringBuilder();
+	    				 for (int i=0;i<seq.length;i++){
+	    					 if (i==seq.length-1)
+	    						 seqName.append(nameToID.getKey(seq[i]));
+	    					 else
+	    						 seqName.append(nameToID.getKey(seq[i])).append(", ");
+	    				 }
+	    				 seqName.append(":: Ham=").append(hammDis).append("\n");
+	    				 results.setDetails(seqName.toString());
+	    			     displaySeqCount++;
 	    			  }
 	    				   
 	    			  anomalousSequencesToReturn++;
@@ -442,6 +460,25 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     }
 	     if (results.getAnomaly())
 	    	 testAnomalies++;
+	     
+	     ////  get unknown events
+	     if (nameToID.getSize() > testNameToIDSize){
+			 Integer diff=nameToID.getSize()-testNameToIDSize;
+			 
+			 if (diff >100)
+				 results.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
+			 else
+				 results.setDetails("\nUnknown events: \n");
+			 int eventCount=0;
+			 for (int i=testNameToIDSize; i<testNameToIDSize+diff;i++){// All these events are unknown
+				   results.setDetails(nameToID.getKey(i)+", ");
+				   eventCount++;
+				   if ((eventCount)%10==0)
+					   results.setDetails("\n");   
+			 }
+			 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
+
+		 }
 	  		
 	    return results;  
 

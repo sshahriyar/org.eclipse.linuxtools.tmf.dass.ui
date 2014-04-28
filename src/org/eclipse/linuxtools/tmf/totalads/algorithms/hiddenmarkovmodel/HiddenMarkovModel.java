@@ -199,8 +199,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	 Boolean isTrained=true;
 	   	 String event=null;
-		 while (trace.advance() && (event=trace.getCurrentEvent())!=null ) {
-			
+		 while (trace.advance()  ) {
+			 event=trace.getCurrentEvent();
 	    	  newSequence.add(nameToID.getId(event));
 	    	 // newSequence.add(1);
 	    	  winWidth++;
@@ -280,8 +280,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   	console.printTextLn("Extracting sequences, please wait...");
 	   	
 		 String event=null;
-		 while (trace.advance() && (event=trace.getCurrentEvent())!=null ) {
-			
+		 while (trace.advance()  ) {
+			 event=trace.getCurrentEvent();
 	    	  newSequence.add(nameToID.getId(event));
 	    	 
 	    	  winWidth++;
@@ -368,8 +368,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   	Boolean isTested=true;
 	    totalTestTraces++;
 	    String event=null;
-	   	while (trace.advance() && (event=trace.getCurrentEvent())!=null) {
-	   		
+	   	while (trace.advance() ) {
+	   		event=trace.getCurrentEvent();
 	   		 newSequence.add(nameToID.getId(event));
 	    	  winWidth++;
 	    	  isTested=false;    	  
@@ -425,6 +425,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 						   if ((eventCount)%10==0)
 							   result.setDetails("\n");   
 					 }
+					 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
 				 }
 			totalTestAnomalies++; 
 			return true;	 

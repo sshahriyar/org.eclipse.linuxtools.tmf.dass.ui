@@ -9,6 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
@@ -16,9 +17,10 @@ import java.util.ArrayList;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-class Event{
+class Event {
+	
 	// Data variables
-	 private String event; 
+	 private Integer event; 
 	 private ArrayList<Event[]> branches;  
 	 
 	 /** constructor */
@@ -27,7 +29,7 @@ class Event{
 	  * Returns an event
 	  * @return event
 	  */
-	 public String getEvent(){
+	 public Integer getEvent(){
 		 return event;
 	 }
 	 
@@ -35,7 +37,7 @@ class Event{
 	  * Sets an event
 	  * @param event string
 	  */
-	 public void setEvent(String event){
+	 public void setEvent(Integer event){
 		 this.event=event;
 	 }
 	 

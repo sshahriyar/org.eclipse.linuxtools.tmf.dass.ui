@@ -61,7 +61,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     /*
      * Inner class to store trace states
      * Behaves likes a structure. There is no
-     * need of getter setters here bacuse it is a 
+     * need of getter setters here bacause it is a 
      * private class and getter/setters adds unnecessary complexity
      */
     private class TraceStates{

@@ -8,9 +8,9 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
+package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 /**
- * This class represents the fields of the name to id collection for Hmm in the DB.
+ * This class represents the fields of the name to id collection in the DB.
  * It stores the name of the event with its corresponding integer number
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *

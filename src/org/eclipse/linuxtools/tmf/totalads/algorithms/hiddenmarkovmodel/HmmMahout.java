@@ -30,7 +30,7 @@ import org.apache.mahout.math.Vector;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class HmmMahout {
+class HmmMahout {
 	
 	private HmmModel hmm;
 	private int numStates;

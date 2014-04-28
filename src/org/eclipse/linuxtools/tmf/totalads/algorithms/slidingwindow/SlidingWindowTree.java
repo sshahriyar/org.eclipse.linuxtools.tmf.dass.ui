@@ -45,7 +45,7 @@ class SlidingWindowTree {
 	 * @param connection
 	 * @throws TotalADSDBMSException
 	 */
-	public void searchAndAddSequence(String []newSequence, HashMap<String, Event[]> sysCallSequences){
+	public void searchAndAddSequence(Integer []newSequence, HashMap<Integer, Event[]> sysCallSequences){
   //  public void searchAndAddSequence(String []newSequence, String database, DBMS connection) throws TotalADSDBMSException{
 		Integer seqSize=newSequence.length;
 		Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
@@ -59,7 +59,7 @@ class SlidingWindowTree {
 				eventSequence[j].setEvent(newSequence[j]);
 			}
 			eventSequence[seqSize]=new Event();
-			eventSequence[seqSize].setEvent("1");
+			eventSequence[seqSize].setEvent(1);
 			
 		}else{
 			
@@ -73,7 +73,7 @@ class SlidingWindowTree {
 					newBranchSeq[j].setEvent(newSequence[j]);
 				}
 				newBranchSeq[seqSize]=new Event();
-				newBranchSeq[seqSize].setEvent("1");
+				newBranchSeq[seqSize].setEvent(1);
 				eventSequence[0].getBranches().add(newBranchSeq);
 			}
 		}
@@ -101,7 +101,7 @@ class SlidingWindowTree {
 	 * @param newSeq   a sequence of events that requires to be appended
 	 * @return
 	 */
-	private Boolean searchAndAppendSequence(Event[] eventSeq, String []newSeq){
+	private Boolean searchAndAppendSequence(Event[] eventSeq, Integer []newSeq){
 		
 	Integer seqSize=newSeq.length;
 	Integer j;
@@ -114,8 +114,8 @@ class SlidingWindowTree {
 	Integer matchIdx=j-1;
 	 
 	if (matchIdx>=seqSize-1){
-	 	Integer counter= Integer.parseInt(eventSeq[seqSize].getEvent())+1;
-	 	eventSeq[seqSize].setEvent(counter.toString());
+	 	Integer counter= eventSeq[seqSize].getEvent()+1;
+	 	eventSeq[seqSize].setEvent(counter);
 		return true;	
 	}
 	else if (matchIdx <0){
@@ -124,7 +124,7 @@ class SlidingWindowTree {
 	
 	else {
 		 Event []newEventSeq= new Event[seqSize-matchIdx];//+1 for the count
-		 String [] newTmpSeq= new String [seqSize-matchIdx-1];
+		 Integer [] newTmpSeq= new Integer [seqSize-matchIdx-1];
 	     Boolean isFound=false;      
 	     Integer i;
 		 for ( i=0; i <newEventSeq.length-1; i++){
@@ -133,7 +133,7 @@ class SlidingWindowTree {
 					newTmpSeq[i]=newSeq[matchIdx+i+1];
 		 }
 		 newEventSeq[i]=new Event();
-		 newEventSeq[i].setEvent("1");// add 1 as a counter at the leaf
+		 newEventSeq[i].setEvent(1);// add 1 as a counter at the leaf
 			
 		ArrayList<Event[]> branches= eventSeq[matchIdx].getBranches();
 	//      When there are no more branches then we shall automatically 
@@ -178,11 +178,11 @@ class SlidingWindowTree {
 	 * @param collectionName Collection name
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveinDatabase(ProgressConsole console, String database, DBMS connection,HashMap<String, 
+	public void saveinDatabase(ProgressConsole console, String database, DBMS connection,HashMap<Integer, 
 			Event[]> sysCallSequences) throws TotalADSDBMSException{
 		console.printTextLn("Saving in database.....");
 		
-		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
+		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			
 					
 			Event []events=nodes.getValue(); 
@@ -201,6 +201,7 @@ class SlidingWindowTree {
 			//console.printTextLn(jsonObject.toString());
 			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, TraceCollection.COLLECTION_NAME.toString());
 			
+			
 		}
 	}
 	
@@ -217,7 +218,7 @@ class SlidingWindowTree {
 		
 		 
 		
-		 	String key=tree[0].getEvent(); // top node is the key
+		 	Integer key=tree[0].getEvent(); // top node is the key
 			
 			com.google.gson.Gson gson = new com.google.gson.Gson();
 			
@@ -369,7 +370,7 @@ class SlidingWindowTree {
 	 * @param nodes Tree of events
 	 * @param newSeq Sequence to search
 	 */
-	public Integer getHammingAndSearch(Event[] nodes,String []newSeq){
+	public Integer getHammingAndSearch(Event[] nodes,Integer []newSeq){
 	      
 		
 		Integer hammDis=0, minHammDis=100000000;//initializing minimum hamming distance with a very large number
@@ -382,7 +383,7 @@ class SlidingWindowTree {
 				  		
 				  
 				  if (branches!= null){ // if there are branches on an event then keep
-					  	 String [] newTmpSeq= new String [newSeq.length-nodeCount-1];
+					  	 Integer [] newTmpSeq= new Integer [newSeq.length-nodeCount-1];
 					     for ( int i=0; i <newTmpSeq.length; i++)
 					    	 newTmpSeq[i]=newSeq[nodeCount+i+1];// that is copy from the next index of matched index
 									

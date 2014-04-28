@@ -41,6 +41,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
     	 private CtfIterator traceIterator=null;
     	 private CtfTmfTrace  trace=null;
     	 private Boolean isDispose=false;
+    	 private String syscall;
     	  
     	 public CTFSystemCallIterator(CtfTmfTrace  tmfTrace){
     		   trace=tmfTrace;
@@ -49,8 +50,14 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
     	  /** Moves Iterator to the next event, and returns true if the iterator can advance or false if the iterator cannot advance **/ 
     	   @Override
     	    public boolean advance(){
-    			boolean isAdvance=traceIterator.advance();
-    		
+    			boolean isAdvance=true;//traceIterator.advance();
+    			syscall="";
+    			do{
+    				CtfTmfEvent event = traceIterator.getCurrentEvent();
+    				syscall=handleSysEntryEvent(event);
+    				isAdvance=traceIterator.advance();
+        		} while (syscall.isEmpty() && isAdvance);
+    			
     			if (!isAdvance){
     				isDispose=true;
     				trace.dispose();
@@ -63,15 +70,15 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader   {
     		@Override
     	    public String getCurrentEvent(){
     			
-    			String syscall="";
-    			do{
+    			
+    			/*do{
     				CtfTmfEvent event = traceIterator.getCurrentEvent();
     				syscall=handleSysEntryEvent(event);
-        		} while (syscall.isEmpty() && advance());
+        		} while (syscall.isEmpty() && advance()); */
     			
-    			if (syscall.isEmpty())
-    				return null;
-    			else 
+    			//if (syscall.isEmpty())
+    			//	return null;
+    			//else 
     			 return syscall;
     			
     		}
