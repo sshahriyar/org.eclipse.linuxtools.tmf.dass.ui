@@ -30,6 +30,8 @@ class NameToIDMapper {
 	 */
 	public NameToIDMapper(){
 		nameToID=HashBiMap.create();
+		/// for testing only
+		//addPredefinedIDs();
 	}
 	/**
 	 * Returns the id mapped to a name
@@ -43,7 +45,7 @@ class NameToIDMapper {
 			updateId(name, size);
 			return size;
 		}else{
-			System.out.println(name + " "+ id);
+			//System.out.println(name + " "+ id);
 			return id;
 		}
 	}
@@ -54,7 +56,7 @@ class NameToIDMapper {
 	 */
 	private void updateId(String name, Integer value){
 		nameToID.put(name, value);
-		System.out.println(name + " "+ value);
+		//System.out.println(name + " "+ value);
 	}
 	/**
 	 * Size
@@ -116,6 +118,13 @@ class NameToIDMapper {
 			 }
 			cursor.close();
 	     }
+	}
+	/**
+	 * 
+	 */
+	public void addPredefinedIDs(){
+		for (Integer i=0; i<340;i++)
+			nameToID.put(i.toString(), i);
 	}
 	
 }// End class

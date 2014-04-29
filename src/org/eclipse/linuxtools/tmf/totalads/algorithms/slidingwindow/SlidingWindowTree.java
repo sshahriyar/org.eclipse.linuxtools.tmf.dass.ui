@@ -381,8 +381,12 @@ class SlidingWindowTree {
 		for (int nodeCount=0; nodeCount<newSeq.length; nodeCount++){
 			      
 				  ArrayList<Event[]> branches=nodes[nodeCount].getBranches();
-				  if (!nodes[nodeCount].getEvent().equals(newSeq[nodeCount]))	
-				  		 hammDis++;
+				  if (!nodes[nodeCount].getEvent().equals(newSeq[nodeCount])){	
+					//  System.out.print (", x "+nodes[nodeCount].getEvent());
+					  hammDis++;
+				  }
+				 // else
+					//  System.out.print (", =="+nodes[nodeCount].getEvent());
 				  		
 				  
 				  if (branches!= null){ // if there are branches on an event then keep
@@ -392,8 +396,10 @@ class SlidingWindowTree {
 									
 						
 					     for(int i=0;i<branches.size(); i++){
+					    	  //  System.out.println(); 
 						    	Integer branchHamming= getHammingAndSearch(branches.get(i),newTmpSeq);
-						    	if (branchHamming==0){ // there is no need to hceck further branches
+						    	branchHamming=branchHamming+hammDis;// add the mismatches that have been found before this branch
+						    	if (branchHamming==0){ // there is no need to get further branches
 						    		minHammDis=0;             // we have found a match, as hamming is 0
 						    		break;
 						    	}

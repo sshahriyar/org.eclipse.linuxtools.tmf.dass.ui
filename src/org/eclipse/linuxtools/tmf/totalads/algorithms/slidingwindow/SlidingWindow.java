@@ -36,7 +36,7 @@ import com.mongodb.DBObject;
 
 
 /**
- * This class implements the Sliding Window algorithm
+ * This class implements the Sliding Window algorithm for host-based anomaly detection
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  * 
  */
@@ -276,7 +276,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     }
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
-	    	 
+	    	 treeTransformer.printSequence(console, database, sysCallSequences);
 	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences);
 	    	 intialize=false;
 	    	 nameToID.saveMap(connection, database);
@@ -360,131 +360,138 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		  
 	}
 
-/**
- * Evaluates a trace
- * @param trace
- * @param database
- * @param connection
- * @return
- * @throws TotalADSReaderException 
- */
- private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection) throws TotalADSReaderException{
-	     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
-	     int displaySeqCount=0;
-	     Results results= new Results();
-		 results.setAnomalyType("");
-		 results.setAnomaly(false);
-		 testTraceCount++;
+	/**
+	 * Evaluates a trace
+	 * @param trace
+	 * @param database
+	 * @param connection
+	 * @return
+	 * @throws TotalADSReaderException 
+	 */
+	 private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection) throws TotalADSReaderException{
+		     
+		     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
+		     int displaySeqCount=0, totalAnomalousSequences=0, largestHam=0;
+		     Results results= new Results();
+			 results.setAnomalyType("");
+			 String headerMsg="First "+maxAnomalousSequencesToReturn+" or less anomalous sequences with non-overlapping  events at Ham:"+maxHamDis+"\n\n";
+			 Integer []largestHamSeq=null;
+			 testTraceCount++;
+			  
+		      LinkedList<Integer> newSequence=new LinkedList<Integer>();
+		      //System.out.println(maxWin);
+		      String event=null;
+		      while (trace.advance()) {
+		    	 
+		    	  event=trace.getCurrentEvent();
+		    	  newSequence.add(nameToID.getId(event));
+		    	 
+		    	  winWidth++;
+		    	      	  
+		    	  if(winWidth >= maxWin){
+		    		  		
+		    		  winWidth--;
+		    		  
+		    		  Integer[] seq=new Integer[maxWin];
+		    		  seq=newSequence.toArray(seq);
+		    		 // System.out.println(Arrays.toString(seq));
+		    		 
+		    		  int counter=0;
+		    		 //Calculate the minimum hamming distance 
+		    		 Integer hammDisForSequence=seq.length; // we assign hamming distance 
+		    		 for (Map.Entry<Integer, Event[]> tree: sysCallSequences.entrySet()){
+		    			 
+		    			 Event[] nodes=tree.getValue();
+		    			// just get the hamming and search with a full sequence
+		    			 Integer hammDisForTree=treeTransformer.getHammingAndSearch(nodes, seq); 
+			    	     if (hammDisForTree < hammDisForSequence)    
+			    	    	   hammDisForSequence=hammDisForTree;
+			    	     
+		    		 }
+		    		// If hamming distance is greater than the set threshold then it is an anomaly
+			   		  if (hammDisForSequence > maxHamDis) {
+			   			  totalAnomalousSequences++;
+			   			 
+			   			  if (headerMsg.length()>=1){
+			   				  results.setAnomaly(true);
+			   				  results.setDetails(headerMsg);
+			   				  headerMsg="";
+			   			  }
+			   			 //Add a new sequence for display, when  all of previous events are gone
+			   			  if (displaySeqCount <= maxAnomalousSequencesToReturn)
+			   			  		if (anomalousSequencesToReturn % maxWin==0){ 
+			   	    				  //Convert sequence in integer ids to name
+			   	    				 StringBuilder seqName=new StringBuilder();
+			   	    				 for (int i=0;i<seq.length;i++){
+			   	    					 if (i==seq.length-1)
+			   	    						 seqName.append(nameToID.getKey(seq[i]));
+			   	    					 else
+			   	    						 seqName.append(nameToID.getKey(seq[i])).append(" ");
+			   	    				 }
+			   	    				 seqName.append(":: Ham=").append(hammDisForSequence).append("\n");
+			   	    				 //Add sequence to results
+			   	    				 results.setDetails(seqName.toString());
+			   	    			     displaySeqCount++;
+			   	    			    //Get the sequence with the largest hamming distance 
+			   	    			    
+			   	    			 }
+			   			  if (hammDisForSequence > largestHam){
+			   			    	largestHam=hammDisForSequence;
+			   			    	largestHamSeq=seq;
+			   			    }
+			   			  anomalousSequencesToReturn++;
+			   		  }// End of ham comparison
+		    		 
+		    		
+		    		  newSequence.remove(0);// remove the top event and slide a window
+		    	  }
+		    		  
+		     }
+		     
+		    additionalInforForResults(largestHam, largestHamSeq, results, totalAnomalousSequences);
+		  		
+		    return results;  
+
+		}
+	 /**
+	  * Adds additional information to the reuslts
+	  * @param largestHam
+	  * @param largestHamSeq
+	  * @param results
+	  * @param totalAnomalousSequences
+	  */
+	 private void additionalInforForResults(int largestHam, Integer [] largestHamSeq, Results results, int totalAnomalousSequences){
 		  
-	      LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	      //System.out.println(maxWin);
-	      String event=null;
-	      while (trace.advance()) {
-	    	  event=trace.getCurrentEvent();
-	    	
-	    	  newSequence.add(nameToID.getId(event));
-	    	 
-	    	  winWidth++;
-	    	      	  
-	    	  if(winWidth >= maxWin){
-	    		  		
-	    		  winWidth--;
-	    		  
-	    		  Integer[] seq=new Integer[maxWin];
-	    		  seq=newSequence.toArray(seq);
-	    		  
-	    		  Event[] nodes=null;
-	    		  int counter=0;
-	    		 
-	    		  do {// This loop searches for the tree that starts with the first event of a new sequences, 
-	    			  // if not found it starts with a second event, then the third event and so on. Each time
-	    			  //it keeps on increasing the hamming distnace
-	    			   nodes=sysCallSequences.get(seq[counter]);//load from database
-	    			  // nodes=treeTransformer.loadTreeFromDatabase(seq[counter], database, connection);
-	    			   counter++;
-	    		  }while (nodes==null && counter <seq.length);
-	    		  
-	    		  //Boolean isNormal=false;
-	    		  Integer hammDis=counter-1; // we assign hamming distance 
-	    		 
-	    		  if (nodes!=null){ // if a tree has been found then we go inside this condition
-	    			   
-	    			  Integer []tmp;
-	    			   
-	    			    if (hammDis >= 1){// if we have found a tree that does not start with the 
-	    			    				 // first event of a new sequence in the above loop then we pass the sequence 
-	    			    				// from where it matched with the root of the tree in the above loop
-	    			    	
-	    			    		
-	    			    	tmp=new Integer[seq.length-(counter-1)];
-	    			    	int j=0;
-	    			    	for (int i=counter-1; i< seq.length;i++)
-	    			    			tmp[j++]=seq[i];
-	    			    	hammDis=hammDis+treeTransformer.getHammingAndSearch(nodes, tmp);// calculate hamming distance and subtract 1
-	    			    	                                      // because one extra distance is reported from the function
-	    			    										  // getHammingAndSearch
-	    			    }
-	    			    else	
-	    			  	  hammDis=treeTransformer.getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
-	    			     
-	    		  }else// it means last comparison was a mismatch
-	    			  hammDis=counter;
-	    		  //isNormal=searchMatchingSequenceInTree(nodes, seq);
-	    		 // System.out.println(hammDis+ " "+maxHamDis);
-	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
-	    			  results.setAnomaly(true);
-	    			  
-	    			  if (anomalousSequencesToReturn % maxWin==0){ // add a new sequence when the previous events are gone
-	    				
-	    				  StringBuilder seqName=new StringBuilder();
-	    				 for (int i=0;i<seq.length;i++){
-	    					 if (i==seq.length-1)
-	    						 seqName.append(nameToID.getKey(seq[i]));
-	    					 else
-	    						 seqName.append(nameToID.getKey(seq[i])).append(", ");
-	    				 }
-	    				 seqName.append(":: Ham=").append(hammDis).append("\n");
-	    				 results.setDetails(seqName.toString());
-	    			     displaySeqCount++;
-	    			  }
-	    				   
-	    			  anomalousSequencesToReturn++;
-	    		  }
-	    		  if (displaySeqCount >= maxAnomalousSequencesToReturn){
-	    			  results.setDetails(".....\n....."+maxAnomalousSequencesToReturn+" or less"
-	    			  		+ " randomly selected anomalies"+"\n");
-	    			  break;// No need to extract all the anomalous sequences in a trace;
-	    		                     // just return and break
-	    		  }
-	    		  newSequence.remove(0);// remove the top event and slide a window
-	    	  }
-	    		  
-	     }
-	     if (results.getAnomaly())
-	    	 testAnomalies++;
-	     
-	     ////  get unknown events
-	     if (nameToID.getSize() > testNameToIDSize){
-			 Integer diff=nameToID.getSize()-testNameToIDSize;
-			 
-			 if (diff >100)
-				 results.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
-			 else
-				 results.setDetails("\nUnknown events: \n");
-			 int eventCount=0;
-			 for (int i=testNameToIDSize; i<testNameToIDSize+diff;i++){// All these events are unknown
-				   results.setDetails(nameToID.getKey(i)+", ");
-				   eventCount++;
-				   if ((eventCount)%10==0)
-					   results.setDetails("\n");   
+		     if (results.getAnomaly()){
+		    	 testAnomalies++;
+		    	 results.setDetails("\n\nLargest Hamming distance: "+ largestHam+"\n");
+		    	 results.setDetails("Last sequence with the largest Hamming distance:\n ");
+		    	 for (int i=0;i<largestHamSeq.length;i++)
+		    		 results.setDetails(nameToID.getKey(largestHamSeq[i])+" ");
+		    	 results.setDetails("\n\nTotal anomalous sequences "+ totalAnomalousSequences);
+		      }
+		     
+		     ////  get unknown events
+		     if (nameToID.getSize() > testNameToIDSize){
+				 Integer diff=nameToID.getSize()-testNameToIDSize;
+				 int eventCount=0;
+				 if (diff >10)
+					 eventCount=testNameToIDSize+10;
+				 else
+					 eventCount=testNameToIDSize+diff;
+				
+				 results.setDetails("\n\nTen or less unknown events: \n");
+				 int count=0;
+				 for (int i=testNameToIDSize; i<eventCount;i++){// All these events are unknown
+					   results.setDetails(nameToID.getKey(i)+" ");
+					   count++;
+					   if ((count)%10==0)
+						   results.setDetails("\n");   
+				 }
+				 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
+
 			 }
-			 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
-
-		 }
-	  		
-	    return results;  
-
-	}
+	 }
 	
 	/**
 	 * Updates settings collection
