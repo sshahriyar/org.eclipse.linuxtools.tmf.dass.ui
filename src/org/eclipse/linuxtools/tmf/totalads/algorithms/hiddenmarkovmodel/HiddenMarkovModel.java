@@ -35,7 +35,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private NameToIDMapper nameToID;
 	private boolean isTrainIntialized=false, isValidationInitialized=false, isTestInitialized=false;
 	private int numStates, numSymbols, numIterations, testNameToIDSize;
-	private Double totalTestAnomalies=0.0, totalTestTraces=0.0;
+	private Double totalTestAnomalies=0.0, totalTestTraces=0.0, logThresholdTest=0.0;;
 	
 	/**
 	 * Constructor
@@ -184,10 +184,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				 numStates=Integer.parseInt(options[1]);
 				 numSymbols=Integer.parseInt(options[3]);
 				 numIterations=Integer.parseInt(options[5]);
-				 if (isNewDB)
-					 hmm.initializeHMM(numSymbols, numStates);
-				 else
-					 hmm.loadHmm(connection, database);	
+				// if (isNewDB)
+				//	 hmm.initializeHMM(numSymbols, numStates);
+				// else
+				//	 hmm.loadHmm(connection, database);	
 				 nameToID.loadMap(connection, database);
 				 isTrainIntialized=true;
 		 }	
@@ -211,7 +211,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  console.printTextLn("Learning using the BaumWelch algorithm");
-	    		  trainBaumWelch(seq);
+	    		  trainBaumWelch(seq, connection, database);
 	    		  newSequence.remove(0);
 	    		  seqCount++;
 	    	  }
@@ -222,7 +222,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			 Integer[] seq=new Integer[newSequence.size()];
    		     seq=newSequence.toArray(seq);
    		     console.printTextLn("Learning on sequences using BaumWelch algorithm");
-   		     trainBaumWelch(seq);
+   		     trainBaumWelch(seq, connection, database);
 		 }
 		 
 	     if (isLastTrace){ 
@@ -232,7 +232,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	     //hmm.learnUsingBaumWelch(numIterations);
 	    	  	 console.printTextLn("Saving HMM");
 	    	  	 console.printTextLn(hmm.toString());
-	    	  	 hmm.saveHMM(database, connection);
+	    	  	 //hmm.saveHMM(database, connection);
 	    	  	 nameToID.saveMap(connection, database);
 	     }
 		 
@@ -243,9 +243,12 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
     * @param seq
     * @throws TotalADSUIException
     */
-   private void trainBaumWelch(Integer []seq) throws TotalADSUIException{
+   private void trainBaumWelch(Integer []seq, DBMS connection, String database) throws TotalADSUIException{
 	   try{
+		         hmm.initializeHMM(numSymbols, numStates);
 		    	 hmm.learnUsingBaumWelch(numIterations, seq);
+		    	 hmm.updatePreviousModel(seq, connection, database);
+		    	 
 		     } catch (Exception ex){
 		    	 if (nameToID.getSize()>numSymbols)
 		    		 throw new  TotalADSUIException("More events were found in the trace than you mentioned."
@@ -270,9 +273,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,validationSeqLength=seqLength;
-		Double probThreshold;
+		Double logThreshold;
 		String []options=hmm.loadSettings(database, connection);
-		 probThreshold=Double.parseDouble(options[7]);
+		logThreshold=Double.parseDouble(options[7]);
 		
 		LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	console.printTextLn("Starting validation");
@@ -292,7 +295,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  Integer[] seq=new Integer[validationSeqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
-	    		   probThreshold= validationEvaluation(console, probThreshold, seq);
+	    		   logThreshold= validationEvaluation(console, logThreshold, seq);
 	    		
 	    		  newSequence.remove(0);
 	    	
@@ -302,15 +305,16 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		if (!isValidated){
 			 Integer[] seq=new Integer[newSequence.size()];
    		  	 seq=newSequence.toArray(seq);
-			 probThreshold=validationEvaluation(console, probThreshold, seq);
+			 logThreshold=validationEvaluation(console, logThreshold, seq);
 		}
 		
-		options[7]=probThreshold.toString();
-		console.printTextLn("Final Minimum Log Likelihood Threshold: "+probThreshold.toString());
+		options[7]=logThreshold.toString();
+		
+		console.printTextLn("Minimum Log Likelihood Threshold: "+logThreshold.toString());
 		 
 		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
-		if (isLastTrace)
-			nameToID.saveMap(connection, database);
+		//if (isLastTrace)
+			//nameToID.saveMap(connection, database);
 	}
 	
 	/**
@@ -346,16 +350,16 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,testSeqLength=seqLength;
-		Double logThreshold=0.0;
+		
 		
 		if (!isTestInitialized){
 			hmm=new HmmMahout();
 			if (options!=null){
 				hmm.verifySaveSettingsCreateDb(options, database, connection, false, false);
-				logThreshold=Double.parseDouble(options[1]);
+				logThresholdTest=Double.parseDouble(options[1]);
 			}else{
 				options=hmm.loadSettings(database, connection);
-				logThreshold=Double.parseDouble(options[7]);
+				logThresholdTest=Double.parseDouble(options[7]);
 			}
 			hmm.loadHmm(connection, database);
 			nameToID.loadMap(connection, database);
@@ -379,7 +383,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  Integer[] seq=new Integer[testSeqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
-	    		  if (testEvaluation(results, logThreshold, seq)==true)
+	    		  if (testEvaluation(results, logThresholdTest, seq)==true)
 	 				break;
 	    		  //testEvaluation(results, logThreshold, seq);
 	    		  newSequence.remove(0);
@@ -390,7 +394,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		if (!isTested){
 			 Integer[] seq=new Integer[newSequence.size()];
    		  	 seq=newSequence.toArray(seq);
-			 testEvaluation(results, logThreshold, seq);
+			 testEvaluation(results, logThresholdTest, seq);
 		}
 		
 		

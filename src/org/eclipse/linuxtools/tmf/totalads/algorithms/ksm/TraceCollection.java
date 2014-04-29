@@ -7,43 +7,66 @@
  * Contributors:
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
-package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
 
+package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
 /**
- * This class represents the fields of  a settings collection in the MongoDB.
- * 
+ * This class represents the fields of  a trace collection in the SB
+ * In the case of trace collection the fields are the system call tree generated from the trace
  *  @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
-enum SettingsCollections{
+enum TraceCollection{
 	
 	/**
 	 * The name of collection itself
 	 */
-	COLLECTION_NAME("settings"),
+	COLLECTION_NAME("trace_data"),
 	/**
-	 * The Key name in the collection
+	 * key
 	 */
 	KEY("_id"),
 	/**
-	 * Alpha field in the collection
+	 *  FS field
 	 */
-	ALPHA("alpha"),
+	FS("FS"),
 	/**
-	 * Versions of the kernels
+	 *  KL field
 	 */
-	KernelVersions("kernel_versions"),
+	KL("KL"),
+	
 	/**
-	 * Update_time field in the collection
+	 *  MM field
 	 */
-	UPDATE_TIME("update_time");
+	MM("MM"),
+	
+	/**
+	 *  AC field
+	 */
+	AC("AC"),
+	
+	/**
+	 *  IPC field
+	 */
+	IPC("IPC"),
+	/**
+	 *  NT field
+	 */
+	NT("NT"),
+	/**
+	 *  SC field
+	 */
+	SC("SC"),
+	/**
+	 * UN
+	 */
+	UN("UN");
 	
 	private String fieldName;
 	/**
 	 * Constructor
 	 * @param fieldName
 	 */
-	private SettingsCollections(String fieldName){
+	private TraceCollection(String fieldName){
 		this.fieldName=fieldName;
 	}
 	/**

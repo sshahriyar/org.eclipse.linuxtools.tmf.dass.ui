@@ -201,7 +201,7 @@ class HmmMahout {
 	 * @param sequence Integer array of sequences
 	 * @return
 	 */
-	public double observationLikelihood(int[] sequence){
+	private double observationProbability(int[] sequence){
 		return HmmEvaluator.modelLikelihood(hmm, sequence, true);
 	}
 	/**
@@ -217,6 +217,39 @@ class HmmMahout {
 		return m.zSum();
 		//System.out.println(HmmAlgorithms.forwardAlgorithm(hmm, seq, true));
 			//return HmmEvaluator.modelLikelihood(hmm, seq, true);
+	}
+	
+	/**
+	 * Updating MM based on an incremental version descibed in 
+	 * http://goanna.cs.rmit.edu.au/~jiankun/Sample_Publication/ICON04_Dau.pdf
+	 * @param sequence
+	 * @param connection
+	 * @param database
+	 * @throws TotalADSDBMSException
+	 */
+	public void updatePreviousModel(Integer[] sequence, DBMS connection, String database) throws TotalADSDBMSException{
+		int []seq=new int[sequence.length];
+		for (int i=0; i<sequence.length;i++)
+			seq[i]=sequence[i];
+		
+		//double prob=observationProbability(seq);// this always zero
+		//System.out.println(prob);
+		double prob=1.0;
+		Matrix transition= hmm.getTransitionMatrix().divide(prob);
+		Matrix emission= hmm.getEmissionMatrix().divide(prob);
+		Vector initial= hmm.getInitialProbabilities().divide(prob);
+		
+		HmmMahout oldHMM=new HmmMahout();
+		oldHMM.loadHmm(connection, database);
+		if (oldHMM.hmm!=null){
+		  transition=oldHMM.hmm.getTransitionMatrix().plus(transition);
+		  emission=oldHMM.hmm.getEmissionMatrix().plus(emission);
+		  initial=oldHMM.hmm.getInitialProbabilities().plus(initial);
+		}
+		
+		HmmMahout newHMM=new HmmMahout();
+		newHMM.hmm=new HmmModel(transition, emission, initial);
+		newHMM.saveHMM(database, connection);
 	}
 	/**
 	 * Loads the model directly from a database

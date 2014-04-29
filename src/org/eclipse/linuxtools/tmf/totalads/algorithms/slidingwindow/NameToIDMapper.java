@@ -42,8 +42,10 @@ class NameToIDMapper {
 			Integer size=nameToID.size();
 			updateId(name, size);
 			return size;
-		}else
-		  return id;
+		}else{
+			System.out.println(name + " "+ id);
+			return id;
+		}
 	}
 	/**
 	 * Sets the id to a name

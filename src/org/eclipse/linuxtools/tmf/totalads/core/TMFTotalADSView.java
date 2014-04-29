@@ -67,10 +67,7 @@ public class TMFTotalADSView extends TmfView {
 	 */
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
-      //  // Don't populate the view again if we're already showing this trace
-       // if (currentTrace == signal.getTrace()) {
-        //   return;
-       // }
+     
         currentTrace = signal.getTrace();
      
             

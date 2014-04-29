@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -80,8 +81,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Constructor
 	 */
     public KernelStateModeling(){
-    	TRACE_COLLECTION="trace_data";//Configuration.traceCollection;
-    	SETTINGS_COLLECTION="settings";//Configuration.settingsCollection;
+    	TRACE_COLLECTION=TraceCollection.COLLECTION_NAME.toString();
+    	SETTINGS_COLLECTION=SettingsCollections.COLLECTION_NAME.toString();
     	initialize=false;
     	isTestStarted=false;
     	validationTraceCount=0;
@@ -103,6 +104,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     public void createDatabase(String databaseName, DBMS connection) throws  TotalADSDBMSException{
     	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
     	connection.createDatabase(databaseName, collectionNames);
+    	String []fields={TraceCollection.FS.toString(),TraceCollection.MM.toString(),TraceCollection.KL.toString()};
+	    connection.createAscendingUniquesIndexes(databaseName, TRACE_COLLECTION, fields);
     }
     /**
      * Returns the settings of an algorithm as option name at index i and value at index i+1
@@ -225,23 +228,18 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		measureStateProbabilities(trace, states);
 		// if everything is fine up till now then carry on and insert it into the database
 		
-		try {
-				// If it has reached up till here now create the database and inserts. In case of incorrect trace format,
-				//it may have exited earlier
-				if (isNewDB && !initialize){
+		 if (isNewDB && !initialize){
 		    		 createDatabase(database, connection);
 		    		 initialize=true;// make it true so we don't execute it again
-				}
+		  }
+	     saveTraceData(connection, database, states);
 			
-				connection.insert(states, database,TRACE_COLLECTION);
-		} catch (IllegalAccessException ex) {
-			
-			throw new TotalADSDBMSException(ex.getMessage());
-		}
 		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
-		if (isLastTrace)
+		if (isLastTrace){
 			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
-	}
+			
+		}
+    }
 	/**
 	 * Validates the model
 	 * @throws TotalADSDBMSException 
@@ -330,8 +328,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
+		
 		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
 		testTraceCount++;
+		
 		if (isAnomaly)
 			testAnomalyCount++;
 		
@@ -526,6 +526,38 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	    BigDecimal bd = new BigDecimal(unrounded);
 	    BigDecimal rounded = bd.setScale(precision, BigDecimal.ROUND_UP);
 	    return rounded.doubleValue();
+	}
+	
+	/**
+	 * 
+	 * @param connection
+	 * @param database
+	 * @param states
+	 * @throws TotalADSDBMSException 
+	 */
+	private void saveTraceData(DBMS connection, String database, TraceStates states) throws TotalADSDBMSException{
+
+		try {
+				JsonObject jsonDoc=new JsonObject();
+				jsonDoc.addProperty(TraceCollection.FS.toString(), states.FS);
+				jsonDoc.addProperty(TraceCollection.MM.toString(), states.MM);
+				jsonDoc.addProperty(TraceCollection.KL.toString(), states.KL);
+				jsonDoc.addProperty(TraceCollection.AC.toString(), states.AC);
+				jsonDoc.addProperty(TraceCollection.IPC.toString(), states.IPC);
+				jsonDoc.addProperty(TraceCollection.NT.toString(), states.NT);
+				jsonDoc.addProperty(TraceCollection.SC.toString(), states.SC);
+				jsonDoc.addProperty(TraceCollection.UN.toString(), states.UN);
+				connection.insertUsingJSON(database, jsonDoc,  TRACE_COLLECTION);
+				
+				// this also works
+				//connection.insert(states, database,TRACE_COLLECTION);
+		//} catch (IllegalAccessException ex) {
+			
+		//	throw new TotalADSDBMSException(ex.getMessage());
+		}catch (TotalADSDBMSException ex){
+			if (ex!=null && !ex.getMessage().contains("E11000 duplicate key"))// if it is a duplicate key error do nothing
+				throw new TotalADSDBMSException(ex);
+		}
 	}
 	/**
 	 * Saves alpha in a database

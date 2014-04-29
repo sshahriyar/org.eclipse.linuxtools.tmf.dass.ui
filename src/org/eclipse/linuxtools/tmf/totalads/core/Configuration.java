@@ -18,7 +18,7 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
  *
  */
 public abstract class Configuration {
-public static final String dbStates="states";
+
 public static final String host="localhost";
 public static final Integer port=27017;
 //public static final String collectionNormal="normalTraces";

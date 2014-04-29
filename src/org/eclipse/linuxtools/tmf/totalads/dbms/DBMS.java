@@ -210,14 +210,34 @@ public class DBMS implements ISubject {
 	}
 	
 	/**
-	 * Creates an index on a collection (table)
+	 * Creates a unique index on a collection (table) in ascending order
 	 * @param database Database name
 	 * @param collection Collection name
-	 * @param field Field name on which to create an index
+	 * @param fields An array of field names on which to create unique indexes. 
 	 */
-	public void createAscendingIndex(String dataBase, String collection, String field){
+	public void createAscendingUniquesIndexes(String dataBase, String collection, String []fields){
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
-		coll.createIndex(new BasicDBObject(field, 1));
+		DBObject fieldsDB=new BasicDBObject();
+		for (int j=0; j<fields.length;j++){
+			fieldsDB.put(fields[j],1);
+		}
+			
+		coll.ensureIndex(fieldsDB,new BasicDBObject("unique", true));
+	}
+	/**
+	 * Creates a unique index on a collection (table) in descending order
+	 * @param database Database name
+	 * @param collection Collection name
+	 * @param fields An array of field names on which to create unique indexes. 
+	 */
+	public void createDescendingUniquesIndexes(String dataBase, String collection, String []fields){
+		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
+		DBObject fieldsDB=new BasicDBObject();
+		for (int j=0; j<fields.length;j++){
+			fieldsDB.put(fields[j],-1);
+		}
+			
+		coll.ensureIndex(fieldsDB,new BasicDBObject("unique", true));
 	}
 	/**
 	 * Close the connection
@@ -241,7 +261,7 @@ public class DBMS implements ISubject {
 	 * @param document Document object in a collection which will store these fields and values
 	 * @throws IllegalAccessException 
 	 * @throws IllegalArgumentException 
-	 */
+	 
 	private void extractKeysAndValuesfromTheObject(Object record, BasicDBObject document) throws IllegalArgumentException, IllegalAccessException{
 			
 		  for (Field field : record.getClass().getDeclaredFields()) {
@@ -263,7 +283,7 @@ public class DBMS implements ISubject {
 					 }
 			}
 	}
-	
+	*/
 	/**
 	 *  Insert an object's field with only one level of nesting. The object's class should  only
 	 *  have public data fields when calling this function. For example, create a class A{String b; Integer b},
@@ -274,7 +294,7 @@ public class DBMS implements ISubject {
 	 * @throws TotalADSDBMSException
 	 * @throws IllegalAccessException
 	 * @throws IllegalAccessException
-	 */
+	
 	public void insert(Object record, String database, String collection) throws TotalADSDBMSException,IllegalAccessException,IllegalAccessException{
 		
 		WriteResult writeRes=null;
@@ -291,16 +311,16 @@ public class DBMS implements ISubject {
 	     } catch ( MongoException  e ) {
 	          exception ="Caught MongoException cause: "+e.getMessage();
 	     }   
-          
-         CommandResult cmdResult = writeRes.getLastError();
-         if( !cmdResult.ok()) 
-              exception+="\n error : "+cmdResult.getErrorMessage();
-      	  
+          if (writeRes!=null){
+        	  CommandResult cmdResult = writeRes.getLastError();
+          	  if( !cmdResult.ok()) 
+                exception+="\n error : "+cmdResult.getErrorMessage();
+          }
 	     if (!exception.isEmpty())
 		   throw new TotalADSDBMSException(exception);
 		
 		
-	}
+	}*/
 	/**
 	 * Inserts an object in the form of JSON representation into the database. Any kind of complex
 	 *  data structure can be converted to JSON  using gson library and passed to this function 
@@ -477,7 +497,7 @@ public class DBMS implements ISubject {
 	 * @param collection Collection name
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 */
+	 
 	public void replaceFields(Object searchKeyAndItsValue, Object replacementFieldsAndValues,String database, String collection) 
 										throws IllegalArgumentException, IllegalAccessException, TotalADSDBMSException{
 		
@@ -503,7 +523,7 @@ public class DBMS implements ISubject {
 			         throw new TotalADSDBMSException ("Error : "+cmdResult.getErrorMessage());
 			
 			
-	}
+	}*/
 	//////////////////////////////////////////////////////////////////////////////// 
 	//Implementing the ISubject Interface 
 	///////////////////////////////////////////////////////////////

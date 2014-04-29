@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
@@ -186,7 +187,7 @@ class SlidingWindowTree {
 			
 					
 			Event []events=nodes.getValue(); 
-
+		
 			
 			com.google.gson.Gson gson = new com.google.gson.Gson();
 			
@@ -199,10 +200,12 @@ class SlidingWindowTree {
 			jsonKey.addProperty(TraceCollection.KEY.toString(), nodes.getKey());
 			
 			//console.printTextLn(jsonObject.toString());
+			
 			connection.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, TraceCollection.COLLECTION_NAME.toString());
 			
 			
 		}
+		//printSequence(console, database, sysCallSequences);
 	}
 	
 	/**
@@ -259,8 +262,8 @@ class SlidingWindowTree {
 	 * @param console ProgressConsole object
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 */
-	public void printSequence(ProgressConsole console, String database, HashMap<String, Event[]> sysCallSequences) {
-		for(Map.Entry<String, Event[]>nodes:  sysCallSequences.entrySet()){
+	public void printSequence(ProgressConsole console, String database, HashMap<Integer, Event[]> sysCallSequences) {
+		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			// create root: nodes.getKey
 			
 			//console.printTextLn(JSONserialize(events[0]));

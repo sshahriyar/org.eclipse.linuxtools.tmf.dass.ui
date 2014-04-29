@@ -52,7 +52,7 @@ class NameToIDMapper {
 	 */
 	private void updateId(String name, Integer value){
 		nameToID.put(name, value);
-		System.out.println(name + " "+ value);
+	//	System.out.println(name + " "+ value);
 	}
 	/**
 	 * Size

@@ -417,16 +417,18 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    			    	
 	    			    		
 	    			    	tmp=new Integer[seq.length-(counter-1)];
-	    			    	for (int i=counter-1; i<tmp.length;i++)
-	    			    			tmp[i]=seq[i+1];
-	    			    	hammDis=hammDis+treeTransformer.getHammingAndSearch(nodes, tmp)-1;// calculate hamming distance and subtract 1
+	    			    	int j=0;
+	    			    	for (int i=counter-1; i< seq.length;i++)
+	    			    			tmp[j++]=seq[i];
+	    			    	hammDis=hammDis+treeTransformer.getHammingAndSearch(nodes, tmp);// calculate hamming distance and subtract 1
 	    			    	                                      // because one extra distance is reported from the function
 	    			    										  // getHammingAndSearch
 	    			    }
 	    			    else	
 	    			  	  hammDis=treeTransformer.getHammingAndSearch(nodes, seq); // just get the hamming and search with a full sequence
 	    			     
-	    		  }
+	    		  }else// it means last comparison was a mismatch
+	    			  hammDis=counter;
 	    		  //isNormal=searchMatchingSequenceInTree(nodes, seq);
 	    		 // System.out.println(hammDis+ " "+maxHamDis);
 	    		  if (hammDis > maxHamDis) {// It is not normal, it is actually an anomaly
