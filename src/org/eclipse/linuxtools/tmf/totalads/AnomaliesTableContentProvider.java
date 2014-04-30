@@ -11,7 +11,7 @@ import org.eclipse.jface.viewers.Viewer;
  *
  */
 public class AnomaliesTableContentProvider 
-	implements IStructuredContentProvider, AnomaliesObserver{
+	implements IStructuredContentProvider, IAnomaliesObserver{
 
 	private Viewer viewer = null;
 	private Anomalies model = null;

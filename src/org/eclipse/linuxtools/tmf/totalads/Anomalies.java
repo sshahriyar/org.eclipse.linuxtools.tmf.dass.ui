@@ -14,11 +14,11 @@ public class Anomalies {
 	
 	private final static Anomalies INSTANCE = new Anomalies();
 	
-	private final List<AnomaliesObserver> observerList;
+	private final List<IAnomaliesObserver> observerList;
 	private final List<Anomaly> anomalies;
 	
 	private Anomalies(){
-		observerList = new ArrayList<AnomaliesObserver>();
+		observerList = new ArrayList<IAnomaliesObserver>();
 		anomalies = new ArrayList<Anomaly>();
 		
 		//test data
@@ -35,11 +35,11 @@ public class Anomalies {
 		return new ArrayList<Anomaly>(anomalies);
 	}
 	
-	public void addAnomaliesObserver(AnomaliesObserver observer){
+	public void addAnomaliesObserver(IAnomaliesObserver observer){
 		observerList.add(observer);
 	}
 	
-	public void removeAnomaliesObserver(AnomaliesObserver observer){
+	public void removeAnomaliesObserver(IAnomaliesObserver observer){
 		observerList.remove(observer);
 	}
 	

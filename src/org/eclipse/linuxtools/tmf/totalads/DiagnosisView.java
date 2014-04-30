@@ -68,7 +68,7 @@ public class DiagnosisView extends TmfView {
 		trcTypeFactory.initialize();
 		// Intialize the logger
 		handler=null;
-		handler= new  FileHandler("/home/efraimlopez/totaladslog.xml");
+		handler= new  FileHandler("totaladslog.xml");
           Logger.getLogger("").addHandler(handler);	
 			
 		} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes

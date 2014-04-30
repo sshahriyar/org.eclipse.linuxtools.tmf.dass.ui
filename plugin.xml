@@ -31,7 +31,7 @@
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ModellingView"
+             class="org.eclipse.linuxtools.tmf.totalads.ModelingView"
              id="org.eclipse.linuxtools.tmf.totalads.ModellingView"
              name="Modelling"
              restorable="true">

@@ -32,61 +32,63 @@ import org.eclipse.ui.console.IConsoleConstants;
  * A simple implementation of {@link IPerspectiveFactory} that is used by the workbench
  * to produce a custom perspective for the plugin
  * 
- * @author  Efraim J Lopez  efraimlopez@gmail.com
+ * @author  <p> Efraim J Lopez  efraimlopez@gmail.com </p>
+ * 			<p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
 	
     // LTTng views
-    private static final String HISTOGRAM_VIEW_ID = HistogramView.ID;
+   // private static final String HISTOGRAM_VIEW_ID = HistogramView.ID;
     private static final String CONTROL_VIEW_ID = ControlView.ID;
-    private static final String CONTROLFLOW_VIEW_ID = ControlFlowView.ID;
-    private static final String RESOURCES_VIEW_ID = ResourcesView.ID;
-    private static final String STATISTICS_VIEW_ID = TmfStatisticsView.ID;
+  //  private static final String CONTROLFLOW_VIEW_ID = ControlFlowView.ID;
+    //private static final String RESOURCES_VIEW_ID = ResourcesView.ID;
+    //private static final String STATISTICS_VIEW_ID = TmfStatisticsView.ID;
 
     // Standard Eclipse views
     private static final String PROJECT_VIEW_ID = IPageLayout.ID_PROJECT_EXPLORER;
-    private static final String PROPERTIES_VIEW_ID = IPageLayout.ID_PROP_SHEET;
-    private static final String BOOKMARKS_VIEW_ID = IPageLayout.ID_BOOKMARKS;
+   // private static final String PROPERTIES_VIEW_ID = IPageLayout.ID_PROP_SHEET;
+  //  private static final String BOOKMARKS_VIEW_ID = IPageLayout.ID_BOOKMARKS;
 
     @Override
 	public void createInitialLayout(IPageLayout layout) {
 		System.out.println("printing layout");
 		
 		layout.setEditorAreaVisible(false);
-        IFolderLayout topRightRightFolder = layout.createFolder(
-                "topRightRightFolder", IPageLayout.RIGHT, 0.80f,IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-        topRightRightFolder.addView(ModelsView.ID);
+		//Create right folders
+        IFolderLayout topRightFolder = layout.createFolder(
+                "topRightFolder", IPageLayout.RIGHT, 0.80f,IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+        topRightFolder.addView(ModelsView.ID);
         
-        IFolderLayout topRightRightBottomFolder = layout.createFolder(
-                "topRightRightBottomFolder", IPageLayout.BOTTOM, 0.50f,"topRightRightFolder"); //$NON-NLS-1$
-        topRightRightBottomFolder.addView(GenericView.ID);
-        topRightRightBottomFolder.addView(IPageLayout.ID_PROP_SHEET);
+        IFolderLayout bottomRightFolder = layout.createFolder(
+                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightRightFolder"); //$NON-NLS-1$
+        bottomRightFolder.addView(GenericView.ID);
+        //bottomRightFolder.addView(IPageLayout.ID_PROP_SHEET);
         
-		// Project and control view on the left
+		// Create Left folders
         IFolderLayout topLeftFolder = layout.createFolder(
                 "topLeftFolder", IPageLayout.LEFT, 0.20f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
         topLeftFolder.addView(PROJECT_VIEW_ID);
 
-        // Create the bottom left folder
+        
         IFolderLayout bottomLeftFolder = layout.createFolder(
                 "bottomLeftFolder", IPageLayout.BOTTOM, 0.70f, "topLeftFolder"); //$NON-NLS-1$
         bottomLeftFolder.addView(CONTROL_VIEW_ID);
 
-        // Create the top right folder
-        IFolderLayout topRightFolder = layout.createFolder(
-                "topRightFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-        topRightFolder.addView(DiagnosisView.VIEW_ID);
-        topRightFolder.addView(ModellingView.VIEW_ID);
+        // Create the center folders
+        IFolderLayout centerTopFolder = layout.createFolder(
+                "centreTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+        centerTopFolder.addView(DiagnosisView.VIEW_ID);
+        centerTopFolder.addView(ModelingView.VIEW_ID);
         
-        IFolderLayout topBottomRightFolder = layout.createFolder(
-                "topBottomRightFolder", IPageLayout.BOTTOM, 0.70f,"topRightFolder"); //$NON-NLS-1$
-        topBottomRightFolder.addView(AnomaliesView.ID);
+        IFolderLayout centerMiddleFolder = layout.createFolder(
+                "centreMiddleFolder", IPageLayout.BOTTOM, 0.70f,"topRightFolder"); //$NON-NLS-1$
+        centerMiddleFolder.addView(AnomaliesView.ID);
         
-        // Create the bottom right folder
-        IFolderLayout bottomRightFolder = layout.createFolder(
-                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-        bottomRightFolder.addView(IConsoleConstants.ID_CONSOLE_VIEW);
+        
+        IFolderLayout centerBottomFolder = layout.createFolder(
+                "centerBottomFolder", IPageLayout.BOTTOM, 0.50f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+        centerBottomFolder.addView(IConsoleConstants.ID_CONSOLE_VIEW);
 	}
 
 }

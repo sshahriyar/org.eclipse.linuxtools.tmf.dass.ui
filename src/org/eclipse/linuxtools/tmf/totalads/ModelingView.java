@@ -12,14 +12,15 @@ import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.part.ViewPart;
 
 /**
  * @author efraimlopez
  *
  */
-public class ModellingView extends TmfView {
+public class ModelingView extends ViewPart {
 
-	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ModellingView";
+	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ModelingView";
 	
 	private ITmfTrace currentTrace;
 	private Modeling modelling;
@@ -27,8 +28,8 @@ public class ModellingView extends TmfView {
 	/**
 	 * 
 	 */
-	public ModellingView() {
-		super(VIEW_ID);
+	public ModelingView() {
+	//	super(VIEW_ID);
 	}
 
 	/* (non-Javadoc)
@@ -44,7 +45,7 @@ public class ModellingView extends TmfView {
 	 */
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
+		
 
 	}
 
