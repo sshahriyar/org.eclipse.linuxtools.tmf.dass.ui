@@ -61,7 +61,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         topRightFolder.addView(ModelsView.ID);
         
         IFolderLayout bottomRightFolder = layout.createFolder(
-                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightRightFolder"); //$NON-NLS-1$
+                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightFolder"); //$NON-NLS-1$
         bottomRightFolder.addView(GenericView.ID);
         //bottomRightFolder.addView(IPageLayout.ID_PROP_SHEET);
         
@@ -77,12 +77,12 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
 
         // Create the center folders
         IFolderLayout centerTopFolder = layout.createFolder(
-                "centreTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+                "centerTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
         centerTopFolder.addView(DiagnosisView.VIEW_ID);
         centerTopFolder.addView(ModelingView.VIEW_ID);
         
         IFolderLayout centerMiddleFolder = layout.createFolder(
-                "centreMiddleFolder", IPageLayout.BOTTOM, 0.70f,"topRightFolder"); //$NON-NLS-1$
+                "centerMiddleFolder", IPageLayout.BOTTOM, 0.70f,"centerTopFolder"); //$NON-NLS-1$
         centerMiddleFolder.addView(AnomaliesView.ID);
         
         
