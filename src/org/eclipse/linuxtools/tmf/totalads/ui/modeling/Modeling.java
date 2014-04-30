@@ -65,12 +65,12 @@ public class Modeling {
 	 * Constructor
 	 * @param tabFolderParent Parent tabFolder object  
 	 */
-	public Modeling(CTabFolder tabFolderParent){
+	public Modeling(Composite tabFolderParent){
 		
 	
 		// Create a modeling tab
-		CTabItem tbItmModeling = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmModeling.setText("Modeling");
+		//CTabItem tbItmModeling = new CTabItem(tabFolderParent, SWT.NONE);
+		//tbItmModeling.setText("Modeling");
 		
 		GridLayout gridTwoColumns=new GridLayout(2,true);
 		
@@ -80,7 +80,7 @@ public class Modeling {
 		comptbItmModeling.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
 		comptbItmModeling.setLayout(gridTwoColumns);
 		
-		tbItmModeling.setControl(scrolCompModel);
+		//tbItmModeling.setControl(scrolCompModel);
 		
 		selectTracesAndTraceTypes(comptbItmModeling);
 		

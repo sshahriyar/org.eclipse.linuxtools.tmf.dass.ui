@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.TabFolder;
 //import org.eclipse.swt.widgets.TabItem;
 //import org.eclipse.swt.widgets.Table;
 //import org.eclipse.swt.widgets.TableColumn;
@@ -66,26 +67,34 @@ public class Diagnosis {
 	private Button btnSelTMFTrace;
 
 	/**
-	 * Constructor of the LiveMonitor class
+	 * Constructor of the Diagnosis class
 	 * @param tabFolderParent TabFolder object
 	 *
 	 */
-	public Diagnosis(CTabFolder tabFolderParent){
+	public Diagnosis(Composite tabFolderParent){
 		tmfTracePath=new StringBuilder();
 		currentlySelectedTracesPath=new StringBuilder();
+
 		//LiveMonitor Tab Item
-		CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmDiagnosis.setText("Diagnosis");
+		///CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
+		//tbItmDiagnosis.setText("Diagnosis");
+
+		//Diagnosis Tab Item
+		//CTabItem tbItmDiagnosis = new CTabItem(tabFolderParent, SWT.NONE);
+		//tbItmDiagnosis.setText("Diagnosis");
+
 		//Making scrollable tab item 
+		
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
-		tbItmDiagnosis.setControl(scrolCompAnom);
+		
+		//tbItmDiagnosis.setControl(scrolCompAnom);
 		
 		//Desiging the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
 		comptbItmDiagnosis.setLayoutData(gridData);
-		comptbItmDiagnosis.setLayout(new GridLayout(2, false));
+		comptbItmDiagnosis.setLayout(new GridLayout(1, false));
 	
 		///////////////////////////////////////////////////////////////////////////
 		//Creating GUI widgets for selection of a trace type and a selection of the model
@@ -100,18 +109,22 @@ public class Diagnosis {
 		
 		//Initialize a class which loads model names from db and create appropriate GUI elements
 		
-		modelLoader=new ModelLoader(compTraceTypeAndModel);
+		
+/*		efraim
+ * modelLoader=new ModelLoader(compTraceTypeAndModel);
 		modelLoader.setTrace(currentlySelectedTracesPath);///////////////////////////////
-		modelLoader.setTraceTypeSelector(traceTypeSelector);
+		modelLoader.setTraceTypeSelector(traceTypeSelector);*/
 		
 		
 		//////////////////////////////////////////////////////////////////////
 		// Creating GUI widgets for status, results and feedback
 		//////////////////////////////////////////////////////////////////
-		Composite compStatusResults=new Composite(comptbItmDiagnosis, SWT.NONE);
+/*		efraim
+ * Composite compStatusResults=new Composite(comptbItmDiagnosis, SWT.NONE);
 		compStatusResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		compStatusResults.setLayout(new GridLayout(1, false));
-		StatusBar statusBar=new StatusBar(compStatusResults);
+		StatusBar statusBar=new StatusBar(compStatusResults);*/
+		
 		/*Composite compStatus=new Composite(compStatusResults, SWT.NONE);
 		compStatus.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		compStatus.setLayout(new GridLayout(2, false));
@@ -130,14 +143,19 @@ public class Diagnosis {
 		
 		
 		
-		resultsAndFeedback=new ResultsAndFeedback(compStatusResults,true);
+//<<<<<<< HEAD
+	//	resultsAndFeedback=new ResultsAndFeedback(compStatusResults,true);
+//=======
+/*		efraim
+ * resultsAndFeedback=new ResultsAndFeedback(compStatusResults);
+>>>>>>> prototype_efraim
 		modelLoader.setResultsAndFeedback(resultsAndFeedback);
-		modelLoader.setStautsBar(statusBar);
+		modelLoader.setStautsBar(statusBar);*/
 		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
 		 // Set the minimum size
-		scrolCompAnom.setMinSize(500, 500);
+		scrolCompAnom.setMinSize(200, 200);
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
