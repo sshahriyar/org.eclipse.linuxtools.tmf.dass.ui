@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.core;
 
-import org.eclipse.linuxtools.tmf.totalads.TotalAdsState;
+import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.TotalAdsState;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 

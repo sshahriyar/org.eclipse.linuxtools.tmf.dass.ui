@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
@@ -18,18 +18,18 @@ import org.eclipse.ui.part.ViewPart;
  * @author efraimlopez
  *
  */
-public class ModelingView extends ViewPart {
+public class ModelingView extends TmfView {
 
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ModelingView";
 	
-	private ITmfTrace currentTrace;
-	private Modeling modelling;
+
+	private Modeling modeling;
 	
 	/**
 	 * 
 	 */
 	public ModelingView() {
-	//	super(VIEW_ID);
+		super(VIEW_ID);
 	}
 
 	/* (non-Javadoc)
@@ -37,7 +37,7 @@ public class ModelingView extends ViewPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		modelling=new Modeling(parent);
+		modeling=new Modeling(parent);
 	}
 	
 	/* (non-Javadoc)

@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 
 
 
@@ -40,6 +39,8 @@ import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 
 
 
+
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 
 /*********************************************************************************************
  * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada

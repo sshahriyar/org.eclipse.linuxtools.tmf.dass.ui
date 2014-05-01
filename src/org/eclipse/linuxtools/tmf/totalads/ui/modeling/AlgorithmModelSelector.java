@@ -28,13 +28,13 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 //<<<<<<< HEAD
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
 //=======
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
 //>>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -268,7 +268,7 @@ public class AlgorithmModelSelector {
 		 * Group modeling type and traces
 		 */
 		Group grpIdentifyDB=new Group(compParent, SWT.NONE);
-		//grpIdentifyDB.setText("Models");
+		//grpIdentifyDB.setText("DataModels");
 		grpIdentifyDB.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
 		grpIdentifyDB.setLayout(new GridLayout(1,false));//gridTwoColumns);
 				
@@ -279,7 +279,7 @@ public class AlgorithmModelSelector {
 		//Label lblDB=new Label(compParent, SWT.BORDER);
 		btnEnterDB=new Button(grpIdentifyDB, SWT.RADIO);
 		btnEnterDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		btnEnterDB.setText("Enter a New Model Name");
+		btnEnterDB.setText("Enter a New DataModel Name");
 		btnEnterDB.setSelection(true);
 		
 		txtNewDBName = new Text(grpIdentifyDB, SWT.BORDER);
@@ -290,7 +290,7 @@ public class AlgorithmModelSelector {
 		
 		btnSelectDB=new Button(grpIdentifyDB, SWT.RADIO);
 		btnSelectDB.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,1,1));
-		btnSelectDB.setText("Select an Existing Model Name");
+		btnSelectDB.setText("Select an Existing DataModel Name");
 		
 		
 		cmbDBNames= new Combo(grpIdentifyDB,SWT.READ_ONLY | SWT.V_SCROLL);
@@ -434,7 +434,7 @@ public class AlgorithmModelSelector {
 						 }
 						 else{
 							 if (txtNewDBName.getText().contains("_")){
-								 modelNameVerificationException="Model name cannot contain underscore \"_\"";
+								 modelNameVerificationException="DataModel name cannot contain underscore \"_\"";
 								 return;
 							 }
 							 selectedDB=txtNewDBName.getText();
@@ -591,7 +591,7 @@ public class AlgorithmModelSelector {
 			 else{
 				 
 				 if (txtNewDBName.getText().contains("_")){
-					 throw new TotalADSUIException("Model name cannot contain underscore \"_\"");
+					 throw new TotalADSUIException("DataModel name cannot contain underscore \"_\"");
 				
 				 }
 				 String database=txtNewDBName.getText();

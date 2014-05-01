@@ -1,13 +1,14 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.dbms;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.linuxtools.tmf.totalads.TotalAdsDAOException;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModel;
 
 /**
  * @author efraimlopez
@@ -26,9 +27,9 @@ public class MongoDAOFactory extends DAOFactory{
 		private DBMS conn = new DBMS();
 		
 		@Override
-		public List<Model> getAllModels() throws TotalAdsDAOException {
+		public List<DataModel> getAllModels() throws TotalAdsDAOException {
 			
-			List<Model> models = new ArrayList<Model>();
+			List<DataModel> models = new ArrayList<DataModel>();
 			String error = conn.connect(Configuration.host, Configuration.port);			
 			if (!error.isEmpty()){
 			    throw new TotalAdsDAOException(error);
@@ -37,7 +38,7 @@ public class MongoDAOFactory extends DAOFactory{
 				
 				List <String> modelsList= conn.getDatabaseList();
 				for(String strModel : modelsList){
-					models.add(new Model(strModel, strModel));
+					models.add(new DataModel(strModel, strModel));
 				}
 				
 			}

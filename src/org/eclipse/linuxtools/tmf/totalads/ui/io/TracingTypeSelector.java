@@ -8,7 +8,7 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.io;
 
 //import java.util.ArrayList;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;

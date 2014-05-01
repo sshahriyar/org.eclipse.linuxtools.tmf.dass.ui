@@ -14,7 +14,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 
 /** Each model should implement the functions of this interface and, in addition, 
  * a static function registerModel

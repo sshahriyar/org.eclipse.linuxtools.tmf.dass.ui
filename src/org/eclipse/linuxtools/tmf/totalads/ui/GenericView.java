@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;

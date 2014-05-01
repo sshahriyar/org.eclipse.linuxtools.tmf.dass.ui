@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -9,6 +9,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -22,9 +23,9 @@ import org.eclipse.ui.part.ViewPart;
 public class AnomaliesView extends ViewPart {
 	
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.AnomaliesView";
-	private AnomaliesTable anomaliesTable = null;
+	//private AnomaliesTable anomaliesTable = null;
 	
-	public static class AnomaliesTable{
+	/*public static class AnomaliesTable{
 		TableViewer viewer = null;
 		
 		public AnomaliesTable(Composite parent){
@@ -83,7 +84,7 @@ public class AnomaliesView extends ViewPart {
 			viewer.setContentProvider(new AnomaliesTableContentProvider());			
 			viewer.setInput(TotalAdsState.INSTANCE.getAnomalies());
 		}
-	}
+	}*/
 	
 	public AnomaliesView() {
 		
@@ -94,7 +95,8 @@ public class AnomaliesView extends ViewPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		anomaliesTable = new AnomaliesTable(parent);
+		//anomaliesTable = new AnomaliesTable(parent);
+		 ResultsAndFeedback results=new ResultsAndFeedback(parent, false);
 	}
 
 	/* (non-Javadoc)

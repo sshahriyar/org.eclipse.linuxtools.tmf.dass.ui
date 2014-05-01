@@ -21,10 +21,10 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.swtchart.Chart;
 /**
- * This class implements a Hidden Markov Model
+ * This class implements a Hidden Markov DataModel
  * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  * 
  */
@@ -501,7 +501,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public String getName() {
 		
-		return "Hidden Markov Model (HMM)";
+		return "Hidden Markov DataModel (HMM)";
 	}
 
 	@Override

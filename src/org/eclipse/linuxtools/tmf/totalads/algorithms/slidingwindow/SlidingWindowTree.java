@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

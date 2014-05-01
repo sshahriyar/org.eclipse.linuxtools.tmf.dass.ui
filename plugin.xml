@@ -3,48 +3,40 @@
 <plugin>
    <extension
    		   point="org.eclipse.ui.views"> 
-		<view
-            category="org.eclipse.linuxtools.tmf.totalads"
-            class="org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView"
-            icon="icons/totalads.ico"
-            id="org.eclipse.linuxtools.tmf.totalads.ADS01"
-            name="Total Anomaly Detection System"
-            restorable="true">
-      </view> 
        <category
             id="org.eclipse.linuxtools.tmf.totalads"
             name="Automated Anomaly Detection">
       </category>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.DiagnosisView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"
              id="org.eclipse.linuxtools.tmf.totalads.DiagnosisView"
              name="Diagnosis"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.AnomaliesView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView"
              id="org.eclipse.linuxtools.tmf.totalads.AnomaliesView"
              name="Anomalies"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ModelingView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.ModelingView"
              id="org.eclipse.linuxtools.tmf.totalads.ModellingView"
              name="Modelling"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ModelsView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView"
              id="org.eclipse.linuxtools.tmf.totalads.ModelsView"
              name="Models DB"
              restorable="true">
        </view>
        <view
-             class="org.eclipse.linuxtools.tmf.totalads.GenericView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.GenericView"
              id="org.eclipse.linuxtools.tmf.totalads.GenericView"
              name="Generic View"
              restorable="true">
@@ -83,7 +75,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.eclipse.linuxtools.tmf.totalads.TotalAdsPerspectiveFactory"
+            class="org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory"
             icon="icons/totalads.ico"
             id="org.eclipse.linuxtools.tmf.totalads.TotalAdsPerspective"
             name="Total ADSx">

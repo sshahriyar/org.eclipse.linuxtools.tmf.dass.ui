@@ -12,12 +12,13 @@ package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.io.File;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-import org.eclipse.linuxtools.tmf.totalads.ui.DirectoryBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
@@ -45,6 +46,10 @@ import org.eclipse.swt.widgets.TabFolder;
 //import org.eclipse.swt.widgets.TableColumn;
 //import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.Workbench;
 
 /**
  * This class creates the GUI elements/widgets for diagnosis.
@@ -99,12 +104,12 @@ public class Diagnosis {
 		///////////////////////////////////////////////////////////////////////////
 		//Creating GUI widgets for selection of a trace type and a selection of the model
 		///////////////////////////////////////////////////////////////////
-		Composite compTraceTypeAndModel=new Composite(comptbItmDiagnosis, SWT.NONE);
-		compTraceTypeAndModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
+		//Composite compTraceTypeAndModel=new Composite(comptbItmDiagnosis, SWT.NONE);
+		//compTraceTypeAndModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
 	
-		selectTraceTypeAndTraces(compTraceTypeAndModel);
+		selectTraceTypeAndTraces(comptbItmDiagnosis);
 		// Create GUI elements for a selection of a trace
 		
 		//Initialize a class which loads model names from db and create appropriate GUI elements
@@ -151,6 +156,15 @@ public class Diagnosis {
 >>>>>>> prototype_efraim
 		modelLoader.setResultsAndFeedback(resultsAndFeedback);
 		modelLoader.setStautsBar(statusBar);*/
+		/*PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().
+		             addSelectionListener("SampleViewId",new ISelectionListener() {
+			
+			@Override
+			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+				// TODO Auto-generated method stub
+				
+			}
+		});*/
 		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmDiagnosis);
@@ -174,12 +188,12 @@ public class Diagnosis {
 		Group grpTraceSelection = new Group(compDiagnosis, SWT.NONE);
 		grpTraceSelection.setText("Select Traces and Trace Type");
 		
-		grpTraceSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false));
-		grpTraceSelection.setLayout(new GridLayout(1,false));
+		grpTraceSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
+		grpTraceSelection.setLayout(new GridLayout(4,false));
 		
 		// Creating widgets for the selection of a trace type
 		Composite compTraceType=new Composite(grpTraceSelection, SWT.NONE);
-		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,4,1));
 		compTraceType.setLayout(new GridLayout(2,false));
 		
 		Label lblTraceType= new Label(compTraceType, SWT.NONE);
@@ -194,19 +208,21 @@ public class Diagnosis {
 		btnSelTestTraces.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false, false,2,1));
 		btnSelTestTraces.setSelection(true);
 		
-		txtTestTraceDir=new Text(grpTraceSelection, SWT.BORDER);
-		txtTestTraceDir.setEnabled(true);
-		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
-		
-		traceBrowser= new DirectoryBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.LEFT,SWT.TOP,false,false));
-	
-		
 		btnSelTMFTrace = new Button(grpTraceSelection, SWT.RADIO);
 		btnSelTMFTrace.setText("Select the Trace Selected in TMF (Only Kernel Trace)");
 		btnSelTMFTrace.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false, false,2,1));
 		
+		txtTestTraceDir=new Text(grpTraceSelection, SWT.BORDER);
+		txtTestTraceDir.setEnabled(true);
+		txtTestTraceDir.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
+		
+		traceBrowser= new DirectoryBrowser(grpTraceSelection,txtTestTraceDir,new GridData(SWT.RIGHT,SWT.TOP,false,false));
+	
+		
+		
+		
 		txtTMFTraceID=new Text(grpTraceSelection,SWT.BORDER);
-		txtTMFTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		txtTMFTraceID.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtTMFTraceID.setEditable(false);
 		txtTMFTraceID.setEnabled(false);
 		

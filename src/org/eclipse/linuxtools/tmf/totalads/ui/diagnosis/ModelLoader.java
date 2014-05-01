@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 
 
 
+
 //import java.lang.reflect.Method;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -34,7 +35,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 //import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
-import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
@@ -95,7 +96,7 @@ public class ModelLoader {
 		grpModelSelection=new Group(comptbtmAnalysis,SWT.NONE);	
 		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
 		grpModelSelection.setLayout(new GridLayout(1,false));
-		grpModelSelection.setText("Evaluate a Model");
+		grpModelSelection.setText("Evaluate a DataModel");
 		
 		compModelSelection=new Composite(grpModelSelection, SWT.NONE);
 	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));

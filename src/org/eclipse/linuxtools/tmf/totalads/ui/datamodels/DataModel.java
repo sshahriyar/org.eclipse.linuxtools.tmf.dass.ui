@@ -1,18 +1,18 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
 
 /**
  * @author efraimlopez
  *
  */
-public class Model {
+public class DataModel {
 
 	private final String id;
 	private final String description;
 	
-	public Model(String id, String description){
+	public DataModel(String id, String description){
 		this.id = id; this.description = description;
 	}
 	

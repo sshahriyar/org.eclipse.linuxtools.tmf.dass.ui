@@ -1,7 +1,9 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+
+import org.eclipse.linuxtools.tmf.totalads.Anomalies;
 
 
 /**
@@ -13,13 +15,13 @@ public enum TotalAdsState {
 	
 	private boolean init = false;
 	private Anomalies anomalies = null;
-	private Models models = null;
+	private DataModels models = null;
 	
 	public void init(){
 		synchronized(this){
 			if (!init){
 				anomalies = Anomalies.getInstance();
-				models = Models.getInstance();
+				models = DataModels.getInstance();
 				init = true;
 			}
 		}
@@ -29,7 +31,7 @@ public enum TotalAdsState {
 		return anomalies;
 	}
 	
-	public Models getModels(){
+	public DataModels getModels(){
 		return models;
 	}
 	

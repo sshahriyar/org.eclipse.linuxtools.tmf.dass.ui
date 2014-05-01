@@ -26,7 +26,7 @@ enum HmmModelCollection{
 	 */
 	 KEY("_id"),
 	 /**
-	  * Model
+	  * DataModel
 	  */
 	 MODEL("model"),
 	 /**

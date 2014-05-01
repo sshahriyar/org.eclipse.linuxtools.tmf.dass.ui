@@ -20,9 +20,9 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.ui.DirectoryBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -85,7 +85,7 @@ public class Modeling {
 		selectTracesAndTraceTypes(comptbItmModeling);
 		
 		Group grpAlgorithmModel=new Group(comptbItmModeling, SWT.NONE);
-		grpAlgorithmModel.setText("Select Algorithms and Models");
+		grpAlgorithmModel.setText("Select Algorithms and DataModels");
 		grpAlgorithmModel.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
 		grpAlgorithmModel.setLayout(new GridLayout(2,false));//gridTwoColumns);
 		
@@ -98,8 +98,8 @@ public class Modeling {
 		//createAnEmptyModel(compSettingAndEvaluation);
 	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
-		//Initialize progress console
-	    progConsole=new ProgressConsole(comptbItmModeling);
+		///Initialize progress console
+	    //progConsole=new ProgressConsole(comptbItmModeling);
 		
 	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size
@@ -222,7 +222,7 @@ public class Modeling {
 			
 			/*Button btnEmpty=new Button(comptbItmModeling,SWT.NONE);
 			btnEmpty.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-			btnEmpty.setText("Create an Empty Model");
+			btnEmpty.setText("Create an Empty DataModel");
 			
 			//Event handler for Empty model button
 			btnEmpty.addMouseListener(new MouseAdapter() {

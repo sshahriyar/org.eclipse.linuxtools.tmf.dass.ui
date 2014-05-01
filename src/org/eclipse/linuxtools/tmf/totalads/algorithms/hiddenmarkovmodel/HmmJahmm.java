@@ -37,7 +37,7 @@
 //	private int numSymbols;
 //	
 //	/**
-//	 * Initializes Hidden Markov Model with random initial probabilities
+//	 * Initializes Hidden Markov DataModel with random initial probabilities
 //	 * @param numSymbols
 //	 * @param numStates
 //	 * 

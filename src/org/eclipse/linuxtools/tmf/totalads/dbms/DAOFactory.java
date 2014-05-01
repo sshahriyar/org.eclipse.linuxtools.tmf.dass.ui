@@ -1,7 +1,8 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.dbms;
+
 
 /**
  * @author efraimlopez

@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 
 import com.jcraft.jsch.*;
 /**

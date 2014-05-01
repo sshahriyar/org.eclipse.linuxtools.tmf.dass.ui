@@ -1,45 +1,48 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
 
 /**
  * @author efraimlopez
  *
  */
-public class ModelsView extends TmfView {
+public class DataModelsView extends TmfView {
 	
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.ModelsView";
-	private ModelsTable anomaliesTable = null;
+	private ModelsList modelListViewer = null;
 	
-	public static class ModelsTable{
+	private  class ModelsList{
 		TableViewer viewer = null;
 		
-		public ModelsTable(Composite parent){
-			viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL
+		public ModelsList(Composite parent){
+			viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL|SWT.CHECK
 				      | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 			
 			final Table table = viewer.getTable();
 			table.setHeaderVisible(true);
 			table.setLinesVisible(true);
 			
-			TableViewerColumn colAnomalyType = new TableViewerColumn(viewer, SWT.NONE);
-			colAnomalyType.getColumn().setWidth(200);
-			colAnomalyType.getColumn().setText("Id");
-			colAnomalyType.setLabelProvider(new ColumnLabelProvider() {
+			TableViewerColumn modelName = new TableViewerColumn(viewer, SWT.NONE);
+			modelName.getColumn().setWidth(200);
+			modelName.getColumn().setText("DataModel");
+			modelName.setLabelProvider(new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					Model model = (Model) element;
+					DataModel model = (DataModel) element;
 					return model.getId();
 				}
 				@Override
@@ -48,13 +51,13 @@ public class ModelsView extends TmfView {
 				}
 			});
 			
-			TableViewerColumn colAnomalyDesc = new TableViewerColumn(viewer, SWT.NONE);
-			colAnomalyDesc.getColumn().setWidth(200);
-			colAnomalyDesc.getColumn().setText("Description");
-			colAnomalyDesc.setLabelProvider(new ColumnLabelProvider() {
+			TableViewerColumn algorithmName = new TableViewerColumn(viewer, SWT.NONE);
+			algorithmName.getColumn().setWidth(200);
+			algorithmName.getColumn().setText("Algorithm");
+			algorithmName.setLabelProvider(new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					Model model = (Model) element;
+					DataModel model = (DataModel) element;
 					return model.getDescription();
 				}
 				@Override
@@ -63,12 +66,14 @@ public class ModelsView extends TmfView {
 				}
 			}); 
 			
-			viewer.setContentProvider(new ModelTableContentProvider());			
+			viewer.setContentProvider(new DataModelTableContentProvider());			
 			viewer.setInput(TotalAdsState.INSTANCE.getModels());
+			// Registering viewer as a provider with Eclipse to monitor chnages 
+			getSite().setSelectionProvider(viewer);
 		}
 	}
-	
-	public ModelsView() {
+
+	public DataModelsView() {
 		super(ID);
 	}
 
@@ -77,7 +82,7 @@ public class ModelsView extends TmfView {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		anomaliesTable = new ModelsTable(parent);
+		modelListViewer = new ModelsList(parent);
 	}
 
 	/* (non-Javadoc)

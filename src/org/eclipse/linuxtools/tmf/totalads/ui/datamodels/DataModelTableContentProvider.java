@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads;
+package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -10,15 +10,15 @@ import org.eclipse.jface.viewers.Viewer;
  * @author efraimlopez
  *
  */
-public class ModelTableContentProvider 
-	implements IStructuredContentProvider, ModelsObserver{
+public class DataModelTableContentProvider 
+	implements IStructuredContentProvider, IDataModelsObserver{
 
 	private Viewer viewer = null;
-	private Models model = null;
+	private DataModels model = null;
 		
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
@@ -26,11 +26,11 @@ public class ModelTableContentProvider
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
 	    if(oldInput != null) {
-	    	Models old = (Models) oldInput;
+	    	DataModels old = (DataModels) oldInput;
 	        old.removeModelsObserver(this);
 	    }
 	    if(newInput != null) {
-	    	model = (Models) newInput;
+	    	model = (DataModels) newInput;
 	    	model.addModelsObserver(this);
 	    }
 	}

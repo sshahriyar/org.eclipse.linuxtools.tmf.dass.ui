@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
