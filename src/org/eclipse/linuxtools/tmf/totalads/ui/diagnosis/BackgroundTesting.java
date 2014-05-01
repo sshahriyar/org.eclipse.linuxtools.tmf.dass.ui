@@ -42,14 +42,11 @@ import org.eclipse.swt.widgets.MessageBox;
 public class BackgroundTesting implements Runnable{
 	private String testDirectory;
 	private ITraceTypeReader traceReader;
-	private IDetectionAlgorithm algorithm;
-	private String database;
-	private StatusBar statusBar;
-	private Button btnDelete;
-	private Button btnSettings;
+	private IDetectionAlgorithm []algorithm;
+	private String []database;
 	private Button btnAnalysisEvaluateModels;
 	private ResultsAndFeedback resultsAndFeedback;
-	private String []modelOptions;
+	//private String []modelOptions;
 	
 	/**
 	 * Constructor to create an object of BackgroundTesting
@@ -64,20 +61,16 @@ public class BackgroundTesting implements Runnable{
 	 * @param resultsAndFeedback Results and Feedback
 	 * @param algorithmSettings Algorithm settings
 	 */
-	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database,
-				StatusBar statusBar, Button btnDelete, Button btnSettings, Button btnEvaluate, ResultsAndFeedback resultsAndFeedback
-				, String []algorithmSettings){
+	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm []algorithm, String []database,
+				  Button btnEvaluate, ResultsAndFeedback resultsAndFeedback	){
 		this.testDirectory=testDirectory;
 		this.traceReader=traceReader;
 		this.algorithm=algorithm;
 		this.database=database;
-		this.statusBar=statusBar;
-		this.btnDelete=btnDelete;
-		this.btnSettings=btnSettings;
+		//this.statusBar=statusBar;
 		this.btnAnalysisEvaluateModels=btnEvaluate;
 		this.resultsAndFeedback=resultsAndFeedback;
-		this.modelOptions=algorithmSettings;
-		this.resultsAndFeedback.registerAllModelNames(new String[]{database});
+		this.resultsAndFeedback.registerAllModelNames(database);
 		
 	}
 	
@@ -143,9 +136,7 @@ public class BackgroundTesting implements Runnable{
 							msgBox.open();
 						}
 						btnAnalysisEvaluateModels.setEnabled(true);
-						btnSettings.setEnabled(true);
-						btnDelete.setEnabled(true);
-						statusBar.initialState();
+						//statusBar.initialState();
 					}
 				});
 				
@@ -158,24 +149,23 @@ public class BackgroundTesting implements Runnable{
 	 * @param testDirectory Test directory
 	 * @param traceReader Trace reader
 	 * @param algorithm Algorithm of the algorithm
-	 * @param database Databse
+	 * @param database Database
 	 * @throws TotalADSUIException
 	 * @throws TotalADSReaderException 
 	 * @throws TotalADSDBMSException 
 	 * 
 	 */
 	
-	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm, String database )
-			throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
+	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm []algorithm, 
+			                  String []database )throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
 				
 				
 			// First verify selections
 			Boolean isLastTrace=false;
 			Integer totalFiles;		
-			//if (!checkItemSelection())
-				//throw new TotalADSUIException("Please, first select a algorithm!");
-	       if (testDirectory.isEmpty())
-	    	   throw new TotalADSUIException("Please, first select a trace!");
+			
+	       //if (testDirectory.isEmpty())
+	    	//   throw new TotalADSUIException("Please, first select a trace!");
 			
 			File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 			
@@ -183,85 +173,64 @@ public class BackgroundTesting implements Runnable{
 				throw new TotalADSUIException("More than 5000 traces can not be tested simultaneously.");
 			
 			DBMS connection=Configuration.connection;
-			
-			
+				
 			try{ //Check for valid trace type reader and traces before creating a database
 				traceReader.getTraceIterator(fileList[0]);
 			}catch (TotalADSReaderException ex){// this is just a validation error, cast it to UI exception
 				String message="Invalid trace reader and traces: "+ex.getMessage();
 				throw new TotalADSUIException(message);
 			}
-			
+			  
+			org.eclipse.ui.console.MessageConsole myConsole = findConsole("Diagnosis");
+			org.eclipse.ui.console.MessageConsoleStream out = myConsole.newMessageStream();
+			out.println("Hello from Generic console sample action");
 			
 			// Second, start testing
 			totalFiles=fileList.length;
 			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<String, Double>();
-			
-			
+			// for each trace
 			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
-			  /// put for each model here
-				HashMap<String,Results> modelResults=new HashMap<String, Results>();
-				
-				int counter=trcCnt+1;
-				statusBar.setProgress("Processing trace #"+counter+"..."); 
-					 
-				ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
-		 					
-		 		Results results= algorithm.test(trace, database, connection, modelOptions);
-		 		modelResults.put(database,results);
-		 		final String traceName=fileList[trcCnt].getName();
-		 		
-		 		resultsAndFeedback.addTraceResult(traceName, modelResults);
-		 		
+				out.println("Executing trace #"+ trcCnt+ " : "+fileList[trcCnt]);
+				// for each selected model 
+				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
+										
+						HashMap<String,Results> modelResults=new HashMap<String, Results>();
+						out.println("Executing tmodel: "+database[modelCnt]);
+						int counter=trcCnt+1;
+											 
+						ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
+				 					
+				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,null);
+				 		modelResults.put(database[modelCnt],results);
+				 		final String traceName=fileList[trcCnt].getName();
+				 		
+				 		resultsAndFeedback.addTraceResult(traceName, modelResults);
+				 		 // Third, print summary
 						
+						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
+						modelsAndAnomalyCount.put(database[modelCnt],totalAnoms);
+						resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
 				}
+						
+		  }
 	       
-	     // Third, print summary
-			
-			Double totalAnoms=algorithm.getTotalAnomalyPercentage();
-			modelsAndAnomalyCount.put(database,totalAnoms);
-			resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
-			
-			resultsAndFeedback.setTotalTraceCount(totalFiles.toString());
+	    resultsAndFeedback.setTotalTraceCount(totalFiles.toString());
 		
 	
 	}
 	
-	/**
-	 *  Get a directory handle, if there is only one file it returns an array of size one
-	 * @param testDirectory Test directory
-	 * @param traceReader Trace reader
-	 * @return list of files
-	 
-	private File[] getDirectoryHandler(String testDirectory, ITraceTypeReader traceReader){
-		
-		File traces=new File(testDirectory);
-		String kernelCTF=TraceTypeFactory.getInstance().getCTFKernelorUserReader(true).getName();
-		String userCTF=TraceTypeFactory.getInstance().getCTFKernelorUserReader(false).getName();
-		File []fileList;
-	
-		if (traces.isDirectory())// Returns the list of files in a directory
-            fileList=traces.listFiles();
-		else{
-            fileList= new File[1];// if there is only one file then assigns it
-            fileList[0]=traces;
-		}
-		// CTF readers read directories only. If it is a file, CTF reader will throw an error.
-		//Adding checks for this process
-		if ( traceReader.getName().equals(kernelCTF) || traceReader.getName().equals(userCTF)){
-			
-			if (!fileList[0].isDirectory()){ // if the inner files are not directory;i.e., only one folder--it means return a directory 
-					fileList= new File[1];
-					fileList[0]=traces; //Return the directory;
-			}
-			 //else return the directory list
-			 // if the list is a combination of files and directories then this will result in an exception in the testTheModel function
-		}
-		
-		
-		
-		return fileList;
-	}*/
+	private org.eclipse.ui.console.MessageConsole findConsole(String name) {
+		org.eclipse.ui.console.ConsolePlugin plugin = org.eclipse.ui.console.ConsolePlugin.getDefault();
+		org.eclipse.ui.console.IConsoleManager conMan = plugin.getConsoleManager();
+		org.eclipse.ui.console.IConsole[] existing = conMan.getConsoles();
+	      for (int i = 0; i < existing.length; i++)
+	         if (name.equals(existing[i].getName()))
+	            return (org.eclipse.ui.console.MessageConsole) existing[i];
+	      //no console found, so create a new one
+	      org.eclipse.ui.console.MessageConsole myConsole = new org.eclipse.ui.console.MessageConsole(name, null);
+	      conMan.addConsoles(new org.eclipse.ui.console.IConsole[]{myConsole});
+	      return myConsole;
+	   }
 	
 	/**
 	 * 

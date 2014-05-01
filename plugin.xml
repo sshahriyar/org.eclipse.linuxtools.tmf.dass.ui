@@ -24,8 +24,8 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.ModelingView"
-             id="org.eclipse.linuxtools.tmf.totalads.ModellingView"
-             name="Modelling"
+             id="org.eclipse.linuxtools.tmf.totalads.ModelingView"
+             name="Modeling"
              restorable="true">
        </view>
        <view
@@ -80,6 +80,47 @@
             id="org.eclipse.linuxtools.tmf.totalads.TotalAdsPerspective"
             name="Total ADSx">
       </perspective>
+   </extension>
+   <extension
+         name="create"
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.linuxtools.tmf.totalads.ModelsView">
+         <command
+               commandId="org.eclipse.linuxtools.tmf.totalads.createModel"
+               icon="icons/create.ico"
+               style="push"
+               tooltip="Creates a new model">
+         </command>
+         <command
+               commandId="org.eclipse.linuxtools.tmf.totalads.testSettings"
+               icon="icons/settings.ico"
+               style="push"
+               tooltip="Adjusts settings for testing">
+         </command>
+         <command
+               commandId="org.eclipse.linuxtools.tmf.totalads.delete"
+               icon="icons/delete.ico"
+               style="push"
+               tooltip="Deletes a model">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.CreateModelHandler"
+            commandId="org.eclipse.linuxtools.tmf.totalads.createModel">
+      </handler>
+      <handler
+            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DeleteModelHandler"
+            commandId="org.eclipse.linuxtools.tmf.totalads.delete">
+      </handler>
+      <handler
+            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.TestSettingsHandler"
+            commandId="org.eclipse.linuxtools.tmf.totalads.testSettings">
+      </handler>
    </extension>
 
 </plugin>

@@ -207,11 +207,11 @@ public class ModelLoader {
 				btnSettings.setEnabled(false);
 				btnDelete.setEnabled(false);
 				
-				BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, algorithm, database,
-							statusBar, btnDelete, btnSettings, btnEvaluateModels, resultsAndFeedback, algorithmSettings);
-				 ExecutorService executor = Executors.newSingleThreadExecutor();
-				 executor.execute(testTheModel);
-				 executor.shutdown();
+				//BackgroundTesting testTheModel=new BackgroundTesting(tracePath.toString(), traceReader, algorithm, database,
+			//				statusBar, btnDelete, btnSettings, btnEvaluateModels, resultsAndFeedback, algorithmSettings);
+				// ExecutorService executor = Executors.newSingleThreadExecutor();
+				// executor.execute(testTheModel);
+				// executor.shutdown();
 				
 			}
 		});

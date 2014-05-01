@@ -21,6 +21,7 @@ import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.resources.Resource
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.GenericView;
+import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
 import org.eclipse.linuxtools.tmf.ui.views.histogram.HistogramView;
@@ -82,7 +83,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         IFolderLayout centerTopFolder = layout.createFolder(
                 "centerTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
         centerTopFolder.addView(DiagnosisView.VIEW_ID);
-        //centerTopFolder.addView(ModelingView.VIEW_ID);
+        centerTopFolder.addView(ModelingView.VIEW_ID);
         
         IFolderLayout centerMiddleFolder = layout.createFolder(
                 "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); //$NON-NLS-1$

@@ -1,11 +1,14 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
+import java.util.HashSet;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -37,7 +40,7 @@ public class DiagnosisView extends TmfView {
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.DiagnosisView";
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
-	private Modeling modeling;
+	//private Modeling modeling;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
 	private TraceTypeFactory trcTypeFactory;
@@ -56,18 +59,22 @@ public class DiagnosisView extends TmfView {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         } 
         
-        getSite().getPage().addSelectionListener(DataModelsView.ID,new ISelectionListener() {
+        getSite().getPage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
 				 if (part instanceof DataModelsView) {  
-					   Object text = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();  
-					    
-					    if (text!=null)  
-					    	System.out.println(((DataModel)text).getId());
-					  }  
-				//System.out.println(model.getId());
+					   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
+					   HashSet<String> modelList= (HashSet<String>)obj;
+					   diagnosis.updateonModelSelection(modelList); 
+				    /*if (!modelList.isEmpty()) { 
+				    	java.util.Iterator<String> it= modelList.iterator();
+				    	while (it.hasNext())
+				    	   System.out.println(it.next());
+				    }*/
+			   }  
+				
 				
 			}
 		});
@@ -93,7 +100,7 @@ public class DiagnosisView extends TmfView {
 		// Intialize the logger
 		handler=null;
 		handler= new  FileHandler("totaladslog.xml");
-          Logger.getLogger("").addHandler(handler);	
+        Logger.getLogger("").addHandler(handler);	
 			
 		} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
 			
@@ -108,7 +115,7 @@ public class DiagnosisView extends TmfView {
 	
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
+		// TODO
 
 	}
 

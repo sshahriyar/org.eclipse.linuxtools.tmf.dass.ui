@@ -30,6 +30,9 @@ public class DataModels {
 		return INSTANCE;
 	}
 	
+	// TODO function to add models / call notify update
+	// TODO function to remove models / same thing
+	
 	public List<DataModel> listModels(){
 	
 		if(models==null){
