@@ -40,7 +40,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 
 
 
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 /*********************************************************************************************
  * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
@@ -71,7 +71,7 @@ public class SSHConnector {
 	private String user;
 	private  String host;
 	private Session session;
-	private ProgressConsole console;
+	private TotalADSOutStream console;
 	private  String totalADSLocalDir;
 	private Integer snapshotDuration;
 	/**
@@ -103,7 +103,7 @@ public class SSHConnector {
 	 * @throws TotalADSNetException
 	 */
 	public void openSSHConnectionUsingPassword(String userAtHost,String password, Integer portToConnect, 
-				ProgressConsole console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
+				TotalADSOutStream console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
 	try{
 	    
 		 port=portToConnect;
@@ -117,7 +117,7 @@ public class SSHConnector {
 			 
 		 session.setUserInfo(ui);
 		 session.connect();
-		 console.printTextLn("SSH connection established");
+		 console.addOutputEvent("SSH connection established");
 			     
 	    } catch (JSchException e) {
 	    	 throw new TotalADSNetException("SSH Communication Error\n"+e.getMessage());
@@ -134,7 +134,7 @@ public class SSHConnector {
 	 * @throws TotalADSNetException
 	 */
 	public void openSSHConnectionUsingPrivateKey(String userAtHost,String pathToPrivateKey, Integer portToConnect,
-			ProgressConsole console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
+			TotalADSOutStream console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
 		try{
 		    
 			 port=portToConnect;
@@ -144,14 +144,14 @@ public class SSHConnector {
 	      	 this.snapshotDuration=snapshotDurationInSeconds;
 	      	 
 	      	 jsch.addIdentity(pathToPrivateKey);
-	         console.printTextLn("Identity added ");
+	         console.addOutputEvent("Identity added ");
 		     session=jsch.getSession(user, host, port);
 		     java.util.Properties config = new java.util.Properties();
 	         config.put("StrictHostKeyChecking", "no");
 	         session.setConfig(config);	 
 			 session.setUserInfo(ui);
 			 session.connect();
-			 console.printTextLn("SSH connection established");
+			 console.addOutputEvent("SSH connection established");
 				     
 		    } catch (JSchException e) {
 		    	 throw new TotalADSNetException("SSH Communication Error\n"+e.getMessage());
@@ -177,7 +177,7 @@ public class SSHConnector {
 	      
 	      // Wait for these many seconds and then stop the trace
 	      try{
-	    	  console.printTextLn("Tracing for "+snapshotDuration+" secs.....");
+	    	  console.addOutputEvent("Tracing for "+snapshotDuration+" secs.....");
 	    	  TimeUnit.SECONDS.sleep(snapshotDuration);
 	      }catch (InterruptedException ee){}
 	      
@@ -220,11 +220,11 @@ public class SSHConnector {
 		     
 	    }
 		 catch(IOException e){
-	    		console.printTextLn("Error:"+e.getMessage());
+	    		console.addOutputEvent("Error:"+e.getMessage());
 	    		throw new TotalADSNetException(e);// Don't continue further
 	    }
 	    catch(JSchException e){
-	    		console.printTextLn("Error: "+e.getMessage());
+	    		console.addOutputEvent("Error: "+e.getMessage());
 	    		throw new TotalADSNetException(e);// Don't continue further
 	    }finally{
 	    	if  (channel!=null)
@@ -253,7 +253,7 @@ public class SSHConnector {
 	        if(channel.isClosed()){
 	          if(in.available()>0) continue; 
 	          		//System.out.println("exit-status: "+channel.getExitStatus());
-	          		console.printTextLn("exit-status: "+channel.getExitStatus());
+	          		console.addOutputEvent("exit-status: "+channel.getExitStatus());
 	          break;
 	        }
 	        try{
@@ -277,7 +277,7 @@ public class SSHConnector {
 		        java.util.Vector<ChannelSftp.LsEntry> list= sftpChannel.ls("*");
 		        
 		        for (ChannelSftp.LsEntry entry : list){
-		        	console.printTextLn("Processing remote "+ entry.getFilename()); // actually downloading
+		        	console.addOutputEvent("Processing remote "+ entry.getFilename()); // actually downloading
 		        	
 			        sftpChannel.get(entry.getFilename(),localDownloadFolder+File.separator+entry.getFilename());
 		        }
@@ -285,11 +285,11 @@ public class SSHConnector {
 			}
 		 
 		  catch(SftpException e){
-		 		 console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
+		 		 console.addOutputEvent("Error: "+e.getCause().getMessage()); // Exception printed
 		 		throw new TotalADSNetException(e );// Don't continue further
 		   }
 		   catch(JSchException e){
-		   		console.printTextLn("Error: "+e.getCause().getMessage()); // Exception printed
+		   		console.addOutputEvent("Error: "+e.getCause().getMessage()); // Exception printed
 		   		throw new TotalADSNetException(e);// Don't continue further
 		   	}finally{
 		   		if (sftpChannel!=null)

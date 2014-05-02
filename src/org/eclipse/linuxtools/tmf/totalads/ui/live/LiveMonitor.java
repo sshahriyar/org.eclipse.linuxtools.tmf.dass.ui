@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.FileBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 //import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 //import org.eclipse.osgi.framework.internal.core.Msg;
@@ -86,7 +86,7 @@ public class LiveMonitor {
 	private Text txtSudoPassword;
 	private ResultsAndFeedback resultsAndFeedback;
 	private Button btnStart;
-	private ProgressConsole console;
+	private TotalADSOutStream console;
 	private Button btnStop;
 	private Button btnDetails;
 	private BackgroundLiveMonitor liveExecutor;
@@ -175,7 +175,7 @@ public class LiveMonitor {
 		
 		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
 		gridDataConsoleText.minimumHeight=160;
-		console =new ProgressConsole (compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
+		console =new TotalADSOutStream (compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
 				gridDataConsoleText);
 
 		

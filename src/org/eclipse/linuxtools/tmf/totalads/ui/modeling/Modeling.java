@@ -21,7 +21,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.swt.SWT;
@@ -57,7 +57,7 @@ public class Modeling {
 	private Text txtTrainingTraces;
 	private Text txtValidationTraces;
 	private MessageBox msgBox;
-	private ProgressConsole  progConsole;
+	private TotalADSOutStream  progConsole;
 	private Button btnBuildModel;
 	
 	
@@ -99,7 +99,7 @@ public class Modeling {
 	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
 		///Initialize progress console
-	    //progConsole=new ProgressConsole(comptbItmModeling);
+	    //progConsole=new TotalADSOutStream(comptbItmModeling);
 		
 	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size

@@ -182,7 +182,7 @@ class HmmMahout {
 		int []seq=new int[observedSequence.length];
 		for (int i=0;i<seq.length;i++)
 			seq[i]=observedSequence[i];
-		HmmTrainer.trainBaumWelch(hmm,seq , 0.0001, numIterations,false);
+		HmmTrainer.trainBaumWelch(hmm,seq , 0.01, numIterations,true);
 					
 	}
 	/**
@@ -192,7 +192,7 @@ class HmmMahout {
 	 */
 	public  void learnUsingBaumWelch(Integer numIterations, int []observedSequence){
 		
-		HmmTrainer.trainBaumWelch(hmm,observedSequence , 0.000000001, numIterations,true);
+		HmmTrainer.trainBaumWelch(hmm,observedSequence , 0.01, numIterations,true);
 					
 	}
 	
@@ -214,7 +214,13 @@ class HmmMahout {
 		for (int i=0; i<sequence.length;i++)
 			seq[i]=sequence[i];
 		Matrix m=HmmAlgorithms.forwardAlgorithm(hmm, seq, true);
-		return m.zSum();
+		int lastCol=m.numCols()-1;
+		int numRows=m.numRows();
+		double sum=0.0;
+		for (int i=0; i<numRows; i++)
+			sum+=m.getQuick(i, lastCol);
+		
+		return sum;
 		//System.out.println(HmmAlgorithms.forwardAlgorithm(hmm, seq, true));
 			//return HmmEvaluator.modelLikelihood(hmm, seq, true);
 	}

@@ -116,7 +116,7 @@ public class BackgroundTesting implements Runnable{
 				Logger.getLogger(BackgroundTesting.class.getName()).log(Level.SEVERE, msg, ex);
 				// An exception could be thrown due to unavailability of the db, 
 				// make sure that the connection is not lost
-						Configuration.connection.connect(Configuration.host, Configuration.port);
+				Configuration.connection.connect(Configuration.host, Configuration.port);
 				// We don't have to worry about exceptions here as the above function handles all the exceptions
 				// and just returns a message. This function also initializes connection info to correct value
 				// We cannot write above function under ConnectinException block because such exception is never thrown
@@ -155,7 +155,6 @@ public class BackgroundTesting implements Runnable{
 	 * @throws TotalADSDBMSException 
 	 * 
 	 */
-	
 	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm []algorithm, 
 			                  String []database )throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
 				
@@ -197,7 +196,7 @@ public class BackgroundTesting implements Runnable{
 				
 				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
 						
-						out.println("Executing tmodel: "+database[modelCnt]);
+						out.println("Executing the model: "+database[modelCnt]);
 						int counter=trcCnt+1;
 											 
 						ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
@@ -206,7 +205,6 @@ public class BackgroundTesting implements Runnable{
 				 		modelResults.put(database[modelCnt],results);
 				 	
 				 		 // Third, print summary
-						
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
 						modelsAndAnomalyCount.put(database[modelCnt],totalAnoms);
 						resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
@@ -223,7 +221,8 @@ public class BackgroundTesting implements Runnable{
 		org.eclipse.ui.console.ConsolePlugin plugin = org.eclipse.ui.console.ConsolePlugin.getDefault();
 		org.eclipse.ui.console.IConsoleManager conMan = plugin.getConsoleManager();
 		org.eclipse.ui.console.IConsole[] existing = conMan.getConsoles();
-	      for (int i = 0; i < existing.length; i++)
+	   
+		for (int i = 0; i < existing.length; i++)
 	         if (name.equals(existing[i].getName()))
 	            return (org.eclipse.ui.console.MessageConsole) existing[i];
 	      //no console found, so create a new one

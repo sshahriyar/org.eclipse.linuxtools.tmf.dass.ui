@@ -16,7 +16,7 @@ import java.util.Map;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -172,16 +172,16 @@ class SlidingWindowTree {
 	
 	/**
 	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
-	 * @param console ProgressConsole object
+	 * @param console TotalADSOutStream object
 	 * @param database Database name
 	 * @param connection DBMS object
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 * @param collectionName Collection name
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveinDatabase(ProgressConsole console, String database, DBMS connection,HashMap<Integer, 
+	public void saveinDatabase(TotalADSOutStream console, String database, DBMS connection,HashMap<Integer, 
 			Event[]> sysCallSequences) throws TotalADSDBMSException{
-		console.printTextLn("Saving in database.....");
+		console.addOutputEvent("Saving in database.....");
 		
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			
@@ -259,10 +259,10 @@ class SlidingWindowTree {
 	}
 	/**
 	 * Prints the graph of sequence; use for testing
-	 * @param console ProgressConsole object
+	 * @param console TotalADSOutStream object
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 */
-	public void printSequence(ProgressConsole console, String database, HashMap<Integer, Event[]> sysCallSequences) {
+	public void printSequence(TotalADSOutStream console, String database, HashMap<Integer, Event[]> sysCallSequences) {
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			// create root: nodes.getKey
 			
@@ -276,9 +276,9 @@ class SlidingWindowTree {
 	 * form.
 	 * @param nodes Root event
 	 * @param prefix Prefix of the event sequence
-	 * @param console ProgressConsole object
+	 * @param console TotalADSOutStream object
 	 */
-	private void printRecursive(Event[] nodes,String prefix, ProgressConsole console){
+	private void printRecursive(Event[] nodes,String prefix, TotalADSOutStream console){
 	      
 		Boolean isPrefixPrinted=false;
  		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
@@ -304,7 +304,7 @@ class SlidingWindowTree {
 				    		//console.printText(nodes[nodeCount].event+"-");
 				}
 		}
-	  	console.printNewLine();	    
+	  	console.addNewLine();	    
 	}
 
 	/**

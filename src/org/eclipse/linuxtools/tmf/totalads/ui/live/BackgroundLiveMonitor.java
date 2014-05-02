@@ -32,7 +32,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -49,7 +49,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	private String sudoPassword;
 	private String pathToPrivateKey;
 	private Integer port;
-	private ProgressConsole console;
+	private TotalADSOutStream console;
 	private SSHConnector ssh;
 	private Integer snapshotDuration;// In Seconds
 	private Integer intervalsBetweenSnapshots; // In Minutes
@@ -92,7 +92,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
 		  	Button btnStop, Button btnDetails,HashMap<String,String[]> modelsAndSettings,
-		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval,ProgressConsole console ) {
+		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval,TotalADSOutStream console ) {
 		
 		this.userAtHost=userAtHost;
 		this.password=password;
@@ -193,7 +193,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					if (isExecuting==false)
 						break;// break out of the loop 
 					
-					console.printTextLn("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
+					console.addOutputEvent("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
 									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
 					try{
 						//TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
@@ -231,8 +231,8 @@ public class BackgroundLiveMonitor implements Runnable {
 		}
 		finally{
 			ssh.close();
-			console.printTextLn("SSH connection terminated");
-			console.printTextLn("Monitor stopped");
+			console.addOutputEvent("SSH connection terminated");
+			console.addOutputEvent("Monitor stopped");
 			final String err=exception;
 			//
 			//Run on main GUI thread
@@ -261,9 +261,9 @@ public class BackgroundLiveMonitor implements Runnable {
 	 */
 	public void stopMonitoring(){
 		isExecuting=false;
-		console.printTextLn("Stopping monitor");
-		console.printTextLn("It could take few minutes to safely stop the monitor");
-		console.printTextLn("Please wait...");		
+		console.addOutputEvent("Stopping monitor");
+		console.addOutputEvent("It could take few minutes to safely stop the monitor");
+		console.addOutputEvent("Please wait...");		
 	}
 	/**
 	 * This is a key function that evaluates traces on models and trains the model on those traces if needed
@@ -286,8 +286,8 @@ public class BackgroundLiveMonitor implements Runnable {
 				
 				
 				
-				console.printTextLn("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
-				console.printTextLn("Please wait while the trace is evaluated....");
+				console.addOutputEvent("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
+				console.addOutputEvent("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
@@ -307,26 +307,26 @@ public class BackgroundLiveMonitor implements Runnable {
 									// database has already been created and settings for test are only passed to this threa
 									// in the constructor. Also, this will always be a last trace, and new db is false
 					
-					console.printTextLn("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
-					console.printTextLn("Please wait while the model is updated....");
+					console.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
+					console.addOutputEvent("Please wait while the model is updated....");
 					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 					algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
 				} 
 				
-				console.printTextLn("Execution  finished for "+model);
+				console.addOutputEvent("Execution  finished for "+model);
 				
 				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
 				if (results.getAnomaly()){
 							anomalies.add(1.0);
-							console.printTextLn("It is an anomaly");
+							console.addOutputEvent("It is an anomaly");
 							
 				}
 				else{
 							anomalies.add(0.0);
-							console.printTextLn("It is not an anomaly");
+							console.addOutputEvent("It is not an anomaly");
 				}
 				
-				console.printTextLn("Plotting anomaly on the chart");
+				console.addOutputEvent("Plotting anomaly on the chart");
 				
 				if (anomalyIdx>maxPoints){
 					anomalies.remove();//remove head
@@ -378,7 +378,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	 */
 	private void initialise() throws TotalADSNetException{
 		console.clearText();
-		console.printTextLn("Starting SSH....waiting for response from the remote host");
+		console.addOutputEvent("Starting SSH....waiting for response from the remote host");
 		//Connecting to SSH
 		if (!pathToPrivateKey.isEmpty())
 			ssh.openSSHConnectionUsingPrivateKey(userAtHost, pathToPrivateKey, port, console,snapshotDuration);

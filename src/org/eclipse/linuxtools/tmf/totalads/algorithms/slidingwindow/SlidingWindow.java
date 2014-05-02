@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
@@ -207,7 +207,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * 
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, 
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, 
 			String[] options, Boolean isNewDB)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
@@ -291,7 +291,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 *
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) 
+	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) 
 			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
@@ -301,7 +301,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	   
 	     if (result.getAnomaly()){
 	    	 String details=result.getDetails().toString();
-	    	 console.printTextLn(details);
+	    	 console.addOutputEvent(details);
 	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
 	    	 //hammAnomalies[hamming]++;
 	    	 validationAnomalies++;
@@ -314,18 +314,18 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	//	    console.printTextLn("Anomalies at hamming "+ hamCount + ":" +hammAnomalies[hamCount]);
 	    	//	    totalAnomalies+=hammAnomalies[hamCount];
 	    	// }
-	    	console.printTextLn("Total traces in validation folder: "+validationTraceCount); 
+	    	console.addOutputEvent("Total traces in validation folder: "+validationTraceCount); 
 	    	Double anomalyPrcentage=(validationAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
-	    	console.printTextLn("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
+	    	console.addOutputEvent("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
 	    	Double normalPercentage=(100-anomalyPrcentage);
-	    	console.printTextLn("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
+	    	console.addOutputEvent("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
 	    	
 	    	// Update the settings collection for maxwin and maxhamm
 	    	 saveSettings(database, connection);
-	    	 console.printTextLn("Database updated..");
+	    	 console.addOutputEvent("Database updated..");
 	    	 
 	    	 if (!warningMessage.isEmpty())
-	    		 console.printTextLn(warningMessage);
+	    		 console.addOutputEvent(warningMessage);
 	     }
 
 	}
@@ -589,7 +589,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Performs cross validation
 	 */
 	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
+	public void crossValidate(Integer folds, String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
 		
 	}
 }

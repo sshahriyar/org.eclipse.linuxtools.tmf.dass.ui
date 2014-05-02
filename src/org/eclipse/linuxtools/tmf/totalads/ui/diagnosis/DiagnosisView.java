@@ -7,36 +7,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModel;
 import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.Modeling;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
-
+/**
+ * This class creates the Diagnosis view
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ *
+ */
 public class DiagnosisView extends TmfView {
 
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.DiagnosisView";
@@ -47,22 +41,67 @@ public class DiagnosisView extends TmfView {
 	private AlgorithmFactory algFactory;
 	private TraceTypeFactory trcTypeFactory;
 	private AnomaliesView anomView;
+	/**
+	 * An inner class implementing the listener for other views initialised in {@link TotalAdsPerspectiveFactory} 
+	 */
+	 private class PerspectiveViewsListener implements IPartListener {
+		 /// Registers a listener to Eclipse to get the object of  ResultsAndfeedback in anomView
+		 // So it can be filled whenme evaluate button is pressed in the Diagnosis View
+		 @Override  
+	        public void partOpened(IWorkbenchPart part) {
+	  		   if (part instanceof AnomaliesView) {
+	  		    anomView = (AnomaliesView)part;
+	  		    resultsAndFeedback=anomView.getResultsAndFeddbackInstance();
+	  		    diagnosis.setResultsAndFeedbackInstance(resultsAndFeedback);
+	  		   }
+	  		  }
+	
+			@Override
+			public void partActivated(IWorkbenchPart part) {
+				// TODO 
+				
+			}
+	
+			@Override
+			public void partBroughtToTop(IWorkbenchPart part) {
+				// TODO 
+				
+			}
+	
+			@Override
+			public void partClosed(IWorkbenchPart part) {
+				// TODO 
+				
+			}
+	
+			@Override
+			public void partDeactivated(IWorkbenchPart part) {
+				// TODO 
+				
+			}
+  	}
+	 
+	/**
+	 * Constructor
+	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
 	}
-
+	/**
+	 * An overriden method gets called from Eclipse when the view is initialised
+	 */
 	@Override
 	public void createPartControl(Composite parent) {
 		init();
 		diagnosis=new Diagnosis(parent);
-		//modeling=new Modeling(parent);
+	
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         } 
         
+        /// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
         getSite().getPage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
-			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
@@ -70,61 +109,20 @@ public class DiagnosisView extends TmfView {
 					   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
 					   HashSet<String> modelList= (HashSet<String>)obj;
 					   diagnosis.updateonModelSelection(modelList); 
-				    /*if (!modelList.isEmpty()) { 
-				    	java.util.Iterator<String> it= modelList.iterator();
-				    	while (it.hasNext())
-				    	   System.out.println(it.next());
-				    }*/
-			   }  
-				
-				
-			}
+				    }  
+				}
 		});
         
-       
-        
-       IPartListener partListener = new IPartListener() {
-  		@Override  
-        public void partOpened(IWorkbenchPart part) {
-  		   if (part instanceof AnomaliesView) {
-  		    anomView = (AnomaliesView)part;
-  		    resultsAndFeedback=anomView.getResultsAndFeddbackInstance();
-  		    diagnosis.setResultsAndFeedbackInstance(resultsAndFeedback);
-  		   }
-  		  }
-
-		@Override
-		public void partActivated(IWorkbenchPart part) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void partBroughtToTop(IWorkbenchPart part) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void partClosed(IWorkbenchPart part) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void partDeactivated(IWorkbenchPart part) {
-			// TODO Auto-generated method stub
-			
-		}
-  		};
-  		
-  		 getSite().getWorkbenchWindow().getPartService().addPartListener(partListener);
+        /// Registers a listener to Eclipse to get the object of another view      		
+  		getSite().getWorkbenchWindow().getPartService().addPartListener(new PerspectiveViewsListener());
 
 	}
 
 	
 	
 	/**
+	 * 
+	 * Initialises the view
 	 * 
 	 */
 	private void init(){
@@ -144,7 +142,7 @@ public class DiagnosisView extends TmfView {
 		
 		trcTypeFactory=TraceTypeFactory.getInstance();
 		trcTypeFactory.initialize();
-		// Intialize the logger
+		// Initialise the logger
 		handler=null;
 		handler= new  FileHandler("totaladslog.xml");
         Logger.getLogger("").addHandler(handler);	
@@ -159,7 +157,9 @@ public class DiagnosisView extends TmfView {
 		   Logger.getLogger(TotalADS.class.getName()).log(Level.SEVERE,null,ex);
 		}
 	}
-	
+	/**
+	 * Sets the focus
+	 */
 	@Override
 	public void setFocus() {
 		// TODO
@@ -172,10 +172,7 @@ public class DiagnosisView extends TmfView {
 	 */
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
-      //  // Don't populate the view again if we're already showing this trace
-       // if (currentTrace == signal.getTrace()) {
-        //   return;
-       // }
+      
         currentTrace = signal.getTrace();
      
             
@@ -188,7 +185,9 @@ public class DiagnosisView extends TmfView {
         diagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
-	
+	/**
+	 * Disposes the view
+	 */
 	@Override
 	public void dispose(){
 		super.dispose();

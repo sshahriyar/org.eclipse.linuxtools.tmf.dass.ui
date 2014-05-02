@@ -14,7 +14,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 /** Each model should implement the functions of this interface and, in addition, 
  * a static function registerModel
@@ -83,7 +83,7 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @throws TotalADSReaderException
  */
 
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 
 /**
  * This function is called after the train function has finished processing and has built a model.
@@ -97,7 +97,7 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function evaluates an existing model in the database on the traces in the test set. It is called for every single
  * trace separately.
@@ -124,7 +124,7 @@ public Results test (ITraceIterator trace, String database, DBMS connection, Str
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException
  */
-public void crossValidate(Integer folds, String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException;
+public void crossValidate(Integer folds, String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 

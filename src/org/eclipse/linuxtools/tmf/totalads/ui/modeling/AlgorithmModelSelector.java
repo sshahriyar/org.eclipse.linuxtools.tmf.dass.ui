@@ -34,7 +34,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTra
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
 //>>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -466,7 +466,7 @@ public class AlgorithmModelSelector {
 	 * @throws TotalADSReaderException 
 	 * 
 	 */
-	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,  ProgressConsole console ) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,  TotalADSOutStream console ) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		String database;
 		// First, verify selections
 		if (!checkItemSelection())
@@ -523,7 +523,7 @@ public class AlgorithmModelSelector {
 							
 		//Third, start training
 		console.clearText();
-		console.printTextLn("Training the model....");
+		console.addOutputEvent("Training the model....");
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 	
@@ -532,7 +532,7 @@ public class AlgorithmModelSelector {
 			 
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
-			console.printTextLn("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
+			console.addOutputEvent("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
 	 		algorithm.train(trace, isLastTrace, database,connection, console, algorithmOptions, isCreateDB);
 		
 		}
@@ -553,12 +553,12 @@ public class AlgorithmModelSelector {
 	 * @throws TotalADSDBMSException
 	 */
 	private void validateModels(File []fileList, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm,
-			String database,ProgressConsole console) throws TotalADSUIException, TotalADSReaderException, 
+			String database,TotalADSOutStream console) throws TotalADSUIException, TotalADSReaderException, 
 			TotalADSDBMSException {
 		
 				
 		// process now
-		console.printTextLn("Starting validation....");
+		console.addOutputEvent("Starting validation....");
 		
 		Boolean isLastTrace=false;
 		
@@ -569,7 +569,7 @@ public class AlgorithmModelSelector {
 			
  			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
  		
- 			console.printTextLn("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
+ 			console.addOutputEvent("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
  			
 	 		algorithm.validate(trace, database, Configuration.connection, isLastTrace, console );
 

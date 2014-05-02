@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 import com.jcraft.jsch.*;
 /**
@@ -20,12 +20,12 @@ import com.jcraft.jsch.*;
  */
 public class UserInfoSSH implements UserInfo {
 		private String password;
-		private ProgressConsole progConsole;
+		private TotalADSOutStream progConsole;
 		
 		/**
 		 * Constructor
 		 */
-		public UserInfoSSH(String password, ProgressConsole console) {
+		public UserInfoSSH(String password, TotalADSOutStream console) {
 			this.password=password;
 			this.progConsole=console;
 		}
@@ -33,7 +33,7 @@ public class UserInfoSSH implements UserInfo {
 		
 		@Override
 		public void showMessage(String msg) {
-			progConsole.printTextLn(msg);
+			progConsole.addOutputEvent(msg);
 			//System.out.println(msg);
 		}
 		

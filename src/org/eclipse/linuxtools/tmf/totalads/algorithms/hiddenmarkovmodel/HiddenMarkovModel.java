@@ -21,7 +21,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.swtchart.Chart;
 /**
  * This class implements a Hidden Markov DataModel
@@ -155,7 +155,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    */
    
    @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console,
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console,
 		String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	   
 	    if (!isTrainIntialized){
@@ -193,24 +193,27 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 }	
 	   
 		 
-		 console.printTextLn("Extracting sequences, please wait....");
+		 console.addOutputEvent("Extracting sequences, please wait....");
 		 
 		 int winWidth=0,seqCount=0;
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	 Boolean isTrained=true;
 	   	 String event=null;
-		 while (trace.advance()  ) {
+		
+	   	 while (trace.advance()  ) {
 			 event=trace.getCurrentEvent();
 	    	  newSequence.add(nameToID.getId(event));
 	    	 // newSequence.add(1);
 	    	  winWidth++;
 	    	  isTrained=false; 	  
+	    	
 	    	  if(winWidth >= seqLength){
+	    		 
 	    		  isTrained=true;	
 	    		  winWidth--;
 	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
-	    		  console.printTextLn("Learning using the BaumWelch algorithm");
+	    		  console.addOutputEvent("Learning using the BaumWelch algorithm");
 	    		  trainBaumWelch(seq, connection, database);
 	    		  newSequence.remove(0);
 	    		  seqCount++;
@@ -221,17 +224,17 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 if (isTrained==false){// train on the last missing sequences in the previous loop
 			 Integer[] seq=new Integer[newSequence.size()];
    		     seq=newSequence.toArray(seq);
-   		     console.printTextLn("Learning on sequences using BaumWelch algorithm");
+   		     console.addOutputEvent("Learning on sequences using BaumWelch algorithm");
    		     trainBaumWelch(seq, connection, database);
 		 }
 		 
 	     if (isLastTrace){ 
 	    	     numSymbols=nameToID.getSize();
 	    	     //hmm.initializeHMM(numSymbols, numStates);
-	 		     console.printTextLn("Training finished..");
+	 		     console.addOutputEvent("Training finished..");
 	    	     //hmm.learnUsingBaumWelch(numIterations);
-	    	  	 console.printTextLn("Saving HMM");
-	    	  	 console.printTextLn(hmm.toString());
+	    	  	 console.addOutputEvent("Saving HMM");
+	    	  	 console.addOutputEvent(hmm.toString());
 	    	  	 //hmm.saveHMM(database, connection);
 	    	  	 nameToID.saveMap(connection, database);
 	     }
@@ -270,7 +273,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void validate(ITraceIterator trace, String database,DBMS connection, 
-			Boolean isLastTrace, ProgressConsole console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+			Boolean isLastTrace, TotalADSOutStream console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,validationSeqLength=seqLength;
 		Double logThreshold;
@@ -278,9 +281,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		logThreshold=Double.parseDouble(options[7]);
 		
 		LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	   	console.printTextLn("Starting validation");
+	   	console.addOutputEvent("Starting validation");
 	   	Boolean isValidated=true;
-	   	console.printTextLn("Extracting sequences, please wait...");
+	   	console.addOutputEvent("Extracting sequences, please wait...");
 	   	
 		 String event=null;
 		 while (trace.advance()  ) {
@@ -310,7 +313,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 		options[7]=logThreshold.toString();
 		
-		console.printTextLn("Minimum Log Likelihood Threshold: "+logThreshold.toString());
+		console.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
 		 
 		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
 		//if (isLastTrace)
@@ -323,20 +326,20 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param probThreshold
 	 * @param seq
 	 */
-	private Double validationEvaluation(ProgressConsole console, Double probThreshold, Integer []seq){
+	private Double validationEvaluation(TotalADSOutStream console, Double probThreshold, Integer []seq){
 		  Double prob=1.0;
 		  try{
 			  prob=hmm.observationLikelihood(seq);
 			 // console.printTextLn("Sequence likelhood: "+prob.toString());
 		  } catch (Exception ex){
-			  console.printTextLn("Unknown events in your sequences. Retrain using larger number of unique events");
+			  console.addOutputEvent("Unknown events in your sequences. Retrain using larger number of unique events");
 			 // ex.printStackTrace();
 		  }
 		  
 		  if (prob<probThreshold){
 			  probThreshold=prob;
 			  //console.printTextLn(Arrays.toString(seq));
-			  console.printTextLn("Min Log Likelihood Threshold: "+probThreshold.toString());
+			  console.addOutputEvent("Min Log Likelihood Threshold: "+probThreshold.toString());
 			 
 		  }
 		  return probThreshold;
@@ -472,7 +475,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void crossValidate(Integer folds, String database, DBMS connection,
-			ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException {
+			TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException {
 	
 
 	}

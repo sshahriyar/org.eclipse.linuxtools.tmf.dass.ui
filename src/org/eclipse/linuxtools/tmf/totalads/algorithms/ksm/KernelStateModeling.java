@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -192,7 +192,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @throws TotalADSReaderException 
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, ProgressConsole console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!initialize){
     		  alpha=0.0;
@@ -235,7 +235,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		  }
 	     saveTraceData(connection, database, states);
 			
-		console.printTextLn("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
+		console.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 		if (isLastTrace){
 			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
 			
@@ -247,7 +247,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @throws TotalADSReaderException 
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, ProgressConsole console) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -257,7 +257,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				if (isAnomaly==false)
 							 break; // no need to increment alpha as there is no anomaly
 			    alpha+=0.02;
-			    console.printTextLn("Increasing alpha to "+alpha);
+			    console.addOutputEvent("Increasing alpha to "+alpha);
 			    
 		  }
 		 if (alpha>=maxAlpha)
@@ -265,17 +265,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				 validationAnomalyCount++;
 			 
 		  if (isLastTrace){
-			  	console.printTextLn("Updating database");
+			  	console.addOutputEvent("Updating database");
 			  	
 				
 				saveSettingsInDatabase(alpha, database, connection);
 				
 				  
-			  	console.printTextLn("Database updated with final alpha: "+alpha);
+			  	console.addOutputEvent("Database updated with final alpha: "+alpha);
 				Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
 				  
-				console.printTextLn("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
-				console.printTextLn("Total traces "+validationTraceCount);
+				console.addOutputEvent("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
+				console.addOutputEvent("Total traces "+validationTraceCount);
 		  }
 	  
 	}
@@ -285,7 +285,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * Cross validate the model
 	 */
 	@Override
-	public void crossValidate(Integer folds,String database, DBMS connection, ProgressConsole console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
+	public void crossValidate(Integer folds,String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
 		// totalTraces=get the record count in the database
 		// patitionSize=divide it by folds
 		//repeat untill j=0  to folds and j++
