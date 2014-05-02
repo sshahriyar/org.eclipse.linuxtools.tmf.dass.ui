@@ -149,10 +149,10 @@ public class ResultsAndFeedback {
 				
 				lblSelectModel = new Label(compSummary, SWT.NONE);
 				lblSelectModel.setLayoutData(new GridData(SWT.LEFT,SWT.BOTTOM,false,false,1,1));
-				lblSelectModel.setText("Select DataModels");
+				lblSelectModel.setText("Select Models");
 				
 				cmbModels= new Combo(compSummary,SWT.BORDER|SWT.READ_ONLY);
-				cmbModels.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,false,false,1,1));
+				cmbModels.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false,1,1));
 				if (isDiagnosis==true){
 					cmbModels.setVisible(false);
 					lblSelectModel.setVisible(false);

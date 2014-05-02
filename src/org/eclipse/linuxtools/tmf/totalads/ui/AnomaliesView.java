@@ -21,7 +21,7 @@ import org.eclipse.ui.part.ViewPart;
  *
  */
 public class AnomaliesView extends ViewPart {
-	
+	private ResultsAndFeedback results;
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.AnomaliesView";
 	//private AnomaliesTable anomaliesTable = null;
 	
@@ -96,7 +96,7 @@ public class AnomaliesView extends ViewPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		//anomaliesTable = new AnomaliesTable(parent);
-		 ResultsAndFeedback results=new ResultsAndFeedback(parent, false);
+		 results=new ResultsAndFeedback(parent, false);
 	}
 
 	/* (non-Javadoc)
@@ -106,6 +106,12 @@ public class AnomaliesView extends ViewPart {
 	public void setFocus() {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public ResultsAndFeedback getResultsAndFeddbackInstance(){
+		System.out.println("results");
+		return results;
+		
 	}
 
 }

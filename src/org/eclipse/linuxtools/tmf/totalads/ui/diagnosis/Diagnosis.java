@@ -273,8 +273,8 @@ public class Diagnosis {
 	
 	private void addEvaluateButton(Composite compParent){
 		btnEvaluateModels=new Button(compParent, SWT.NONE);
-		btnEvaluateModels.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnEvaluateModels.setText(" Evaluate ");
+		btnEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false));
+		btnEvaluateModels.setText("    Evaluate    ");
 		
 		
 		
@@ -329,7 +329,7 @@ public class Diagnosis {
 						}
 				  counter++;
 				}
-				//	resultsAndFeedback.clearData();
+					resultsAndFeedback.clearData();
 				
 				btnEvaluateModels.setEnabled(false);
 				
@@ -361,7 +361,13 @@ public class Diagnosis {
 		
 	
 	}
-	
+	/**
+	 * Sets the ResultsAndFeddback object to a local variable
+	 * @param resultsAndFeedback
+	 */
+	public void setResultsAndFeedbackInstance(ResultsAndFeedback resultsAndFeedback){
+		this.resultsAndFeedback=resultsAndFeedback;
+	}
 	/**
 	 * This function get called from {@link DiagnosisView} to notify currently selected models
 	 * @param modelsList

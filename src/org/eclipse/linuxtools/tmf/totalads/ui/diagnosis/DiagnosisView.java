@@ -20,6 +20,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModel;
 import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
@@ -32,6 +33,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -40,11 +42,11 @@ public class DiagnosisView extends TmfView {
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.DiagnosisView";
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
-	//private Modeling modeling;
+	private ResultsAndFeedback resultsAndFeedback;
 	private Handler handler;
 	private AlgorithmFactory algFactory;
 	private TraceTypeFactory trcTypeFactory;
-	
+	private AnomaliesView anomView;
 	public DiagnosisView() {
 		super(VIEW_ID);
 	}
@@ -78,8 +80,53 @@ public class DiagnosisView extends TmfView {
 				
 			}
 		});
+        
+       
+        
+       IPartListener partListener = new IPartListener() {
+  		@Override  
+        public void partOpened(IWorkbenchPart part) {
+  		   if (part instanceof AnomaliesView) {
+  		    anomView = (AnomaliesView)part;
+  		    resultsAndFeedback=anomView.getResultsAndFeddbackInstance();
+  		    diagnosis.setResultsAndFeedbackInstance(resultsAndFeedback);
+  		   }
+  		  }
+
+		@Override
+		public void partActivated(IWorkbenchPart part) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void partBroughtToTop(IWorkbenchPart part) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void partClosed(IWorkbenchPart part) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void partDeactivated(IWorkbenchPart part) {
+			// TODO Auto-generated method stub
+			
+		}
+  		};
+  		
+  		 getSite().getWorkbenchWindow().getPartService().addPartListener(partListener);
+
 	}
 
+	
+	
+	/**
+	 * 
+	 */
 	private void init(){
 		try{
 		    Configuration.connection=new DBMS();

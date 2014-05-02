@@ -192,9 +192,11 @@ public class BackgroundTesting implements Runnable{
 			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
 				out.println("Executing trace #"+ trcCnt+ " : "+fileList[trcCnt]);
 				// for each selected model 
+				HashMap<String,Results> modelResults=new HashMap<String, Results>();
+				final String traceName=fileList[trcCnt].getName();
+				
 				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
-										
-						HashMap<String,Results> modelResults=new HashMap<String, Results>();
+						
 						out.println("Executing tmodel: "+database[modelCnt]);
 						int counter=trcCnt+1;
 											 
@@ -202,16 +204,14 @@ public class BackgroundTesting implements Runnable{
 				 					
 				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,null);
 				 		modelResults.put(database[modelCnt],results);
-				 		final String traceName=fileList[trcCnt].getName();
-				 		
-				 		resultsAndFeedback.addTraceResult(traceName, modelResults);
+				 	
 				 		 // Third, print summary
 						
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
 						modelsAndAnomalyCount.put(database[modelCnt],totalAnoms);
 						resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
 				}
-						
+			resultsAndFeedback.addTraceResult(traceName, modelResults);		
 		  }
 	       
 	    resultsAndFeedback.setTotalTraceCount(totalFiles.toString());
