@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -31,6 +32,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.jface.viewers.StructuredSelection;  
 
 /**
+ * This class creates a view to display the models
  * @author <p> efraimlopez </p>
  * 			<p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
@@ -41,7 +43,11 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	private ModelsList modelListViewer = null;
 	private ListenerList listeners ; 
 	private HashSet<String> selection; 
-	
+	/**
+	 * 
+	 * Inner class representing a Table for ModelsList
+	 *
+	 */
 	private  class ModelsList{
 		CheckboxTableViewer viewer = null;
 		Table table=null;
@@ -74,33 +80,42 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 			viewer.setContentProvider(new DataModelTableContentProvider());			
 			viewer.setInput(TotalAdsState.INSTANCE.getModels());
 			
+			// Event handler for check ticks in the Table
 			viewer.addCheckStateListener(new ICheckStateListener() {
 				
 				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					
-					
+					MessageBox msgBox=new MessageBox(Display.getCurrent().getActiveShell(), SWT.ERROR);
 					DataModel model=(DataModel)event.getElement();
 					String modelName=model.getId();
+					String []modelAcronym=modelName.split("_");
 					
 					if (event.getChecked()){
+						
 						if (selection.size()>=5){
-							MessageBox msgBox=new MessageBox(Display.getCurrent().getActiveShell(), SWT.ERROR);
 							msgBox.setMessage("Please select less than six models only");
 						    msgBox.open();
-						    for (int i=0;i<viewer.getTable().getItemCount(); i++)
-						    	if (viewer.getTable().getItem(i).getText().equals(modelName)){
-						    		     viewer.getTable().getItem(i).setChecked(false);
-						    		     break;
-						    	}
+						    uncheckedSelectedModel(modelName, viewer);
 						    return;
+						   //Making sure that it is not a database that already exist in the db 
+						} else if(modelAcronym==null ||  modelAcronym.length<2){
+							msgBox.setMessage(modelName+ " is not a valid model created by TotalADS!");
+							msgBox.open();
+							uncheckedSelectedModel(modelName, viewer);
+							return;
+							
+						}else if (AlgorithmFactory.getInstance().getAlgorithmByAcronym(modelAcronym[1])==null){
+								msgBox.setMessage(modelName +" is not a valid model created by TotalADS!");
+								msgBox.open();
+								uncheckedSelectedModel(modelName, viewer);
+								return;
 						}
 						
 						selection.add(modelName);
-						System.out.println("Adding "+modelName);
 						
 					}else if (!event.getChecked()){
-						System.out.println("Removing "+modelName);
+						
 						selection.remove(modelName);
 					} // end of event checking
 					// now calling listeners
@@ -112,11 +127,26 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		}
 	}
 
+	/**
+	 * Constructor
+	 */
 	public DataModelsView() {
 		listeners = new ListenerList(); 
 		selection=new HashSet<String>(); 
 	}
-
+	
+	/**
+	 * Unchecked selected model in the table view
+	 * @param modelName
+	 * @param viewer
+	 */
+	private void uncheckedSelectedModel(String modelName, CheckboxTableViewer viewer ){
+		for (int i=0;i<viewer.getTable().getItemCount(); i++)
+	    	if (viewer.getTable().getItem(i).getText().equals(modelName)){
+	    		     viewer.getTable().getItem(i).setChecked(false);
+	    		     break;
+	    	}
+	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */

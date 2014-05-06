@@ -86,7 +86,6 @@ public class AlgorithmModelSelector {
 		/**
 		 *  Group model selection
 		 */
-		
 		grpAnalysisModelSelection=new Group(compParent,SWT.NONE);	
 		grpAnalysisModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,3));
 		grpAnalysisModelSelection.setLayout(new GridLayout(1,false));

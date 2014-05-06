@@ -4,6 +4,9 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.PlatformUI;
 
 public class CreateModelHandler implements IHandler {
 
@@ -21,8 +24,15 @@ public class CreateModelHandler implements IHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		System.out.println("Executing Create a model command "+event.toString());
-		return null;
+		WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+			      new CreateModelWizard());
+	    if (wizardDialog.open() == Window.OK) {
+			      System.out.println("Ok pressed");
+		} else {
+			      System.out.println("Cancel pressed");
+		 }
+		
+	    return null;
 	}
 
 	@Override

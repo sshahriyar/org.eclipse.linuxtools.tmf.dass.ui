@@ -42,8 +42,10 @@ public class ModelSelection {
 	private HashMap<String,String[]> models= new HashMap<String,String[]>();
 	
 	/**
-	 * Constructor used in Live modeling
-	 * @param compParent
+	 * Consturctor
+	 * @param btnSettings
+	 * @param btnDelete
+	 * @param tree
 	 */
 	public ModelSelection(Button btnSettings, Button btnDelete, Tree tree) {
 		this.btnSettings=btnSettings;
@@ -133,7 +135,7 @@ public class ModelSelection {
 							String []databases=getModels();
 							
 							if (databases.length >1){
-								msgBox.setMessage("Please seelect only one model to edit settings");
+								msgBox.setMessage("Please select only one model to edit settings");
 								msgBox.open();
 								return;
 							}
