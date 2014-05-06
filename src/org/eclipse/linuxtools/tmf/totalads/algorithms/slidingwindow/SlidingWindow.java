@@ -15,17 +15,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
@@ -207,7 +208,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * 
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, 
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, 
 			String[] options, Boolean isNewDB)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
@@ -276,8 +277,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     }
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
-	    	 treeTransformer.printSequence(console, database, sysCallSequences);
-	    	 treeTransformer.saveinDatabase(console, database, connection, sysCallSequences);
+	    	 treeTransformer.printSequence(outStream, database, sysCallSequences);
+	    	 treeTransformer.saveinDatabase(outStream, database, connection, sysCallSequences);
 	    	 intialize=false;
 	    	 nameToID.saveMap(connection, database);
 	     }
@@ -291,7 +292,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 *
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) 
+	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
 			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
@@ -301,7 +302,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	   
 	     if (result.getAnomaly()){
 	    	 String details=result.getDetails().toString();
-	    	 console.addOutputEvent(details);
+	    	 outStream.addOutputEvent(details);
 	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
 	    	 //hammAnomalies[hamming]++;
 	    	 validationAnomalies++;
@@ -314,18 +315,18 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    	//	    console.printTextLn("Anomalies at hamming "+ hamCount + ":" +hammAnomalies[hamCount]);
 	    	//	    totalAnomalies+=hammAnomalies[hamCount];
 	    	// }
-	    	console.addOutputEvent("Total traces in validation folder: "+validationTraceCount); 
+	    	outStream.addOutputEvent("Total traces in validation folder: "+validationTraceCount); 
 	    	Double anomalyPrcentage=(validationAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
-	    	console.addOutputEvent("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
+	    	outStream.addOutputEvent("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
 	    	Double normalPercentage=(100-anomalyPrcentage);
-	    	console.addOutputEvent("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
+	    	outStream.addOutputEvent("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
 	    	
 	    	// Update the settings collection for maxwin and maxhamm
 	    	 saveSettings(database, connection);
-	    	 console.addOutputEvent("Database updated..");
+	    	 outStream.addOutputEvent("Database updated..");
 	    	 
 	    	 if (!warningMessage.isEmpty())
-	    		 console.addOutputEvent(warningMessage);
+	    		 outStream.addOutputEvent(warningMessage);
 	     }
 
 	}
@@ -336,7 +337,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * Tests the model by overriding a method from the interface {@link IDetectionAlgorithm}
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options) 
+	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options, IAlgorithmOutStream outputStream) 
 			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		  
 	       if (!isTestStarted){
@@ -585,11 +586,4 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 	
 	
-	/**
-	 * Performs cross validation
-	 */
-	@Override
-	public void crossValidate(Integer folds, String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
-		
-	}
 }

@@ -10,7 +10,7 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"
-             id="org.eclipse.linuxtools.tmf.totalads.DiagnosisView"
+             id="org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"
              name="Diagnosis"
              restorable="true">
        </view>
@@ -36,9 +36,24 @@
              restorable="true">
        </view>
        <view
+             category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.GenericView"
              id="org.eclipse.linuxtools.tmf.totalads.GenericView"
              name="Generic View"
+             restorable="true">
+       </view>
+       <view
+             category="org.eclipse.linuxtools.tmf.totalads"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView"
+             id="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView"
+             name="LiveMonitor"
+             restorable="true">
+       </view>
+       <view
+             category="org.eclipse.linuxtools.tmf.totalads"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView"
+             id="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView"
+             name="LiveChart"
              restorable="true">
        </view>
    

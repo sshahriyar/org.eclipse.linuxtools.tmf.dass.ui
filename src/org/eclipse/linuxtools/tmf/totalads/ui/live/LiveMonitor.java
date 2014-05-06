@@ -10,6 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,13 +20,15 @@ import java.util.concurrent.Executors;
 //import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 //import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 
+
+
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 //import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 //import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.FileBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 //import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 //import org.eclipse.osgi.framework.internal.core.Msg;
@@ -75,41 +78,42 @@ import org.eclipse.swt.widgets.Tree;
 public class LiveMonitor {
 	//Initializes variables
 	//private TracingTypeSelector traceTypeSelector;
-	private Text txtPassword;
+	//private Text txtPassword;
 	private Text txtUserAtHost;
 	private Combo cmbSnapshot;
 	private Combo cmbInterval;
-	private Text txtPvtKey;
-	private Button btnPvtKey;
-	private Button btnPassword;
+	//private Text txtPvtKey;
+	//private Button btnPvtKey;
+	//private Button btnPassword;
 	private Text txtPort;
 	private Text txtSudoPassword;
 	private ResultsAndFeedback resultsAndFeedback;
 	private Button btnStart;
-	private TotalADSOutStream console;
+	//private AlgorithmOutStream console;
 	private Button btnStop;
 	private Button btnDetails;
 	private BackgroundLiveMonitor liveExecutor;
-	private ModelSelection modelSelectionHandler;
+	//private ModelSelection modelSelectionHandler;
 	private LiveXYChart liveChart;
 	private Button btnTrainingAndEval;
 	private Button btnTesting;
-	private FileBrowser trcbrowser;
+	//private FileBrowser trcbrowser;
+	private HashSet<String> modelsList;
 	/**
 	 * Constructor of the LiveMonitor class
 	 * @param tabFolderParent TabFolder object
 	 *
 	 */
-	public LiveMonitor(CTabFolder tabFolderParent){
+	public LiveMonitor(Composite compParent){
 		//tmfTracePath=new StringBuilder();
 		//currentlySelectedTracesPath=new StringBuilder();
 		//LiveMonitor Tab Item
-		CTabItem tbItmLive = new CTabItem(tabFolderParent, SWT.NONE);
-		tbItmLive.setText("Live Monitor");
+		//CTabItem tbItmLive = new CTabItem(tabFolderParent, SWT.NONE);
+		//tbItmLive.setText("Live Monitor");
 		//Making scrollable tab item 
-		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledComposite scrolCompAnom=new ScrolledComposite(compParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmLive = new Composite(scrolCompAnom,SWT.NONE);
-		tbItmLive.setControl(scrolCompAnom);
+		//tbItmLive.setControl(scrolCompAnom);
 		
 		//Designing the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -125,8 +129,8 @@ public class LiveMonitor {
 		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
 	
-		// Create GUI elements for a selection of a trace
-		
+		// Create GUI elements for SSH Configuration
+		selectHostUsingSSH(compTraceTypeAndModel);
 			
 		//////////////////////////////////////////////////////////////////////
 		// Creating GUI widgets for charts and console
@@ -155,31 +159,29 @@ public class LiveMonitor {
 		btnDetails.setEnabled(false);
 		
 
-		selectHostUsingSSH(compTraceTypeAndModel);
+		
 		///////////////
 		///Creating a chart
 		///////////////
-		;
 		
-		Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
-		compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		compChart.setLayout(new FillLayout());
-		liveChart=new LiveXYChart(compChart);
+		
+		//Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
+		//compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		//compChart.setLayout(new FillLayout());
+		
 		
 		/////////
 		///Creating a smaller console than the chart
 		///////
-		Composite compConsole = new Composite(compButtonsChartConsole,SWT.NONE);
-		compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		compConsole.setLayout(new GridLayout(1,false));
+	//	Composite compConsole = new Composite(compButtonsChartConsole,SWT.NONE);
+	//	compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+	//	compConsole.setLayout(new GridLayout(1,false));
 		
-		GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
-		gridDataConsoleText.minimumHeight=160;
-		console =new TotalADSOutStream (compConsole,new GridData(SWT.LEFT,SWT.BOTTOM,true,false),
-				gridDataConsoleText);
-
+	//	GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
+	//	gridDataConsoleText.minimumHeight=160;
 		
-		resultsAndFeedback=new ResultsAndFeedback();
+		
+		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmLive);
 		 // Set the minimum size
@@ -293,6 +295,7 @@ public class LiveMonitor {
 		
 		cmbInterval=new Combo(compDurationPort, SWT.NONE|SWT.READ_ONLY);
 		cmbInterval.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false,1,1));
+		cmbInterval.add("0");
 		cmbInterval.add("1");
 		cmbInterval.add("3"); 
 		cmbInterval.add("5"); 
@@ -334,10 +337,10 @@ public class LiveMonitor {
 		//////////////////
 		/////// Existing DataModel
 		//////////////
-		Group grpModelSelection=new Group(grpTrainingAndEval,SWT.NONE);	
+		/*Group grpModelSelection=new Group(grpTrainingAndEval,SWT.NONE);	
 		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,2,2));
 		grpModelSelection.setLayout(new GridLayout(1,false));
-		grpModelSelection.setText("Existing DataModels");
+		grpModelSelection.setText("Existing Models");
 		
 		Composite compModelSelection=new Composite(grpModelSelection, SWT.NONE);
 	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
@@ -356,7 +359,7 @@ public class LiveMonitor {
 		treeModels.setLinesVisible(true);
 		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);
+		modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);*/
 		
 	}
 	
@@ -401,11 +404,11 @@ public class LiveMonitor {
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
 					//IDetectionAlgorithm algorithms[]=modelSelectionHandler.getCurrentlySelectedAlgorithms();
-					HashMap<String,String[]> modelsAndSettings=modelSelectionHandler.getModelaAndSettings();
+					//HashMap<String,String[]> modelsAndSettings=modelSelectionHandler.getModelaAndSettings();
 					
-					if (modelsAndSettings.size() > 5){
+					if (modelsList.size() <=0){
 						 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
-						 msgBox.setMessage("Please select less than six models");
+						 msgBox.setMessage("Please select a model first");
 						 msgBox.open();
 						 return;
 					}
@@ -413,8 +416,8 @@ public class LiveMonitor {
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
-									  	btnStop, btnDetails,modelsAndSettings,resultsAndFeedback,liveChart,
-									  	isTrainAndEval, console);
+									  	btnStop, btnDetails,modelsList,resultsAndFeedback,liveChart,
+									  	isTrainAndEval);
 					 ExecutorService executor = Executors.newSingleThreadExecutor();
 					 executor.execute(liveExecutor);
 					 executor.shutdown();
@@ -434,13 +437,13 @@ public class LiveMonitor {
 		});
 		/**
 		 * details event handler
-		 */
+		 
 		btnDetails.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
-				resultsAndFeedback.showForm();	
+				//resultsAndFeedback.showForm();	
 			}
-		});
+		});*/
 		
 		//**** Pvt key button handler: Will be enabled in the next version
 		/*btnPvtKey.addSelectionListener(new SelectionAdapter() {
@@ -485,8 +488,7 @@ public class LiveMonitor {
 		//	msg="SSH password cannot be empty";
 		//else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
          //  msg="Private key path cannot be empty";
-		else if (this.modelSelectionHandler.getSelectedModelsCount()==0)
-			msg="Please, first select a model";
+		
 		else {
 				try{ 
 					Integer.parseInt(txtPort.getText());
@@ -505,10 +507,32 @@ public class LiveMonitor {
 	}
 	
 	/**
-	 * Closes the results form if open
+	 * Closes the results form
 	 */
 	public void destroy (){
-		this.resultsAndFeedback.destroy();
+		//this.resultsAndFeedback.destroy();
 	}
-	
+	/**
+	 * Sets the chart object
+	 * @param chart
+	 */
+	public void setLiveChart(LiveXYChart chart){
+		liveChart=chart;
+	}
+	/**
+	 * Sets ResultsAndFeedback object
+	 * @param results
+	 */
+	public void setResultsAndFeedback(ResultsAndFeedback results){
+		System.out.println("Results in live Monitor");
+		this.resultsAndFeedback=results;
+	}
+
+	/**
+	 *Updates the selected model list 
+	 * @param modelsList
+	 */
+	public void updateOnModelSelction(HashSet<String> modelList){
+		this.modelsList=modelList;
+	}
 }

@@ -16,17 +16,31 @@
   */
 package org.eclipse.linuxtools.tmf.totalads.core;
 
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.controlflow.ControlFlowView;
 import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.resources.ResourcesView;
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.GenericView;
 import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
+import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitor;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView;
 import org.eclipse.linuxtools.tmf.ui.views.histogram.HistogramView;
 import org.eclipse.linuxtools.tmf.ui.views.statistics.TmfStatisticsView;
 import org.eclipse.osgi.framework.internal.core.ConsoleManager;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -42,57 +56,56 @@ import org.eclipse.ui.console.IConsoleConstants;
  */
 public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
 	
-    // LTTng views
-   // private static final String HISTOGRAM_VIEW_ID = HistogramView.ID;
-    private static final String CONTROL_VIEW_ID = ControlView.ID;
-  //  private static final String CONTROLFLOW_VIEW_ID = ControlFlowView.ID;
-    //private static final String RESOURCES_VIEW_ID = ResourcesView.ID;
-    //private static final String STATISTICS_VIEW_ID = TmfStatisticsView.ID;
-
-    // Standard Eclipse views
+    
+   
     private static final String PROJECT_VIEW_ID = IPageLayout.ID_PROJECT_EXPLORER;
-   // private static final String PROPERTIES_VIEW_ID = IPageLayout.ID_PROP_SHEET;
-  //  private static final String BOOKMARKS_VIEW_ID = IPageLayout.ID_BOOKMARKS;
-
+    private static final String CONTROL_VIEW_ID = ControlView.ID;
+   
+    
     @Override
 	public void createInitialLayout(IPageLayout layout) {
 		System.out.println("printing layout");
+		//init();
 		
 		layout.setEditorAreaVisible(false);
 		//Create right folders
         IFolderLayout topRightFolder = layout.createFolder(
-                "topRightFolder", IPageLayout.RIGHT, 0.80f,IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+                "topRightFolder", IPageLayout.RIGHT, 0.80f,IPageLayout.ID_EDITOR_AREA); 
         topRightFolder.addView(DataModelsView.ID);
         
         IFolderLayout bottomRightFolder = layout.createFolder(
-                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightFolder"); //$NON-NLS-1$
+                "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightFolder"); 
         bottomRightFolder.addView(GenericView.ID);
         //bottomRightFolder.addView(IPageLayout.ID_PROP_SHEET);
         
 		// Create Left folders
         IFolderLayout topLeftFolder = layout.createFolder(
-                "topLeftFolder", IPageLayout.LEFT, 0.20f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+                "topLeftFolder", IPageLayout.LEFT, 0.20f, IPageLayout.ID_EDITOR_AREA); 
         topLeftFolder.addView(PROJECT_VIEW_ID);
 
         
         IFolderLayout bottomLeftFolder = layout.createFolder(
-                "bottomLeftFolder", IPageLayout.BOTTOM, 0.70f, "topLeftFolder"); //$NON-NLS-1$
+                "bottomLeftFolder", IPageLayout.BOTTOM, 0.70f, "topLeftFolder"); 
         bottomLeftFolder.addView(CONTROL_VIEW_ID);
 
         // Create the center folders
         IFolderLayout centerTopFolder = layout.createFolder(
-                "centerTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
+                "centerTopFolder", IPageLayout.TOP, 0.70f, IPageLayout.ID_EDITOR_AREA); 
         centerTopFolder.addView(DiagnosisView.VIEW_ID);
         centerTopFolder.addView(ModelingView.VIEW_ID);
+        centerTopFolder.addView(LiveMonitorView.VIEW_ID);
         
         IFolderLayout centerMiddleFolder = layout.createFolder(
-                "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); //$NON-NLS-1$
+                "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); 
         centerMiddleFolder.addView(AnomaliesView.ID);
-        
+       centerMiddleFolder.addView(LiveChartView.VIEW_ID);
         
         IFolderLayout centerBottomFolder = layout.createFolder(
-                "centerBottomFolder", IPageLayout.BOTTOM, 0.70f,"centerMiddleFolder"); //$NON-NLS-1$
+                "centerBottomFolder", IPageLayout.BOTTOM, 0.70f,"centerMiddleFolder"); 
         centerBottomFolder.addView(IConsoleConstants.ID_CONSOLE_VIEW);
 	}
+    
+   
+	
 
 }

@@ -14,7 +14,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 /** Each model should implement the functions of this interface and, in addition, 
  * a static function registerModel
@@ -41,7 +40,7 @@ public String[] getTrainingOptions(DBMS connection, String database, Boolean isN
  * Validates the training options and saves them into the database. On error throws exception
  * @param options Settings array
  * @param database Database name
- * @param connection Databse connection object
+ * @param connection Database connection object
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException TODO
  */
@@ -75,7 +74,7 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @param isLastTrace True if the trace is the last trace, else false
  * @param database Database/mode name
  * @param connection Connection object
- * @param console An object of the console where the processing information needs to be printed
+ * @param outStream Use this object to display the events during processing
  * @param options Value of the options/settings if set
  * @param isNewDB True if the database is a new database; otherwise false
  * @throws TotalADSUIException
@@ -83,7 +82,7 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @throws TotalADSReaderException
  */
 
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 
 /**
  * This function is called after the train function has finished processing and has built a model.
@@ -92,12 +91,12 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @param database Database name
  * @param connection Connection name
  * @param isLastTrace True if the trace is the last trace, else false
- * @param console An object of the console where to print the processing options
+ * @param outStream Use this object to display the events during processing
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function evaluates an existing model in the database on the traces in the test set. It is called for every single
  * trace separately.
@@ -105,26 +104,13 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param database Database name
  * @param connection DBMS object
  * @param options Testing Options/Settings if changed by a user are passed here
- * @return An object of type Result containing the evaluation rinformation on a trace
+ * @param outputStream Use this object to display the events during processing
+ * @return An object of type Result containing the evaluation information of a trace
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
-/**
- * This function is used to do the cross validation on the training data in the database. Currently it is unimplmented.
- *  It will work on the traces already processed and stored or after processing and stroign them in the suitable form 
- *  for the evaluation. It will then virtually divide the processed  traces into different parts, train on some parts and evaluate on other parts. 
- * @param folds
- * @param database
- * @param connection
- * @param console
- * @param trace
- * @param isLastTrace
- * @throws TotalADSUIException
- * @throws TotalADSDBMSException
- */
-public void crossValidate(Integer folds, String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException;
+public Results test (ITraceIterator trace, String database, DBMS connection, String[] options, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 

@@ -9,9 +9,11 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.ksm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
@@ -19,7 +21,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -192,7 +193,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @throws TotalADSReaderException 
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, TotalADSOutStream console, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!initialize){
     		  alpha=0.0;
@@ -235,7 +236,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		  }
 	     saveTraceData(connection, database, states);
 			
-		console.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
+		outStream.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 		if (isLastTrace){
 			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
 			
@@ -247,7 +248,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @throws TotalADSReaderException 
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, TotalADSOutStream console) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -257,7 +258,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				if (isAnomaly==false)
 							 break; // no need to increment alpha as there is no anomaly
 			    alpha+=0.02;
-			    console.addOutputEvent("Increasing alpha to "+alpha);
+			    outStream.addOutputEvent("Increasing alpha to "+alpha);
 			    
 		  }
 		 if (alpha>=maxAlpha)
@@ -265,39 +266,23 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				 validationAnomalyCount++;
 			 
 		  if (isLastTrace){
-			  	console.addOutputEvent("Updating database");
+			  	outStream.addOutputEvent("Updating database");
 			  	
 				
 				saveSettingsInDatabase(alpha, database, connection);
 				
 				  
-			  	console.addOutputEvent("Database updated with final alpha: "+alpha);
+			  	outStream.addOutputEvent("Database updated with final alpha: "+alpha);
 				Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
 				  
-				console.addOutputEvent("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
-				console.addOutputEvent("Total traces "+validationTraceCount);
+				outStream.addOutputEvent("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
+				outStream.addOutputEvent("Total traces "+validationTraceCount);
 		  }
 	  
 	}
 	
 	
-	/**
-	 * Cross validate the model
-	 */
-	@Override
-	public void crossValidate(Integer folds,String database, DBMS connection, TotalADSOutStream console, ITraceIterator trace, Boolean isLastTrace) throws TotalADSUIException, TotalADSDBMSException{
-		// totalTraces=get the record count in the database
-		// patitionSize=divide it by folds
-		//repeat untill j=0  to folds and j++
-			// validationFoldStart=1+j*partitionSize
-			// validationFoldEnd=partitionSize+j*partitionSize;
-			// trainingFirstFoldStart=1
-			// trainingFirstFoldEnd=validationFoldStart-1
-			// trainingRemainingFoldStart=validationFoldEnd+1
-			// trainingRemainingFoldEnd=totalTraces
-		    // take one record from each validationFoldStart to validationFoldEnd 
-	}
-
+	
 	/**
 	 * Tests the model
 	 * @throws TotalADSReaderException 
@@ -305,7 +290,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @throws TotalADSDBMSException
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;

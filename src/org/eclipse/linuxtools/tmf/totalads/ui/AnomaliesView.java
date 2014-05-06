@@ -109,7 +109,7 @@ public class AnomaliesView extends ViewPart {
 	}
 	
 	public ResultsAndFeedback getResultsAndFeddbackInstance(){
-		System.out.println("results");
+		//System.out.println("results");
 		return results;
 		
 	}

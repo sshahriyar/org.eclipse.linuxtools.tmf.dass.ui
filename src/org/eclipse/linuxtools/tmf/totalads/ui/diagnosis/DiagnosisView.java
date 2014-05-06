@@ -33,13 +33,14 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class DiagnosisView extends TmfView {
 
-	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.DiagnosisView";
+	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView";
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
 	private ResultsAndFeedback resultsAndFeedback;
-	private Handler handler;
 	private AlgorithmFactory algFactory;
 	private TraceTypeFactory trcTypeFactory;
+	private Handler handler;
+	
 	private AnomaliesView anomView;
 	/**
 	 * An inner class implementing the listener for other views initialised in {@link TotalAdsPerspectiveFactory} 
@@ -49,6 +50,7 @@ public class DiagnosisView extends TmfView {
 		 // So it can be filled whenme evaluate button is pressed in the Diagnosis View
 		 @Override  
 	        public void partOpened(IWorkbenchPart part) {
+			 System.out.println ("Part Opened "+part.getTitle());
 	  		   if (part instanceof AnomaliesView) {
 	  		    anomView = (AnomaliesView)part;
 	  		    resultsAndFeedback=anomView.getResultsAndFeddbackInstance();
@@ -58,25 +60,26 @@ public class DiagnosisView extends TmfView {
 	
 			@Override
 			public void partActivated(IWorkbenchPart part) {
-				// TODO 
+				System.out.println ("Part Activated "+part.getTitle());
 				
 			}
 	
 			@Override
 			public void partBroughtToTop(IWorkbenchPart part) {
-				// TODO 
+				System.out.println ("Part BroughtToTop "+part.getTitle());
+				System.out.println(getSite().getWorkbenchWindow().getPartService().getActivePart().getTitle());
 				
 			}
 	
 			@Override
 			public void partClosed(IWorkbenchPart part) {
-				// TODO 
+				System.out.println ("Part Closed "+part.getTitle());
 				
 			}
 	
 			@Override
 			public void partDeactivated(IWorkbenchPart part) {
-				// TODO 
+				System.out.println ("Part Deactivated "+part.getTitle());
 				
 			}
   	}
@@ -86,6 +89,7 @@ public class DiagnosisView extends TmfView {
 	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
+		System.out.println("In Diagnosis View");
 	}
 	/**
 	 * An overriden method gets called from Eclipse when the view is initialised
@@ -120,43 +124,7 @@ public class DiagnosisView extends TmfView {
 
 	
 	
-	/**
-	 * 
-	 * Initialises the view
-	 * 
-	 */
-	private void init(){
-		try{
-		    Configuration.connection=new DBMS();
-			//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
-			String error=Configuration.connection.connect(Configuration.host, Configuration.port);
-		
-		if (!error.isEmpty()){
-				MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-			    msg.setMessage(error);
-			    msg.open();
-		}	    
-		
-		algFactory= AlgorithmFactory.getInstance();
-		algFactory.initialize();
-		
-		trcTypeFactory=TraceTypeFactory.getInstance();
-		trcTypeFactory.initialize();
-		// Initialise the logger
-		handler=null;
-		handler= new  FileHandler("totaladslog.xml");
-        Logger.getLogger("").addHandler(handler);	
-			
-		} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
-			
-		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-		   if (ex.getMessage()!=null){
-		      msg.setMessage(ex.getMessage());
-		      msg.open();
-		   }
-		   Logger.getLogger(TotalADS.class.getName()).log(Level.SEVERE,null,ex);
-		}
-	}
+	
 	/**
 	 * Sets the focus
 	 */
@@ -185,6 +153,43 @@ public class DiagnosisView extends TmfView {
         diagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
+	 /**
+		 * 
+		 * Initialises TotalADS
+		 * 
+		 */
+		private void init(){
+			try{
+			    Configuration.connection=new DBMS();
+				//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
+				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
+			
+			if (!error.isEmpty()){
+					MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+				    msg.setMessage(error);
+				    msg.open();
+			}	    
+			
+			algFactory= AlgorithmFactory.getInstance();
+			algFactory.initialize();
+			
+			trcTypeFactory=TraceTypeFactory.getInstance();
+			trcTypeFactory.initialize();
+			// Initialise the logger
+			handler=null;
+			handler= new  FileHandler("totaladslog.xml");
+	        Logger.getLogger("").addHandler(handler);	
+				
+			} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
+				
+			   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+			   if (ex.getMessage()!=null){
+			      msg.setMessage(ex.getMessage());
+			      msg.open();
+			   }
+			   Logger.getLogger(TotalADS.class.getName()).log(Level.SEVERE,null,ex);
+			}
+		}
 	/**
 	 * Disposes the view
 	 */

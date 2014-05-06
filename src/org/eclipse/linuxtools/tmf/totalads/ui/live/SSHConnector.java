@@ -13,44 +13,14 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream.GetField;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
-
-/*********************************************************************************************
- * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of XYZ License which
- * accompanies this distribution, and is available at xyz.com/license
- *
- * Contributors:
- *    Syed Shariyar Murtaza
- **********************************************************************************************/
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -71,7 +41,7 @@ public class SSHConnector {
 	private String user;
 	private  String host;
 	private Session session;
-	private TotalADSOutStream console;
+	private ProgressConsole console;
 	private  String totalADSLocalDir;
 	private Integer snapshotDuration;
 	/**
@@ -103,7 +73,7 @@ public class SSHConnector {
 	 * @throws TotalADSNetException
 	 */
 	public void openSSHConnectionUsingPassword(String userAtHost,String password, Integer portToConnect, 
-				TotalADSOutStream console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
+				ProgressConsole console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
 	try{
 	    
 		 port=portToConnect;
@@ -117,7 +87,7 @@ public class SSHConnector {
 			 
 		 session.setUserInfo(ui);
 		 session.connect();
-		 console.addOutputEvent("SSH connection established");
+		 console.println("SSH connection established");
 			     
 	    } catch (JSchException e) {
 	    	 throw new TotalADSNetException("SSH Communication Error\n"+e.getMessage());
@@ -134,7 +104,7 @@ public class SSHConnector {
 	 * @throws TotalADSNetException
 	 */
 	public void openSSHConnectionUsingPrivateKey(String userAtHost,String pathToPrivateKey, Integer portToConnect,
-			TotalADSOutStream console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
+			ProgressConsole console, Integer snapshotDurationInSeconds) throws TotalADSNetException{
 		try{
 		    
 			 port=portToConnect;
@@ -144,14 +114,14 @@ public class SSHConnector {
 	      	 this.snapshotDuration=snapshotDurationInSeconds;
 	      	 
 	      	 jsch.addIdentity(pathToPrivateKey);
-	         console.addOutputEvent("Identity added ");
+	         console.println("Identity added ");
 		     session=jsch.getSession(user, host, port);
 		     java.util.Properties config = new java.util.Properties();
 	         config.put("StrictHostKeyChecking", "no");
 	         session.setConfig(config);	 
 			 session.setUserInfo(ui);
 			 session.connect();
-			 console.addOutputEvent("SSH connection established");
+			 console.println("SSH connection established");
 				     
 		    } catch (JSchException e) {
 		    	 throw new TotalADSNetException("SSH Communication Error\n"+e.getMessage());
@@ -177,7 +147,7 @@ public class SSHConnector {
 	      
 	      // Wait for these many seconds and then stop the trace
 	      try{
-	    	  console.addOutputEvent("Tracing for "+snapshotDuration+" secs.....");
+	    	  console.println("Tracing for "+snapshotDuration+" secs.....");
 	    	  TimeUnit.SECONDS.sleep(snapshotDuration);
 	      }catch (InterruptedException ee){}
 	      
@@ -220,11 +190,11 @@ public class SSHConnector {
 		     
 	    }
 		 catch(IOException e){
-	    		console.addOutputEvent("Error:"+e.getMessage());
+	    		console.println("Error:"+e.getMessage());
 	    		throw new TotalADSNetException(e);// Don't continue further
 	    }
 	    catch(JSchException e){
-	    		console.addOutputEvent("Error: "+e.getMessage());
+	    		console.println("Error: "+e.getMessage());
 	    		throw new TotalADSNetException(e);// Don't continue further
 	    }finally{
 	    	if  (channel!=null)
@@ -247,13 +217,13 @@ public class SSHConnector {
 	          int i=in.read(tmp, 0, 1024);
 	          	if(i<0)break;
 	          		//System.out.print(new String(tmp, 0, i));
-	          		console.printText(new String(tmp, 0, i));
+	          		console.print(new String(tmp, 0, i));
 	        }
 	        
 	        if(channel.isClosed()){
 	          if(in.available()>0) continue; 
 	          		//System.out.println("exit-status: "+channel.getExitStatus());
-	          		console.addOutputEvent("exit-status: "+channel.getExitStatus());
+	          		console.println("exit-status: "+channel.getExitStatus());
 	          break;
 	        }
 	        try{
@@ -277,7 +247,7 @@ public class SSHConnector {
 		        java.util.Vector<ChannelSftp.LsEntry> list= sftpChannel.ls("*");
 		        
 		        for (ChannelSftp.LsEntry entry : list){
-		        	console.addOutputEvent("Processing remote "+ entry.getFilename()); // actually downloading
+		        	console.println("Processing remote "+ entry.getFilename()); // actually downloading
 		        	
 			        sftpChannel.get(entry.getFilename(),localDownloadFolder+File.separator+entry.getFilename());
 		        }
@@ -285,11 +255,11 @@ public class SSHConnector {
 			}
 		 
 		  catch(SftpException e){
-		 		 console.addOutputEvent("Error: "+e.getCause().getMessage()); // Exception printed
+		 		 console.println("Error: "+e.getCause().getMessage()); // Exception printed
 		 		throw new TotalADSNetException(e );// Don't continue further
 		   }
 		   catch(JSchException e){
-		   		console.addOutputEvent("Error: "+e.getCause().getMessage()); // Exception printed
+		   		console.println("Error: "+e.getCause().getMessage()); // Exception printed
 		   		throw new TotalADSNetException(e);// Don't continue further
 		   	}finally{
 		   		if (sftpChannel!=null)
@@ -306,30 +276,16 @@ public class SSHConnector {
 	 }
 	
 	 
-/**
- * 	 Get current time stamp
- */
-private String getCurrentTimeStamp(){
- 		  DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
-		   //get current date time with Date()
-		   Date date = new Date();
-		    return dateFormat.format(date);
-	 
-		   //get current date time with Calendar()
-		 //  Calendar cal = Calendar.getInstance();
-		   //return dateFormat.format(cal.getTime());
-}
+	/**
+	 * 	 Get current time stamp
+	 */
+	private String getCurrentTimeStamp(){
+	 		  DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm");
+			   //get current date time with Date()
+			   Date date = new Date();
+			    return dateFormat.format(date);
+		 
+	}
 
-	/*public static void main (String args[]){
-		
-		
-		try {
-			   SSHConnector sh =new SSHConnector();
-			   System.out.println(sh.getCurrentTimeStamp());
-			
-		} catch (Exception e) {
-			
-			e.printStackTrace();
-		}
-	}*/
+	
 }

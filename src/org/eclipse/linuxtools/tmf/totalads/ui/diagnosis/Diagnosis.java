@@ -366,6 +366,7 @@ public class Diagnosis {
 	 * @param resultsAndFeedback
 	 */
 	public void setResultsAndFeedbackInstance(ResultsAndFeedback resultsAndFeedback){
+		System.out.println("Results in Diagnosis");
 		this.resultsAndFeedback=resultsAndFeedback;
 	}
 	/**

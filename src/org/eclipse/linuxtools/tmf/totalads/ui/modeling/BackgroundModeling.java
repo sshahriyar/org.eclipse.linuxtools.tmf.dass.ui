@@ -13,12 +13,12 @@ package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -35,7 +35,6 @@ public class BackgroundModeling implements Runnable{
 	String validationTraces;
 	ITraceTypeReader traceReader;
 	AlgorithmModelSelector algorithmSelector;
-	TotalADSOutStream progConsole;
 	Button btnMain;
 	/**
 	 *  Constructor 
@@ -43,17 +42,16 @@ public class BackgroundModeling implements Runnable{
 	 * @param validationTraces Validation trace folder
 	 * @param traceReader Trace reader selected by the user
 	 * @param modelSel ModelSelector object
-	 * @param progConsole TotalADSOutStream object
+	 * @param progConsole AlgorithmOutStream object
 	 * @param btnBuild Button to enable
 	 */
 	public BackgroundModeling(String trainingTraces,
-				String validationTraces,ITraceTypeReader traceReader, AlgorithmModelSelector algSel
-				, TotalADSOutStream progConsole, Button btnBuild){
+				String validationTraces,ITraceTypeReader traceReader, AlgorithmModelSelector algSel,
+				 Button btnBuild){
 		this.trainingTraces=trainingTraces;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
 		this.algorithmSelector=algSel;
-		this.progConsole=progConsole;
 		this.btnMain=btnBuild;
 	}
 	/**
@@ -65,7 +63,7 @@ public class BackgroundModeling implements Runnable{
 			
 			try {
 				
-					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,progConsole);
+					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,null,null);
 							
 			} 
 			catch(TotalADSUIException ex){// handle UI exceptions here

@@ -10,8 +10,10 @@
 
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
+import java.io.Console;
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.logging.Logger;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
@@ -32,7 +35,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -49,14 +52,15 @@ public class BackgroundLiveMonitor implements Runnable {
 	private String sudoPassword;
 	private String pathToPrivateKey;
 	private Integer port;
-	private TotalADSOutStream console;
+	private AlgorithmOutStream outStreamAlg;
+	private ProgressConsole progConsole;
 	private SSHConnector ssh;
 	private Integer snapshotDuration;// In Seconds
 	private Integer intervalsBetweenSnapshots; // In Minutes
 	private Button btnStart;
   	private Button btnStop;
   	private Button btnDetails;
-  	private HashMap<String,String[]> modelsAndSettings;
+  	private HashSet<String> modelsList;
   	private ResultsAndFeedback results;
   	private MessageBox msgBox;
   	private HashMap<String,LinkedList<Double>> modelsAndAnomaliesOnChart;
@@ -84,15 +88,15 @@ public class BackgroundLiveMonitor implements Runnable {
 	 * @param btnStart
 	 * @param btnStop
 	 * @param btnDetails
-	 * @param modelsAndSettings
+	 * @param modelsList
 	 * @param results
 	 * @param xyChart
-	 * @param console
+	 * @param outStreamAlg
 	 */
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
-		  	Button btnStop, Button btnDetails,HashMap<String,String[]> modelsAndSettings,
-		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval,TotalADSOutStream console ) {
+		  	Button btnStop, Button btnDetails,HashSet<String> modelsList,
+		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval ) {
 		
 		this.userAtHost=userAtHost;
 		this.password=password;
@@ -104,23 +108,29 @@ public class BackgroundLiveMonitor implements Runnable {
 		this.btnStart=btnStart;
 		this.btnStop=btnStop;
 		this.btnDetails=btnDetails;
-		this.modelsAndSettings=modelsAndSettings;
+		this.modelsList=modelsList;
 		this.results=results;
 		this.liveXYChart=xyChart;
-		this.console=console;
 		this.maxPoints=intervalBetweenSnapshots*30;
 		this.isTrainAndEval=isTrainEval;
+		
+		
+		progConsole=new ProgressConsole("Live Monitor");
+		outStreamAlg=new AlgorithmOutStream();
+		outStreamAlg.addObserver(progConsole);
 		
 		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
 		modelsAndAnomaliesOnChart=new HashMap<String, LinkedList<Double>>();
 		modelsAndAnomalyCount=new HashMap<String, Double>();
 		
-		seriesNames=new String[modelsAndSettings.size()];
+		seriesNames=new String[modelsList.size()];
 		int idx=0;
 		
-		for (Map.Entry<String, String[]> models:modelsAndSettings.entrySet()){
-			this.modelsAndAnomaliesOnChart.put(models.getKey(), anomalyCounts);
-			seriesNames[idx]=models.getKey();
+		Iterator<String> it=modelsList.iterator();
+		while (it.hasNext()){
+			String model=it.next();
+			this.modelsAndAnomaliesOnChart.put(model, anomalyCounts);
+			seriesNames[idx]=model;
 			modelsAndAnomalyCount.put(seriesNames[idx], 0.0);
 			idx++;
 			
@@ -193,16 +203,16 @@ public class BackgroundLiveMonitor implements Runnable {
 					if (isExecuting==false)
 						break;// break out of the loop 
 					
-					console.addOutputEvent("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
+					outStreamAlg.addOutputEvent("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
 									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
 					try{
-						//TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
-						TimeUnit.SECONDS.sleep(2);
+						TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+						//TimeUnit.SECONDS.sleep(2);
 						
 					} catch (InterruptedException ex){}
 			
 		  }// End of while
-			
+		
 		} 
 		catch (TotalADSNetException ex){
 			exception=ex.getMessage();
@@ -231,8 +241,9 @@ public class BackgroundLiveMonitor implements Runnable {
 		}
 		finally{
 			ssh.close();
-			console.addOutputEvent("SSH connection terminated");
-			console.addOutputEvent("Monitor stopped");
+			progConsole.closeConsole();
+			outStreamAlg.addOutputEvent("SSH connection terminated");
+			outStreamAlg.addOutputEvent("Monitor stopped");
 			final String err=exception;
 			//
 			//Run on main GUI thread
@@ -249,6 +260,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					btnStop.setEnabled(false);
 					btnStart.setEnabled(true);
 					
+					
 				}
 			});
 			
@@ -261,9 +273,9 @@ public class BackgroundLiveMonitor implements Runnable {
 	 */
 	public void stopMonitoring(){
 		isExecuting=false;
-		console.addOutputEvent("Stopping monitor");
-		console.addOutputEvent("It could take few minutes to safely stop the monitor");
-		console.addOutputEvent("Please wait...");		
+		outStreamAlg.addOutputEvent("Stopping monitor");
+		outStreamAlg.addOutputEvent("It could take few minutes to safely stop the monitor");
+		outStreamAlg.addOutputEvent("Please wait...");		
 	}
 	/**
 	 * This is a key function that evaluates traces on models and trains the model on those traces if needed
@@ -277,20 +289,21 @@ public class BackgroundLiveMonitor implements Runnable {
 		
 		HashMap<String, Results> modelsAndResults=new HashMap<String,Results>();
 		boolean isAnomCountThres=false;
-		for (Map.Entry<String, String[]> modAndSettings:modelsAndSettings.entrySet()){
+		Iterator<String> it=modelsList.iterator();
+		while (it.hasNext()){
 			
-				String model=modAndSettings.getKey();
-				String []settings=modAndSettings.getValue();
+				String model=it.next();
+				String []settings=null;
 				
 				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
 				
 				
 				
-				console.addOutputEvent("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
-				console.addOutputEvent("Please wait while the trace is evaluated....");
+				outStreamAlg.addOutputEvent("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
+				outStreamAlg.addOutputEvent("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings);
+				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings, outStreamAlg);
 				
 				Double anomCount=modelsAndAnomalyCount.get(model);
 				if (results.getAnomaly()==true)
@@ -307,26 +320,26 @@ public class BackgroundLiveMonitor implements Runnable {
 									// database has already been created and settings for test are only passed to this threa
 									// in the constructor. Also, this will always be a last trace, and new db is false
 					
-					console.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
-					console.addOutputEvent("Please wait while the model is updated....");
+					outStreamAlg.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
+					outStreamAlg.addOutputEvent("Please wait while the model is updated....");
 					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-					algorithm.train(traceIterator, true, model, Configuration.connection, console, null, false);
+					algorithm.train(traceIterator, true, model, Configuration.connection, outStreamAlg, null, false);
 				} 
 				
-				console.addOutputEvent("Execution  finished for "+model);
+				outStreamAlg.addOutputEvent("Execution  finished for "+model);
 				
 				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
 				if (results.getAnomaly()){
 							anomalies.add(1.0);
-							console.addOutputEvent("It is an anomaly");
+							outStreamAlg.addOutputEvent("It is an anomaly");
 							
 				}
 				else{
 							anomalies.add(0.0);
-							console.addOutputEvent("It is not an anomaly");
+							outStreamAlg.addOutputEvent("It is not an anomaly");
 				}
 				
-				console.addOutputEvent("Plotting anomaly on the chart");
+				outStreamAlg.addOutputEvent("Plotting anomaly on the chart");
 				
 				if (anomalyIdx>maxPoints){
 					anomalies.remove();//remove head
@@ -359,9 +372,9 @@ public class BackgroundLiveMonitor implements Runnable {
 			totalTraces--;
 			//Also decrease the count of total anoamlies for each model
 			Set<String> keys= modelsAndAnomalyCount.keySet();
-			Iterator<String> it=keys.iterator();
-			while (it.hasNext()){
-				String key=it.next();
+			Iterator<String> iter=keys.iterator();
+			while (iter.hasNext()){
+				String key=iter.next();
 				Double anom=modelsAndAnomalyCount.get(key);
 				modelsAndAnomalyCount.put(key,--anom);;
 			}
@@ -377,13 +390,13 @@ public class BackgroundLiveMonitor implements Runnable {
 	 * @throws TotalADSNetException 
 	 */
 	private void initialise() throws TotalADSNetException{
-		console.clearText();
-		console.addOutputEvent("Starting SSH....waiting for response from the remote host");
+		progConsole.clearConsole();
+		progConsole.println("Starting SSH....waiting for response from the remote host");
 		//Connecting to SSH
 		if (!pathToPrivateKey.isEmpty())
-			ssh.openSSHConnectionUsingPrivateKey(userAtHost, pathToPrivateKey, port, console,snapshotDuration);
+			ssh.openSSHConnectionUsingPrivateKey(userAtHost, pathToPrivateKey, port,progConsole,snapshotDuration);
 		else
-			ssh.openSSHConnectionUsingPassword(userAtHost, password, port, console,snapshotDuration);
+			ssh.openSSHConnectionUsingPassword(userAtHost, password, port, progConsole,snapshotDuration);
 		
 		liveXYChart.clearChart();
 		liveXYChart.inititaliseSeries(seriesNames);

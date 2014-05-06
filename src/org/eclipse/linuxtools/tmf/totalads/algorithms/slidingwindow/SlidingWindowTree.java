@@ -13,10 +13,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -172,16 +173,16 @@ class SlidingWindowTree {
 	
 	/**
 	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
-	 * @param console TotalADSOutStream object
+	 * @param coutStream An object to display output
 	 * @param database Database name
 	 * @param connection DBMS object
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 * @param collectionName Collection name
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveinDatabase(TotalADSOutStream console, String database, DBMS connection,HashMap<Integer, 
+	public void saveinDatabase(IAlgorithmOutStream outStream, String database, DBMS connection,HashMap<Integer, 
 			Event[]> sysCallSequences) throws TotalADSDBMSException{
-		console.addOutputEvent("Saving in database.....");
+		outStream.addOutputEvent("Saving in database.....");
 		
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			
@@ -259,15 +260,15 @@ class SlidingWindowTree {
 	}
 	/**
 	 * Prints the graph of sequence; use for testing
-	 * @param console TotalADSOutStream object
+	 * @param outStream An object to display information 
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 */
-	public void printSequence(TotalADSOutStream console, String database, HashMap<Integer, Event[]> sysCallSequences) {
+	public void printSequence(IAlgorithmOutStream outStream, String database, HashMap<Integer, Event[]> sysCallSequences) {
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			// create root: nodes.getKey
 			
 			//console.printTextLn(JSONserialize(events[0]));
-			printRecursive(nodes.getValue(),"", console);
+			printRecursive(nodes.getValue(),"", outStream);
 			}
 		
 	}
@@ -276,9 +277,9 @@ class SlidingWindowTree {
 	 * form.
 	 * @param nodes Root event
 	 * @param prefix Prefix of the event sequence
-	 * @param console TotalADSOutStream object
+	 * @param OutStream An object to display output
 	 */
-	private void printRecursive(Event[] nodes,String prefix, TotalADSOutStream console){
+	private void printRecursive(Event[] nodes,String prefix, IAlgorithmOutStream outStream){
 	      
 		Boolean isPrefixPrinted=false;
  		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
@@ -293,18 +294,18 @@ class SlidingWindowTree {
 				  if (branches!= null){ // if there are branches on an event then keep
 					 
 					 for(int i=0;i<branches.size(); i++){
-							printRecursive(branches.get(i),prefix,console);
+							printRecursive(branches.get(i),prefix,outStream);
 					   }   
 				  } else {
 				       // create tee withnull
 				    	// Print only when we reach a leaf of a branch
 				    	if (nodeCount==nodes.length-1)
-				    		   		console.printText(prefix);
+				    		outStream.addOutputEvent(prefix);
 				    	
 				    		//console.printText(nodes[nodeCount].event+"-");
 				}
 		}
-	  	console.addNewLine();	    
+ 		  outStream.addNewLine();	    
 	}
 
 	/**

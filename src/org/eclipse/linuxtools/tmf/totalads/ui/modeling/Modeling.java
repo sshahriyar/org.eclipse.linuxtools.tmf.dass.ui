@@ -15,13 +15,13 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.swt.SWT;
@@ -57,7 +57,7 @@ public class Modeling {
 	private Text txtTrainingTraces;
 	private Text txtValidationTraces;
 	private MessageBox msgBox;
-	private TotalADSOutStream  progConsole;
+	private AlgorithmOutStream  progConsole;
 	private Button btnBuildModel;
 	
 	
@@ -99,7 +99,7 @@ public class Modeling {
 	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
 		///Initialize progress console
-	    //progConsole=new TotalADSOutStream(comptbItmModeling);
+	    //progConsole=new AlgorithmOutStream(comptbItmModeling);
 		
 	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size
@@ -326,8 +326,7 @@ public class Modeling {
 						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
 						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, 
-												validationTraces,traceReader,algorithmSelector,progConsole,
-												btnBuildModel);
+												validationTraces,traceReader,algorithmSelector,	btnBuildModel);
 						ExecutorService executor = Executors.newSingleThreadExecutor();
 						executor.execute(modeling);
 						executor.shutdown();

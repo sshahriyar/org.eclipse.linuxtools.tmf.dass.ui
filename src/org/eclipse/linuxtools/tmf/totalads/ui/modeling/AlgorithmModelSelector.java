@@ -19,6 +19,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
@@ -34,7 +35,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTra
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
 //>>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.TotalADSOutStream;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -333,7 +334,7 @@ public class AlgorithmModelSelector {
 		
 	   // Add an observer to DBMS connection to automatically update 
 	  //the list of databases when new ones are created and old ones are deleted
-	   Configuration.connection.addObserver( new IObserver() {
+	   /*Configuration.connection.addObserver( new IObserver() {
 			@Override
 			public void update() {
 				Display.getDefault().asyncExec(new Runnable(){
@@ -345,7 +346,7 @@ public class AlgorithmModelSelector {
 				});
 		
 			}
-		 });
+		 });*/
 		
 
 		/**
@@ -457,31 +458,37 @@ public class AlgorithmModelSelector {
 	///////////////////////////////////////////////////////////////////////////////////////
 	////////// Training and Validation
 	/////////////////////////////////////////////////////////////////////////////////////
-	
 	/**
-	 * This function trains a model
-	 * @param trainDirectory Train Directory
+	 * This function trains and validate models
+	 * @param trainDirectory
+	 * @param validationDirectory
+	 * @param traceReader
 	 * @throws TotalADSUIException
-	 * @throws TotalADSDBMSException 
-	 * @throws TotalADSReaderException 
-	 * 
+	 * @throws TotalADSDBMSException
+	 * @throws TotalADSReaderException
 	 */
-	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,  TotalADSOutStream console ) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,
+					IDetectionAlgorithm selectedAlgorithm, String modelName )
+							throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+
 		String database;
+		ProgressConsole console=new ProgressConsole("Modeling");
+		AlgorithmOutStream outStream=new AlgorithmOutStream();
+		outStream.addObserver(console);
 		// First, verify selections
 		if (!checkItemSelection())
 			throw new TotalADSUIException("Please, first select an algorithm!");
        
 		Boolean isLastTrace=false;
-		IDetectionAlgorithm algorithm=currentlySelectedAlgorithm.createInstance();
+		IDetectionAlgorithm algorithm=selectedAlgorithm.createInstance();
 		
 		//Get the model/database name
-		String msg=retreiveModelName();
-		if (!msg.isEmpty())
-			 throw new TotalADSUIException(msg);
+		//String msg=retreiveModelName();
+		//if (!msg.isEmpty())
+			// throw new TotalADSUIException(msg);
 		// if there is no exception then get the db name and new or old db using the class variables	
-		Boolean isCreateDB=isNewOrOldModel;
-		database=modelNameRetreival;
+		//Boolean isCreateDB=isNewOrOldModel;
+		database=modelName;
 		
 		////////////////////
 		///File verifications
@@ -509,7 +516,7 @@ public class AlgorithmModelSelector {
 		///////////////
 		//Second,  create a database after verifications
 		DBMS connection=Configuration.connection;
-		if(isCreateDB){
+		/*if(isCreateDB){
 				database=database.trim()+"_"+algorithm.getAcronym(); //+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();
 				//theModel.createDatabase(database, connection);// throws TotalADSDBMSException
@@ -518,12 +525,12 @@ public class AlgorithmModelSelector {
 				}
 			
 		}
-		else if (!checkDBExistence(database))
+		else */if (!checkDBExistence(database))
 			throw new TotalADSUIException("Database does not exist!");
 							
 		//Third, start training
-		console.clearText();
-		console.addOutputEvent("Training the model....");
+		console.clearConsole();
+		console.println("Training the model....");
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 	
@@ -532,12 +539,12 @@ public class AlgorithmModelSelector {
 			 
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
-			console.addOutputEvent("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
-	 		algorithm.train(trace, isLastTrace, database,connection, console, algorithmOptions, isCreateDB);
+			console.println("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
+	 		algorithm.train(trace, isLastTrace, database,connection, outStream, algorithmOptions, false);
 		
 		}
 		//Fourth, start validation
-		validateModels(validationFileList, traceReader,algorithm, database, console);
+		validateModels(validationFileList, traceReader,algorithm, database, outStream);
 		
 	}
 
@@ -547,18 +554,18 @@ public class AlgorithmModelSelector {
 	 * @param traceReader trace reader
 	 * @param algorithm Algorithm object
 	 * @param database Database name
-	 * @param console console object
+	 * @param outStream console object
 	 * @throws TotalADSUIException 
 	 * @throws TotalADSReaderException
 	 * @throws TotalADSDBMSException
 	 */
 	private void validateModels(File []fileList, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm,
-			String database,TotalADSOutStream console) throws TotalADSUIException, TotalADSReaderException, 
+			String database,AlgorithmOutStream outStream) throws TotalADSUIException, TotalADSReaderException, 
 			TotalADSDBMSException {
 		
 				
 		// process now
-		console.addOutputEvent("Starting validation....");
+		outStream.addOutputEvent("Starting validation....");
 		
 		Boolean isLastTrace=false;
 		
@@ -569,9 +576,9 @@ public class AlgorithmModelSelector {
 			
  			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
  		
- 			console.addOutputEvent("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
+ 			outStream.addOutputEvent("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
  			
-	 		algorithm.validate(trace, database, Configuration.connection, isLastTrace, console );
+	 		algorithm.validate(trace, database, Configuration.connection, isLastTrace, outStream );
 
 		}
 		

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
@@ -25,6 +26,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
 import org.eclipse.swt.SWT;
@@ -180,28 +182,29 @@ public class BackgroundTesting implements Runnable{
 				throw new TotalADSUIException(message);
 			}
 			  
-			org.eclipse.ui.console.MessageConsole myConsole = findConsole("Diagnosis");
-			org.eclipse.ui.console.MessageConsoleStream out = myConsole.newMessageStream();
-			out.println("Hello from Generic console sample action");
-			
+			ProgressConsole console= new ProgressConsole("Diagnosis");
+			console.println("Daignosing traces.......");
+			AlgorithmOutStream outStreamAlg=new AlgorithmOutStream();
+			outStreamAlg.addObserver(console);
 			// Second, start testing
 			totalFiles=fileList.length;
 			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<String, Double>();
 			// for each trace
 			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
-				out.println("Executing trace #"+ trcCnt+ " : "+fileList[trcCnt]);
+			
+				console.println("Executing trace #"+ trcCnt+ " : "+fileList[trcCnt]);
 				// for each selected model 
 				HashMap<String,Results> modelResults=new HashMap<String, Results>();
 				final String traceName=fileList[trcCnt].getName();
 				
 				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
 						
-						out.println("Executing the model: "+database[modelCnt]);
+					    console.println("Executing the model: "+database[modelCnt]);
 						int counter=trcCnt+1;
 											 
 						ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 				 					
-				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,null);
+				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,null,outStreamAlg);
 				 		modelResults.put(database[modelCnt],results);
 				 	
 				 		 // Third, print summary
@@ -217,19 +220,7 @@ public class BackgroundTesting implements Runnable{
 	
 	}
 	
-	private org.eclipse.ui.console.MessageConsole findConsole(String name) {
-		org.eclipse.ui.console.ConsolePlugin plugin = org.eclipse.ui.console.ConsolePlugin.getDefault();
-		org.eclipse.ui.console.IConsoleManager conMan = plugin.getConsoleManager();
-		org.eclipse.ui.console.IConsole[] existing = conMan.getConsoles();
-	   
-		for (int i = 0; i < existing.length; i++)
-	         if (name.equals(existing[i].getName()))
-	            return (org.eclipse.ui.console.MessageConsole) existing[i];
-	      //no console found, so create a new one
-	      org.eclipse.ui.console.MessageConsole myConsole = new org.eclipse.ui.console.MessageConsole(name, null);
-	      conMan.addConsoles(new org.eclipse.ui.console.IConsole[]{myConsole});
-	      return myConsole;
-	   }
+	
 	
 	/**
 	 * 
