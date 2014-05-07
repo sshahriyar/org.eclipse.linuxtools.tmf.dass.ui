@@ -16,6 +16,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 //import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -50,9 +51,48 @@ public class Settings {
 		
 		 display = Display.getDefault();
 		 dialogShel = new Shell(display, SWT.BORDER | SWT.CLOSE | SWT.APPLICATION_MODAL|SWT.V_SCROLL);
-		
-		 dialogShel.setLayout(new GridLayout(4, false));
+		 createForm(options, dialogShel);
+		 dialogShel.setLayout(new GridLayout(1, false));
+		 dialogShel.setSize(500, 150);
+		 
+		 
+	}
+	/**
+	 * Non-dialog constructor
+	 * @param options
+	 * @param compParent
+	 * @throws TotalADSUIException 
+	 */
+	public Settings(String []options, Composite compParent) throws TotalADSUIException{
+		if (options.length % 2==1)
+			 throw new TotalADSUIException("Options must be even: key and value pairs.");
 	
+		createForm(options, compParent);
+	}
+	/**
+	 * Shows the modal form
+	 */
+	public void showForm(){
+		dialogShel.open();
+		while (!dialogShel.isDisposed()) {
+		    if (!display.readAndDispatch()) {
+		        display.sleep();
+		    }
+		}
+		
+	}// end function ShowForm
+	
+	
+	/**
+	 * Creates the contents of the form
+	 * @param options
+	 * @param dialogShel
+	 */
+	private void createForm(String []options, Composite compParent){
+		Composite dialogShel=new Composite(compParent, SWT.NONE);
+		dialogShel.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true,true)); 
+		dialogShel.setLayout(new GridLayout(4,false));
+		 
 		 modelOptions=options;
 		 Integer widgetsCount=options.length/2;
 		 lblOption=new Label[widgetsCount];
@@ -83,22 +123,8 @@ public class Settings {
 		 btnCancel=new Button(dialogShel,SWT.NONE);
 		 btnCancel.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,false,false,1,1));
 		 btnCancel.setText("   Cancel   ");
-		 dialogShel.setSize(500, 150);
 		 addListeners();
-		 
 	}
-	/**
-	 * Shows the modal form
-	 */
-	public void showForm(){
-		dialogShel.open();
-		while (!dialogShel.isDisposed()) {
-		    if (!display.readAndDispatch()) {
-		        display.sleep();
-		    }
-		}
-		
-	}// end function ShowForm
 	
 	/**
 	 * Returns selected options 
