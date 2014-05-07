@@ -24,12 +24,12 @@ public class AlgorithmSettingsPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite compParent) {
-		compSettings=new Composite(compParent, SWT.NONE);
+		Composite compSettings=new Composite(compParent, SWT.NONE);
 		//compSettings.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		compSettings.setLayout(new GridLayout(2,false));
 		 Button btnOK=new Button(compSettings,SWT.NONE);
 		 btnOK.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
-		 btnOK.setText("      OK       ");
+		btnOK.setText("      OK       ");
 		
 		setControl(compSettings);
 		setPageComplete(false);
@@ -44,9 +44,9 @@ public class AlgorithmSettingsPage extends WizardPage {
 		//getContainer().showPage(this);
 	}
 
-	@Override
+	/*@Override
 	public void setVisible(boolean isVisible){
-		if (isVisible){
+		/*if (isVisible){
 			try {
 				if (settings!=null){
 				   //Settings set =new Settings(settings,compSettings);
@@ -62,5 +62,5 @@ public class AlgorithmSettingsPage extends WizardPage {
 			}
 			
 		}
-	}
+	}*/
 }
