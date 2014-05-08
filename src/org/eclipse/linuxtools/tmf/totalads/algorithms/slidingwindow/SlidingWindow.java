@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.swtchart.Chart;
 
@@ -128,13 +128,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
     */
     @Override
-    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException{
+    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException{
     	 Integer theMaxHamDis=0;
     	if (options!=null && options[0].equals(this.testingOptions[0]) ){
   		  	try {
   		  		theMaxHamDis=Integer.parseInt(options[1]);
   		  	}catch (NumberFormatException ex){
-  		  		throw new TotalADSUIException("Please, enter an integer value.");
+  		  		throw new TotalADSGeneralException("Please, enter an integer value.");
   		  	}
   		   
   		  	/// Get previous max window first
@@ -164,7 +164,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSUIException{
+	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException{
 		 
 		if (trainingSettings!=null){
 	   		  try{
@@ -175,11 +175,11 @@ public class SlidingWindow implements IDetectionAlgorithm {
 				    		  	maxHamDis=Integer.parseInt(trainingSettings[i+1]);// on error exception will be thrown automatically
 		    		  }
 	   		  }catch (Exception ex){// Capturing exception to send a UI error
-	   			  throw new TotalADSUIException("Please, enter integer numbers only in settings' fileds.");
+	   			  throw new TotalADSGeneralException("Please, enter integer numbers only in settings' fileds.");
 	   		  }
 	   		  
 	   		  if (maxWin > maxWinLimit)
-	   			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
+	   			   throw new TotalADSGeneralException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
    	    }
 		
 		
@@ -195,7 +195,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream)  throws TotalADSGeneralException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
@@ -250,7 +250,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	@Override
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
-			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
 		 
@@ -290,7 +290,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 */
 	@Override
 	public Results test (ITraceIterator trace,  String database, DBMS connection, IAlgorithmOutStream outputStream) 
-			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		  
 	       if (!isTestStarted){
 			  testTraceCount=0;
@@ -532,7 +532,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel() throws TotalADSUIException{
+	public static void registerModel() throws TotalADSGeneralException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		SlidingWindow sldWin=new SlidingWindow();
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  sldWin);

@@ -30,7 +30,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -228,7 +228,7 @@ public class BackgroundLiveMonitor implements Runnable {
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
 			
 	
-		} catch (TotalADSUIException ex) {
+		} catch (TotalADSGeneralException ex) {
 			exception=ex.getMessage();
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
 	
@@ -283,9 +283,9 @@ public class BackgroundLiveMonitor implements Runnable {
 	 * @param xVals
 	 * @throws TotalADSReaderException 
 	 * @throws TotalADSDBMSException 
-	 * @throws TotalADSUIException 
+	 * @throws TotalADSGeneralException 
 	 */
-	private void processTraceOnModels(String tracePath, Double []xVals) throws TotalADSReaderException, TotalADSUIException, TotalADSDBMSException{
+	private void processTraceOnModels(String tracePath, Double []xVals) throws TotalADSReaderException, TotalADSGeneralException, TotalADSDBMSException{
 		
 		HashMap<String, Results> modelsAndResults=new HashMap<String,Results>();
 		boolean isAnomCountThres=false;

@@ -14,7 +14,7 @@ import java.util.HashSet;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
-import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 //import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener;

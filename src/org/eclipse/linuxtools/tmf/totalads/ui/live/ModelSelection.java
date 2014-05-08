@@ -11,10 +11,10 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.SettingsForm;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -37,7 +37,7 @@ public class ModelSelection {
 	private Tree treeModels;
 	private AlgorithmFactory algFactory;
 	private MessageBox msgBox;
-	private Settings settingsDialog;
+	private SettingsForm settingsDialog;
 	//private String []algorithmSettings;
 	private HashMap<String,String[]> models= new HashMap<String,String[]>();
 	
@@ -121,98 +121,7 @@ public class ModelSelection {
 			}
 			
 		});	
-		/** 
-		 * Event handler for Settings button
-		 * 
-		 */
-		btnSettings.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				
-					try {
-							
-							IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithms();
-							String []databases=getModels();
-							
-							if (databases.length >1){
-								msgBox.setMessage("Please select only one model to edit settings");
-								msgBox.open();
-								return;
-							}
-								
-							
-							if (settingsDialog==null)
-								settingsDialog= new Settings(algorithm[0].getTestingOptions(databases[0], Configuration.connection));
-						
-							settingsDialog.showForm();
-							String []algorithmSettings=settingsDialog.getSettings();
-							//models.put(databases[0], algorithmSettings);
-							if (algorithmSettings!=null)
-								algorithm[0].saveTestingOptions(algorithmSettings, databases[0], Configuration.connection);
-							//settingsDialog=null;
-						
-					} catch (TotalADSUIException ex) {
-						msgBox.setMessage(ex.getMessage());
-						msgBox.open();
-					}catch (TotalADSDBMSException ex) {
-						msgBox.setMessage(ex.getMessage());
-						msgBox.open();
-					}finally{
-						settingsDialog=null;
-					}
-				
-			}
-		});
-		/**
-		 * Event handler for Delete button
-		 */
-		btnDelete.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				 try{
-					 
-						IDetectionAlgorithm []algorithm=getCurrentlySelectedAlgorithms();;
-						String []databases=getModels();
-											
-						
-						if (databases.length >1){
-							msgBox.setMessage("Let's not delete models in haste, let us delete them one by one.");
-							msgBox.open();
-							return;
-						}
-						
-						MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
-									SWT.ICON_INFORMATION|SWT.YES|SWT.NO);
-						
-						msgBox.setMessage("Do you want to delete the model "+databases[0]+ "?");
-						if (msgBox.open()==SWT.YES){
-							Configuration.connection.deleteDatabase(databases[0]);
-							models.remove(databases[0]);
-						}
-				} catch (TotalADSUIException ex) {
-					msgBox.setMessage(ex.getMessage());
-					msgBox.open();
-				}
-				
-			}
-		});
-		/**
-		 * Event handler to update the list of models automatically whenever the database changes
-		 */
-		Configuration.connection.addObserver(new IObserver() {
-			@Override
-			public void update() {
-				Display.getDefault().asyncExec(new Runnable(){
-					@Override
-					public void run(){
-						populateTreeWithModels();
-					}
-				});
-		
-			}
-
-			
-		});
+	
 	 // end of function addEventHandler
 	}
 	/**
@@ -226,14 +135,14 @@ public class ModelSelection {
 	/**
 	 *  Returns the currently selected algorithms as an array
 	 * @return  An array of {@link IDetectionAlgorithm}
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
-	public IDetectionAlgorithm[] getCurrentlySelectedAlgorithms() throws TotalADSUIException{
+	public IDetectionAlgorithm[] getCurrentlySelectedAlgorithms() throws TotalADSGeneralException{
 	
 		
 		
 		if (models.size()<=0)
-			throw new TotalADSUIException("Please select a model first");
+			throw new TotalADSGeneralException("Please select a model first");
 		
 		IDetectionAlgorithm  []algorithms=new IDetectionAlgorithm[models.size()];
 		String []models=new String[this.models.size()];
@@ -247,11 +156,11 @@ public class ModelSelection {
 					String []modelKey=database.split("_");
 					
 					//if(modelKey==null ||  modelKey.length<2)
-						//throw new TotalADSUIException(database+ " is not a valid model created by TotalADS!");
+						//throw new TotalADSGeneralException(database+ " is not a valid model created by TotalADS!");
 					
 					algorithms[idx]= algFactory.getAlgorithmByAcronym(modelKey[1]);
 					//if  (algorithms[idx]==null)
-						//throw new TotalADSUIException(database+" is not a valid model created by TotalADS!");
+						//throw new TotalADSGeneralException(database+" is not a valid model created by TotalADS!");
 					idx++;
 				
 		

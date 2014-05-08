@@ -1,3 +1,12 @@
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.util.HashSet;
@@ -18,7 +27,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -162,13 +171,13 @@ public class DiagnosisView extends TmfView {
 			try{
 			    Configuration.connection=new DBMS();
 				//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
-				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
+				//String error=Configuration.connection.connect(Configuration.host, Configuration.port);
 			
-			if (!error.isEmpty()){
-					MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-				    msg.setMessage(error);
-				    msg.open();
-			}	    
+			//if (!error.isEmpty()){
+		//			MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+			//	    msg.setMessage(error);
+			//	    msg.open();
+			//}	    
 			
 			algFactory= AlgorithmFactory.getInstance();
 			algFactory.initialize();

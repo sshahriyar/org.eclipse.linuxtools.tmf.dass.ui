@@ -30,7 +30,7 @@
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModelsView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView"
              id="org.eclipse.linuxtools.tmf.totalads.ModelsView"
              name="Models DB"
              restorable="true">
@@ -120,21 +120,31 @@
                style="push"
                tooltip="Deletes a model">
          </command>
+         <command
+               commandId="org.eclipse.linuxtools.tmf.totalads.dbconnection"
+               icon="icons/db.ico"
+               style="push"
+               tooltip="Connects to a database">
+         </command>
       </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.CreateModelHandler"
+            class="org.eclipse.linuxtools.tmf.totalads.ui.models.create.CreateModelHandler"
             commandId="org.eclipse.linuxtools.tmf.totalads.createModel">
       </handler>
       <handler
-            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DeleteModelHandler"
+            class="org.eclipse.linuxtools.tmf.totalads.ui.models.delete.DeleteModelHandler"
             commandId="org.eclipse.linuxtools.tmf.totalads.delete">
       </handler>
       <handler
-            class="org.eclipse.linuxtools.tmf.totalads.ui.datamodels.TestSettingsHandler"
+            class="org.eclipse.linuxtools.tmf.totalads.ui.models.settings.TestSettingsHandler"
             commandId="org.eclipse.linuxtools.tmf.totalads.testSettings">
+      </handler>
+      <handler
+            class="org.eclipse.linuxtools.tmf.totalads.ui.models.dbconnect.DBConnectionHandler"
+            commandId="org.eclipse.linuxtools.tmf.totalads.dbconnection">
       </handler>
    </extension>
 

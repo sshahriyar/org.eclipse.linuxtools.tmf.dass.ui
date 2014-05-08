@@ -3,7 +3,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 
 //import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 //import org.eclipse.swt.events.MouseEvent;
@@ -165,13 +165,13 @@ public class LiveXYChart {
   * function. It throws an exception if series name is not found
   * @param ySeries Array of double values
   * @param seriesName Series name
-  * @throws TotalADSUIException
+  * @throws TotalADSGeneralException
   */
-public void addYSeriesValues(double []ySeries, String seriesName) throws TotalADSUIException{
+public void addYSeriesValues(double []ySeries, String seriesName) throws TotalADSGeneralException{
 	// create line series
     ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
     if (lineSeries==null)
-    	throw new  TotalADSUIException("No such series");
+    	throw new  TotalADSGeneralException("No such series");
     lineSeries.setYSeries(ySeries);
     
 }
@@ -180,9 +180,9 @@ public void addYSeriesValues(double []ySeries, String seriesName) throws TotalAD
  * function. It throws an exception if series name is not found
  * @param ySeries Array of double values
  * @param seriesName Series name
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  */
-public void addYSeriesValues(Double []ySeries, String seriesName) throws TotalADSUIException{
+public void addYSeriesValues(Double []ySeries, String seriesName) throws TotalADSGeneralException{
 	//First convert Double to double
 	double []yVals=new double[ySeries.length];
 	for (int j=0;j<ySeries.length;j++)
@@ -191,30 +191,30 @@ public void addYSeriesValues(Double []ySeries, String seriesName) throws TotalAD
 	// create line series
    ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
    if (lineSeries==null)
-   	throw new  TotalADSUIException("No such series");
+   	throw new  TotalADSGeneralException("No such series");
    lineSeries.setYSeries(yVals);
    
 }
 /**
  * This function sets the values on X axis that would be displayed for corresponding points on Y axis
  * @param xSeries An array of double values
- * @throws TotalADSUIException 
+ * @throws TotalADSGeneralException 
  */
-public void addXSeriesValues(double []xSeries, String seriesName) throws TotalADSUIException{
+public void addXSeriesValues(double []xSeries, String seriesName) throws TotalADSGeneralException{
 	// create line series
     //xyChart.getSeriesSet().getSeries()[0].setXSeries(xSeries);
 	 ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
 	 if (lineSeries==null)
-	   	throw new  TotalADSUIException("No such series");
+	   	throw new  TotalADSGeneralException("No such series");
 	 lineSeries.setXSeries(xSeries);
 
 }
 /**
  * This function sets the values on X axis that would be displayed for corresponding points on Y axis
  * @param xSeries An array of double values
- * @throws TotalADSUIException 
+ * @throws TotalADSGeneralException 
  */
-public void addXSeriesValues(Double []xSeries,String seriesName) throws TotalADSUIException{
+public void addXSeriesValues(Double []xSeries,String seriesName) throws TotalADSGeneralException{
 	//First convert Double to double
 	double []xVals=new double[xSeries.length];
 	for (int j=0;j<xSeries.length;j++)
@@ -223,7 +223,7 @@ public void addXSeriesValues(Double []xSeries,String seriesName) throws TotalADS
    // xyChart.getSeriesSet().getSeries()[0].setXSeries(xVals);
 	 ILineSeries lineSeries = (ILineSeries) xyChart.getSeriesSet().getSeries(seriesName);
 	 if (lineSeries==null)
-	   	throw new  TotalADSUIException("No such series");
+	   	throw new  TotalADSGeneralException("No such series");
 	 lineSeries.setXSeries(xVals);
 
 }

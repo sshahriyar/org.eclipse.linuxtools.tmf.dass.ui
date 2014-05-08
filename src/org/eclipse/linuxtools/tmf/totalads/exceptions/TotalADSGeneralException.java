@@ -14,23 +14,23 @@ package org.eclipse.linuxtools.tmf.totalads.exceptions;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class TotalADSUIException extends Exception {
+public class TotalADSGeneralException extends Exception {
 
-	public TotalADSUIException() {
+	public TotalADSGeneralException() {
 		
 	}
 
-	public TotalADSUIException(String message) {
+	public TotalADSGeneralException(String message) {
 		super(message);
 		
 	}
 
-	public TotalADSUIException(Throwable cause) {
+	public TotalADSGeneralException(Throwable cause) {
 		super(cause);
 		
 	}
 
-	public TotalADSUIException(String message, Throwable cause) {
+	public TotalADSGeneralException(String message, Throwable cause) {
 		super(message, cause);
 		
 	}

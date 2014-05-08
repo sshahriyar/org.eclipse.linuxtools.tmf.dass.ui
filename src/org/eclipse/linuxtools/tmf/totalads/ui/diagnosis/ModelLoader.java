@@ -23,6 +23,8 @@ import java.util.concurrent.Executors;
 
 
 
+
+
 //import java.lang.reflect.Method;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -30,13 +32,13 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 //import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 //import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
-import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.SettingsForm;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -77,7 +79,7 @@ public class ModelLoader {
 	private StatusBar statusBar;
 	private TracingTypeSelector traceTypeSelector;
 	private ResultsAndFeedback resultsAndFeedback;
-	private Settings settingsDialog;
+	private SettingsForm settingsDialog;
 	private String []algorithmSettings;
 	private Composite compModelSelection;
 	
@@ -108,7 +110,7 @@ public class ModelLoader {
 	   
 		btnSettings=new Button(compModelSelection, SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnSettings.setText(" Settings ");
+		btnSettings.setText(" SettingsForm ");
 		
 		btnDelete=new Button(compModelSelection, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
@@ -248,71 +250,7 @@ public class ModelLoader {
 			}
 			
 		});	
-		/** 
-		 * Event handler for Settings button
-		 * 
-		 */
-		btnSettings.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				if (!checkItemSelection()){
-					msgBox.setMessage("Please, select a model first!");
-					msgBox.open();
-				} else{
-					try {
-							AlgorithmFactory modFac= AlgorithmFactory.getInstance();
-							String database=currentlySelectedTreeItem.getText();
-							String []modelKey=database.split("_");
-							if(modelKey==null ||  modelKey.length<2){
-								msgBox.setMessage("Not a valid model created by TotalADS!");
-								msgBox.open();
-								return;
-							}
-							IDetectionAlgorithm model= modFac.getAlgorithmByAcronym(modelKey[1]);
-							if(model==null){
-								msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
-								msgBox.open();
-								return;
-							}
-							
-							if (settingsDialog==null)
-									settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
-						
-							settingsDialog.showForm();
-							algorithmSettings=settingsDialog.getSettings();
-						
-					} catch (TotalADSUIException ex) {
-						msgBox.setMessage(ex.getMessage());
-						msgBox.open();
-					}finally{
-						settingsDialog=null;
-					}
-				}
-			}
-		});
-		/**
-		 * Event handler for Delete button
-		 */
-		btnDelete.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				if (!checkItemSelection()){
-					msgBox.setMessage("Please, select a model first!");
-					msgBox.open();
-				} else{
-					
-					MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
-								SWT.ICON_INFORMATION|SWT.YES|SWT.NO);
-					
-					msgBox.setMessage("Do you want to delete the model "+currentlySelectedTreeItem.getText()+ "?");
-					if (msgBox.open()==SWT.YES)
-						Configuration.connection.deleteDatabase(currentlySelectedTreeItem.getText());
-					
-						
-					//populateTreeWithModels();
-				}
-			}
-		});
+		
 		/**
 		 * Event handler to update the list of models automatically whenever the database changes
 		 */

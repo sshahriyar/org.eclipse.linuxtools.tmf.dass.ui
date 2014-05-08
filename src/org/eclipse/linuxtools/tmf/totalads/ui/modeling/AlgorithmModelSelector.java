@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 //<<<<<<< HEAD
@@ -34,8 +34,8 @@ import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
 //>>>>>>> 82b1feda7ccaaf9f33cc8762456a2d6fa8156877
-import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.SettingsForm;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -67,7 +67,7 @@ public class AlgorithmModelSelector {
 	
 	private TreeItem currentlySelectedTreeItem;
 	private IDetectionAlgorithm currentlySelectedAlgorithm;
-	private Settings settingsDialog;
+	private SettingsForm settingsDialog;
 	private String []algorithmOptions;
 	private Combo cmbDBNames;
 	private Text txtNewDBName;
@@ -205,58 +205,6 @@ public class AlgorithmModelSelector {
 			return Configuration.connection.datbaseExists(database);
 			
 	}
-	/**
-	 * Shows the settings dialog box
-	 * @throws TotalADSUIException
-	 */
-	public void showSettingsDialog() throws TotalADSUIException{
-		if (!checkItemSelection())
-			throw new TotalADSUIException("Please, first select an algorithm!");
-		// Getting training options
-		MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-		           ,SWT.ICON_ERROR|SWT.OK);
-		//Get the model/database name
-		String exception=retreiveModelName();
-		if (!exception.isEmpty()){
-			msgBox.setMessage(exception);
-			msgBox.open();
-			return;
-		}
-		// we only need to know if it is a new model or an existing model with its name
-		// so get the information from the class variables
-		Boolean isCreateDB=isNewOrOldModel;
-		String database=modelNameRetreival;
-				
-		
-		String []options=currentlySelectedAlgorithm.getTrainingOptions();
-		if (options!=null){
-			try{
-				if (settingsDialog==null)
-					settingsDialog= new Settings(options);
-			
-				settingsDialog.showForm();
-				algorithmOptions=settingsDialog.getSettings();
-
-			}catch (TotalADSUIException ex){
-				msgBox.setMessage(ex.getMessage());
-				msgBox.open();
-			} catch (Exception ex){
-				String msg="Problems in settings from "+currentlySelectedAlgorithm.getName()+"\n";
-				if (ex.getMessage()!=null)
-					msg+=ex.getMessage();
-				msgBox.setMessage(msg);
-				msgBox.open();
-			}
-			finally{
-				settingsDialog=null;
-			}
-		}else{
-			msgBox.setMessage("Not implemented yet");
-			msgBox.open();
-		}
-		
-	}
-	
 	/**
 	 * 
 	 * Creates GUI widgets to select a database name of a model or type a new one
@@ -411,10 +359,10 @@ public class AlgorithmModelSelector {
 
 	/**
 	 * Retrieves the model name and also retrieves if the model is new or old
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 * @return exception message if any otherwise empty
 	 */
-	private String retreiveModelName() throws TotalADSUIException{
+	private String retreiveModelName() throws TotalADSGeneralException{
 		
 		Display.getDefault().syncExec(new Runnable() { // Due to a thread execution using BackgrounModeling class, we have execute this
 													//code under a min thread using syncExec
@@ -462,13 +410,13 @@ public class AlgorithmModelSelector {
 	 * @param trainDirectory
 	 * @param validationDirectory
 	 * @param traceReader
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 * @throws TotalADSDBMSException
 	 * @throws TotalADSReaderException
 	 */
 	public void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,
 					IDetectionAlgorithm selectedAlgorithm, String modelName )
-							throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+							throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 
 		String database;
 		ProgressConsole console=new ProgressConsole("Modeling");
@@ -476,7 +424,7 @@ public class AlgorithmModelSelector {
 		outStream.addObserver(console);
 		// First, verify selections
 		if (!checkItemSelection())
-			throw new TotalADSUIException("Please, first select an algorithm!");
+			throw new TotalADSGeneralException("Please, first select an algorithm!");
        
 		Boolean isLastTrace=false;
 		IDetectionAlgorithm algorithm=selectedAlgorithm.createInstance();
@@ -484,7 +432,7 @@ public class AlgorithmModelSelector {
 		//Get the model/database name
 		//String msg=retreiveModelName();
 		//if (!msg.isEmpty())
-			// throw new TotalADSUIException(msg);
+			// throw new TotalADSGeneralException(msg);
 		// if there is no exception then get the db name and new or old db using the class variables	
 		//Boolean isCreateDB=isNewOrOldModel;
 		database=modelName;
@@ -498,7 +446,7 @@ public class AlgorithmModelSelector {
 			traceReader.getTraceIterator(fileList[0]);
 		}catch (TotalADSReaderException ex){
 			String message="Invalid training traces and the trace reader.\n"+ex.getMessage();
-			throw new TotalADSUIException(message);
+			throw new TotalADSGeneralException(message);
 		}
 		
 	
@@ -508,7 +456,7 @@ public class AlgorithmModelSelector {
 			traceReader.getTraceIterator(validationFileList[0]);
 		}catch (TotalADSReaderException ex){
 			String message="Invalid validation traces and the trace reader.\n"+ex.getMessage();
-			throw new TotalADSUIException(message);
+			throw new TotalADSGeneralException(message);
 		}
 	    ///////////////
 		/// Db vverifications
@@ -520,12 +468,12 @@ public class AlgorithmModelSelector {
 				database=database.toUpperCase();
 				//theModel.createDatabase(database, connection);// throws TotalADSDBMSException
 				if (checkDBExistence(database)){
-					throw new TotalADSUIException("Database already exists, select from the existing list!");
+					throw new TotalADSGeneralException("Database already exists, select from the existing list!");
 				}
 			
 		}
 		else */if (!checkDBExistence(database))
-			throw new TotalADSUIException("Database does not exist!");
+			throw new TotalADSGeneralException("Database does not exist!");
 							
 		//Third, start training
 		console.clearConsole();
@@ -554,12 +502,12 @@ public class AlgorithmModelSelector {
 	 * @param algorithm Algorithm object
 	 * @param database Database name
 	 * @param outStream console object
-	 * @throws TotalADSUIException 
+	 * @throws TotalADSGeneralException 
 	 * @throws TotalADSReaderException
 	 * @throws TotalADSDBMSException
 	 */
 	private void validateModels(File []fileList, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm,
-			String database,AlgorithmOutStream outStream) throws TotalADSUIException, TotalADSReaderException, 
+			String database,AlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSReaderException, 
 			TotalADSDBMSException {
 		
 				
@@ -588,16 +536,16 @@ public class AlgorithmModelSelector {
 	 * Creates an empty model
 	 * @throws TotalADSDBMSException 
 	 
-	public void createAnEmptyModel() throws TotalADSDBMSException, TotalADSUIException{
+	public void createAnEmptyModel() throws TotalADSDBMSException, TotalADSGeneralException{
 		
 		    if (!btnEnterDB.getSelection() || txtNewDBName.getText().isEmpty() ){
-				 throw new TotalADSUIException("Please, enter a new model name");
+				 throw new TotalADSGeneralException("Please, enter a new model name");
 				 
 			 }
 			 else{
 				 
 				 if (txtNewDBName.getText().contains("_")){
-					 throw new TotalADSUIException("DataModel name cannot contain underscore \"_\"");
+					 throw new TotalADSGeneralException("DataModel name cannot contain underscore \"_\"");
 				
 				 }
 				 String database=txtNewDBName.getText();
@@ -615,10 +563,10 @@ public class AlgorithmModelSelector {
 	 * @param directory The name of the directory
 	 * @param traceReader An object of the trace reader
 	 * @return An array list of traces sutied for the appropriate type
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
 	
-	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSUIException{
+	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSGeneralException{
 		File traces=new File(directory);
 		
 		CTFLTTngSysCallTraceReader kernelReader=new CTFLTTngSysCallTraceReader();
@@ -631,9 +579,9 @@ public class AlgorithmModelSelector {
 	 * Get an array of trace list for a directory or just one file handler if there is only one file
 	 * @param traces File object representing traces
 	 * @return the file handler to the correct path
-	 * @throws TotalADSUIException 
+	 * @throws TotalADSGeneralException 
 	 */
-	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSUIException{
+	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSGeneralException{
 		
 		File []fileList;
 				
@@ -648,13 +596,13 @@ public class AlgorithmModelSelector {
 					   isAllFiles=true;
 			   
 				   if (isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains"
+				  	   throw new TotalADSGeneralException("The folder "+traces.getName()+" contains"
 					   		+ "	directories. Please put only trace files in it.");
 			   
 			    }
 			    
 			    if (!isAllFiles && !isAllFolders)
-			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    	 throw new TotalADSGeneralException("Empty directory: "+traces.getName());
 				 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached
@@ -671,9 +619,9 @@ public class AlgorithmModelSelector {
 	 * Gets an array of list of directories 
 	 * @param traces File object representing traces
 	 * @return Handler to the correct path of files
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
-	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSUIException{
+	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSGeneralException{
 		
 				
 		if (traces.isDirectory()){
@@ -689,13 +637,13 @@ public class AlgorithmModelSelector {
 					   isAllFiles=true;
 			   
 				   if (isAllFiles && isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix of"+
+				  	   throw new TotalADSGeneralException("The folder "+traces.getName()+" contains a mix of"+
 					   		 " files and directories. Please put only LTTng traces' directories in it.");
 			   
 			    }
 			    // if it has reached this far 
 			    if (!isAllFiles && !isAllFolders)
-			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    	 throw new TotalADSGeneralException("Empty directory: "+traces.getName());
 			    else if (isAllFiles){ // return the name of folder as a trace
 			    	fileHandler =new File[1];
 			    	fileHandler[0]=traces;
@@ -708,7 +656,7 @@ public class AlgorithmModelSelector {
 			    
 	    } else// this will not happen currently as we are only using the directory 
 	    	  //loader in the main view
-	    	throw new TotalADSUIException("You have selected a file"+traces.getName()+", select a folder");
+	    	throw new TotalADSGeneralException("You have selected a file"+traces.getName()+", select a folder");
 	
 	}
 }

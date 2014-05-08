@@ -17,7 +17,7 @@ import java.io.IOException;
 
 //import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -144,10 +144,10 @@ public class TextLineTraceReader implements ITraceTypeReader {
 
 	/**
 	 * Registers Itself with the Trace Type Reader 
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
 	
-	 public static void registerTraceTypeReader() throws TotalADSUIException{
+	 public static void registerTraceTypeReader() throws TotalADSGeneralException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	TextLineTraceReader textFileReader=new TextLineTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);

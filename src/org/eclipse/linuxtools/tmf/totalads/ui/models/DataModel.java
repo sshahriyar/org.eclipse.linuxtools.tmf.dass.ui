@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models;
 
 /**
  * @author efraimlopez

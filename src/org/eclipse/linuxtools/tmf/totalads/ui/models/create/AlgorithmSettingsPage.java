@@ -1,9 +1,9 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
-import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.SettingsForm;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -14,10 +14,10 @@ import org.eclipse.swt.widgets.MessageBox;
 public class AlgorithmSettingsPage extends WizardPage {
 	private String []settings;
 	private Composite compSettings;
-	private Settings settingForm;
+	private SettingsForm settingForm;
 	public AlgorithmSettingsPage() {
-		super("Algorithm Settings");
-		setTitle("Adjust Settings of the Algorithm");
+		super("Algorithm SettingsForm");
+		setTitle("Adjust SettingsForm of the Algorithm");
 		
 	}
 
@@ -57,7 +57,7 @@ public class AlgorithmSettingsPage extends WizardPage {
 						widgets[i].dispose();
 					compSettings.layout();
 				 
-				    settingForm =new Settings(settings,compSettings);
+				    settingForm =new SettingsForm(settings,compSettings);
 				
 				    compSettings.layout(); 
 				    setPageComplete(true);
@@ -81,7 +81,7 @@ public class AlgorithmSettingsPage extends WizardPage {
 	  
 	  try {
 		settingFromUser=settingForm.getSettings();
-	} catch (TotalADSUIException e) {
+	} catch (TotalADSGeneralException e) {
 		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
 		msgBoxErr.setMessage(e.getMessage());

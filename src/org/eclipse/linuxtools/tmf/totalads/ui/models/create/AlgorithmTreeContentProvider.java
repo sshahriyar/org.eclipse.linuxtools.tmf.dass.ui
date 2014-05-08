@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;

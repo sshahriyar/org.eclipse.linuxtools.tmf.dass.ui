@@ -21,7 +21,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.swtchart.Chart;
 /**
@@ -51,7 +51,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
-	public static void registerModel() throws TotalADSUIException{
+	public static void registerModel() throws TotalADSGeneralException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		HiddenMarkovModel hmm=new HiddenMarkovModel();
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  hmm);
@@ -62,7 +62,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSUIException {
+	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSGeneralException {
 		String []setting=null;
 		
 		if (trainingSettings!=null){
@@ -135,7 +135,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
 	 */
    @Override
-	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException
 	{ 
 	   HmmMahout hmm=new HmmMahout();
 	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
@@ -146,7 +146,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
     */
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	   
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
@@ -234,9 +234,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    /**
     * Trains Using BaumWelch
     * @param seq
-    * @throws TotalADSUIException
+    * @throws TotalADSGeneralException
     */
-   private void trainBaumWelch(Integer []seq, DBMS connection, String database) throws TotalADSUIException{
+   private void trainBaumWelch(Integer []seq, DBMS connection, String database) throws TotalADSGeneralException{
 	   try{
 		         hmm.initializeHMM(numSymbols, numStates);
 		    	 hmm.learnUsingBaumWelch(numIterations, seq);
@@ -244,10 +244,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		    	 
 		     } catch (Exception ex){
 		    	 if (nameToID.getSize()>numSymbols)
-		    		 throw new  TotalADSUIException("More events were found in the trace than you mentioned."
+		    		 throw new  TotalADSGeneralException("More events were found in the trace than you mentioned."
 		    		 		+ " Please, select larger number of unique events and start fresh with a new model");
 		    	 else
-		    		 throw new TotalADSUIException(ex);
+		    		 throw new TotalADSGeneralException(ex);
 		     }
    }
 	/*
@@ -256,7 +256,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public void validate(ITraceIterator trace, String database,DBMS connection, 
-			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,validationSeqLength=seqLength;
 		Double logThreshold;
@@ -331,7 +331,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database, DBMS connection,	IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database, DBMS connection,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,testSeqLength=seqLength;
 		String []options;

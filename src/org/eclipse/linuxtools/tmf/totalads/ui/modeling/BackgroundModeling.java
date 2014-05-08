@@ -17,7 +17,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
@@ -66,7 +66,7 @@ public class BackgroundModeling implements Runnable{
 					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,null,null);
 							
 			} 
-			catch(TotalADSUIException ex){// handle UI exceptions here
+			catch(TotalADSGeneralException ex){// handle UI exceptions here
 				if (ex.getMessage()==null)
 					msg="UI error";	
 				else

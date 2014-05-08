@@ -10,7 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
 
 
@@ -114,10 +114,19 @@ public class DBMS implements ISubject {
 			
 			mongoClient = new MongoClient( host , port );
 			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
-		
 			
-			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
-											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
+			DB db=mongoClient.getDB(database);
+			
+			if (db.authenticate(username, password.toCharArray())==false){
+				isConnected=false;
+				message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
+			}
+			else{
+				isConnected=true;// if it reaches here then everything is fine
+				
+			}
+		//}
+	
 		} catch (UnknownHostException ex) {
 			isConnected=false;
 			message=ex.getMessage();
@@ -125,24 +134,12 @@ public class DBMS implements ISubject {
 			//return message;
 		} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
 			isConnected=false;
-			message="Unable to connect to MongoDB.";
+			message="Unable to connect to MongoDB";
 			//notifyObservers();
 			//return message;
 		}finally{
 		
-			if (message.isEmpty()){
-				// if there is a running db then check this
-				DB db=mongoClient.getDB(database);
 			
-				if (db.authenticate(username, password.toCharArray())==false){
-					isConnected=false;
-					message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
-				}
-				else{
-					isConnected=true;// if it reaches here then everything is fine
-					
-				}
-			}
 		  notifyObservers();
 		
 		}

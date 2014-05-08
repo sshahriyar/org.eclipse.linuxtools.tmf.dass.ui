@@ -12,7 +12,7 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 
 /** Each model should implement the functions of this interface and, in addition, 
@@ -25,11 +25,11 @@ public interface IDetectionAlgorithm {
  * Creates a database where an algorithm would store its model
  * @param modelName Name of the database
  * @param connection An object of DBMS
- * @param trainingSettings Training Settings
+ * @param trainingSettings Training SettingsForm
  * @throws TotalADSDBMSException 
- * @throws TotalADSUIException TODO
+ * @throws TotalADSGeneralException TODO
  */
-public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSUIException; 
+public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException; 
 /**
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
  * @return Array of Strings as options/settings
@@ -37,13 +37,13 @@ public void initializeModelAndSettings(String modelName, DBMS connection, String
 public String[] getTrainingOptions();
 /**
  * Validates the training options and saves them into the database. On error throws exception
- * @param options Settings array
+ * @param options SettingsForm array
  * @param database Database name
  * @param connection Database connection object
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException TODO
  
-public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException;
+public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
 */
 
 /**
@@ -60,10 +60,10 @@ public String[] getTestingOptions(String database, DBMS connection);
  * @param options
  * @param database
  * @param connection
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException 
  */
-public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException;
+public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
 /**
  * An algorithm will take a  trace through this function. Some algorithms can train on 
  * the traces as they come and some need to wait till the last trace. Caller
@@ -74,12 +74,12 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @param database Database/mode name
  * @param connection Connection object
  * @param outStream Use this object to display the events during processing
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
 
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 
 /**
  * This function is called after the train function has finished processing and has built a model.
@@ -89,11 +89,11 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @param connection Connection name
  * @param isLastTrace True if the trace is the last trace, else false
  * @param outStream Use this object to display the events during processing
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function evaluates an existing model in the database on the traces in the test set. It is called for every single
  * trace separately.
@@ -102,11 +102,11 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param connection DBMS object
  * @param outputStream Use this object to display the events during processing
  * @return An object of type Result containing the evaluation information of a trace
- * @throws TotalADSUIException
+ * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public Results test (ITraceIterator trace, String database, DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 
@@ -117,7 +117,7 @@ public IDetectionAlgorithm createInstance();
 ///////////////////////////////////////////////////////////////////////////////////
 //An algorithm registers itself with the AlgorithmFactory
 //Each derived class must implement the following static method
-//public static void registerModel() throws TotalADSUIException;
+//public static void registerModel() throws TotalADSGeneralException;
 ///////////////////////////////////////////////////////////////////////////////////
 /** Gets the name of the model**/
 public String getName();

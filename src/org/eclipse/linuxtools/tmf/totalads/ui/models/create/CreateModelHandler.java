@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -26,11 +26,12 @@ public class CreateModelHandler implements IHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 			      new CreateModelWizard());
-	    if (wizardDialog.open() == Window.OK) {
-			      System.out.println("Ok pressed");
-		} else {
-			      System.out.println("Cancel pressed");
-		 }
+		wizardDialog.open();
+	 //   if (wizardDialog.open() == Window.OK) {
+		//	      System.out.println("Ok pressed");
+		//} else {
+		//	      System.out.println("Cancel pressed");
+		// }
 		
 	    return null;
 	}

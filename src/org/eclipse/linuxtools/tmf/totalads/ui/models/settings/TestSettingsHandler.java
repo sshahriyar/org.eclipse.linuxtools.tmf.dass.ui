@@ -8,20 +8,25 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.settings;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
-import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.ISelectionListener;
@@ -35,7 +40,8 @@ import org.eclipse.ui.PlatformUI;
  */
 public class TestSettingsHandler implements IHandler {
 	private HashSet<String> selectedModels;
-	private Settings settingsDialog;
+	private TestSettingsDialog settingsDialog;
+	
 	/**
 	 * Constructor
 	 */
@@ -56,21 +62,30 @@ public class TestSettingsHandler implements IHandler {
 		});
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#addHandlerListener(org.eclipse.core.commands.IHandlerListener)
+	 */
 	@Override
 	public void addHandlerListener(IHandlerListener handlerListener) {
 	
 
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#dispose()
+	 */
 	@Override
 	public void dispose() {
-		// TODO 
+		
 
 	}
-	//
-	//Execute function
-	//
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 			MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
@@ -90,47 +105,58 @@ public class TestSettingsHandler implements IHandler {
 					msgBoxErr.open();
 					return null;
 				}
-				String databases=selectedModels.iterator().next();	// get the only selected model
-				String algorithmAcronym=databases.split("_")[1];
-				IDetectionAlgorithm algorithm=AlgorithmFactory.getInstance().getAlgorithmByAcronym(algorithmAcronym);
 				
-				if (settingsDialog==null)
-					settingsDialog= new Settings(algorithm.getTestingOptions(databases, Configuration.connection));
+				String model=selectedModels.iterator().next();	// get the only selected model
+				IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, Configuration.connection);
+				String []settings=algorithm.getTestingOptions(model,Configuration.connection );
+				
+				settingsDialog= new TestSettingsDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+														, algorithm, model, settings);
 			
-				settingsDialog.showForm();
-				String []algorithmSettings=settingsDialog.getSettings();
-				//models.put(databases[0], algorithmSettings);
-				if (algorithmSettings!=null)
-					algorithm.saveTestingOptions(algorithmSettings, databases, Configuration.connection);
-				//settingsDialog=null;
+				settingsDialog.create();
+				settingsDialog.open();
+		
 			
-		} catch (TotalADSUIException ex) {
+		} catch (TotalADSGeneralException ex) {
 			msgBoxErr.setMessage(ex.getMessage());
 			msgBoxErr.open();
-		}catch (TotalADSDBMSException ex) {
+		}catch (Exception ex) {
 			msgBoxErr.setMessage(ex.getMessage());
 			msgBoxErr.open();
+			Logger.getLogger(TestSettingsHandler.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
+			
 		}finally{
 			settingsDialog=null;
 		}
 		return null;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#isEnabled()
+	 */
 	@Override
 	public boolean isEnabled() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#isHandled()
+	 */
 	@Override
 	public boolean isHandled() {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#removeHandlerListener(org.eclipse.core.commands.IHandlerListener)
+	 */
 	@Override
 	public void removeHandlerListener(IHandlerListener handlerListener) {
-		// TODO Auto-generated method stub
+	
 
 	}
 

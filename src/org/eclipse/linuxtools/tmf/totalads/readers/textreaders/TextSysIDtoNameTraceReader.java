@@ -17,7 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -148,7 +148,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 
 
 	
-	 public static void registerTraceTypeReader() throws TotalADSUIException{
+	 public static void registerTraceTypeReader() throws TotalADSGeneralException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);

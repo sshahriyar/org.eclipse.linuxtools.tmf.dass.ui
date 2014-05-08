@@ -1,4 +1,13 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+/*********************************************************************************************
+ * Copyright (c) 2014  Software Behaviour Analysis Lab, Concordia University, Montreal, Canada
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of XYZ License which
+ * accompanies this distribution, and is available at xyz.com/license
+ *
+ * Contributors:
+ *    Syed Shariyar Murtaza
+ **********************************************************************************************/
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
 import org.eclipse.jface.wizard.IWizardPage;
@@ -7,11 +16,12 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
+
 /**
- * 
+ * This class creates a wizard dialog box for the creation of a new model
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
@@ -24,7 +34,7 @@ public class CreateModelWizard extends Wizard {
 	 */
 	public CreateModelWizard() {
 		super();
-	//	setNeedsProgressMonitor(true);
+		setNeedsProgressMonitor(true);
 	}
 	
 	/*
@@ -69,6 +79,7 @@ public class CreateModelWizard extends Wizard {
 	}
 
 	/*
+	 * Creates a model in the database when the Finish button is clicked
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
@@ -93,7 +104,7 @@ public class CreateModelWizard extends Wizard {
 				
 			} catch (TotalADSDBMSException e) {
 				exception=e.getMessage();
-			} catch (TotalADSUIException e) {
+			} catch (TotalADSGeneralException e) {
 				exception=e.getMessage();
 			}
 		

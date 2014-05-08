@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.eclipse.linuxtools.tmf.totalads.TotalAdsDAOException;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.ui.datamodels.DataModel;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModel;
 
 /**
  * @author efraimlopez

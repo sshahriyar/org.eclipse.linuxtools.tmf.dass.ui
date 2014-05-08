@@ -19,7 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
@@ -238,7 +238,7 @@ public class Modeling {
 					} catch (TotalADSDBMSException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
-					} catch (TotalADSUIException ex) {
+					} catch (TotalADSGeneralException ex) {
 						msgBox.setMessage(ex.getMessage());
 						msgBox.open();
 					} catch (Exception ex) {
@@ -261,22 +261,9 @@ public class Modeling {
 		
 		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-		btnSettings.setText("Adjust Settings");
+		btnSettings.setText("Adjust SettingsForm");
 		
-		//Event handler for Settings button
-		btnSettings.addMouseListener(new MouseAdapter() {
 		
-		@Override
-		public void mouseUp(MouseEvent e) {
-				try {
-					algorithmSelector.showSettingsDialog();
-				} catch (TotalADSUIException ex) {
-					msgBox.setMessage(ex.getMessage());
-					msgBox.open();
-				}
-				
-			}
-		 });
 	}
 
 	

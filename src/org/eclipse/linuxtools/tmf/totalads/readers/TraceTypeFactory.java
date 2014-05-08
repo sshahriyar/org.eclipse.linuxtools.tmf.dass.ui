@@ -12,7 +12,7 @@ package org.eclipse.linuxtools.tmf.totalads.readers;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFEventsTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFFunctionEntryExitTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
@@ -96,18 +96,18 @@ public class TraceTypeFactory {
 	 * Registers a trace reader with the factory
 	 * @param key Key for the trace reader
 	 * @param traceReader Instance of the trace reader
-	 * @throws TotalADSUIException Exception 
+	 * @throws TotalADSGeneralException Exception 
 	 */
-	public void registerTraceReaderWithFactory(String key, ITraceTypeReader traceReader) throws TotalADSUIException{
+	public void registerTraceReaderWithFactory(String key, ITraceTypeReader traceReader) throws TotalADSGeneralException{
 		if (!key.isEmpty()){
 			ITraceTypeReader  reader=traceTypeReadersList.get(key);
 			if (reader==null)
 				traceTypeReadersList.put(key, traceReader);
 			else
-				throw new TotalADSUIException("Duplicate Key!");
+				throw new TotalADSGeneralException("Duplicate Key!");
 		}
 		else 
-			 throw new TotalADSUIException("Key is Empty!");
+			 throw new TotalADSGeneralException("Key is Empty!");
 		
 			
 	}
@@ -128,7 +128,7 @@ public class TraceTypeFactory {
 	 * in this function but in future reflection will be used to automatically register them
 	 * @throws Exception
 	 */
-	public void initialize() throws TotalADSUIException{
+	public void initialize() throws TotalADSGeneralException{
 		
 	    //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
 	    //java.util.Set<Class<? extends IDetectionAlgorithm>> modules = reflections.getSubTypesOf

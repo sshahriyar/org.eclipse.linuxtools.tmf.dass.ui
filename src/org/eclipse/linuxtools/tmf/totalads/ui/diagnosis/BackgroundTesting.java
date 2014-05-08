@@ -21,7 +21,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -58,7 +58,7 @@ public class BackgroundTesting implements Runnable{
 	 * @param database Database
 	 * @param statusBar An object of StatusBar
 	 * @param btnDelete Delete button
-	 * @param btnSettings Settings button
+	 * @param btnSettings SettingsForm button
 	 * @param btnEvaluate Evaluate button
 	 * @param resultsAndFeedback Results and Feedback
 	 * @param algorithmSettings Algorithm settings
@@ -89,7 +89,7 @@ public class BackgroundTesting implements Runnable{
 				testTheModel(testDirectory, traceReader, algorithm, database);
 							
 			} 
-			catch(TotalADSUIException ex){// handle UI exceptions here
+			catch(TotalADSGeneralException ex){// handle UI exceptions here
 										 //UI exceptions are simply notifications--no need to log them
 				if (ex.getMessage()==null)
 					msg="UI error";	
@@ -152,13 +152,13 @@ public class BackgroundTesting implements Runnable{
 	 * @param traceReader Trace reader
 	 * @param algorithm Algorithm of the algorithm
 	 * @param database Database
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 * @throws TotalADSReaderException 
 	 * @throws TotalADSDBMSException 
 	 * 
 	 */
 	public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm []algorithm, 
-			                  String []database )throws TotalADSUIException, TotalADSReaderException, TotalADSDBMSException {
+			                  String []database )throws TotalADSGeneralException, TotalADSReaderException, TotalADSDBMSException {
 				
 				
 			// First verify selections
@@ -166,12 +166,12 @@ public class BackgroundTesting implements Runnable{
 			Integer totalFiles;		
 			
 	       //if (testDirectory.isEmpty())
-	    	//   throw new TotalADSUIException("Please, first select a trace!");
+	    	//   throw new TotalADSGeneralException("Please, first select a trace!");
 			
 			File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 			
 			if (fileList.length >5000)
-				throw new TotalADSUIException("More than 5000 traces can not be tested simultaneously.");
+				throw new TotalADSGeneralException("More than 5000 traces can not be tested simultaneously.");
 			
 			DBMS connection=Configuration.connection;
 				
@@ -179,7 +179,7 @@ public class BackgroundTesting implements Runnable{
 				traceReader.getTraceIterator(fileList[0]);
 			}catch (TotalADSReaderException ex){// this is just a validation error, cast it to UI exception
 				String message="Invalid trace reader and traces: "+ex.getMessage();
-				throw new TotalADSUIException(message);
+				throw new TotalADSGeneralException(message);
 			}
 			  
 			ProgressConsole console= new ProgressConsole("Diagnosis");
@@ -227,10 +227,10 @@ public class BackgroundTesting implements Runnable{
 	 * @param directory The name of the directory
 	 * @param traceReader An object of the trace reader
 	 * @return An array list of traces sutied for the appropriate type
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
 	
-	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSUIException{
+	private File[] getDirectoryHandler(String directory, ITraceTypeReader traceReader) throws TotalADSGeneralException{
 		File traces=new File(directory);
 		
 		CTFLTTngSysCallTraceReader kernelReader=new CTFLTTngSysCallTraceReader();
@@ -243,9 +243,9 @@ public class BackgroundTesting implements Runnable{
 	 * Get an array of trace list for a directory or just one file handler if there is only one file
 	 * @param traces File object representing traces
 	 * @return the file handler to the correct path
-	 * @throws TotalADSUIException 
+	 * @throws TotalADSGeneralException 
 	 */
-	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSUIException{
+	private File[] getDirectoryHandlerforTextTraces(File traces) throws TotalADSGeneralException{
 		
 		File []fileList;
 				
@@ -260,13 +260,13 @@ public class BackgroundTesting implements Runnable{
 					   isAllFiles=true;
 			   
 				   if (isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains"
+				  	   throw new TotalADSGeneralException("The folder "+traces.getName()+" contains"
 					   		+ " directories. Please put only trace files in it.");
 			   
 			    }
 			    
 			    if (!isAllFiles && !isAllFolders)
-			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    	 throw new TotalADSGeneralException("Empty directory: "+traces.getName());
 				 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached
@@ -283,9 +283,9 @@ public class BackgroundTesting implements Runnable{
 	 * Gets an array of list of directories 
 	 * @param traces File object representing traces
 	 * @return Handler to the correct path of files
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
-	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSUIException{
+	private File[] getDirectoryHandlerforLTTngTraces(File traces) throws TotalADSGeneralException{
 		
 				
 		if (traces.isDirectory()){
@@ -301,13 +301,13 @@ public class BackgroundTesting implements Runnable{
 					   isAllFiles=true;
 			   
 				   if (isAllFiles && isAllFolders) // there is no need to continue further throw this msg	   
-				  	   throw new TotalADSUIException("The folder "+traces.getName()+" contains a mix of"+
+				  	   throw new TotalADSGeneralException("The folder "+traces.getName()+" contains a mix of"+
 					   		 " files and directories. Please put only LTTng traces' directories in it.");
 			   
 			    }
 			    // if it has reached this far 
 			    if (!isAllFiles && !isAllFolders)
-			    	 throw new TotalADSUIException("Empty directory: "+traces.getName());
+			    	 throw new TotalADSGeneralException("Empty directory: "+traces.getName());
 			    else if (isAllFiles){ // return the name of folder as a trace
 			    	fileHandler =new File[1];
 			    	fileHandler[0]=traces;
@@ -320,7 +320,7 @@ public class BackgroundTesting implements Runnable{
 			    
 	    } else// this will not happen currently as we are only using the directory 
 	    	  //loader in the main view
-	    	throw new TotalADSUIException("You have selected a file"+traces.getName()+", select a folder");
+	    	throw new TotalADSGeneralException("You have selected a file"+traces.getName()+", select a folder");
 	
 	}
 

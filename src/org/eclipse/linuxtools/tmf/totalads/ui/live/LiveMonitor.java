@@ -349,7 +349,7 @@ public class LiveMonitor {
 		   
 		Button btnSettings=new Button(compModelSelection, SWT.NONE);
 		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnSettings.setText(" Settings ");
+		btnSettings.setText(" SettingsForm ");
 		
 		Button btnDelete=new Button(compModelSelection, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));

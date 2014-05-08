@@ -18,7 +18,7 @@ import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.ui.*;
 
@@ -101,7 +101,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
     */
     @Override
-    public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSUIException{
+    public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSGeneralException{
     	
     	if (trainingSettings!=null){
   		  int trueCount=0;
@@ -112,16 +112,16 @@ public class KernelStateModeling implements IDetectionAlgorithm {
   			  		trueCount++;
   			  		if (trueCount>1){
   			  			trainingOptions[count]="false";
-  			  			throw new TotalADSUIException("Please, select only one option as true.");
+  			  			throw new TotalADSGeneralException("Please, select only one option as true.");
   			  		}
   			 }
   			 else  if (trainingSettings[count].equals("false")) // if it is not true then it must be false
   				    trainingOptions[count]="false";
   			 else
-  				 throw new TotalADSUIException("Please, type true or false only.");
+  				 throw new TotalADSGeneralException("Please, type true or false only.");
 		      
   			if (trueCount==0)	  
-  		      throw new TotalADSUIException("Please, type true for one of the options.");
+  		      throw new TotalADSGeneralException("Please, type true for one of the options.");
   		  	    			  	
   	   }else
   		 trainingSettings=trainingOptions;
@@ -149,12 +149,12 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
      */
     @Override
-    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
+    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException
     {
     	try {
 			alpha= Double.parseDouble(options[1]);
 		}catch (NumberFormatException ex){
-			throw new TotalADSUIException("Please, enter only decimal values.");
+			throw new TotalADSGeneralException("Please, enter only decimal values.");
 		}
     	// First read settings in a class level array-- just one row
     	getSettingsFromDatabase(database, connection);
@@ -181,7 +181,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!initialize){
     		    alpha=getSettingsFromDatabase(database, connection);
@@ -205,7 +205,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -245,7 +245,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database,DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
@@ -331,7 +331,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/** Self registration of the model with the modelFactory **/
-	public static void registerModel() throws TotalADSUIException{
+	public static void registerModel() throws TotalADSGeneralException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		KernelStateModeling ksm=new KernelStateModeling();
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,ksm);
@@ -405,9 +405,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param trace
 	 * @param states
 	 * @throws TotalADSReaderException 
-	 * @throws TotalADSUIException
+	 * @throws TotalADSGeneralException
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSUIException, TotalADSReaderException{
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSGeneralException, TotalADSReaderException{
 		
 		Double totalSysCalls=0.0;
 		
@@ -422,7 +422,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
 		// If correct system call names do not exist in the trace, throw an exception
 		if (totalSysCalls<=0 || totalSysCalls.equals(states.UN))
-			throw new TotalADSUIException("No system call names found in the last trace. Further processing aborted!");
+			throw new TotalADSGeneralException("No system call names found in the last trace. Further processing aborted!");
 		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);

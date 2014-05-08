@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -52,8 +52,6 @@ public class AlgorithmSelectionPage extends WizardPage {
 		txtDescription=new StyledText(compAlgorithms, SWT.MULTI | SWT.READ_ONLY |SWT.NONE | SWT.WRAP | SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtDescription.setText("Select an algorithm to see its description....");
-		//txtDescription.setJustify(true);
-		//txtDescription.setEditable(false);
 		
 		// Event handler for the tree
 		treeViewer.addCheckStateListener(new ICheckStateListener() {

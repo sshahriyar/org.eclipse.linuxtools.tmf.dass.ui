@@ -13,7 +13,7 @@ import java.io.File;
 
 import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -48,7 +48,7 @@ public class CTFFunctionEntryExitTraceReader implements ITraceTypeReader {
     	
     	return "FUN";
     }
-	 public static void registerTraceTypeReader() throws TotalADSUIException{
+	 public static void registerTraceTypeReader() throws TotalADSGeneralException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	CTFFunctionEntryExitTraceReader userTraceReader=new CTFFunctionEntryExitTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(userTraceReader.getName(), userTraceReader);

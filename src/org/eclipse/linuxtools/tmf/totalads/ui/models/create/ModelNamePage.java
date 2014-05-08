@@ -1,4 +1,4 @@
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
 import org.eclipse.core.internal.localstore.IsSynchronizedVisitor;

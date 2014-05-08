@@ -7,7 +7,7 @@
 //import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 //import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
 //import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-//import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+//import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //
 //import com.google.gson.Gson;
 //import com.google.gson.JsonArray;
@@ -101,15 +101,15 @@
 //	
 //	/**
 //	 * Validates settings and saves them into the database after creating a new databse if requried
-//	 * @param settings Settings array
+//	 * @param settings SettingsForm array
 //	 * @param database Database name
 //	 * @param connection DBMS object
 //	 * @param isNewSettings True if settings are inserted first time, else false if existing fields are updated
 //	 * @param isNewDBTrue if new database has to be created 
-//	 * @throws TotalADSUIException
+//	 * @throws TotalADSGeneralException
 //	 * @throws TotalADSDBMSException
 //	 */
-//	public void verifySaveSettingsCreateDb(String []settings, String database, DBMS connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException{
+//	public void verifySaveSettingsCreateDb(String []settings, String database, DBMS connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSGeneralException, TotalADSDBMSException{
 //	
 //		JsonObject settingObject=new JsonObject();
 //		for (int i=0; i<settings.length;i+=2){ 
@@ -119,7 +119,7 @@
 //						  Integer num_states=Integer.parseInt(settings[i+1]);
 //						  settingObject.add(SettingsCollection.NUM_STATES.toString(), new JsonPrimitive(num_states));
 //					  }catch (Exception ex){
-//						  throw new TotalADSUIException("Select an integer for number of states");
+//						  throw new TotalADSGeneralException("Select an integer for number of states");
 //					  }
 //					  
 //				}else if (SettingsCollection.NUM_SYMBOLS.toString().equalsIgnoreCase(settings[i])){
@@ -127,22 +127,22 @@
 //						  Integer num_symbols=Integer.parseInt(settings[i+1]);
 //						  settingObject.add(SettingsCollection.NUM_SYMBOLS.toString(), new JsonPrimitive(num_symbols));
 //					  }catch (Exception ex){
-//						  throw new TotalADSUIException("Select an integer for number of symbols");
+//						  throw new TotalADSGeneralException("Select an integer for number of symbols");
 //					  }
 //			   	}else if (SettingsCollection.SEQ_LENGTH.toString().equalsIgnoreCase(settings[i])){
 //					  try {
 //						  Integer seqLength=Integer.parseInt(settings[i+1]);
 //						  settingObject.add(SettingsCollection.SEQ_LENGTH.toString(), new JsonPrimitive(seqLength));
 //					  }catch (Exception ex){
-//						  throw new TotalADSUIException("Select an integer for sequence length");
+//						  throw new TotalADSGeneralException("Select an integer for sequence length");
 //					  }
 //			   	}else if (SettingsCollection.LOG_LIKELIHOOD.toString().equalsIgnoreCase(settings[i])){
 //					  try {
 //						   Double prob=Double.parseDouble(settings[i+1]);
-//						   if (prob >1.0) throw new TotalADSUIException("Probability can't be > 1");
+//						   if (prob >1.0) throw new TotalADSGeneralException("Probability can't be > 1");
 //						   settingObject.add(SettingsCollection.LOG_LIKELIHOOD.toString().toString(), new JsonPrimitive(prob));
 //					  }catch (Exception ex){
-//						  throw new TotalADSUIException("Select a decimal number for the probability threshold");
+//						  throw new TotalADSGeneralException("Select a decimal number for the probability threshold");
 //					  }
 //			   	} else if (SettingsCollection.KEY.toString().equalsIgnoreCase(settings[i])){
 //			   		settingObject.add(SettingsCollection.KEY.toString(), new JsonPrimitive("hmm"));
@@ -172,7 +172,7 @@
 //	 * Loads settings from the database
 //	 * @param database
 //	 * @param connection
-//	 * @return Settings as an array of String 
+//	 * @return SettingsForm as an array of String 
 //	 */
 //	public String[] loadSettings(String database, DBMS connection){
 //		String [] settings=null;

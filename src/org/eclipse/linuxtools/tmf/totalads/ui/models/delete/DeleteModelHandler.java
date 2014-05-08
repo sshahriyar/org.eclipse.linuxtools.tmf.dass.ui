@@ -8,7 +8,7 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui.datamodels;
+package org.eclipse.linuxtools.tmf.totalads.ui.models.delete;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,8 +22,9 @@ import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.ISelectionListener;

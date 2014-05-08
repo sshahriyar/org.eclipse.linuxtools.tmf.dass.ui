@@ -17,7 +17,7 @@ import java.util.Iterator;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel.HiddenMarkovModel;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.ksm.KernelStateModeling;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 
 /**
  * This is an AlgorithmFactory class that registers all the Algorithms with itself.
@@ -83,21 +83,21 @@ public IDetectionAlgorithm[] getAlgorithms(AlgorithmTypes algorithmTypes){
  * This function registers an algorithm by using its acronym as a key
  * @param key Acronym of the algorithm
  * @param detectionAlgorithm The Algorithm to register
- * @throws TotalADSUIException 
+ * @throws TotalADSGeneralException 
  */
-private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detectionAlgorithm) throws TotalADSUIException{
+private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detectionAlgorithm) throws TotalADSGeneralException{
 	
 	if (key.isEmpty())
-		throw new TotalADSUIException("Empty key/acronym!");
+		throw new TotalADSGeneralException("Empty key/acronym!");
 	else if (key.contains("_"))
-			throw new TotalADSUIException("Acronym cannot contain underscore");
+			throw new TotalADSGeneralException("Acronym cannot contain underscore");
 	else {
 		
 		IDetectionAlgorithm model =acronymModels.get(key);
 		if (model==null) 
 			acronymModels.put(key, detectionAlgorithm);
 		else
-			throw new TotalADSUIException("Duplicate key/acronym!");
+			throw new TotalADSGeneralException("Duplicate key/acronym!");
 	}
 		
 		
@@ -108,7 +108,7 @@ private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detect
  * @param algorithmType An enum of {@link AlgorithmTypes}
  */
 public void registerModelWithFactory(AlgorithmTypes algorithmType,  IDetectionAlgorithm detectionAlgorithm)
-																	throws TotalADSUIException{
+																	throws TotalADSGeneralException{
 	
 	registerAlgorithmWithAcronym(detectionAlgorithm.getAcronym(), detectionAlgorithm);
 	HashSet<String>  list=algList.get(algorithmType);
@@ -140,7 +140,7 @@ public IDetectionAlgorithm getAlgorithmByAcronym(String key){
  * replace  with reflection and  will register all algorithms derived from the 
  * interface IDetectionAlgorithms automatically
  */
-public void initialize() throws TotalADSUIException{
+public void initialize() throws TotalADSGeneralException{
 	
  //Reflections reflections = new Reflections("org.eclipse.linuxtools.tmf.totalads.ui");
  ////java.util.Set<Class<? extends IDetectionAlgorithm>> modules = reflections.getSubTypesOf
