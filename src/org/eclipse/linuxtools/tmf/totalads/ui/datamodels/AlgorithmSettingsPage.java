@@ -5,15 +5,16 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.ui.Settings;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.MessageBox;
+
 
 public class AlgorithmSettingsPage extends WizardPage {
 	private String []settings;
 	private Composite compSettings;
-	
+	private Settings settingForm;
 	public AlgorithmSettingsPage() {
 		super("Algorithm Settings");
 		setTitle("Adjust Settings of the Algorithm");
@@ -24,15 +25,16 @@ public class AlgorithmSettingsPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite compParent) {
-		Composite compSettings=new Composite(compParent, SWT.NONE);
-		//compSettings.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		compSettings.setLayout(new GridLayout(2,false));
-		 Button btnOK=new Button(compSettings,SWT.NONE);
-		 btnOK.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
-		btnOK.setText("      OK       ");
-		
+		compSettings=new Composite(compParent, SWT.NONE);
+		//compSettings.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		compSettings.setLayout(new GridLayout(1,false));
+		//compSettings.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,false,false));
+		//Text txtOption=new Text(compSettings, SWT.NONE);
+		// txtOption.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		// txtOption.setText("lala");
 		setControl(compSettings);
 		setPageComplete(false);
+		
 	}
 	
 	/**
@@ -42,25 +44,59 @@ public class AlgorithmSettingsPage extends WizardPage {
 	public void setSettings(String []settings){
 		this.settings=settings;
 		//getContainer().showPage(this);
+		
 	}
 
-	/*@Override
+	@Override
 	public void setVisible(boolean isVisible){
-		/*if (isVisible){
+		if (isVisible){
 			try {
 				if (settings!=null){
-				   //Settings set =new Settings(settings,compSettings);
-				 //  Button btnOK=new Button(compSettings,SWT.NONE);
-					// btnOK.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,true,false,1,1));
-					// btnOK.setText("      OK       ");
-					 
-				   //setControl(compSettings);
+					Control []widgets= compSettings.getChildren();
+					for (int i=0; i<widgets.length; i++)
+						widgets[i].dispose();
+					compSettings.layout();
+				 
+				    settingForm =new Settings(settings,compSettings);
 				
-				}
+				    compSettings.layout(); 
+				    setPageComplete(true);
+				
+			}
 			} catch (Exception e) {
 					e.printStackTrace();
 			}
 			
 		}
-	}*/
+		super.setVisible(isVisible);
+		
+	}
+	
+  /**
+   * Returns the selected settings from the user	
+   * @return An array of settings
+   */
+  public String[] getSettingsSelectedByTheUser(){
+	  String []settingFromUser=null;
+	  
+	  try {
+		settingFromUser=settingForm.getSettings();
+	} catch (TotalADSUIException e) {
+		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
+				SWT.ICON_ERROR);
+		msgBoxErr.setMessage(e.getMessage());
+		msgBoxErr.open();
+		
+	}
+	return settingFromUser; 
+	 
+  }
+  
+  @Override
+  public boolean canFlipToNextPage() {
+				return false;
+  }
+	
+  
+  
 }

@@ -98,8 +98,7 @@ public class Modeling {
 		//createAnEmptyModel(compSettingAndEvaluation);
 	    adjustSettings(compSettingAndEvaluation);
 		buildModel(compSettingAndEvaluation);
-		///Initialize progress console
-	    //progConsole=new AlgorithmOutStream(comptbItmModeling);
+		
 		
 	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size

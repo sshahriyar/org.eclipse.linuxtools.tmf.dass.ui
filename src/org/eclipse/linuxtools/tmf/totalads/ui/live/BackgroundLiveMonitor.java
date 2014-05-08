@@ -303,7 +303,7 @@ public class BackgroundLiveMonitor implements Runnable {
 				outStreamAlg.addOutputEvent("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-				Results results=algorithm.test(traceIterator,model , Configuration.connection, settings, outStreamAlg);
+				Results results=algorithm.test(traceIterator,model , Configuration.connection, outStreamAlg);
 				
 				Double anomCount=modelsAndAnomalyCount.get(model);
 				if (results.getAnomaly()==true)
@@ -323,7 +323,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					outStreamAlg.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
 					outStreamAlg.addOutputEvent("Please wait while the model is updated....");
 					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-					algorithm.train(traceIterator, true, model, Configuration.connection, outStreamAlg, null, false);
+					algorithm.train(traceIterator, true, model, Configuration.connection, outStreamAlg);
 				} 
 				
 				outStreamAlg.addOutputEvent("Execution  finished for "+model);

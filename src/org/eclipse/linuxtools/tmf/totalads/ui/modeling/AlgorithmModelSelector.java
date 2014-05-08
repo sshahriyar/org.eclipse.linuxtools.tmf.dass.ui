@@ -228,14 +228,14 @@ public class AlgorithmModelSelector {
 		String database=modelNameRetreival;
 				
 		
-		String []options=currentlySelectedAlgorithm.getTrainingOptions(Configuration.connection, database,isCreateDB);
+		String []options=currentlySelectedAlgorithm.getTrainingOptions();
 		if (options!=null){
 			try{
 				if (settingsDialog==null)
 					settingsDialog= new Settings(options);
 			
 				settingsDialog.showForm();
-				algorithmOptions=settingsDialog.getOptions();
+				algorithmOptions=settingsDialog.getSettings();
 
 			}catch (TotalADSUIException ex){
 				msgBox.setMessage(ex.getMessage());
@@ -539,7 +539,7 @@ public class AlgorithmModelSelector {
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
 			console.println("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
-	 		algorithm.train(trace, isLastTrace, database,connection, outStream, algorithmOptions, false);
+	 		algorithm.train(trace, isLastTrace, database,connection, outStream);
 		
 		}
 		//Fourth, start validation

@@ -145,7 +145,7 @@ public class ModelSelection {
 								settingsDialog= new Settings(algorithm[0].getTestingOptions(databases[0], Configuration.connection));
 						
 							settingsDialog.showForm();
-							String []algorithmSettings=settingsDialog.getOptions();
+							String []algorithmSettings=settingsDialog.getSettings();
 							//models.put(databases[0], algorithmSettings);
 							if (algorithmSettings!=null)
 								algorithm[0].saveTestingOptions(algorithmSettings, databases[0], Configuration.connection);

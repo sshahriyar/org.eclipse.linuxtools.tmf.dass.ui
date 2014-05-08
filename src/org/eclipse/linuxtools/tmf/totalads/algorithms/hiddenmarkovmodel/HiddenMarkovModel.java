@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSUIException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.swtchart.Chart;
 /**
- * This class implements a Hidden Markov DataModel
+ * This class implements a Hidden Markov Model
  * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  * 
  */
@@ -57,48 +57,47 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  hmm);
 		
 	}
-	/**
-	 * Creates database
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
 	 */
 	@Override
-	public void createDatabase(String databaseName, DBMS connection)throws TotalADSDBMSException {
+	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSUIException {
+		String []setting=null;
 		
-		
-		String []settings={ SettingsCollection.KEY.toString(),"hmm",
+		if (trainingSettings!=null){
+			 setting=new String[trainingSettings.length+6];
+			 setting[0]=SettingsCollection.KEY.toString(); 
+			 setting[1]="hmm";
+			 for (int i=0;i<trainingSettings.length;i++)
+				 setting[i+2]=trainingSettings[i];
+			 setting[trainingSettings.length+2]=SettingsCollection.LOG_LIKELIHOOD.toString();
+			 setting[trainingSettings.length+3]="0.0";
+			 setting[trainingSettings.length+4]=SettingsCollection.SEQ_LENGTH.toString();
+			 setting[trainingSettings.length+5]=seqLength.toString();
+		}else{
+		 
+		    String []settings={ SettingsCollection.KEY.toString(),"hmm",
 							SettingsCollection.NUM_STATES.toString(),"5",
 						    SettingsCollection.NUM_SYMBOLS.toString(), "300",
 						    SettingsCollection.NUMBER_OF_ITERATIONS.toString(),"10",
 							SettingsCollection.LOG_LIKELIHOOD.toString(),"0.0",
 						    SettingsCollection.SEQ_LENGTH.toString(),seqLength.toString()};
-		
-		try {
-			
-			hmm.verifySaveSettingsCreateDb(settings, databaseName, connection,true,true);
-		} catch (TotalADSUIException e) {}
-
-	}
-	/**
-	 * Saves Training options
-	 * @param options
-	 * @param database
-	 * @param connection
-	 * @throws TotalADSUIException
-	 * @throws TotalADSDBMSException
-	 */
-	@Override
-	public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
-	{
+		    setting=settings;
+		    
+		}
 		HmmMahout hmm=new HmmMahout();
-		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
+		hmm.verifySaveSettingsCreateDb(setting, modelName, connection,true,true);
 		
 	}
-	/**
-	 * Gets training settings
-	 * @return
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
 	 */
 	@Override
-	public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase) {
-		if (isNewDatabase){
+	public String[] getTrainingOptions() {
+		//if (isNewDatabase){
 			String [] trainingSettings=new String[6];
 			trainingSettings[0]=SettingsCollection.NUM_STATES.toString();
 			trainingSettings[1]="5";
@@ -107,19 +106,17 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			trainingSettings[4]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
 			trainingSettings[5]="10";
 			return trainingSettings;
-		}else{
+		/*}else{
 			String [] trainingSettings=new String[2];
 			trainingSettings[0]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
 			trainingSettings[1]="10";
 			return trainingSettings;
-		}
+		}*/
 			
 	}
-	/**
-	 * Gets Test settings
-	 * @param database
-	 * @param connection
-	 * @return  An array of String 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
 	 */
 	@Override
 	public String[] getTestingOptions(String database, DBMS connection) {
@@ -129,19 +126,13 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			return null;
 		
 		String []testingSettings=new String[2];
-		//testingSettings[0]=SettingsCollection.SEQ_LENGTH.toString();
-		//testingSettings[1]=settings[5];// seq length
 		testingSettings[0]=SettingsCollection.LOG_LIKELIHOOD.toString();
-		testingSettings[1]=settings[7]; // probaility
+		testingSettings[1]=settings[7]; // probability
 		return testingSettings;
 	}
-	/**
-	 * Saves test settings
-	 * @param options
-	 * @param database
-	 * @param connection
-	 * @throws TotalADSUIException
-	 * @throws TotalADSDBMSException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
 	 */
    @Override
 	public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
@@ -150,18 +141,17 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
 	}
  
-  /**
-   * 
-   * Trains an HMM
-   */
-      @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream,
-		String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+   /*
+    * (non-Javadoc)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+    */
+    @Override
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 	   
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
 								 
-				 if (options!=null){
+				/* if (options!=null){
 					 if (isNewDB){// add all settings to the db if this is a new database
 						 String []setting=new String[options.length+6];
 						 setting[0]=SettingsCollection.KEY.toString(); 
@@ -178,9 +168,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				 }					 
 				 else{
 					 if (isNewDB) 
-						createDatabase(database, connection); // with default settings if no settings selected
-				 } 
-				 options=hmm.loadSettings(database, connection);// get settings from db
+						initializeModelAndSettings(database, connection, null); // with default settings if no settings selected
+				 } */
+				 String []options=hmm.loadSettings(database, connection);// get settings from db
 				 numStates=Integer.parseInt(options[1]);
 				 numSymbols=Integer.parseInt(options[3]);
 				 numIterations=Integer.parseInt(options[5]);
@@ -242,7 +232,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 	}
    /**
-    *  Trains Using BaumWelch
+    * Trains Using BaumWelch
     * @param seq
     * @throws TotalADSUIException
     */
@@ -260,16 +250,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		    		 throw new TotalADSUIException(ex);
 		     }
    }
-	/**
-	 * Validates HMM
-	 * @param trace
-	 * @param database
-	 * @param connection
-	 * @param isLastTrace
-	 * @param outStream
-	 * @throws TotalADSUIException
-	 * @throws TotalADSDBMSException
-	 * @throws TotalADSReaderException 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
 	public void validate(ITraceIterator trace, String database,DBMS connection, 
@@ -316,8 +299,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		outStream.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
 		 
 		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
-		//if (isLastTrace)
-			//nameToID.saveMap(connection, database);
+		
 	}
 	
 	/**
@@ -344,26 +326,25 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		  }
 		  return probThreshold;
 	}
-	/**
-	 * Tests an HMM
-	 * @throws TotalADSReaderException 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database, DBMS connection,	String[] options,
-			IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database, DBMS connection,	IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,testSeqLength=seqLength;
-		
+		String []options;
 		
 		if (!isTestInitialized){
 			hmm=new HmmMahout();
-			if (options!=null){
+			/*if (options!=null){
 				hmm.verifySaveSettingsCreateDb(options, database, connection, false, false);
 				logThresholdTest=Double.parseDouble(options[1]);
-			}else{
+			}else{*/
 				options=hmm.loadSettings(database, connection);
 				logThresholdTest=Double.parseDouble(options[7]);
-			}
+			//}
 			hmm.loadHmm(connection, database);
 			nameToID.loadMap(connection, database);
 			testNameToIDSize=nameToID.getSize();
@@ -405,7 +386,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 	}
 	/**
-	 * 
+	 * Helper function for testing
 	 * @param result
 	 * @param probThreshold
 	 * @param seq
@@ -471,7 +452,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		  
 	}
 	
-	/**
+	/*
 	 * Returns the total anomalies found during testing
 	 */
 	@Override
@@ -480,31 +461,68 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 Double anomalyPercentage= (totalTestAnomalies/totalTestTraces) *100;
 		 return anomalyPercentage;
 	}
-
+	
+	
 	@Override
 	public Chart graphicalResults(ITraceIterator traceIterator) {
 	
 		return null;
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#createInstance()
+	 */
 	@Override
 	public IDetectionAlgorithm createInstance() {
 	
 		return new HiddenMarkovModel();
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getName()
+	 */
 	@Override
 	public String getName() {
 		
 		return "Hidden Markov DataModel (HMM)";
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getAcronym()
+	 */
 	@Override
 	public String getAcronym() {
 		
 		return "HMM";
 	}
-	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getDescription()
+	 */
+	@Override
+	public String getDescription(){
+		return "HMM is a stochastic model for sequential data and hence it is naturally suitable for modeling temporal order of "
+				+ "system call sequences. The process is determined by a latent Markov chain having a finite number of "
+				+ "states, N, and a set of output observation probability distributions, B, associated with each state. "
+				+ "Starting from an initial state No, the process transits from one state to another according to the matrix "
+				+ "of transition probability distribution, A, and then emits an observation symbol Ok from a finite alphabet "
+				+ "(i.e., M distinct observable events) according to the output probability distribution, Bj(Ok), of the current"
+				+ " state Nj. HMM is typically parameterized by the initial state distribution probabilities (Π), "
+				+ "output (emission) probabilities (B), and state transition probabilities (A). Baulm-Welch algorithm is used "
+				+ "to train the model parameters to fit the sequences of observations, T.  During the validation phase,"
+				+ " HMM adjusts the decision threshold (log likelihood) of prediction of anomalous alarms on T sequences "
+				+ "from traces. In the testing phase, if the probability value of any sequence in a trace is below the "
+				+ "selected threshold, then we consider the trace as anomalous otherwise we consider it as normal";
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#isOnlineLearningSupported()
+	 */
+	@Override
+	public boolean isOnlineLearningSupported() {
+		
+		return false;
+	}
 
+	
 }

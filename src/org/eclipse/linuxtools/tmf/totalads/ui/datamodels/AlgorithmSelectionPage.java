@@ -8,9 +8,11 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 
 /**
@@ -20,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class AlgorithmSelectionPage extends WizardPage {
 	private CheckboxTreeViewer treeViewer;
+	private StyledText txtDescription;
 	private Boolean isItemSelected;
 	private IDetectionAlgorithm algorithmSelected;
 	/**
@@ -38,13 +41,19 @@ public class AlgorithmSelectionPage extends WizardPage {
 	public void createControl(Composite compParent) {
 		Composite compAlgorithms=new Composite(compParent, SWT.NONE);
 		compAlgorithms.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		compAlgorithms.setLayout(new GridLayout(1,false));
+		compAlgorithms.setLayout(new GridLayout(2,false));
 		
 		treeViewer=new CheckboxTreeViewer(compAlgorithms);
-		treeViewer.getTree().setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false,1,6));
+		treeViewer.getTree().setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, true));
 		treeViewer.setContentProvider(new AlgorithmTreeContentProvider());
 		treeViewer.setLabelProvider(new AlgorithmTreeLabelProvider());
 		treeViewer.setInput(AlgorithmTypes.ANOMALY);
+		
+		txtDescription=new StyledText(compAlgorithms, SWT.MULTI | SWT.READ_ONLY |SWT.NONE | SWT.WRAP | SWT.V_SCROLL);
+		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtDescription.setText("Select an algorithm to see its description....");
+		//txtDescription.setJustify(true);
+		//txtDescription.setEditable(false);
 		
 		// Event handler for the tree
 		treeViewer.addCheckStateListener(new ICheckStateListener() {
@@ -61,12 +70,23 @@ public class AlgorithmSelectionPage extends WizardPage {
 			    		 isItemSelected=treeViewer.getTree().getItem(i).getChecked();
 			    	 }
 				}
-				if (isItemSelected)
+				if (isItemSelected){
 					algorithmSelected=algorithm;
-				else
+					String desc=algorithm.getDescription();
+					if (desc!=null)
+						txtDescription.setText(desc);
+					else
+						txtDescription.setText("No description is available");
+					
+				;
+				}
+				else{
 					algorithmSelected=null;
+					txtDescription.setText("Select an algorithm to see description....");
+				}
 				
-				getWizard().getContainer().updateButtons();
+				//getWizard().getContainer().updateButtons();
+				setPageComplete(true);
 							
 			}
 		});

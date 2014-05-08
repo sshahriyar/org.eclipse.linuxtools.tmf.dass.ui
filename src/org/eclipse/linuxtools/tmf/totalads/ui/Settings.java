@@ -89,9 +89,9 @@ public class Settings {
 	 * @param dialogShel
 	 */
 	private void createForm(String []options, Composite compParent){
-		Composite dialogShel=new Composite(compParent, SWT.NONE);
-		dialogShel.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true,true)); 
-		dialogShel.setLayout(new GridLayout(4,false));
+		 Composite compSettings=new Composite(compParent, SWT.NONE);
+		 compSettings.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true,true)); 
+		 compSettings.setLayout(new GridLayout(4,false));
 		 
 		 modelOptions=options;
 		 Integer widgetsCount=options.length/2;
@@ -102,36 +102,52 @@ public class Settings {
 			 int idx=j/2;
 			 if (j%2==0){
 				 
-				 lblOption[idx]=new Label(dialogShel, SWT.NONE);
-				 lblOption[idx].setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,false,2,1));
+				 lblOption[idx]=new Label(compSettings, SWT.NONE);
+				 lblOption[idx].setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true,false,2,1));
 				 lblOption[idx].setText(options[j]);
 			 }
 			 else{
-				 txtOption[idx]=new Text(dialogShel, SWT.NONE);
+				 txtOption[idx]=new Text(compSettings, SWT.NONE);
 				 txtOption[idx].setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
 				 txtOption[idx].setText(options[j]);
 			 }
 		 }
-		 new Label(dialogShel, SWT.NONE);// add two empty labels for first two cells
-		 new Label(dialogShel, SWT.NONE);
+		 //new Label(dialogShel, SWT.NONE);// add two empty labels for first two cells
+		 //new Label(dialogShel, SWT.NONE);
 		 
 		 
-		 btnOK=new Button(dialogShel,SWT.NONE);
+		/* btnOK=new Button(dialogShel,SWT.NONE);
 		 btnOK.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,true,false,1,1));
 		 btnOK.setText("      OK       ");
 		 
 		 btnCancel=new Button(dialogShel,SWT.NONE);
 		 btnCancel.setLayoutData(new GridData(SWT.RIGHT,SWT.BOTTOM,false,false,1,1));
 		 btnCancel.setText("   Cancel   ");
-		 addListeners();
+		 addListeners();*/
 	}
 	
 	/**
 	 * Returns selected options 
 	 * @return options as array selected by the user
+	 * @throws TotalADSUIException 
 	 */
-	public String[] getOptions(){
+	public String[] getSettings() throws TotalADSUIException{
+		saveSelectedSettings();
 		return modelOptions;
+	}
+	/**
+	 * Saves settings in an array
+	 * @throws TotalADSUIException
+	 */
+	private void saveSelectedSettings() throws TotalADSUIException{
+		int optionCount=-1;
+		   for (int i=0; i<txtOption.length;i++){
+			   optionCount=optionCount+2;
+			   if (txtOption[i].getText().isEmpty())
+				   throw new TotalADSUIException("Empty fields are not allowed");
+			   else   
+				   modelOptions[optionCount]=txtOption[i].getText();
+		   }
 	}
 	/**
      * Adding listeners to buttons 
@@ -142,12 +158,8 @@ public class Settings {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
-				   int optionCount=-1;
-				   for (int i=0; i<txtOption.length;i++){
-					   optionCount=optionCount+2;
-					   modelOptions[optionCount]=txtOption[i].getText();
-				   }
-				
+				   
+					//saveSelectedSettings();
 					dialogShel.dispose();
 				}
 	 });

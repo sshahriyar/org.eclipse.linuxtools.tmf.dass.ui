@@ -279,7 +279,7 @@ public class ModelLoader {
 									settingsDialog= new Settings(model.getTestingOptions(database, Configuration.connection));
 						
 							settingsDialog.showForm();
-							algorithmSettings=settingsDialog.getOptions();
+							algorithmSettings=settingsDialog.getSettings();
 						
 					} catch (TotalADSUIException ex) {
 						msgBox.setMessage(ex.getMessage());

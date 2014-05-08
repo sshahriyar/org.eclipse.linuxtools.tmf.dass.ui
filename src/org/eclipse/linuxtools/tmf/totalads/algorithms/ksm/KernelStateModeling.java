@@ -64,7 +64,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     /*
      * Inner class to store trace states
      * Behaves likes a structure. There is no
-     * need of getter setters here bacause it is a 
+     * need of getter setters here because it is a 
      * private class and getter/setters adds unnecessary complexity
      */
     private class TraceStates{
@@ -96,69 +96,57 @@ public class KernelStateModeling implements IDetectionAlgorithm {
        
     	
     }
-   /**
-    * Creates a database and collections to store modeling information
-    * @param databaseName Database name
-    * @param connection Connection for database
-    * @throws TotalADSDBMSException 
+   /*
+    * (non-Javadoc)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
     */
     @Override
-    public void createDatabase(String databaseName, DBMS connection) throws  TotalADSDBMSException{
-    	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
-    	connection.createDatabase(databaseName, collectionNames);
-    	String []fields={TraceCollection.FS.toString(),TraceCollection.MM.toString(),TraceCollection.KL.toString()};
-	    connection.createAscendingUniquesIndexes(databaseName, TRACE_COLLECTION, fields);
-    }
-    /**
-     * Returns the settings of an algorithm as option name at index i and value at index i+1
-     * @return String[]
-     */
-    @Override
-    public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase){
-    		if (isNewDatabase)
-    			return trainingOptions;
-    		else{
-    			getSettingsFromDatabase(database, connection);// Settings are loaded in the trainingOptions array
-    			return trainingOptions;
-    		}
-    			
+    public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSUIException{
     	
-    }
-    /**
-     * Saves and validates training options
-     */
-    @Override
-    public void saveTrainingOptions(String [] options, String database, DBMS connection) 	throws TotalADSUIException, TotalADSDBMSException
-    {
-    	/*alpha=0.0;
-  	   
-  	  	if (options!=null){
+    	if (trainingSettings!=null){
   		  int trueCount=0;
-  		   for (int count=1; count<trainingOptions.length; count+=2)
-  			 if (options[count].equals("true")){
+  		  
+  		  for (int count=1; count<trainingOptions.length; count+=2)
+  			 if (trainingSettings[count].equals("true")){
   			  		trainingOptions[count]="true";
   			  		trueCount++;
   			  		if (trueCount>1){
   			  			trainingOptions[count]="false";
-  			  			throw new TotalADSUIException("Please, select only one option as true");
+  			  			throw new TotalADSUIException("Please, select only one option as true.");
   			  		}
   			 }
-  			 else  if (options[count].equals("false")) // if it is not true then it must be false
+  			 else  if (trainingSettings[count].equals("false")) // if it is not true then it must be false
   				    trainingOptions[count]="false";
   			 else
-  				 throw new TotalADSUIException("Please, type true or false only");
+  				 throw new TotalADSUIException("Please, type true or false only.");
 		      
   			if (trueCount==0)	  
-  		      throw new TotalADSUIException("Please, type true for one of the options");
-  	    }
-  		
-  	    // this will throw an exception if databse doesnot exist		
-  	  	saveSettingsInDatabase(alpha, database, connection);
-	 */
+  		      throw new TotalADSUIException("Please, type true for one of the options.");
+  		  	    			  	
+  	   }else
+  		 trainingSettings=trainingOptions;
+    	
+    	
+    	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
+    	connection.createDatabase(modelName, collectionNames);
+    	String []fields={TraceCollection.FS.toString(),TraceCollection.MM.toString(),TraceCollection.KL.toString()};
+	    connection.createAscendingUniquesIndexes(modelName, TRACE_COLLECTION, fields);
+	    saveSettingsInDatabase(alpha,modelName, connection);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
+     */
+    @Override
+    public String[] getTrainingOptions(){
+   			return trainingOptions;
   
     }
-    /**
-     * Saves and validates test settings in the database
+
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
      */
     @Override
     public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
@@ -168,16 +156,17 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		}catch (NumberFormatException ex){
 			throw new TotalADSUIException("Please, enter only decimal values.");
 		}
-    	// first read settings-- just one row
+    	// First read settings in a class level array-- just one row
     	getSettingsFromDatabase(database, connection);
-		// now updat to avoid any error
+		// Now update using that class level array, to avoid any error
     	saveSettingsInDatabase(alpha, database, connection);
     	
     }
 
-    /**
-     * Set the settings of an algorithm as option name at index i and value ate index i+1
-     */
+   /*
+    * (non-Javadoc)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+    */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
     	Double alphaVal=getSettingsFromDatabase(database, connection);
@@ -186,55 +175,24 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		testingOptions[1]=alpha.toString();
 		return testingOptions;
     }
-    /**
-     * Trains the model
-     * @throws TotalADSUIException
-     * @throws TotalADSDBMSException 
-     * @throws TotalADSReaderException 
+    
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!initialize){
-    		  alpha=0.0;
-	    	  
-	   
-	    	  if (options!=null){
-	    		  int trueCount=0;
-	    		  
-	    		  for (int count=1; count<trainingOptions.length; count+=2)
-	    			 if (options[count].equals("true")){
-	    			  		trainingOptions[count]="true";
-	    			  		trueCount++;
-	    			  		if (trueCount>1){
-	    			  			trainingOptions[count]="false";
-	    			  			throw new TotalADSUIException("Please, select only one option as true.");
-	    			  		}
-	    			 }
-	    			 else  if (options[count].equals("false")) // if it is not true then it must be false
-	    				    trainingOptions[count]="false";
-	    			 else
-	    				 throw new TotalADSUIException("Please, type true or false only.");
-	  		      
-	    			if (trueCount==0)	  
-	    		      throw new TotalADSUIException("Please, type true for one of the options.");
-	    		  	    			  	
-	    	  }
-	    	 if (!isNewDB) // if it is not a newDB  then make initialize true else wait till the processing of first trace
-	    		 initialize=true;
-	    	 this.intializeStates();
-	    	  
-	    }
+    		    alpha=getSettingsFromDatabase(database, connection);
+			    initialize=true;
+			    this.intializeStates();
+	     }
     				
     	TraceStates states= new TraceStates();
 		measureStateProbabilities(trace, states);
 		// if everything is fine up till now then carry on and insert it into the database
-		
-		 if (isNewDB && !initialize){
-		    		 createDatabase(database, connection);
-		    		 initialize=true;// make it true so we don't execute it again
-		  }
-	     saveTraceData(connection, database, states);
+		saveTraceData(connection, database, states);
 			
 		outStream.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
 		if (isLastTrace){
@@ -242,10 +200,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 			
 		}
     }
-	/**
-	 * Validates the model
-	 * @throws TotalADSDBMSException 
-	 * @throws TotalADSReaderException 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
     @Override
 	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
@@ -283,31 +240,19 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	
 	
 	
-	/**
-	 * Tests the model
-	 * @throws TotalADSReaderException 
-	 * @thows TotalADSUIException
-	 * @throws TotalADSDBMSException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, String[] options, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database,DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
 			Double alphaVal=getSettingsFromDatabase(database, connection);
-			if (options!=null ){
-				try {
-					alpha= Double.parseDouble(options[1]);
-				}catch (NumberFormatException ex){
-					throw new TotalADSUIException("Please, enter only decimal values.");
-				}
-				saveSettingsInDatabase(alpha, database, connection);
-			}
-			else{
-				
-				if(alphaVal!=null)
+			if(alphaVal!=null)
 					 alpha=alphaVal;
-			}
+			
 			this.intializeStates();
 			isTestStarted=true;
 		}
@@ -337,42 +282,55 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				
 	}
 	
-	/**
-	 * Returns textual result
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTotalAnomalyPercentage()
 	 */
+    @Override
 	public Double getTotalAnomalyPercentage(){
 
 		Double anomalousPercentage=(testAnomalyCount.doubleValue()/testTraceCount.doubleValue())*100;
 		return anomalousPercentage;
 		
 	}
-	/**
-	 * Returns the name
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getName()
 	 */
+	@Override
 	public String getName(){
-		return "Kernel State Modeling (KSM)";//:2.6.35-3.2.x
+		return "Kernel State Modeling (KSM)";
 	}
-	 /**
-     * Returns the acronym of the model
-     */
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getAcronym()
+	 */
+	@Override
     public String getAcronym(){
     	
     	return "KSM";
     }
 	
-	/**
-	 * Returns chart object
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#graphicalResults(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator)
 	 */
+    @Override
 	public org.swtchart.Chart graphicalResults(ITraceIterator traceIterator){
 		return null;
 	}
-	/** Returns an instance of KSM **/
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#createInstance()
+	 */
+	@Override
 	public IDetectionAlgorithm createInstance() {
 		return new KernelStateModeling();
 	}
 	
 	/** Self registration of the model with the modelFactory **/
-	
 	public static void registerModel() throws TotalADSUIException{
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		KernelStateModeling ksm=new KernelStateModeling();
@@ -387,7 +345,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	private Boolean evaluateKSM(Double alpha, TraceStates testStates, DBMS connection, String database){
 		Boolean isAnomalous=false;
 		Double maxFS=0.0;
-		//measureStateProbabilities(testTrace, testStates);
+		
 		String maxVal=connection.selectMax("FS", database, TRACE_COLLECTION);
 		
 		if(!maxVal.isEmpty())
@@ -475,14 +433,13 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		states.AC=round(states.AC/totalSysCalls,2);
 		states.UN=round(states.UN/totalSysCalls,2);
 	}
+	
 	/**
 	 * Map system call ids to state and count frequencies
 	 * @param syscallID
 	 * @param states
 	 */
 	private void mapStates(String syscall, TraceStates states){
-		//Integer sysID=Integer.parseInt(syscallID);
-		
 		  if (MM_CALLS_LIST.contains(syscall))
 			  states.MM++;// keep track of the last sys_entry function id and
 		  else if (FS_CALLS_LIST.contains(syscall))
@@ -537,16 +494,14 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				
 				// this also works
 				//connection.insert(states, database,TRACE_COLLECTION);
-		//} catch (IllegalAccessException ex) {
-			
-		//	throw new TotalADSDBMSException(ex.getMessage());
+
 		}catch (TotalADSDBMSException ex){
 			if (ex!=null && !ex.getMessage().contains("E11000 duplicate key"))// if it is a duplicate key error do nothing
 				throw new TotalADSDBMSException(ex);
 		}
 	}
 	/**
-	 * Saves alpha in a database
+	 * Saves settings in a database
 	 * @param alpha
 	 * @param database
 	 * @param connection
@@ -558,25 +513,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	private void saveSettingsInDatabase(Double alpha, String database, DBMS connection) 
 			throws  TotalADSDBMSException {
 		 String settingsKey ="KSM_SETTINGS";
-		//Both methods work 
-		 // Method 1
-		/* class ReplacementFields{
-			Double alpha;
-			String updateTime;
-		  }
-		  class SearchFields{
-			  String _id;
-		  }
-		  
-		  SearchFields searchFields=new SearchFields();
-		  ReplacementFields replacementFields=new ReplacementFields();
-		  searchFields._id=settingsKey;
-		  replacementFields.alpha=alpha;
-		  replacementFields.updateTime= new SimpleDateFormat("ddMMyyyy_HHmmss").format(Calendar.getInstance().getTime());
-		  
-		  connection.replaceFields(searchFields, replacementFields, database, SETTINGS_COLLECTION);
-		*/
-		
+			
 		 // Method 2
 		  
 		  JsonObject jsonKey=new JsonObject();
@@ -604,7 +541,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * Gets alpha and other settings from the database. alpha is returned and other settings are
+	 * Gets alpha and other settings from the database. Alpha is returned and other settings are
 	 * put in a class level string array trainingOptions
 	 * @param database
 	 * @param connection
@@ -631,10 +568,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		
 		return alphaValue;
 	}
+	
 	/**
 	 * Initializer of system calls to state mapper
 	 */
-	 
 	private void  intializeStates(){
 		// Kerenel 2.6.32 Ubuntu 10.04 x86 64 and 32 both
 		/*
@@ -749,6 +686,30 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				 "sys_keyctl", "sys_request_key", "sys_add_key");
 		  }
 	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getDescription()
+	 */
+	@Override
+	public String getDescription(){
+	 return " KSM focuses on detection of anomalies by transforming system calls into states of kernel modules. "
+	 		+ "A system call can be classified into eight different states: file system state, kernel state (KL), "
+	 		+ " memory management state (MM), networking state (NT), inter process communication state (IPC), security state (SC), "
+	 		+ "  architecture state (AC) and (a rare) unknown state (UN). KSM then identifies anomalies by comparing the probabilities of occurrences of states "
+	 		+ "in normal and anomalous traces. During the training and validation phases, KSM learns the probabilities"
+	 		+ " of states from traces, adjust a decision threshold alpha, and use this information to evaluate states of"
+	 		+ " traces in the testing phase. State representation facilitates in reducing computation complexity and "
+	 		+ "allows system wide anomaly detection with a lesser false positive rate than other techniques";
+	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#isOnlineLearningSupported()
+	 */
+	@Override
+	public boolean isOnlineLearningSupported() {
+		
+		return true;
+	}
 
 }

@@ -23,19 +23,18 @@ public interface IDetectionAlgorithm {
 
 /**
  * Creates a database where an algorithm would store its model
- * @param databaseName Name of the database
+ * @param modelName Name of the database
  * @param connection An object of DBMS
+ * @param trainingSettings Training Settings
  * @throws TotalADSDBMSException 
+ * @throws TotalADSUIException TODO
  */
-public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException; 
+public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSUIException; 
 /**
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
- * @param connection Database connection object
- * @param database database name
- * @param isNewDatabase True if it is a new databse else it is false
  * @return Array of Strings as options/settings
  */
-public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase);
+public String[] getTrainingOptions();
 /**
  * Validates the training options and saves them into the database. On error throws exception
  * @param options Settings array
@@ -43,9 +42,9 @@ public String[] getTrainingOptions(DBMS connection, String database, Boolean isN
  * @param connection Database connection object
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException TODO
- */
+ 
 public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException;
-
+*/
 
 /**
  * Returns the testing options/settings of an algorithm as option name at index i and value ate index i+1.
@@ -75,14 +74,12 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @param database Database/mode name
  * @param connection Connection object
  * @param outStream Use this object to display the events during processing
- * @param options Value of the options/settings if set
- * @param isNewDB True if the database is a new database; otherwise false
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
 
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, String[] options, Boolean isNewDB) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 
 /**
  * This function is called after the train function has finished processing and has built a model.
@@ -103,14 +100,13 @@ public  void validate (ITraceIterator trace, String database, DBMS connection, B
  * @param trace Trace iterator to a single trace
  * @param database Database name
  * @param connection DBMS object
- * @param options Testing Options/Settings if changed by a user are passed here
  * @param outputStream Use this object to display the events during processing
  * @return An object of type Result containing the evaluation information of a trace
  * @throws TotalADSUIException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, String[] options, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
+public Results test (ITraceIterator trace, String database, DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 
@@ -125,8 +121,12 @@ public IDetectionAlgorithm createInstance();
 ///////////////////////////////////////////////////////////////////////////////////
 /** Gets the name of the model**/
 public String getName();
-
+/** Gets the description of an algorithm*/
+public String getDescription();
 /** Returns the acronym of the model; should only be three to four characters long. This acronym is very important
  * as it is used in the name of the database/model and facilitates in finding out which algorithm represents the model */
 public String getAcronym();
+/** Returns true if online learning is supported. If false is returned it would mean the algorithm can only
+ * train in batch mode and live training is not supported */
+public boolean isOnlineLearningSupported();
 }

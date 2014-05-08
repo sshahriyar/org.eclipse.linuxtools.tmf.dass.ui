@@ -37,7 +37,7 @@ import com.mongodb.DBObject;
 
 
 /**
- * This class implements the Sliding Window algorithm for host-based anomaly detection
+ * This class implements the Sliding Window algorithm for the host-based anomaly detection.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
  * 
  */
@@ -62,6 +62,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	private int maxWinLimit=25;
 	private NameToIDMapper nameToID;
 	private int testNameToIDSize; 
+	
 	/**
 	 * Constructor
 	 **/
@@ -97,7 +98,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			}else
 				treeExists=false;
 			
-			// Get the maxwin
+			// Get the maxWin and maxHam
 			cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
 				while (cursor.hasNext()){
@@ -110,55 +111,22 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
 	}
 	
-	/**
-     * Returns the settings of an algorithm as option name at index i and value at index i+1
-     * @return String[] Array of String
-     */
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
+	 */
     @Override
-    public String[] getTrainingOptions(DBMS connection, String database, Boolean isNewDatabase){
-    	   if (isNewDatabase)
-    		  return trainingOptions;
-    	   else{
-    		   loadSetings(database, connection);
-    		   String []options={"Max Hamming Distance",maxHamDis.toString()};
-    		   return options;
-    	   }
-    		   
-    	
+    public String[] getTrainingOptions(){
+    	   
+    	 return trainingOptions;
+    	     	
     }
-    /**
-     * Saves and validate training options
-     */
-    @Override
-    public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException
-    {
-    	/*  try{
-    		  if (treeExists==true)
-    			  warningMessage="Warning: window size was not changed because the model (database) already exists.";
-    		  else if (options[0].equals(this.trainingOptions[0]))
-	    		  	maxWin=Integer.parseInt(options[1]);// on error exception will be thrown automatically
-    		  
-    		  //check for hamming distance
-    		  if (options[2].equals(this.trainingOptions[2]) )
-	    		  	maxHamDis=Integer.parseInt(options[3]);// on error exception will be thrown automatically
-		  
-		  }catch (Exception ex){// Capturing exception to send a UI error
-			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
-		  }
-		  
-		  if (maxWin > maxWinLimit)
-			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
+  
 
-		// Update the settings collection for maxwin and maxhamm
-		  // this will throw excepton if databse doesnot exist
-	     saveSettings(database, connection);*/
-	     
-	    	  
-    }
-
-    /**
-     * saves test settings
-     */
+   /*
+    * (non-Javadoc)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+    */
     @Override
     public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSUIException, TotalADSDBMSException{
     	 Integer theMaxHamDis=0;
@@ -174,14 +142,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
   		    maxHamDis=theMaxHamDis;// change the maxHam
   	        saveSettings(database, connection); // save maxHamm
   	     }
+    	
     	  
     }
 
-    /**
-     * 
-     * Set the settings of an algorithm as option name at index i and value ate index i+1
-     * @return String[] Array of String
-     *
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
      */
     @Override
     public String[] getTestingOptions(String database, DBMS connection){
@@ -191,58 +158,49 @@ public class SlidingWindow implements IDetectionAlgorithm {
     	
     	
     }
-	/**
-	 * Creates a database to store models
+    
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
 	 */
 	@Override
-	public void createDatabase(String databaseName, DBMS connection) throws TotalADSDBMSException{
+	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSUIException{
+		 
+		if (trainingSettings!=null){
+	   		  try{
+		    		  for (int i=0; i<trainingSettings.length;i++){
+		    			   if (trainingSettings[i].equals(this.trainingOptions[0]))
+				    		  	maxWin=Integer.parseInt(trainingSettings[i+1]);// on error exception will be thrown automatically
+		    			   else	 if (trainingSettings[i].equals(this.trainingOptions[2]) )
+				    		  	maxHamDis=Integer.parseInt(trainingSettings[i+1]);// on error exception will be thrown automatically
+		    		  }
+	   		  }catch (Exception ex){// Capturing exception to send a UI error
+	   			  throw new TotalADSUIException("Please, enter integer numbers only in settings' fileds.");
+	   		  }
+	   		  
+	   		  if (maxWin > maxWinLimit)
+	   			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
+   	    }
+		
+		
 		String []collectionNames={TraceCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString(),
 								  NameToIDCollection.COLLECTION_NAME.toString()};
-		connection.createDatabase(databaseName, collectionNames);
+		connection.createDatabase(modelName, collectionNames);
+		saveSettings(modelName, connection);
 	}
 	
 	
-	/**
-	 * 
-	 * Trains the model by overriding a method from the interface {@link IDetectionAlgorithm}
-	 * 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream, 
-			String[] options, Boolean isNewDB)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream)  throws TotalADSUIException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
 			  validationAnomalies=0;
-			  
-			  if (!isNewDB)
-			     initialize(connection,database);
-	    	  // If the option name is the same and database has no model then take the maxwin from user
-	    	  // else maxwin aleady exists in the database. We cannot change it
-	    	  if ( options!=null){
-	    		  try{
-		    		
-		    		  for (int i=0; i<options.length;i++){
-		    			  
-		    			   if (options[i].equals(this.trainingOptions[0]))
-				    		  	maxWin=Integer.parseInt(options[i+1]);// on error exception will be thrown automatically
-		    			   else	 if (options[i].equals(this.trainingOptions[2]) )
-				    		  	maxHamDis=Integer.parseInt(options[i+1]);// on error exception will be thrown automatically
-		    		  }
-	    		  }catch (Exception ex){// Capturing exception to send a UI error
-	    			  throw new TotalADSUIException("Please, enter integer numbers only in options.");
-	    		  }
-	    		  
-	    		  if (maxWin > maxWinLimit)
-	    			   throw new TotalADSUIException ("Sequence size too large; select "+maxWinLimit+" or lesser.");
-	    	  }
-	    		
-	    	  
-		      // Now create database 
-		      if (isNewDB){
-		     		  createDatabase(database, connection);
-		     		 // initialize(connection,database);
-		      }
+     	      initialize(connection,database);
 		      intialize=true;
 		      nameToID.loadMap(connection, database);
 	    		    	  
@@ -286,10 +244,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
 	}
 
-	/**
-	 * 
-	 * Validates the model by overriding a method from the interface {@link IDetectionAlgorithm}
-	 *
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
 	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
@@ -303,18 +260,12 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     if (result.getAnomaly()){
 	    	 String details=result.getDetails().toString();
 	    	 outStream.addOutputEvent(details);
-	    	// Integer hamming=Integer.parseInt(details.split("::")[1]);
-	    	 //hammAnomalies[hamming]++;
 	    	 validationAnomalies++;
 	    	 
 	     }
 	    
 	     if (isLastTrace){
 	    	 
-	    	 //for (int hamCount=1; hamCount < hammAnomalies.length; hamCount++){
-	    	//	    console.printTextLn("Anomalies at hamming "+ hamCount + ":" +hammAnomalies[hamCount]);
-	    	//	    totalAnomalies+=hammAnomalies[hamCount];
-	    	// }
 	    	outStream.addOutputEvent("Total traces in validation folder: "+validationTraceCount); 
 	    	Double anomalyPrcentage=(validationAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
 	    	outStream.addOutputEvent("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
@@ -333,25 +284,19 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
     
     
-	/**
-	 * Tests the model by overriding a method from the interface {@link IDetectionAlgorithm}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection, String[] options, IAlgorithmOutStream outputStream) 
+	public Results test (ITraceIterator trace,  String database, DBMS connection, IAlgorithmOutStream outputStream) 
 			throws TotalADSUIException, TotalADSDBMSException, TotalADSReaderException {
 		  
 	       if (!isTestStarted){
 			  testTraceCount=0;
 			  testAnomalies=0;
 	    	  initialize(connection, database); // get the trees from db
-			  if (options!=null && options[0].equals(this.testingOptions[0]) ){
-	    		  	try {
-	    		  		maxHamDis=Integer.parseInt(options[1]);
-	    		  	}catch (NumberFormatException ex){
-	    		  		throw new TotalADSUIException("Please, enter an integer value.");
-	    		  	}
-	    	        saveSettings(database, connection); // save maxHamm
-	    	   }
+			
 			  isTestStarted=true;
 			  nameToID.loadMap(connection, database);
 			  testNameToIDSize=nameToID.getSize();
@@ -454,6 +399,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		    return results;  
 
 		}
+	 
+	 
 	 /**
 	  * Adds additional information to the reuslts
 	  * @param largestHam
@@ -501,8 +448,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @throws TotalADSDBMSException 
 	 */
 	private void saveSettings(String database,DBMS connection) throws TotalADSDBMSException {
-		
-	  
+		  
 		  String settingsKey ="SWN_SETTINGS";
 		 
 		  JsonObject jsonKey=new JsonObject();
@@ -533,8 +479,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			cursor.close();
 		}
 	}
-	/** 
-	 * Text Results, an overriden method
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTotalAnomalyPercentage()
 	 */
 	@Override
 	public Double getTotalAnomalyPercentage() {
@@ -542,8 +489,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		return anomalousPercentage;
 	}
 
-	/* 
-	 * graphicalResults, an overriden method
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#graphicalResults(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator)
 	 */
 	@Override
 	public Chart graphicalResults(ITraceIterator traceIterator) {
@@ -551,8 +499,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		return null;
 	}
 
-	/* 
-	 * Creates Instance, an overriden method
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#createInstance()
 	 */
 	@Override
 	public IDetectionAlgorithm createInstance() {
@@ -560,8 +509,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		return new SlidingWindow();
 	}
 
-	/** 
-	 * Returns the name
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getName()
 	 */
 	@Override
 	public String getName() {
@@ -569,13 +519,16 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		return "Sliding Window (SWN)";
 	}
 	
-	 /**
-     * Returns the acronym of the model
-     */
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getAcronym()
+	 */
+	@Override
     public String getAcronym(){
     	
     	return "SWN";
     }
+    
 	/**
 	 *  Self registration of the model with the modelFactory 
 	 */
@@ -583,6 +536,33 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		AlgorithmFactory modelFactory= AlgorithmFactory.getInstance();
 		SlidingWindow sldWin=new SlidingWindow();
 		modelFactory.registerModelWithFactory( AlgorithmTypes.ANOMALY,  sldWin);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getDescription()
+	 */
+	@Override 
+	public String getDescription(){
+		return "SWN works by extracting sequences of length ‘n’ from a trace by sliding a window one event "
+				+ "(e.g., system call) at a time. For example, for a trace having system calls “3, 6, 195, 195”, "
+				+ "two sequences “3, 6, 195” and “6, 195, 195” of length 3 can be extracted. SWN extracts sequences "
+				+ "from normal traces and then compares them against the sequences in an unknown trace. If a new "
+				+ "sequence is found in an unknown trace then it is considers it as anomalous. The Hamming distance "
+				+ "between sequences can be used to adjust the decision threshold to reduce false alarms; e.g., a "
+				+ "sequence “3, 5, 195” is anomalous for above sequences but the mismatch occurs only at one "
+				+ "position—i.e., a hamming distance difference of only one. If the minimum Hamming distance matching "
+				+ "criterion is set to more than one, then it is a normal sequence. ";
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#isOnlineLearningSupported()
+	 */
+	@Override
+	public boolean isOnlineLearningSupported() {
+		
+		return true;
 	}
 	
 	

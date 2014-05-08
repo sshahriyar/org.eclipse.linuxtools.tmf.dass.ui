@@ -98,7 +98,7 @@ public class TestSettingsHandler implements IHandler {
 					settingsDialog= new Settings(algorithm.getTestingOptions(databases, Configuration.connection));
 			
 				settingsDialog.showForm();
-				String []algorithmSettings=settingsDialog.getOptions();
+				String []algorithmSettings=settingsDialog.getSettings();
 				//models.put(databases[0], algorithmSettings);
 				if (algorithmSettings!=null)
 					algorithm.saveTestingOptions(algorithmSettings, databases, Configuration.connection);

@@ -204,7 +204,7 @@ public class BackgroundTesting implements Runnable{
 											 
 						ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 				 					
-				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,null,outStreamAlg);
+				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStreamAlg);
 				 		modelResults.put(database[modelCnt],results);
 				 	
 				 		 // Third, print summary
