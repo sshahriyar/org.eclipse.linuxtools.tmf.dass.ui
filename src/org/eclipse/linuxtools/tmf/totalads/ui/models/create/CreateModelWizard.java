@@ -19,6 +19,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * This class creates a wizard dialog box for the creation of a new model
@@ -89,7 +90,7 @@ public class CreateModelWizard extends Wizard {
 		String modelName=modelPage.gettheModel();
 		String []settings=pageAlgoSettings.getSettingsSelectedByTheUser();
 		
-		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
+		MessageBox msgBoxErr= new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
 		
 		

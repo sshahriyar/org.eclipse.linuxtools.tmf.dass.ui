@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
@@ -60,15 +61,15 @@ public class TotalADS  {
 	public TotalADS(Composite parent, int style) {
 		
 	  try{
-		    	Configuration.connection=new IDBMS();
+		    	Configuration.connection=DBMSFactory.INSTANCE.getDBMSInstance();
 			//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
-				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
+			//	String error=Configuration.connection.connect(Configuration.host, Configuration.port);
 		  	
-			if (!error.isEmpty()){
-					MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-				    msg.setMessage(error);
-				    msg.open();
-			}	    
+			//if (!error.isEmpty()){
+			//		MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+			//	    msg.setMessage(error);
+			//	    msg.open();
+			//}	    
 		  
 			
 			

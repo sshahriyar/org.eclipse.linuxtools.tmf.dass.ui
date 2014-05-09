@@ -3,6 +3,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models.settings;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.SettingsForm;
@@ -45,7 +46,7 @@ public class TestSettingsDialog extends TitleAreaDialog {
 	  public void create() {
 	    super.create();
 	    setTitle("Adjust SettingsForm for Testing");
-	   // setMessage("This is a TitleAreaDialog", IMessageProvider.INFORMATION);
+	   
 	  }
 	
 	/*
@@ -63,6 +64,7 @@ public class TestSettingsDialog extends TitleAreaDialog {
 		} catch (TotalADSGeneralException e) {
 			msgErr.setMessage(e.getMessage());
 			msgErr.open();
+			cancelPressed();
 		}
 		
 		return compSuper;
@@ -83,9 +85,11 @@ public class TestSettingsDialog extends TitleAreaDialog {
 	@Override
 	  protected void okPressed() {
 	     try {
-			settingsForAlgorithm= settingsForm.getSettings();
-			algorithm.saveTestingOptions(settingsForAlgorithm, modelName, Configuration.connection);
-		} catch (TotalADSGeneralException ex) {
+			
+	    	settingsForAlgorithm= settingsForm.getSettings();
+			algorithm.saveTestingOptions(settingsForAlgorithm, modelName, DBMSFactory.INSTANCE.getDBMSInstance());
+		
+	     } catch (TotalADSGeneralException ex) {
 			setErrorMessage(ex.getMessage());
 			return;
 		} catch (TotalADSDBMSException ex) {

@@ -18,14 +18,12 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.window.Window;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
-import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
@@ -34,7 +32,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * This class implements the edit command. It allows to edit settings for a selected model in the {@link DataModelsView}.
+ * This class implements the settings command. It allows to edit settings for a selected model in the 
+ * {@link DataModelsView}.
  * @author <p> Syed Shariyar Murtaza justsshary@htomail.com </p>
  *
  */
@@ -88,11 +87,14 @@ public class TestSettingsHandler implements IHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-			MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
+			
+		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 					SWT.ICON_ERROR);
 			try {
 				
 				
+				
+				// Checking for the proper selection
 				if (selectedModels.size() >1){
 					
 					msgBoxErr.setMessage("Please select only one model to edit settings");
@@ -106,15 +108,24 @@ public class TestSettingsHandler implements IHandler {
 					return null;
 				}
 				
-				String model=selectedModels.iterator().next();	// get the only selected model
-				IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, Configuration.connection);
-				String []settings=algorithm.getTestingOptions(model,Configuration.connection );
-				
-				settingsDialog= new TestSettingsDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-														, algorithm, model, settings);
-			
-				settingsDialog.create();
-				settingsDialog.open();
+				 
+				IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
+				//Open the settings dialog
+				if (connection.isConnected()){
+						String model=selectedModels.iterator().next();	// get the only selected model
+						IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, Configuration.connection);
+						String []settings=algorithm.getTestingOptions(model,connection );
+						
+						settingsDialog= new TestSettingsDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+																, algorithm, model, settings);
+					
+						settingsDialog.create();
+						settingsDialog.open();
+				}else{
+					msgBoxErr.setMessage("No databse connection exists...");
+					msgBoxErr.open();
+				}
+					
 		
 			
 		} catch (TotalADSGeneralException ex) {

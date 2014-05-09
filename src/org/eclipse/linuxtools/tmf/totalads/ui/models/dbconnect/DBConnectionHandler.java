@@ -29,6 +29,7 @@ public class DBConnectionHandler implements IHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 			      new DBConnectWizard());
+	
 		if (wizardDialog.open()==Window.OK){
 			MessageBox msgBox= new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 					SWT.ICON_WORKING);

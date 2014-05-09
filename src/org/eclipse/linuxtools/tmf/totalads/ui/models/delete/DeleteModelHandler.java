@@ -14,16 +14,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
@@ -57,50 +54,74 @@ public class DeleteModelHandler implements IHandler {
 		});
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#addHandlerListener(org.eclipse.core.commands.IHandlerListener)
+	 */
 	@Override
 	public void addHandlerListener(IHandlerListener handlerListener) {
-		// TODO 
+
 
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#dispose()
+	 */
 	@Override
 	public void dispose() {
-		// TODO 
+
 
 	}
-	///
-	//Execute function
-	//
+	/*
+	 * This function deletes a model from the database
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
+	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		
 		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
 		MessageBox msgBoxYesNo= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_INFORMATION|SWT.YES|SWT.NO);
 	
 		try{
-			 
+			// checking if a model is selected 
 			if (selectedModels.size() <=0){
 				msgBoxErr.setMessage("Please select a model first");
 				msgBoxErr.open();
 				return null;
 			}
-			
-				
+			//
+			//Get confirmation
+			//
 			Iterator<String> it=selectedModels.iterator();
 			String message="Do you really want to delete ";
-			while (it.hasNext())
-				   message+=it.next()+", ";
-			message=message.substring (0,message.lastIndexOf(","));
-			message+="?";
-			
+			int count=1;
+			while (it.hasNext()){
+				 if (count<selectedModels.size())
+				      message+=it.next()+", ";
+				 else
+					 message+="and "+it.next()+"?";
+				 count++;
+			}
+					
 			msgBoxYesNo.setMessage(message);
 			
 			if (msgBoxYesNo.open()==SWT.YES){
-				it=selectedModels.iterator();
-				while (it.hasNext())
-					Configuration.connection.deleteDatabase(it.next());
+			   //Delete models now
+				IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
+				
+				if (connection.isConnected()){
+					it=selectedModels.iterator();
+					while (it.hasNext())
+						connection.deleteDatabase(it.next());
+				}else{ //if the database is not connected
+					msgBoxErr.setMessage("No databse connection exists.....");
+					msgBoxErr.open();
+				}
+					
 			}
 			
 		} catch (Exception ex) {
@@ -114,22 +135,34 @@ public class DeleteModelHandler implements IHandler {
 	
 	    return null;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#isEnabled()
+	 */
 	@Override
 	public boolean isEnabled() {
 		
 		return true;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#isHandled()
+	 */
 	@Override
 	public boolean isHandled() {
 		
 		return true;
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.core.commands.IHandler#removeHandlerListener(org.eclipse.core.commands.IHandlerListener)
+	 */
 	@Override
 	public void removeHandlerListener(IHandlerListener handlerListener) {
-		// TODO 
+		
 
 	}
 

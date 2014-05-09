@@ -20,7 +20,7 @@ import com.mongodb.DBCursor;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public interface IDBMS  {
+public interface IDBMS extends IDBMSSubject {
 	
 	
 	/**

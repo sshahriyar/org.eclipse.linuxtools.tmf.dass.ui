@@ -22,7 +22,7 @@ import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
@@ -169,26 +169,19 @@ public class DiagnosisView extends TmfView {
 		 */
 		private void init(){
 			try{
-			    Configuration.connection=new IDBMS();
-				//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
-				//String error=Configuration.connection.connect(Configuration.host, Configuration.port);
-			
-			//if (!error.isEmpty()){
-		//			MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-			//	    msg.setMessage(error);
-			//	    msg.open();
-			//}	    
-			
-			algFactory= AlgorithmFactory.getInstance();
-			algFactory.initialize();
-			
-			trcTypeFactory=TraceTypeFactory.getInstance();
-			trcTypeFactory.initialize();
-			// Initialise the logger
-			handler=null;
-			handler= new  FileHandler("totaladslog.xml");
-	        Logger.getLogger("").addHandler(handler);	
+			    Configuration.connection=DBMSFactory.INSTANCE.getDBMSInstance();
+				    
 				
+				algFactory= AlgorithmFactory.getInstance();
+				algFactory.initialize();
+				
+				trcTypeFactory=TraceTypeFactory.getInstance();
+				trcTypeFactory.initialize();
+				// Initialise the logger
+				handler=null;
+				handler= new  FileHandler("totaladslog.xml");
+		        Logger.getLogger("").addHandler(handler);	
+					
 			} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
 				
 			   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
@@ -205,7 +198,8 @@ public class DiagnosisView extends TmfView {
 	@Override
 	public void dispose(){
 		super.dispose();
-		Configuration.connection.closeConnection();
+		if (Configuration.connection.isConnected())
+			Configuration.connection.closeConnection();
 		// This code deinitializes the  Factory instance. It was necessary because
 		// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
 		// deinitialized on previous close of the plugin. 

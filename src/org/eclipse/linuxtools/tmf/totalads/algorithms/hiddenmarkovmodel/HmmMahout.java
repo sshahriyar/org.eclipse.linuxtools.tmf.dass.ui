@@ -315,7 +315,7 @@ class HmmMahout {
 	}
 	
 	/**
-	 * Used for verification/testing of the model
+	 * Prints the model
 	 * @return
 	 */
 	public String toString(){
@@ -326,26 +326,5 @@ class HmmMahout {
 				 		+" \n Initial Probabilities \n "+hmm.getInitialProbabilities();
 		
 	}
-	/**
-	 * for testing
-	 * @param args
-	 */
-	public static void main (String args[]){
 	
-		
-		HmmMahout hmm=new HmmMahout();
-		
-		IDBMS conn=new IDBMS();
-		conn.connect(Configuration.host, Configuration.port);
-		try{
-		
-			//hmm.loadHmm(conn, "NEWEST_HMM");
-		} catch (Exception ex){
-			ex.printStackTrace();
-		}
-		hmm.initializeHMM(20, 5);
-		Integer a[]={1,2,10,8,7,6,7,8,9,0,19,18};
-		System.out.println(hmm.observationLikelihood(a));
-		//System.out.println(gson.toJson(hmm));
-	}
 }

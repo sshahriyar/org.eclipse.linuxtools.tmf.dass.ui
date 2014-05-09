@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -63,32 +64,21 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 					
 			TableViewerColumn modelName = new TableViewerColumn(viewer, SWT.NONE);
 			modelName.getColumn().setWidth(100);
-			modelName.getColumn().setText("Model Name");
-			modelName.setLabelProvider(new ColumnLabelProvider() {
-				@Override
-				public String getText(Object element) {
-					DataModel model = (DataModel) element;
-					return model.getId();
-				}
-				@Override
-				public Image getImage(Object element) {
-				  return null;
-				}
-			});
-						
-						
-			viewer.setContentProvider(new DataModelTableContentProvider());			
-			viewer.setInput(DataModels.getInstance());
+			modelName.getColumn().setText("Models");
 			
-			// Event handler for check ticks in the Table
+			viewer.setLabelProvider(new DataModelLabelProvider());
+			viewer.setContentProvider(new DataModelTableContentProvider());			
+			viewer.setInput(DBMSFactory.INSTANCE.getDBMSInstance());
+			
+			// Event handler for check marks (selection) in the Table
 			viewer.addCheckStateListener(new ICheckStateListener() {
 				
 				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					
 					MessageBox msgBox=new MessageBox(Display.getCurrent().getActiveShell(), SWT.ERROR);
-					DataModel model=(DataModel)event.getElement();
-					String modelName=model.getId();
+					
+					String modelName=(String)event.getElement();
 					String []modelAcronym=modelName.split("_");
 					
 					if (event.getChecked()){
@@ -122,7 +112,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 					
 					setSelection(new StructuredSelection(selection.clone()));
 				}
-			});
+			});// end of event handler
 			
 		}
 	}

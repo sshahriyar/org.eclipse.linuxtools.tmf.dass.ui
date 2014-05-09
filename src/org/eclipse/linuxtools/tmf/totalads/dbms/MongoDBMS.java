@@ -49,7 +49,7 @@ import com.mongodb.util.JSON;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-class MongoDBMS implements IDBMSSubject, IDBMS {
+class MongoDBMS implements  IDBMS {
 	
 	private MongoClient mongoClient;
 	private Boolean isConnected=false;

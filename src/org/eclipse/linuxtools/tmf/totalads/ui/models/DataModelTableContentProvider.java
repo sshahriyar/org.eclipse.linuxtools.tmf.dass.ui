@@ -16,7 +16,7 @@ public class DataModelTableContentProvider
 	implements IStructuredContentProvider, IDBMSObserver{
 
 	private Viewer viewer = null;
-	private DataModels model = null;
+	private IDBMS model = null;
 		
 	@Override
 	public void dispose() {
@@ -29,28 +29,28 @@ public class DataModelTableContentProvider
 		this.viewer = viewer;
 	    if(oldInput != null) {
 	    	IDBMS old = (IDBMS) oldInput;
-	        old..removeModelsObserver(this);
+	        old.removeObserver(this);
 	    }
 	    if(newInput != null) {
-	    	model = (DataModels) newInput;
-	    	model.addModelsObserver(this);
+	    	model = (IDBMS) newInput;
+	    	model.addObserver(this);
 	    }
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		System.out.println("inputElement:"+inputElement);
-		if(model!=null){
-			return model.listModels().toArray();
-		}
-		return null;
+		model = (IDBMS) inputElement;
+		
+		if(model.isConnected())
+			return model.getDatabaseList().toArray();
+		else
+			return new String[] {"No Connection"};
 	}
 
-	@Override
-	public void modelsUpdated() {
-		if(viewer!=null)
-			this.viewer.refresh();
-	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver#update()
+	 */
 
 	@Override
 	public void update() {
