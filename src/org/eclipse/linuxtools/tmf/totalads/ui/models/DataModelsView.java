@@ -78,7 +78,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 						
 						
 			viewer.setContentProvider(new DataModelTableContentProvider());			
-			viewer.setInput(TotalAdsState.INSTANCE.getModels());
+			viewer.setInput(DataModels.getInstance());
 			
 			// Event handler for check ticks in the Table
 			viewer.addCheckStateListener(new ICheckStateListener() {

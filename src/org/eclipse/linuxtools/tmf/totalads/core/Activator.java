@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.core;
 
-import org.eclipse.linuxtools.tmf.totalads.ui.models.TotalAdsState;
+//import org.eclipse.linuxtools.tmf.totalads.ui.models.TotalAdsState;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -37,7 +37,7 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		TotalAdsState.INSTANCE.init();
+		//TotalAdsState.INSTANCE.init();
 	}
 
 	/*

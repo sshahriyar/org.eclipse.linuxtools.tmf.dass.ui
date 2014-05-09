@@ -5,7 +5,7 @@
 //import java.util.*;
 //
 //import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-//import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+//import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 //import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 //import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //
@@ -103,13 +103,13 @@
 //	 * Validates settings and saves them into the database after creating a new databse if requried
 //	 * @param settings SettingsForm array
 //	 * @param database Database name
-//	 * @param connection DBMS object
+//	 * @param connection IDBMS object
 //	 * @param isNewSettings True if settings are inserted first time, else false if existing fields are updated
 //	 * @param isNewDBTrue if new database has to be created 
 //	 * @throws TotalADSGeneralException
 //	 * @throws TotalADSDBMSException
 //	 */
-//	public void verifySaveSettingsCreateDb(String []settings, String database, DBMS connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSGeneralException, TotalADSDBMSException{
+//	public void verifySaveSettingsCreateDb(String []settings, String database, IDBMS connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSGeneralException, TotalADSDBMSException{
 //	
 //		JsonObject settingObject=new JsonObject();
 //		for (int i=0; i<settings.length;i+=2){ 
@@ -174,7 +174,7 @@
 //	 * @param connection
 //	 * @return SettingsForm as an array of String 
 //	 */
-//	public String[] loadSettings(String database, DBMS connection){
+//	public String[] loadSettings(String database, IDBMS connection){
 //		String [] settings=null;
 //		DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 //		if (cursor!=null){
@@ -261,7 +261,7 @@
 //	 * @param connection
 //	 * @param database
 //	 */
-//	public void loadHmm(DBMS connection, String database){
+//	public void loadHmm(IDBMS connection, String database){
 //	   
 //		DBCursor cursor=connection.selectAll(database, HmmModelCollection.COLLECTION_NAME.toString());
 //		if (cursor!=null){
@@ -307,7 +307,7 @@
 //	 * @param connection
 //	 * @throws TotalADSDBMSException
 //	 */
-//	public void saveHMM(String database, DBMS connection) throws TotalADSDBMSException{
+//	public void saveHMM(String database, IDBMS connection) throws TotalADSDBMSException{
 //		
 //		int states= hmm.nbStates();
 //		
@@ -426,7 +426,7 @@
 //		
 //	
 //		
-//		DBMS conn=new DBMS();
+//		IDBMS conn=new IDBMS();
 //		conn.connect(Configuration.host, Configuration.port);
 //		try {
 //			myHMM.saveHMM("TATA_HMM",conn);
@@ -434,7 +434,7 @@
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}*/
-//		DBMS conn=new DBMS();
+//		IDBMS conn=new IDBMS();
 //		conn.connect(Configuration.host, Configuration.port);
 //		HmmJahmm myHMM=new HmmJahmm();
 //		myHMM.loadHmm(conn, "TATA_HMM");

@@ -22,7 +22,7 @@ import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
@@ -169,7 +169,7 @@ public class DiagnosisView extends TmfView {
 		 */
 		private void init(){
 			try{
-			    Configuration.connection=new DBMS();
+			    Configuration.connection=new IDBMS();
 				//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
 				//String error=Configuration.connection.connect(Configuration.host, Configuration.port);
 			

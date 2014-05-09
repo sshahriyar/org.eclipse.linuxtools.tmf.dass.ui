@@ -18,7 +18,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -96,11 +96,11 @@ public class BackgroundTesting implements Runnable{
 				else
 					msg=ex.getMessage();
 			}
-			catch(TotalADSDBMSException ex){// handle DBMS exceptions here
+			catch(TotalADSDBMSException ex){// handle IDBMS exceptions here
 				if (ex.getMessage()==null)
-					msg="DBMS error: see log.";	
+					msg="IDBMS error: see log.";	
 				else
-					msg="DBMS error: "+ex.getMessage();
+					msg="IDBMS error: "+ex.getMessage();
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
 			}
 			catch(TotalADSReaderException ex){// handle Reader exceptions here
@@ -173,7 +173,7 @@ public class BackgroundTesting implements Runnable{
 			if (fileList.length >5000)
 				throw new TotalADSGeneralException("More than 5000 traces can not be tested simultaneously.");
 			
-			DBMS connection=Configuration.connection;
+			IDBMS connection=Configuration.connection;
 				
 			try{ //Check for valid trace type reader and traces before creating a database
 				traceReader.getTraceIterator(fileList[0]);

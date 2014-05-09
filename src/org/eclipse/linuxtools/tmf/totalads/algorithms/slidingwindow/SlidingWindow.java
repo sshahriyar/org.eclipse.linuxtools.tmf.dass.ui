@@ -22,7 +22,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -75,10 +75,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	}
 	/**
 	 * Initializes the model if already exists in the database
-	 * @param connection DBMS object
+	 * @param connection IDBMS object
 	 * @param database	Database name
 	 */
-	private void initialize(DBMS connection,String database) {
+	private void initialize(IDBMS connection,String database) {
 		
 			DBCursor cursor=connection.selectAll(database, TraceCollection.COLLECTION_NAME.toString());
 			if (cursor !=null){
@@ -125,10 +125,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
    /*
     * (non-Javadoc)
-    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
     */
     @Override
-    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException{
+    public void saveTestingOptions(String [] options, String database, IDBMS connection) throws TotalADSGeneralException, TotalADSDBMSException{
     	 Integer theMaxHamDis=0;
     	if (options!=null && options[0].equals(this.testingOptions[0]) ){
   		  	try {
@@ -148,10 +148,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
     /*
      * (non-Javadoc)
-     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
      */
     @Override
-    public String[] getTestingOptions(String database, DBMS connection){
+    public String[] getTestingOptions(String database, IDBMS connection){
     	loadSetings(database, connection);
     	testingOptions[1]=maxHamDis.toString(); 		
     	return testingOptions;
@@ -161,10 +161,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
     
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException{
+	public void initializeModelAndSettings(String modelName, IDBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException{
 		 
 		if (trainingSettings!=null){
 	   		  try{
@@ -192,10 +192,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream)  throws TotalADSGeneralException, TotalADSDBMSException,TotalADSReaderException {
+	public void train (ITraceIterator trace, Boolean isLastTrace, String database, IDBMS connection, IAlgorithmOutStream outStream)  throws TotalADSGeneralException, TotalADSDBMSException,TotalADSReaderException {
 	    
 		 if (!intialize){
 			  validationTraceCount=0;
@@ -246,10 +246,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
+	public  void validate (ITraceIterator trace, String database, IDBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
 			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
@@ -286,10 +286,10 @@ public class SlidingWindow implements IDetectionAlgorithm {
     
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, DBMS connection, IAlgorithmOutStream outputStream) 
+	public Results test (ITraceIterator trace,  String database, IDBMS connection, IAlgorithmOutStream outputStream) 
 			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		  
 	       if (!isTestStarted){
@@ -314,7 +314,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @return
 	 * @throws TotalADSReaderException 
 	 */
-	 private Results evaluateTrace(ITraceIterator trace,  String database, DBMS connection) throws TotalADSReaderException{
+	 private Results evaluateTrace(ITraceIterator trace,  String database, IDBMS connection) throws TotalADSReaderException{
 		     
 		     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
 		     int displaySeqCount=0, totalAnomalousSequences=0, largestHam=0;
@@ -447,7 +447,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @param connection
 	 * @throws TotalADSDBMSException 
 	 */
-	private void saveSettings(String database,DBMS connection) throws TotalADSDBMSException {
+	private void saveSettings(String database,IDBMS connection) throws TotalADSDBMSException {
 		  
 		  String settingsKey ="SWN_SETTINGS";
 		 
@@ -468,7 +468,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @param database
 	 * @param connection
 	 */
-	private void loadSetings(String database, DBMS connection){
+	private void loadSetings(String database, IDBMS connection){
 		DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 		if (cursor !=null){
 			while (cursor.hasNext()){

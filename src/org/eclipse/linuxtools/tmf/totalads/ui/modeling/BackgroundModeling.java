@@ -72,9 +72,9 @@ public class BackgroundModeling implements Runnable{
 				else
 					msg=ex.getMessage();
 			}
-			catch(TotalADSDBMSException ex){// handle DBMS exceptions here
+			catch(TotalADSDBMSException ex){// handle IDBMS exceptions here
 				if (ex.getMessage()==null)
-					msg="DBMS error: see log.";
+					msg="IDBMS error: see log.";
 				else
 					msg=ex.getMessage(); 
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);

@@ -9,7 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -24,12 +24,12 @@ public interface IDetectionAlgorithm {
 /**
  * Creates a database where an algorithm would store its model
  * @param modelName Name of the database
- * @param connection An object of DBMS
+ * @param connection An object of IDBMS
  * @param trainingSettings Training SettingsForm
  * @throws TotalADSDBMSException 
  * @throws TotalADSGeneralException TODO
  */
-public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException; 
+public void initializeModelAndSettings(String modelName, IDBMS connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException; 
 /**
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
  * @return Array of Strings as options/settings
@@ -43,7 +43,7 @@ public String[] getTrainingOptions();
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException TODO
  
-public void saveTrainingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
+public void saveTrainingOptions(String [] options, String database, IDBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
 */
 
 /**
@@ -51,10 +51,10 @@ public void saveTrainingOptions(String [] options, String database, DBMS connect
  * It takes database name and connection information, in case if the model is already created and previously 
  * modified settings exist in the database
  * @param database Database name
- * @param connection DBMS object
+ * @param connection IDBMS object
  * @return An array of String as options/settings
  */
-public String[] getTestingOptions(String database, DBMS connection);
+public String[] getTestingOptions(String database, IDBMS connection);
 /**
  * Validates the testing options and saves them into the database. On error throws exception
  * @param options
@@ -63,7 +63,7 @@ public String[] getTestingOptions(String database, DBMS connection);
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException 
  */
-public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
+public void saveTestingOptions(String [] options, String database, IDBMS connection) throws TotalADSGeneralException, TotalADSDBMSException;
 /**
  * An algorithm will take a  trace through this function. Some algorithms can train on 
  * the traces as they come and some need to wait till the last trace. Caller
@@ -79,7 +79,7 @@ public void saveTestingOptions(String [] options, String database, DBMS connecti
  * @throws TotalADSReaderException
  */
 
-public void train (ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
+public void train (ITraceIterator trace, Boolean isLastTrace, String database, IDBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 
 /**
  * This function is called after the train function has finished processing and has built a model.
@@ -93,20 +93,20 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, D
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public  void validate (ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
+public  void validate (ITraceIterator trace, String database, IDBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function evaluates an existing model in the database on the traces in the test set. It is called for every single
  * trace separately.
  * @param trace Trace iterator to a single trace
  * @param database Database name
- * @param connection DBMS object
+ * @param connection IDBMS object
  * @param outputStream Use this object to display the events during processing
  * @return An object of type Result containing the evaluation information of a trace
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public Results test (ITraceIterator trace, String database, DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
+public Results test (ITraceIterator trace, String database, IDBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 

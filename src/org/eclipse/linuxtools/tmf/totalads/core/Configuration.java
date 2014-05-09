@@ -11,7 +11,7 @@ package org.eclipse.linuxtools.tmf.totalads.core;
 
 import java.io.File;
 
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 /**
  * This class contains global variables used throughout the code
  * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
@@ -25,7 +25,7 @@ public static final Integer port=27017;
 //public static final String collectionAnomalous="anomalousTraces";
 //public static final String collectionAnomalyInfo="anomaliesHistory";
 //public static final Boolean notCalledAtRuntime=true;
-public static DBMS connection;
+public static IDBMS connection;
 public static String selectedDB="";
 //public static String traceCollection="trace_data";
 //public static String settingsCollection="settings";

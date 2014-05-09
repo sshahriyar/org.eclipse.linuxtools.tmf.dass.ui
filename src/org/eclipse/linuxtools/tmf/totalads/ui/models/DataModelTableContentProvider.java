@@ -5,13 +5,15 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 
 /**
  * @author efraimlopez
  *
  */
 public class DataModelTableContentProvider 
-	implements IStructuredContentProvider, IDataModelsObserver{
+	implements IStructuredContentProvider, IDBMSObserver{
 
 	private Viewer viewer = null;
 	private DataModels model = null;
@@ -26,8 +28,8 @@ public class DataModelTableContentProvider
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
 	    if(oldInput != null) {
-	    	DataModels old = (DataModels) oldInput;
-	        old.removeModelsObserver(this);
+	    	IDBMS old = (IDBMS) oldInput;
+	        old..removeModelsObserver(this);
 	    }
 	    if(newInput != null) {
 	    	model = (DataModels) newInput;
@@ -48,6 +50,13 @@ public class DataModelTableContentProvider
 	public void modelsUpdated() {
 		if(viewer!=null)
 			this.viewer.refresh();
+	}
+
+	@Override
+	public void update() {
+		if(viewer!=null)
+			this.viewer.refresh();
+		
 	}
 	
 }

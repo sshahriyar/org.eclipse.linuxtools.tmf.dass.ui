@@ -30,8 +30,8 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-//import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+//import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
@@ -254,7 +254,7 @@ public class ModelLoader {
 		/**
 		 * Event handler to update the list of models automatically whenever the database changes
 		 */
-		Configuration.connection.addObserver(new IObserver() {
+		Configuration.connection.addObserver(new IDBMSObserver() {
 			@Override
 			public void update() {
 				Display.getDefault().asyncExec(new Runnable(){

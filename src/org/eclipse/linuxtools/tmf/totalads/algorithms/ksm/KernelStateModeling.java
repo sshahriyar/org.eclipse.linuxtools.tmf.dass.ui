@@ -15,7 +15,7 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -98,10 +98,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     }
    /*
     * (non-Javadoc)
-    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.String[])
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.String[])
     */
     @Override
-    public void initializeModelAndSettings(String modelName, DBMS connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSGeneralException{
+    public void initializeModelAndSettings(String modelName, IDBMS connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSGeneralException{
     	
     	if (trainingSettings!=null){
   		  int trueCount=0;
@@ -146,10 +146,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 
     /*
      * (non-Javadoc)
-     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
      */
     @Override
-    public void saveTestingOptions(String [] options, String database, DBMS connection) throws TotalADSGeneralException, TotalADSDBMSException
+    public void saveTestingOptions(String [] options, String database, IDBMS connection) throws TotalADSGeneralException, TotalADSDBMSException
     {
     	try {
 			alpha= Double.parseDouble(options[1]);
@@ -165,10 +165,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 
    /*
     * (non-Javadoc)
-    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
     */
     @Override
-    public String[] getTestingOptions(String database, DBMS connection){
+    public String[] getTestingOptions(String database, IDBMS connection){
     	Double alphaVal=getSettingsFromDatabase(database, connection);
 		if(alphaVal!=null)
 			 alpha=alphaVal;
@@ -178,10 +178,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     
     /*
      * (non-Javadoc)
-     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
      */
     @Override
-    public void train(ITraceIterator trace, Boolean isLastTrace, String database, DBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+    public void train(ITraceIterator trace, Boolean isLastTrace, String database, IDBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
     	 //initialized alpha to 0 during training
     	if (!initialize){
     		    alpha=getSettingsFromDatabase(database, connection);
@@ -202,10 +202,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     }
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, DBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public void validate(ITraceIterator trace, String database, IDBMS connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
@@ -242,10 +242,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.DBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,DBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database,IDBMS connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
@@ -342,7 +342,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param alpha
 	 * @return
 	 */
-	private Boolean evaluateKSM(Double alpha, TraceStates testStates, DBMS connection, String database){
+	private Boolean evaluateKSM(Double alpha, TraceStates testStates, IDBMS connection, String database){
 		Boolean isAnomalous=false;
 		Double maxFS=0.0;
 		
@@ -478,7 +478,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param states
 	 * @throws TotalADSDBMSException 
 	 */
-	private void saveTraceData(DBMS connection, String database, TraceStates states) throws TotalADSDBMSException{
+	private void saveTraceData(IDBMS connection, String database, TraceStates states) throws TotalADSDBMSException{
 
 		try {
 				JsonObject jsonDoc=new JsonObject();
@@ -510,7 +510,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @throws IllegalArgumentException 
 	 * @throws Exception
 	 */
-	private void saveSettingsInDatabase(Double alpha, String database, DBMS connection) 
+	private void saveSettingsInDatabase(Double alpha, String database, IDBMS connection) 
 			throws  TotalADSDBMSException {
 		 String settingsKey ="KSM_SETTINGS";
 			
@@ -546,7 +546,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @param database
 	 * @param connection
 	 */
-	private Double getSettingsFromDatabase(String database, DBMS connection){
+	private Double getSettingsFromDatabase(String database, IDBMS connection){
 	    String settingsKey ="KSM_SETTINGS";
 	    Double alphaValue=null;
 	    String kernelVersion="";

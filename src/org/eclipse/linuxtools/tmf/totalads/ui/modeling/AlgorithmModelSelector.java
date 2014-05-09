@@ -21,8 +21,8 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -279,9 +279,9 @@ public class AlgorithmModelSelector {
 			
 		});
 		
-	   // Add an observer to DBMS connection to automatically update 
+	   // Add an observer to IDBMS connection to automatically update 
 	  //the list of databases when new ones are created and old ones are deleted
-	   /*Configuration.connection.addObserver( new IObserver() {
+	   /*Configuration.connection.addObserver( new IDBMSObserver() {
 			@Override
 			public void update() {
 				Display.getDefault().asyncExec(new Runnable(){
@@ -462,7 +462,7 @@ public class AlgorithmModelSelector {
 		/// Db vverifications
 		///////////////
 		//Second,  create a database after verifications
-		DBMS connection=Configuration.connection;
+		IDBMS connection=Configuration.connection;
 		/*if(isCreateDB){
 				database=database.trim()+"_"+algorithm.getAcronym(); //+"_"+ traceReader.getAcronym();
 				database=database.toUpperCase();

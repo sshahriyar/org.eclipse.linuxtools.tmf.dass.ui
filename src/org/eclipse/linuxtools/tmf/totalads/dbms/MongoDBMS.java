@@ -43,22 +43,22 @@ import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 /**
- * Database Management System (DBMS) class. This calss connects with MongoDB,
+ * Database Management System (IDBMS) class. This calss connects with MongoDB,
  * and performs  the manipulations required in a program with MongoDB 
  *  
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class DBMS implements ISubject {
+class MongoDBMS implements IDBMSSubject, IDBMS {
 	
 	private MongoClient mongoClient;
 	private Boolean isConnected=false;
-	private ArrayList<IObserver> observers;
+	private ArrayList<IDBMSObserver> observers;
 	/**
 	 * Constructor
 	 */
-	public DBMS() {
-		observers=new ArrayList<IObserver>();
+	public MongoDBMS() {
+		observers=new ArrayList<IDBMSObserver>();
 	}
 	/**
 	 * Connects with MongoDB
@@ -145,6 +145,7 @@ public class DBMS implements ISubject {
 		}
 		return message;
 	}
+	
 	/**
 	 * Determines the connected state
 	 * @return true or false
@@ -152,6 +153,7 @@ public class DBMS implements ISubject {
 	public Boolean isConnected(){
 		return isConnected;
 	}
+	
 	/**
 	 * Get database list
 	 * @return The list of database
@@ -164,6 +166,7 @@ public class DBMS implements ISubject {
 		return dbList;
 		
 	}
+	
 	/**
 	 * Checks the existence of the database
 	 * @param database
@@ -188,7 +191,7 @@ public class DBMS implements ISubject {
 	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
 	
 	 if (datbaseExists(dataBase)){
-		 	if (isConnected==false){// This code sinppet is a check for the breakage of connection during the excution
+		 	if (isConnected==false){// This code snippet is a check for the breakage of connection during the excution
 		 		isConnected=true;   // if reconnection occurs  during execution it will notify all obervers
 		 		notifyObservers();
 		 	}
@@ -332,7 +335,7 @@ public class DBMS implements ISubject {
 		   DBCollection coll = db.getCollection(collection);
 		   BasicDBObject obj = (BasicDBObject)JSON.parse(jsonObject.toString());
 		   coll.insert(obj);
-		  } catch (Exception ex){ // If there is any exception here cast it as DBMS exception
+		  } catch (Exception ex){ // If there is any exception here cast it as IDBMS exception
 			  throw new TotalADSDBMSException(ex.getMessage());
 		  }
 	}
@@ -522,32 +525,32 @@ public class DBMS implements ISubject {
 			
 	}*/
 	//////////////////////////////////////////////////////////////////////////////// 
-	//Implementing the ISubject Interface 
+	//Implementing the IDBMSSubject Interface 
 	///////////////////////////////////////////////////////////////
 	/**
-	 * Adds an observer of type {@link IObserver}
+	 * Adds an observer of type {@link IDBMSObserver}
 	 * @param observer
 	 */
 	@Override
-	public void addObserver(IObserver observer){
+	public void addObserver(IDBMSObserver observer){
 		observers.add(observer);
 		
 	}
 	/**
-	 * Removes an observer of type {@link IObserver}
+	 * Removes an observer of type {@link IDBMSObserver}
 	 * @param observer
 	 */
 	@Override
-	public void removeObserver(IObserver observer){
+	public void removeObserver(IDBMSObserver observer){
 		observers.remove(observer);
 		
 	}
 	/**
-	 * Notifies all observers of type {@link IObserver}
+	 * Notifies all observers of type {@link IDBMSObserver}
 	 */
 	@Override
 	public void notifyObservers(){
-		for (IObserver ob: observers)
+		for (IDBMSObserver ob: observers)
 			ob.update();
 	}
 	

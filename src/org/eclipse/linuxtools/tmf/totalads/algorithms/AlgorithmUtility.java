@@ -10,7 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 
@@ -30,12 +30,12 @@ public  class AlgorithmUtility {
 	 * Creates a model in the database with training settings
 	 * @param modelName Model name
 	 * @param algorithm Algorithm type
-	 * @param connection DBMS object
+	 * @param connection IDBMS object
 	 * @param trainingSettings Training SettingsForm object
 	 * @throws TotalADSDBMSException
 	 * @throws TotalADSGeneralException
 	 */
-	public static void createModel(String modelName, IDetectionAlgorithm algorithm, DBMS connection, String []trainingSettings ) throws TotalADSDBMSException, TotalADSGeneralException{
+	public static void createModel(String modelName, IDetectionAlgorithm algorithm, IDBMS connection, String []trainingSettings ) throws TotalADSDBMSException, TotalADSGeneralException{
 		modelName+="_"+algorithm.getAcronym();
 		modelName=modelName.toUpperCase();		
 		algorithm.initializeModelAndSettings(modelName, Configuration.connection, trainingSettings);
@@ -44,11 +44,11 @@ public  class AlgorithmUtility {
 	/**
 	 * Returns the algorithm for a given model name
 	 * @param modelName Name of the model
-	 * @param connection DBMS connection object
+	 * @param connection IDBMS connection object
 	 * @return An object of type IDetectionAlgorithm
 	 * @throws TotalADSGeneralException 
 	 */
-	public static IDetectionAlgorithm getAlgorithmFromModelName(String modelName, DBMS connection) throws TotalADSGeneralException{
+	public static IDetectionAlgorithm getAlgorithmFromModelName(String modelName, IDBMS connection) throws TotalADSGeneralException{
 		
 		String []modelParts=modelName.split("_");
 		if (modelParts==null  || modelParts.length <2)

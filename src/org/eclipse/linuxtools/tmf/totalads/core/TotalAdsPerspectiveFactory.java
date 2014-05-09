@@ -25,7 +25,7 @@ import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.controlflow.Contro
 import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.resources.ResourcesView;
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.GenericView;

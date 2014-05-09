@@ -9,28 +9,18 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 /**
- * Subject interface used by DBMS to notify observers
- *  @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
+ * Observer interface to be implmented by those classes which wants update from the IDBMS 
+ *  @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  */
-public interface ISubject {
-	/**
-	 *  Adds an observer of type {@link IObserver}
-	 * @param observer
-	 */
-	
-	public void addObserver(IObserver observer);
-	/**
-	 * Removes an observer of type {@link IObserver}
-	 * @param observer
-	 */
-	
-	public void removeObserver(IObserver observer);
-	/**
-	 * Notifies all observers of type {@link IObserver}
-	 */
-	
-	public void notifyObservers();
-	
-	
+public interface IDBMSObserver {
+	   /**
+	    * Updates the observer
+	    */
+       public void update();
+       /**
+        * Provides the information as text when updating
+        *
+        public void update(String information);*/
+
 }

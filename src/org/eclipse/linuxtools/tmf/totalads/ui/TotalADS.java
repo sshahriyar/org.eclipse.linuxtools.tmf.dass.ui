@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.Diagnosis;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitor;
@@ -60,7 +60,7 @@ public class TotalADS  {
 	public TotalADS(Composite parent, int style) {
 		
 	  try{
-		    	Configuration.connection=new DBMS();
+		    	Configuration.connection=new IDBMS();
 			//	Configuration.connection.connect(Configuration.host, Configuration.port, "u","p");
 				String error=Configuration.connection.connect(Configuration.host, Configuration.port);
 		  	

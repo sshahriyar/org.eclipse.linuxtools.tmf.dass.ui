@@ -10,7 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -145,7 +145,7 @@ public class StatusBar {
 		});
 		
 		// Adding an observer to the connection
-		Configuration.connection.addObserver(new IObserver() {
+		Configuration.connection.addObserver(new IDBMSObserver() {
 					@Override
 					public void update() {
 						initialState();

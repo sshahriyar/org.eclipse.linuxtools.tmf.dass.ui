@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IObserver;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;

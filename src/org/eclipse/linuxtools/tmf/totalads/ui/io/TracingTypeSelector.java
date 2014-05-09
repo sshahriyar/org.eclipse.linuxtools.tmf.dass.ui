@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 public class TracingTypeSelector {
 	private Combo cmbTraceTypes;
 	private TraceTypeFactory  traceFac;
-	//ArrayList<IObserver> observers=new ArrayList<IObserver>();
+	//ArrayList<IDBMSObserver> observers=new ArrayList<IDBMSObserver>();
 	/**
 	 * Constructor
 	 * @param compParent Composite
