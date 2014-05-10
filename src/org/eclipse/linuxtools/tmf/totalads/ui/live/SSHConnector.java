@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.core.Activator;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
@@ -30,6 +30,8 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.UserInfo;
 /**
+ * This class connects to a remote system using SSH and collects an LTTng trace
+ * Some of the code in this class is extracted from the following link:
  * http://www.jcraft.com/jsch/examples/Sudo.java.html
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
@@ -49,7 +51,7 @@ public class SSHConnector {
 	 */
 	public SSHConnector() {
 		jsch=new JSch(); 
-		totalADSLocalDir=Configuration.getCurrentPath()+"totalads-traces";
+		totalADSLocalDir=getCurrentPath()+"totalads-traces";
 		File file =new File(totalADSLocalDir);
 		if (!file.isDirectory())// create this directory if it doesn't exist
 			file.mkdir();
@@ -287,5 +289,14 @@ public class SSHConnector {
 		 
 	}
 
+	/**
+	 * Returns the current directory of the application
+	 * @return Path
+	 * @throws Exception
+	 */
+	private  String getCurrentPath() {
+		String applicationDir=Activator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		return applicationDir+File.separator;
+	}
 	
 }

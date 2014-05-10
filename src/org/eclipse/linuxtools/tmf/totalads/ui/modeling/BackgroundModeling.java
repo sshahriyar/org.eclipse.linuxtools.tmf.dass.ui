@@ -12,9 +12,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -34,7 +33,7 @@ public class BackgroundModeling implements Runnable{
 	String trainingTraces;
 	String validationTraces;
 	ITraceTypeReader traceReader;
-	AlgorithmModelSelector algorithmSelector;
+	
 	Button btnMain;
 	/**
 	 *  Constructor 
@@ -46,12 +45,10 @@ public class BackgroundModeling implements Runnable{
 	 * @param btnBuild Button to enable
 	 */
 	public BackgroundModeling(String trainingTraces,
-				String validationTraces,ITraceTypeReader traceReader, AlgorithmModelSelector algSel,
-				 Button btnBuild){
+				String validationTraces,ITraceTypeReader traceReader,  Button btnBuild){
 		this.trainingTraces=trainingTraces;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
-		this.algorithmSelector=algSel;
 		this.btnMain=btnBuild;
 	}
 	/**
@@ -63,7 +60,7 @@ public class BackgroundModeling implements Runnable{
 			
 			try {
 				
-					algorithmSelector.trainAndValidateModels(trainingTraces, validationTraces, traceReader,null,null);
+					AlgorithmUtility.trainAndValidateModels(trainingTraces, validationTraces, traceReader,null,null);
 							
 			} 
 			catch(TotalADSGeneralException ex){// handle UI exceptions here
@@ -72,9 +69,9 @@ public class BackgroundModeling implements Runnable{
 				else
 					msg=ex.getMessage();
 			}
-			catch(TotalADSDBMSException ex){// handle IDBMS exceptions here
+			catch(TotalADSDBMSException ex){// handle IDataAccessObject exceptions here
 				if (ex.getMessage()==null)
-					msg="IDBMS error: see log.";
+					msg="IDataAccessObject error: see log.";
 				else
 					msg=ex.getMessage(); 
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
@@ -100,7 +97,7 @@ public class BackgroundModeling implements Runnable{
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.SEVERE,msg,ex);
 				// An exception could be thrown due to unavailability of the db, 
 				// make sure that the connection is not lost
-				Configuration.connection.connect(Configuration.host, Configuration.port);
+				DBMSFactory.INSTANCE.verifyConnection();
 				// We don't have to worry about exceptions here as the above function handles all the exceptions
 				// and just returns a message. This function also initializes connection info to correct value
 				// We cannot write above function under ConnectinException block because such exception is never thrown

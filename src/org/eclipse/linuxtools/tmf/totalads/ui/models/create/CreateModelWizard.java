@@ -10,13 +10,17 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
+import org.eclipse.linuxtools.tmf.totalads.ui.models.settings.TestSettingsHandler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
@@ -101,12 +105,17 @@ public class CreateModelWizard extends Wizard {
 		}
 		else{	
 			try {
-				AlgorithmUtility.createModel(modelName, alg, Configuration.connection, settings);
+				AlgorithmUtility.createModel(modelName, alg, DBMSFactory.INSTANCE.getDataAccessObject(), settings);
 				
 			} catch (TotalADSDBMSException e) {
 				exception=e.getMessage();
 			} catch (TotalADSGeneralException e) {
 				exception=e.getMessage();
+			}catch (Exception ex){
+				exception=ex.getMessage();
+				Logger.getLogger(TestSettingsHandler.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
+				//Check if connection still exists and all the views are notified of the presence and absence of connection
+				DBMSFactory.INSTANCE.verifyConnection();
 			}
 		
 			if (exception!=null && !exception.isEmpty()){

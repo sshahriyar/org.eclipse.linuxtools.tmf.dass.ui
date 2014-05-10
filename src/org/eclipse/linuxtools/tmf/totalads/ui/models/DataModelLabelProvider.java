@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class DataModelLabelProvider extends ColumnLabelProvider {
+class DataModelLabelProvider extends ColumnLabelProvider {
 	/*
 	 * Constructor
 	 */

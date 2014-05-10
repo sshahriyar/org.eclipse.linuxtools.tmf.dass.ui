@@ -14,37 +14,16 @@ import java.util.List;
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 /**
- * Database Management System (IDBMS) class. This calss connects with MongoDB,
+ * Database Management System (IDataAccessObject) class. This calss connects with MongoDB,
  * and performs  the manipulations required in a program with MongoDB 
  *  
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public interface IDBMS extends IDBMSSubject {
+public interface IDataAccessObject extends IDBMSSubject {
 	
 	
-	/**
-	 * Connects with the database
-	 * @param host Host name 
-	 * @param port Port number
-	 * @return Returns an empty message if connection is made with the database, else returns the error message
-	 * @throws UnknownHostException
-	 */
-	public String connect(String host, Integer port) ;
-	
-	/**
-	 * Connects with the database using authentication mechanism
-	 * @param host Host name
-	 * @param port Port name
-	 * @param username User name
-	 * @param password Password
-	 * @return Empty message if connected or error message
-	 * @throws UnknownHostException
-	 */
-	public String connect(String host, Integer port, String username, String password, String database);
 		
-		
-	
 	/**
 	 * Determines the connected state
 	 * @return true or false
@@ -85,15 +64,8 @@ public interface IDBMS extends IDBMSSubject {
 	 * @param collection Collection name
 	 * @param fields An array of field names on which to create unique indexes. 
 	 */
-	public void createDescendingUniquesIndexes(String dataBase, String collection, String []fields);	/**
-	 * Close the connection
-	 */
-	public void closeConnection();
-	/**
-	 * Deletes a database
-	 * @param database Database name
-	 */
-	public void deleteDatabase(String database);
+	public void createDescendingUniquesIndexes(String dataBase, String collection, String []fields);	
+
 		/**
 	 * Inserts an object in the form of JSON representation into the database. Any kind of complex
 	 *  data structure can be converted to JSON  using gson library and passed to this function 

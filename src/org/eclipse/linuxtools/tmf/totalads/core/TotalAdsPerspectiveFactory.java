@@ -16,35 +16,18 @@
   */
 package org.eclipse.linuxtools.tmf.totalads.core;
 
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.controlflow.ControlFlowView;
-import org.eclipse.linuxtools.internal.lttng2.kernel.ui.views.resources.ResourcesView;
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
-import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.GenericView;
 import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView;
-import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitor;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
-import org.eclipse.linuxtools.tmf.ui.views.histogram.HistogramView;
-import org.eclipse.linuxtools.tmf.ui.views.statistics.TmfStatisticsView;
-import org.eclipse.osgi.framework.internal.core.ConsoleManager;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsoleConstants;
 /**
  * A simple implementation of {@link IPerspectiveFactory} that is used by the workbench
@@ -64,8 +47,6 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
     
     @Override
 	public void createInitialLayout(IPageLayout layout) {
-		System.out.println("printing layout");
-		//init();
 		
 		layout.setEditorAreaVisible(false);
 		//Create right folders

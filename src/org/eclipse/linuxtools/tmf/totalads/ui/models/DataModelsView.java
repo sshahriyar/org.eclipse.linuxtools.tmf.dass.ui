@@ -44,6 +44,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	private ModelsList modelListViewer = null;
 	private ListenerList listeners ; 
 	private HashSet<String> selection; 
+	
 	/**
 	 * 
 	 * Inner class representing a Table for ModelsList
@@ -52,7 +53,10 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	private  class ModelsList{
 		CheckboxTableViewer viewer = null;
 		Table table=null;
-		
+		/**
+		 * Constructor
+		 * @param parent
+		 */
 		public ModelsList(Composite parent){
 			
 			table =new Table(parent, SWT.MULTI | SWT.H_SCROLL|SWT.CHECK
@@ -68,52 +72,77 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 			
 			viewer.setLabelProvider(new DataModelLabelProvider());
 			viewer.setContentProvider(new DataModelTableContentProvider());			
-			viewer.setInput(DBMSFactory.INSTANCE.getDBMSInstance());
+			viewer.setInput(DBMSFactory.INSTANCE.getDataAccessObject());
 			
 			// Event handler for check marks (selection) in the Table
 			viewer.addCheckStateListener(new ICheckStateListener() {
-				
 				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					
-					MessageBox msgBox=new MessageBox(Display.getCurrent().getActiveShell(), SWT.ERROR);
-					
-					String modelName=(String)event.getElement();
-					String []modelAcronym=modelName.split("_");
-					
-					if (event.getChecked()){
-						
-						if (selection.size()>=5){
-							msgBox.setMessage("Please select less than six models only");
-						    msgBox.open();
-						    uncheckedSelectedModel(modelName, viewer);
-						    return;
-						   //Making sure that it is not a database that already exist in the db 
-						} else if(modelAcronym==null ||  modelAcronym.length<2){
-							msgBox.setMessage(modelName+ " is not a valid model created by TotalADS!");
-							msgBox.open();
-							uncheckedSelectedModel(modelName, viewer);
-							return;
-							
-						}else if (AlgorithmFactory.getInstance().getAlgorithmByAcronym(modelAcronym[1])==null){
-								msgBox.setMessage(modelName +" is not a valid model created by TotalADS!");
-								msgBox.open();
-								uncheckedSelectedModel(modelName, viewer);
-								return;
-						}
-						
-						selection.add(modelName);
-						
-					}else if (!event.getChecked()){
-						
-						selection.remove(modelName);
-					} // end of event checking
-					// now calling listeners
-					
-					setSelection(new StructuredSelection(selection.clone()));
+					checkState(event);
 				}
 			});// end of event handler
 			
+		}
+		/**
+		 * Handles the check state of the table
+		 * @param event
+		 */
+		private void checkState(CheckStateChangedEvent event){
+			MessageBox msgBox=new MessageBox(Display.getCurrent().getActiveShell(), SWT.ERROR);
+			
+			String modelName=(String)event.getElement();
+			String []modelAcronym=modelName.split("_");
+			
+			if (event.getChecked()){
+				
+				//Don't let user select no connection message
+				if (modelName.equals(DataModelTableContentProvider.EMPTY_VIEW_FIELD)){
+					uncheckedSelectedModel(modelName, viewer);
+					return;
+				}//See if more than 5 models are slected
+				else if (selection.size()>=5){
+					msgBox.setMessage("Please select less than six models only");
+				    msgBox.open();
+				    uncheckedSelectedModel(modelName, viewer);
+				    return;
+				} //Making sure that it is not a database that already exist in the db 
+				 else if(modelAcronym==null ||  modelAcronym.length<2){
+					msgBox.setMessage(modelName+ " is not a valid model created by TotalADS!");
+					msgBox.open();
+					uncheckedSelectedModel(modelName, viewer);
+					return;
+					
+				}//Make sure the algorithm is there in the list
+				 else if (AlgorithmFactory.getInstance().getAlgorithmByAcronym(modelAcronym[1])==null){
+						msgBox.setMessage(modelName +" is not a valid model created by TotalADS!");
+						msgBox.open();
+						uncheckedSelectedModel(modelName, viewer);
+						return;
+				}
+				
+				selection.add(modelName);
+				
+			}else if (!event.getChecked()){
+				
+				selection.remove(modelName);
+			} // end of event checking
+			// now calling listeners
+			
+			setSelection(new StructuredSelection(selection.clone()));
+		}
+		
+		/**
+		 * Unchecked selected model in the table view
+		 * @param modelName
+		 * @param viewer
+		 */
+		private void uncheckedSelectedModel(String modelName, CheckboxTableViewer viewer ){
+			for (int i=0;i<viewer.getTable().getItemCount(); i++)
+		    	if (viewer.getTable().getItem(i).getText().equals(modelName)){
+		    		     viewer.getTable().getItem(i).setChecked(false);
+		    		     break;
+		    	}
 		}
 	}
 
@@ -125,18 +154,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		selection=new HashSet<String>(); 
 	}
 	
-	/**
-	 * Unchecked selected model in the table view
-	 * @param modelName
-	 * @param viewer
-	 */
-	private void uncheckedSelectedModel(String modelName, CheckboxTableViewer viewer ){
-		for (int i=0;i<viewer.getTable().getItemCount(); i++)
-	    	if (viewer.getTable().getItem(i).getText().equals(modelName)){
-	    		     viewer.getTable().getItem(i).setChecked(false);
-	    		     break;
-	    	}
-	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -152,7 +170,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	 */
 	@Override
 	public void setFocus() {
-		// TODO
+		
 
 	}
 
@@ -183,5 +201,8 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		  }  
 		
 	}
+	
+	
+
 
 }

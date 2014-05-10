@@ -15,22 +15,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
-import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
-import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
 import org.eclipse.swt.SWT;
-//import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -38,28 +29,14 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-//import org.eclipse.swt.widgets.Button;
-//import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.ProgressBar;
-import org.eclipse.swt.widgets.TabFolder;
-//import org.eclipse.swt.widgets.TabItem;
-//import org.eclipse.swt.widgets.Table;
-//import org.eclipse.swt.widgets.TableColumn;
-//import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.Workbench;
 
 /**
  * This class creates the GUI elements/widgets for diagnosis.
@@ -76,7 +53,6 @@ public class Diagnosis {
 	private DirectoryBrowser traceBrowser;
 	private StringBuilder tmfTracePath;
 	private StringBuilder currentlySelectedTracesPath;
-	private ModelLoader modelLoader;
 	private ResultsAndFeedback resultsAndFeedback;
 	private Button btnSelTestTraces;
 	private Button btnSelTMFTrace;
@@ -126,39 +102,6 @@ public class Diagnosis {
 		addEvaluateButton(comptbItmDiagnosis);
 		// Create GUI elements for a selection of a trace
 		
-		//Initialize a class which loads model names from db and create appropriate GUI elements
-		
-		
-/*		efraim
- * modelLoader=new ModelLoader(compTraceTypeAndModel);
-		modelLoader.setTrace(currentlySelectedTracesPath);///////////////////////////////
-		modelLoader.setTraceTypeSelector(traceTypeSelector);*/
-		
-		
-		//////////////////////////////////////////////////////////////////////
-		// Creating GUI widgets for status, results and feedback
-		//////////////////////////////////////////////////////////////////
-/*		efraim
- * Composite compStatusResults=new Composite(comptbItmDiagnosis, SWT.NONE);
-		compStatusResults.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		compStatusResults.setLayout(new GridLayout(1, false));
-		StatusBar statusBar=new StatusBar(compStatusResults);*/
-		
-		/*Composite compStatus=new Composite(compStatusResults, SWT.NONE);
-		compStatus.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		compStatus.setLayout(new GridLayout(2, false));
-		
-		Label lblProgress= new Label(compStatus, SWT.NONE);
-		lblProgress.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
-		lblProgress.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
-		lblProgress.setText("Connected to localhost..");
-		//lblProgress.setVisible(false);
-		
-		
-		Label lblStatus= new Label(compStatus, SWT.BORDER);
-		lblStatus.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-		lblStatus.setBackground(SWTResourceManager.getColor(SWT.COLOR_DARK_GREEN));
-		lblStatus.setText("        "); */
 		
 		
 		
@@ -270,13 +213,14 @@ public class Diagnosis {
 		 */
 	}
 	
-	
+	/**
+	 * Adds the evalaution button
+	 * @param compParent Composite
+	 */
 	private void addEvaluateButton(Composite compParent){
 		btnEvaluateModels=new Button(compParent, SWT.NONE);
 		btnEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false));
 		btnEvaluateModels.setText("    Evaluate    ");
-		
-		
 		
 		/**
 		 * Event handler for the evaluate button
@@ -310,23 +254,20 @@ public class Diagnosis {
 					    database[counter]=it.next();
 						String []modelKey=database[counter].split("_");
 						
-						if(modelKey==null ||  modelKey.length<2){
+						/*if(modelKey==null ||  modelKey.length<2){
 							msgBox.setMessage("Not a valid model created by TotalADS!");
 							msgBox.open();
 							return;
-						}
+						}*/
 						
-						
-						
-					
-						
+									
 						algorithm[counter]= modFac.getAlgorithmByAcronym(modelKey[1]);
 						
-						if(algorithm[counter]==null){
+						/*if(algorithm[counter]==null){
 							msgBox.setMessage("This doesn't seem to be a valid model created by TotalADS!");
 							msgBox.open();
 							return;
-						}
+						}*/
 				  counter++;
 				}
 					resultsAndFeedback.clearData();
@@ -370,7 +311,7 @@ public class Diagnosis {
 		this.resultsAndFeedback=resultsAndFeedback;
 	}
 	/**
-	 * This function get called from {@link DiagnosisView} to notify currently selected models
+	 * This function gets called from {@link DiagnosisView} to get updated for the currently selected models
 	 * @param modelsList
 	 */
 	public void updateonModelSelection(HashSet<String> modelsList){

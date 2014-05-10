@@ -12,9 +12,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models.dbconnect;
 
 
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
@@ -73,7 +72,7 @@ public class DBConnectWizard extends Wizard {
 		MessageBox msgBoxErr= new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
 		try {
-			IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
+			//DBMSFactory.INSTANCE.init();
 			
 			String portNum=basicConfigurationPage.getPort();
 			String host=basicConfigurationPage.getHost();
@@ -88,9 +87,9 @@ public class DBConnectWizard extends Wizard {
 				if (userName.isEmpty() || password.isEmpty() || database.isEmpty()){
 					exception="Empty fields are not allowed";
 				}else
-					exception =connection.connect(host, port, userName, password, database);
+					exception =DBMSFactory.INSTANCE.openConnection(host, port, userName, password, database);
 			}else
-				exception =connection.connect(host, port);
+				exception =DBMSFactory.INSTANCE.openConnection(host, port);
 			
 		}catch (NumberFormatException ex){
 			exception="Invalid port number";

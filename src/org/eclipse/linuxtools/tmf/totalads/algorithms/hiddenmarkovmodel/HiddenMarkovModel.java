@@ -9,16 +9,13 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
-import java.util.Arrays;
 import java.util.LinkedList;
-
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -34,7 +31,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private Integer seqLength;
 	private  HmmMahout hmm;
 	private NameToIDMapper nameToID;
-	private boolean isTrainIntialized=false, isValidationInitialized=false, isTestInitialized=false;
+	private boolean isTrainIntialized=false,  isTestInitialized=false;
 	private int numStates, numSymbols, numIterations, testNameToIDSize;
 	private Double totalTestAnomalies=0.0, totalTestTraces=0.0, logThresholdTest=0.0;;
 	
@@ -59,10 +56,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.String[])
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, IDBMS connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSGeneralException {
+	public void initializeModelAndSettings(String modelName, IDataAccessObject connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSGeneralException {
 		String []setting=null;
 		
 		if (trainingSettings!=null){
@@ -116,10 +113,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
 	@Override
-	public String[] getTestingOptions(String database, IDBMS connection) {
+	public String[] getTestingOptions(String database, IDataAccessObject connection) {
 		 HmmMahout hmm=new HmmMahout();
 		String []settings=hmm.loadSettings(database, connection);
 		if (settings==null)
@@ -132,10 +129,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
    @Override
-	public void saveTestingOptions(String [] options, String database, IDBMS connection) throws TotalADSGeneralException, TotalADSDBMSException
+	public void saveTestingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException
 	{ 
 	   HmmMahout hmm=new HmmMahout();
 	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
@@ -143,10 +140,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
  
    /*
     * (non-Javadoc)
-    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
     */
     @Override
-	public void train(ITraceIterator trace, Boolean isLastTrace, String database, IDBMS connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public void train(ITraceIterator trace, Boolean isLastTrace, String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	   
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
@@ -185,7 +182,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 
 		 outStream.addOutputEvent("Extracting sequences, please wait....");
 		 
-		 int winWidth=0,seqCount=0;
+		 int winWidth=0;
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	 Boolean isTrained=true;
 	   	 String event=null;
@@ -206,7 +203,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  outStream.addOutputEvent("Learning using the BaumWelch algorithm");
 	    		  trainBaumWelch(seq, connection, database);
 	    		  newSequence.remove(0);
-	    		  seqCount++;
+	    	
 	    	  }
 	    	  
 	    		  
@@ -236,7 +233,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
     * @param seq
     * @throws TotalADSGeneralException
     */
-   private void trainBaumWelch(Integer []seq, IDBMS connection, String database) throws TotalADSGeneralException{
+   private void trainBaumWelch(Integer []seq, IDataAccessObject connection, String database) throws TotalADSGeneralException{
 	   try{
 		         hmm.initializeHMM(numSymbols, numStates);
 		    	 hmm.learnUsingBaumWelch(numIterations, seq);
@@ -252,10 +249,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    }
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public void validate(ITraceIterator trace, String database,IDBMS connection, 
+	public void validate(ITraceIterator trace, String database,IDataAccessObject connection, 
 			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,validationSeqLength=seqLength;
@@ -328,10 +325,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	}
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database, IDBMS connection,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database, IDataAccessObject connection,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,testSeqLength=seqLength;
 		String []options;

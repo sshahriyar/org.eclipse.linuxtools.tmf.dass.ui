@@ -2,7 +2,6 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models.settings;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
@@ -87,7 +86,7 @@ public class TestSettingsDialog extends TitleAreaDialog {
 	     try {
 			
 	    	settingsForAlgorithm= settingsForm.getSettings();
-			algorithm.saveTestingOptions(settingsForAlgorithm, modelName, DBMSFactory.INSTANCE.getDBMSInstance());
+			algorithm.saveTestingOptions(settingsForAlgorithm, modelName, DBMSFactory.INSTANCE.getDataAccessObject());
 		
 	     } catch (TotalADSGeneralException ex) {
 			setErrorMessage(ex.getMessage());

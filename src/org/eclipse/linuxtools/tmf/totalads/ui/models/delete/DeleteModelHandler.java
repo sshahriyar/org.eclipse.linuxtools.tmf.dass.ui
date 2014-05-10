@@ -20,7 +20,6 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
@@ -42,6 +41,7 @@ public class DeleteModelHandler implements IHandler {
 		selectedModels=new HashSet<String>();
 		 /// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
@@ -100,7 +100,9 @@ public class DeleteModelHandler implements IHandler {
 			String message="Do you really want to delete ";
 			int count=1;
 			while (it.hasNext()){
-				 if (count<selectedModels.size())
+				 if (count==1)
+					message=it.next();
+				 else if (count>1 && count <selectedModels.size())
 				      message+=it.next()+", ";
 				 else
 					 message+="and "+it.next()+"?";
@@ -111,17 +113,15 @@ public class DeleteModelHandler implements IHandler {
 			
 			if (msgBoxYesNo.open()==SWT.YES){
 			   //Delete models now
-				IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
-				
-				if (connection.isConnected()){
-					it=selectedModels.iterator();
-					while (it.hasNext())
-						connection.deleteDatabase(it.next());
-				}else{ //if the database is not connected
-					msgBoxErr.setMessage("No databse connection exists.....");
-					msgBoxErr.open();
+				it=selectedModels.iterator();
+				while (it.hasNext()){
+						String err=DBMSFactory.INSTANCE.deleteDatabase(it.next());
+						if(!err.isEmpty()){ //if the database is not connected
+							msgBoxErr.setMessage(err);
+							msgBoxErr.open();
+							break;
+						}
 				}
-					
 			}
 			
 		} catch (Exception ex) {
@@ -131,6 +131,8 @@ public class DeleteModelHandler implements IHandler {
 				msgBoxErr.setMessage("Error deleting model(s).");
 			msgBoxErr.open();
 			Logger.getLogger(DeleteModelHandler.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+			//Check if connection still exists and all the views are notified of the presence and absence of connection
+			DBMSFactory.INSTANCE.verifyConnection();
 		}
 	
 	    return null;

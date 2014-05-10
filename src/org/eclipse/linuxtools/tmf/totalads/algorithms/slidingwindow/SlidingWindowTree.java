@@ -12,13 +12,9 @@ package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -48,7 +44,7 @@ class SlidingWindowTree {
 	 * @throws TotalADSDBMSException
 	 */
 	public void searchAndAddSequence(Integer []newSequence, HashMap<Integer, Event[]> sysCallSequences){
-  //  public void searchAndAddSequence(String []newSequence, String database, IDBMS connection) throws TotalADSDBMSException{
+  //  public void searchAndAddSequence(String []newSequence, String database, IDataAccessObject connection) throws TotalADSDBMSException{
 		Integer seqSize=newSequence.length;
 		Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
 		//Event[] eventSequence=	loadTreeFromDatabase(newSequence[0], database, connection) ;//load from database
@@ -175,12 +171,12 @@ class SlidingWindowTree {
 	 * This function saves the model in the database by converting HashMap to JSON and serializing in MongoDB
 	 * @param coutStream An object to display output
 	 * @param database Database name
-	 * @param connection IDBMS object
+	 * @param connection IDataAccessObject object
 	 * @param sysCallSequences  A map containing one tree of events for every key
 	 * @param collectionName Collection name
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveinDatabase(IAlgorithmOutStream outStream, String database, IDBMS connection,HashMap<Integer, 
+	public void saveinDatabase(IAlgorithmOutStream outStream, String database, IDataAccessObject connection,HashMap<Integer, 
 			Event[]> sysCallSequences) throws TotalADSDBMSException{
 		outStream.addOutputEvent("Saving in database.....");
 		
@@ -217,7 +213,7 @@ class SlidingWindowTree {
 	 * @param collectionName
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveTreeInDatabase( String database, IDBMS connection, 
+	public void saveTreeInDatabase( String database, IDataAccessObject connection, 
 			Event[] tree, String collectionName) throws TotalADSDBMSException{
 		
 		 
@@ -245,7 +241,7 @@ class SlidingWindowTree {
 	 * @param connection
 	 * @return
 	 */
-	public Event[] loadTreeFromDatabase(String rootNode ,String database, IDBMS connection){
+	public Event[] loadTreeFromDatabase(String rootNode ,String database, IDataAccessObject connection){
 		DBCursor cursor=connection.select("_id", "", rootNode, database, TraceCollection.COLLECTION_NAME.toString());
 		Event []event=null;
 		 if (cursor !=null){
@@ -281,7 +277,7 @@ class SlidingWindowTree {
 	 */
 	private void printRecursive(Event[] nodes,String prefix, IAlgorithmOutStream outStream){
 	      
-		Boolean isPrefixPrinted=false;
+		//Boolean isPrefixPrinted=false;
  		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
 			      
 				  ArrayList<Event[]> branches=nodes[nodeCount].getBranches();

@@ -17,7 +17,7 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
@@ -53,7 +53,7 @@ public class CreateModelHandler implements IHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
+		IDataAccessObject connection=DBMSFactory.INSTANCE.getDataAccessObject();
 		
 		if (connection.isConnected()){
 			WizardDialog wizardDialog = new WizardDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),

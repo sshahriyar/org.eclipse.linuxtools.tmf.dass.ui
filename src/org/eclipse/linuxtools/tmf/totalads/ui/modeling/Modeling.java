@@ -9,42 +9,26 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
-import org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-//import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-//import org.eclipse.swt.events.SelectionAdapter;
-//import org.eclipse.swt.events.SelectionEvent;
-//import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 
 /**
  * This class creates GUI widgets for the Modeling Tab of TotalADS
@@ -52,14 +36,14 @@ import org.eclipse.swt.graphics.Font;
  *
  */
 public class Modeling {
-	private AlgorithmModelSelector algorithmSelector;
+
 	private TracingTypeSelector traceTypeSelector;
 	private Text txtTrainingTraces;
 	private Text txtValidationTraces;
 	private MessageBox msgBox;
 	private AlgorithmOutStream  progConsole;
 	private Button btnBuildModel;
-	
+	private HashSet<String> modelsList;
 	
 	/**
 	 * Constructor
@@ -84,20 +68,11 @@ public class Modeling {
 		
 		selectTracesAndTraceTypes(comptbItmModeling);
 		
-		Group grpAlgorithmModel=new Group(comptbItmModeling, SWT.NONE);
-		grpAlgorithmModel.setText("Select Algorithms and DataModels");
-		grpAlgorithmModel.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
-		grpAlgorithmModel.setLayout(new GridLayout(2,false));//gridTwoColumns);
-		
-		algorithmSelector=new AlgorithmModelSelector(grpAlgorithmModel);
 		
 		Composite compSettingAndEvaluation=new Composite(comptbItmModeling,SWT.NONE);
 	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
 	    compSettingAndEvaluation.setLayout(new GridLayout(6, false));
-	    
-		//createAnEmptyModel(compSettingAndEvaluation);
-	    adjustSettings(compSettingAndEvaluation);
-		buildModel(compSettingAndEvaluation);
+	    buildModel(compSettingAndEvaluation);
 		
 		
 	    scrolCompModel.setContent(comptbItmModeling);
@@ -158,43 +133,13 @@ public class Modeling {
 	}
 	
 	
-	
-		
-
-	
 	/**
 	 * Creates GUI widgets for the selection of validation traces
 	 * @param compParent
 	 */
 	public void validation(Composite compParent){
 		
-		/////////////////////////////////////////////////////////
-		/////Cross validation will be available in the next version
-		///////////////////////////////////////////////////////////
-		/* 
-		 Group grpValidation=new Group(comptbItmModeling, SWT.NONE);
-		grpValidation.setText("Select Validation Traces");
-		grpValidation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
-		grpValidation.setLayout(new GridLayout(1,false));//gridTwoColumns);
-				
-		
-		 Button radioBtnCrossVal=new Button(grpValidation, SWT.RADIO);
-		radioBtnCrossVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
-		radioBtnCrossVal.setText("Cross Validation");
-		
-		
-		Label lblCrossVal=new Label(grpValidation, SWT.BORDER);
-		lblCrossVal.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false,1,1));
-		lblCrossVal.setText("Specify Folds:");
-		Text txtCrossVal = new Text(grpValidation, SWT.BORDER);
-		txtCrossVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
-		txtCrossVal.setText("3");
-		
-		Button radioBtnVal=new Button(grpValidation, SWT.RADIO);
-		radioBtnVal.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,2,1));
-		radioBtnVal.setText("Validation");
-		radioBtnVal.setSelection(true);*/
-		
+			
 		Label lblValidationTraces= new Label(compParent, SWT.NONE);
 		lblValidationTraces.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false,2,1));
 		lblValidationTraces.setText("Select the Folder Containing Validation Traces");
@@ -212,60 +157,6 @@ public class Modeling {
 		 * End group modeling type and traces
 		 */
 	}
-	
-	/**
-	    * Creates GUI widgets for the creation of an empty model
-	    * @param comptbItmModeling Composite of Modeling
-	    */
-		private void createAnEmptyModel(Composite comptbItmModeling){
-			
-			/*Button btnEmpty=new Button(comptbItmModeling,SWT.NONE);
-			btnEmpty.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-			btnEmpty.setText("Create an Empty DataModel");
-			
-			//Event handler for Empty model button
-			btnEmpty.addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mouseUp(MouseEvent e) {
-					try {
-						algorithmSelector.createAnEmptyModel();
-						MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-						           ,SWT.ICON_INFORMATION|SWT.OK);
-						msgBox.setMessage("An empty model created");
-						msgBox.open();
-						
-					} catch (TotalADSDBMSException ex) {
-						msgBox.setMessage(ex.getMessage());
-						msgBox.open();
-					} catch (TotalADSGeneralException ex) {
-						msgBox.setMessage(ex.getMessage());
-						msgBox.open();
-					} catch (Exception ex) {
-							msgBox.setMessage(ex.getMessage());
-							msgBox.open();
-							Logger.getLogger(Modeling.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
-							
-					}
-					
-				}
-			 });*/
-		}
-	
-   /**
-    * Creates GUI widgets for adjustment of settings of an algorithm
-    * Shows setting dialog for a selected algorithm
-    * @param comptbItmModeling Composite of Modeling
-    */
-	private void adjustSettings(Composite comptbItmModeling){
-		
-		Button btnSettings=new Button(comptbItmModeling,SWT.NONE);
-		btnSettings.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
-		btnSettings.setText("Adjust SettingsForm");
-		
-		
-	}
-
 	
 	/**
 	 * Method to handle model building button
@@ -292,7 +183,12 @@ public class Modeling {
 						String trainingTraces=txtTrainingTraces.getText().trim();
 						String validationTraces=txtValidationTraces.getText().trim();
 						
-						if (trainingTraces.isEmpty()){
+						if (modelsList.size()<=0){
+							msgBox.setMessage("Please, select a model first!");
+							msgBox.open();
+							return;
+						} 
+						else if (trainingTraces.isEmpty()){
 						
 							msgBox.setMessage("Please, select training traces.");
 							msgBox.open();
@@ -312,7 +208,7 @@ public class Modeling {
 						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
 						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, 
-												validationTraces,traceReader,algorithmSelector,	btnBuildModel);
+												validationTraces,traceReader,	btnBuildModel);
 						ExecutorService executor = Executors.newSingleThreadExecutor();
 						executor.execute(modeling);
 						executor.shutdown();
@@ -320,6 +216,14 @@ public class Modeling {
 				
 			}
 		 });
+	}
+	
+	/**
+	 * This function gets called from {@link ModelingView} to get updated for the currently selected models
+	 * @param modelsList
+	 */
+	public void updateonModelSelection(HashSet<String> modelsList){
+	 this.modelsList=modelsList;
 	}
 
 		

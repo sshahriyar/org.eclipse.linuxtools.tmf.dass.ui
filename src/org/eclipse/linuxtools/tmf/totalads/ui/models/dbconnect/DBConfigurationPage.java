@@ -12,8 +12,6 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models.dbconnect;
 
 
 import org.eclipse.jface.wizard.WizardPage;
-
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,7 +32,8 @@ public class DBConfigurationPage extends WizardPage {
 	private Label lblPort;
 	private Text txtPort;
 	private boolean isEmpty;
-	
+	private final String HOST="localhost";
+	private final String PORT="27017";
 	/**
 	 * Constructor
 	 * @param parentShell
@@ -63,7 +62,7 @@ public class DBConfigurationPage extends WizardPage {
 		
 		txtHost=new Text(compConfigure, SWT.BORDER);
 		txtHost.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
-		txtHost.setText(Configuration.host);
+		txtHost.setText(HOST);
 		
 		lblPort= new Label(compConfigure,SWT.NONE);
 		lblPort.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
@@ -71,7 +70,7 @@ public class DBConfigurationPage extends WizardPage {
 		
 		txtPort=new Text(compConfigure, SWT.BORDER);
 		txtPort.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
-		txtPort.setText(Configuration.port.toString());
+		txtPort.setText(PORT);
 		
 		setControl(compConfigure);
 		setPageComplete(true);

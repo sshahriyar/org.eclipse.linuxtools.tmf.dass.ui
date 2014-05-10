@@ -10,7 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 /**
  *
- * Observer interface to be implmented by those classes which wants update from the IDBMS 
+ * Observer interface to be implmented by those classes which wants update from the IDataAccessObject 
  *  @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  */
 public interface IDBMSObserver {

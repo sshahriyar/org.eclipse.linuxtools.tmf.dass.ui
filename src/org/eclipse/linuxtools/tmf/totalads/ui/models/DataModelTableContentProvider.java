@@ -5,19 +5,18 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 
 /**
  * @author efraimlopez
  *
  */
-public class DataModelTableContentProvider 
-	implements IStructuredContentProvider, IDBMSObserver{
+class DataModelTableContentProvider	implements IStructuredContentProvider, IDBMSObserver{
 
 	private Viewer viewer = null;
-	private IDBMS model = null;
-		
+	private IDataAccessObject dao = null;
+	public static final String EMPTY_VIEW_FIELD="No connection";	
 	@Override
 	public void dispose() {
 		
@@ -28,23 +27,23 @@ public class DataModelTableContentProvider
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
 	    if(oldInput != null) {
-	    	IDBMS old = (IDBMS) oldInput;
+	    	IDataAccessObject old = (IDataAccessObject) oldInput;
 	        old.removeObserver(this);
 	    }
 	    if(newInput != null) {
-	    	model = (IDBMS) newInput;
-	    	model.addObserver(this);
+	    	dao = (IDataAccessObject) newInput;
+	    	dao.addObserver(this);
 	    }
 	}
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		model = (IDBMS) inputElement;
+		dao = (IDataAccessObject) inputElement;
 		
-		if(model.isConnected())
-			return model.getDatabaseList().toArray();
+		if(dao.isConnected())
+			return dao.getDatabaseList().toArray();
 		else
-			return new String[] {"No Connection"};
+			return new String[] {EMPTY_VIEW_FIELD};
 	}
 
 	/*

@@ -20,9 +20,8 @@ import org.eclipse.core.commands.IHandlerListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.swt.SWT;
@@ -49,6 +48,8 @@ public class TestSettingsHandler implements IHandler {
 		
 		 /// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
+			
+			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
@@ -109,11 +110,11 @@ public class TestSettingsHandler implements IHandler {
 				}
 				
 				 
-				IDBMS connection=DBMSFactory.INSTANCE.getDBMSInstance();
+				IDataAccessObject connection=DBMSFactory.INSTANCE.getDataAccessObject();
 				//Open the settings dialog
 				if (connection.isConnected()){
 						String model=selectedModels.iterator().next();	// get the only selected model
-						IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, Configuration.connection);
+						IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, DBMSFactory.INSTANCE.getDataAccessObject());
 						String []settings=algorithm.getTestingOptions(model,connection );
 						
 						settingsDialog= new TestSettingsDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
@@ -135,6 +136,8 @@ public class TestSettingsHandler implements IHandler {
 			msgBoxErr.setMessage(ex.getMessage());
 			msgBoxErr.open();
 			Logger.getLogger(TestSettingsHandler.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
+			//Check if connection still exists and all the views are notified of the presence and absence of connection
+			DBMSFactory.INSTANCE.verifyConnection();
 			
 		}finally{
 			settingsDialog=null;

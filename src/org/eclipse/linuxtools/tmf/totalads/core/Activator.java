@@ -10,6 +10,16 @@
 package org.eclipse.linuxtools.tmf.totalads.core;
 
 //import org.eclipse.linuxtools.tmf.totalads.ui.models.TotalAdsState;
+import java.io.File;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
+import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -34,18 +44,21 @@ public class Activator extends AbstractUIPlugin {
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		//TotalAdsState.INSTANCE.init();
+		init();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		dispose();
 		super.stop(context);
 	}
 
@@ -57,5 +70,59 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-
+	
+	/**
+	 * 
+	 * Initialises TotalADS
+	 * 
+	 */
+	private void init(){
+		try{
+		    		    
+			
+			AlgorithmFactory algFactory= AlgorithmFactory.getInstance();
+			algFactory.initialize();
+			
+			TraceTypeFactory trcTypeFactory=TraceTypeFactory.getInstance();
+			trcTypeFactory.initialize();
+			
+			// Initialise the logger
+			Handler handler=null;
+			handler= new  FileHandler(getCurrentPath()+"totaladslog.xml");
+	        Logger.getLogger("").addHandler(handler);	
+				
+		} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
+			
+		   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
+		   if (ex.getMessage()!=null){
+		      msg.setMessage(ex.getMessage());
+		      msg.open();
+		   }
+		   Logger.getLogger(Activator.class.getName()).log(Level.SEVERE,null,ex);
+		}
+	}
+	
+	/**
+	 * Disposes TotalADS
+	 */
+	private void dispose(){
+		DBMSFactory.INSTANCE.closeConnection();
+		// This code deinitializes the  Factory instance. It was necessary because
+		// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
+		// deinitialized on previous close of the plugin. 
+		AlgorithmFactory.destroyInstance();
+		TraceTypeFactory.destroyInstance();
+		
+	
+	}
+	
+	/**
+	 * Returns the current directory of the application
+	 * @return Path
+	 * @throws Exception
+	 */
+	private  String getCurrentPath() {
+		String applicationDir=Activator.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		return applicationDir+File.separator;
+	}
 }

@@ -9,11 +9,11 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 /**
- * Subject interface used by IDBMS to notify observers
+ * Subject interface used by IDataAccessObject to notify observers
  *  @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public interface IDBMSSubject {
+interface IDBMSSubject {
 	/**
 	 *  Adds an observer of type {@link IDBMSObserver}
 	 * @param observer

@@ -10,68 +10,48 @@
 package org.eclipse.linuxtools.tmf.totalads.dbms;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
-//import org.eclipse.linuxtools.tmf.totalads.ui.ksm.*;
-
-
-import java.lang.reflect.Field;
-import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-
-
-
-
-
-
-
-
-
 import com.google.gson.JsonObject;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
 import com.mongodb.DB;
-import com.mongodb.DBAddress;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 /**
- * Database Management System (IDBMS) class. This calss connects with MongoDB,
+ * Database Management System (IDataAccessObject) class. This calss connects with MongoDB,
  * and performs  the manipulations required in a program with MongoDB 
  *  
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-class MongoDBMS implements  IDBMS {
+class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	
 	private MongoClient mongoClient;
 	private Boolean isConnected=false;
 	private ArrayList<IDBMSObserver> observers;
+	
 	/**
 	 * Constructor
 	 */
 	public MongoDBMS() {
 		observers=new ArrayList<IDBMSObserver>();
 	}
-	/**
-	 * Connects with MongoDB
-	 * @param host Host name 
-	 * @param port Port number
-	 * @return Returns an empty message if connection is made with the database, else returns the error message
-	 * @throws UnknownHostException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSConnection#connect(java.lang.String, java.lang.Integer)
 	 */
+	@Override
 	public String connect(String host, Integer port) {
 		String message="";
 		try {
-			if (isConnected) // Don't open multiple connections
-				closeConnection();
+			
 			
 			mongoClient = new MongoClient( host , port );
 			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
@@ -96,22 +76,16 @@ class MongoDBMS implements  IDBMS {
 		return message;
 		
 	}
-	/**
-	 * Connects with MongoDB using authentication mecahinsm
-	 * @param host Host name
-	 * @param port Port name
-	 * @param username User name
-	 * @param password Password
-	 * @return Empty message if connected or error message
-	 * @throws UnknownHostException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSConnection#connect(java.lang.String, java.lang.Integer, java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public String connect(String host, Integer port, String username, String password, String database) {
 		
 		String message="";
 		try {
-			if (isConnected) // Don't open multiple connections
-				closeConnection();
-			
+					
 			mongoClient = new MongoClient( host , port );
 			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
 			
@@ -146,18 +120,20 @@ class MongoDBMS implements  IDBMS {
 		return message;
 	}
 	
-	/**
-	 * Determines the connected state
-	 * @return true or false
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#isConnected()
 	 */
+	@Override
 	public Boolean isConnected(){
 		return isConnected;
 	}
 	
-	/**
-	 * Get database list
-	 * @return The list of database
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#getDatabaseList()
 	 */
+	@Override
 	public List<String> getDatabaseList(){
 		List <String> dbList=mongoClient.getDatabaseNames();
 		// remove system databases
@@ -167,10 +143,9 @@ class MongoDBMS implements  IDBMS {
 		
 	}
 	
-	/**
-	 * Checks the existence of the database
-	 * @param database
-	 * @return
+	/*
+	 * 	@Override(non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#datbaseExists(java.lang.String)
 	 */
 	public boolean datbaseExists(String database){
 	List<String> databaseNames = getDatabaseList();
@@ -182,12 +157,11 @@ class MongoDBMS implements  IDBMS {
 		
 	}
 	
-	/**
-	 * Creates a database and all collections in it
-	 * @param dataBase Database name
-	 * @param collectionNames Array of collection names
-	 * @throws TotalADSDBMSException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#createDatabase(java.lang.String, java.lang.String[])
 	 */
+	@Override
 	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
 	
 	 if (datbaseExists(dataBase)){
@@ -209,12 +183,11 @@ class MongoDBMS implements  IDBMS {
 		notifyObservers();
 	}
 	
-	/**
-	 * Creates a unique index on a collection (table) in ascending order
-	 * @param database Database name
-	 * @param collection Collection name
-	 * @param fields An array of field names on which to create unique indexes. 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#createAscendingUniquesIndexes(java.lang.String, java.lang.String, java.lang.String[])
 	 */
+	@Override
 	public void createAscendingUniquesIndexes(String dataBase, String collection, String []fields){
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
 		DBObject fieldsDB=new BasicDBObject();
@@ -224,12 +197,12 @@ class MongoDBMS implements  IDBMS {
 			
 		coll.ensureIndex(fieldsDB,new BasicDBObject("unique", true));
 	}
-	/**
-	 * Creates a unique index on a collection (table) in descending order
-	 * @param database Database name
-	 * @param collection Collection name
-	 * @param fields An array of field names on which to create unique indexes. 
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#createDescendingUniquesIndexes(java.lang.String, java.lang.String, java.lang.String[])
 	 */
+	@Override
 	public void createDescendingUniquesIndexes(String dataBase, String collection, String []fields){
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
 		DBObject fieldsDB=new BasicDBObject();
@@ -239,20 +212,26 @@ class MongoDBMS implements  IDBMS {
 			
 		coll.ensureIndex(fieldsDB,new BasicDBObject("unique", true));
 	}
-	/**
-	 * Close the connection
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSConnection#closeConnection()
 	 */
+	@Override
 	public void closeConnection(){
 		isConnected=false;
 		mongoClient.close();
 	}
-	/**
-	 * Deletes a database
-	 * @param database Database name
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSConnection#deleteDatabase(java.lang.String)
 	 */
+	@Override
 	public void deleteDatabase(String database){
+		
 		mongoClient.dropDatabase(database);
 		notifyObservers();
+		
 	}
 	/**
 	 * Extracts keys and values from public fields of a class's object using reflection and assign it
@@ -321,35 +300,29 @@ class MongoDBMS implements  IDBMS {
 		
 		
 	}*/
-	/**
-	 * Inserts an object in the form of JSON representation into the database. Any kind of complex
-	 *  data structure can be converted to JSON  using gson library and passed to this function 
-	 * @param database Database name
-	 * @param jsonObject JSON Object
-	 * @param collection Collection name in which to insert 
-	 * @throws TotalADSDBMSException
+	
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#insertUsingJSON(java.lang.String, com.google.gson.JsonObject, java.lang.String)
 	 */
+	@Override
 	public void insertUsingJSON(String database, JsonObject jsonObject, String collection) throws TotalADSDBMSException{
 		  try{
 		   DB db = mongoClient.getDB(database);
 		   DBCollection coll = db.getCollection(collection);
 		   BasicDBObject obj = (BasicDBObject)JSON.parse(jsonObject.toString());
 		   coll.insert(obj);
-		  } catch (Exception ex){ // If there is any exception here cast it as IDBMS exception
+		  } catch (Exception ex){ // If there is any exception here cast it as IDataAccessObject exception
 			  throw new TotalADSDBMSException(ex.getMessage());
 		  }
 	}
 
-	/**
-	 * Inserts or updates (if already exists) an object in the form of JSON representation into the database. Any kind of complex
-	 *  data structure can be converted to JSON using gson library and passed to this function. This function replaces the entire document with a new
-	 *  document of a matching key. E.g., If a document {"_id": 1, a:4, b:6} is updated with {b:8} then the new document would be {"_id":1, b:8} 
-	 * @param database Database name
-	 * @param keytoSearch The indexed field and its value as a JSON object which is to be searched
-	 * @param jsonObjectToUpdate The datastructure as a JSON object which is to be updated
-	 * @param collection Name of the collection (table)
-	 * @throws TotalADSDBMSException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#insertOrUpdateUsingJSON(java.lang.String, com.google.gson.JsonObject, com.google.gson.JsonObject, java.lang.String)
 	 */
+	@Override
 	public void insertOrUpdateUsingJSON(String database, JsonObject keytoSearch, 
 						JsonObject jsonObjectToUpdate, String collection) throws TotalADSDBMSException{
 		   DB db = mongoClient.getDB(database);
@@ -367,15 +340,11 @@ class MongoDBMS implements  IDBMS {
 		
 	}
 	
-	
-	/**
-	 * Updates fields in an existing document.
-	 * @param database
-	 * @param keytoSearch
-	 * @param jsonObjectToUpdate
-	 * @param collection
-	 * @throws TotalADSDBMSException
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#updateFieldsInExistingDocUsingJSON(java.lang.String, com.google.gson.JsonObject, com.google.gson.JsonObject, java.lang.String)
 	 */
+	@Override
 	public void updateFieldsInExistingDocUsingJSON(String database, JsonObject keytoSearch, JsonObject jsonObjectToUpdate, String collection) 
 				throws TotalADSDBMSException{
 		
@@ -395,14 +364,12 @@ class MongoDBMS implements  IDBMS {
 		col.update(query, updateObj);
 
 	}
-	/**
-	 * Selects a max value from a collection (table)
-	 * @param key Field name to return the max of. Use an index key otherwise the results will be slow
-	 * @param database Database name
-	 * @param collection Collection name
-	 * @return Maximum value as a string
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#selectMax(java.lang.String, java.lang.String, java.lang.String)
 	 */
-
+	@Override
 	public String selectMax(String key, String database, String collection){
 		String maxVal="";
 		DB db = mongoClient.getDB(database);
@@ -415,15 +382,12 @@ class MongoDBMS implements  IDBMS {
 		
 		return maxVal;
 	}
-	/**
-	 * Returns a set of documents based on a key search
-	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
-	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
-	 * @param value Double value of the field
-	 * @param database Database name
-	 * @param collection Collection name in the database
-	 * @return A DBCursor object which you can iterate through
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#select(java.lang.String, java.lang.String, java.lang.Double, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public DBCursor select(String key, String operator, Double value,String database, String collection ){
 		DBCursor cursor;
 		BasicDBObject query;
@@ -441,15 +405,12 @@ class MongoDBMS implements  IDBMS {
 			cursor=null;
 		return cursor;
 	}
-	/**
-	 * Returns a set of documents based on a key search
-	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
-	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
-	 * @param value String value of the field
-	 * @param database Database name
-	 * @param collection Collection name in the database
-	 * @return A DBCursor object which you can iterate through
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#select(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public DBCursor select(String key, String operator,String value,String database, String collection ){
 		DBCursor cursor;
 		BasicDBObject query;
@@ -468,16 +429,14 @@ class MongoDBMS implements  IDBMS {
 		return cursor;
 	}
 	
-	/**
-	 * Selects all the documents as a DBCursor Object which can be used to iterate through them
-	 * @param database Database name
-	 * @param collection Collection name
-	 * @return DBCursor object
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject#selectAll(java.lang.String, java.lang.String)
 	 */
+	@Override
 	public DBCursor selectAll(String database, String collection ){
 		DBCursor cursor;
-		BasicDBObject query;
-		
+				
 		DB db =mongoClient.getDB(database);
 		DBCollection coll = db.getCollection(collection);
 				
@@ -524,29 +483,28 @@ class MongoDBMS implements  IDBMS {
 			
 			
 	}*/
-	//////////////////////////////////////////////////////////////////////////////// 
-	//Implementing the IDBMSSubject Interface 
-	///////////////////////////////////////////////////////////////
-	/**
-	 * Adds an observer of type {@link IDBMSObserver}
-	 * @param observer
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSSubject#addObserver(org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver)
 	 */
 	@Override
 	public void addObserver(IDBMSObserver observer){
 		observers.add(observer);
 		
 	}
-	/**
-	 * Removes an observer of type {@link IDBMSObserver}
-	 * @param observer
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSSubject#removeObserver(org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver)
 	 */
 	@Override
 	public void removeObserver(IDBMSObserver observer){
 		observers.remove(observer);
 		
 	}
-	/**
-	 * Notifies all observers of type {@link IDBMSObserver}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSSubject#notifyObservers()
 	 */
 	@Override
 	public void notifyObservers(){

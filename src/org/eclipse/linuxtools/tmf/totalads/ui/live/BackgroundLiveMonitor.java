@@ -10,23 +10,20 @@
 
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
-import java.io.Console;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
+import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
@@ -236,7 +233,14 @@ public class BackgroundLiveMonitor implements Runnable {
 			exception=ex.getMessage();
 			
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
-			ex.printStackTrace();
+			//ex.printStackTrace();
+			// An exception could be thrown due to unavailability of the db, 
+			// make sure that the connection is not lost
+			DBMSFactory.INSTANCE.verifyConnection();
+			// We don't have to worry about exceptions here as the above function handles all the exceptions
+			// and just returns a message. This function also initializes connection info  to a correct value
+			// We cannot write above function under ConnectinException block because such exception is never thrown
+			// and Eclipse starts throwing errors
 			
 		}
 		finally{
@@ -293,7 +297,7 @@ public class BackgroundLiveMonitor implements Runnable {
 		while (it.hasNext()){
 			
 				String model=it.next();
-				String []settings=null;
+				
 				
 				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
 				
@@ -303,7 +307,7 @@ public class BackgroundLiveMonitor implements Runnable {
 				outStreamAlg.addOutputEvent("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-				Results results=algorithm.test(traceIterator,model , Configuration.connection, outStreamAlg);
+				Results results=algorithm.test(traceIterator,model , DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
 				
 				Double anomCount=modelsAndAnomalyCount.get(model);
 				if (results.getAnomaly()==true)
@@ -323,7 +327,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					outStreamAlg.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
 					outStreamAlg.addOutputEvent("Please wait while the model is updated....");
 					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
-					algorithm.train(traceIterator, true, model, Configuration.connection, outStreamAlg);
+					algorithm.train(traceIterator, true, model, DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
 				} 
 				
 				outStreamAlg.addOutputEvent("Execution  finished for "+model);

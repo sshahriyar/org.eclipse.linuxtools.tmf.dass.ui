@@ -10,28 +10,17 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.util.HashSet;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
 import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
-import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
-import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -46,9 +35,9 @@ public class DiagnosisView extends TmfView {
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
 	private ResultsAndFeedback resultsAndFeedback;
-	private AlgorithmFactory algFactory;
-	private TraceTypeFactory trcTypeFactory;
-	private Handler handler;
+	//private AlgorithmFactory algFactory;
+	//private TraceTypeFactory trcTypeFactory;
+	//private Handler handler;
 	
 	private AnomaliesView anomView;
 	/**
@@ -56,7 +45,7 @@ public class DiagnosisView extends TmfView {
 	 */
 	 private class PerspectiveViewsListener implements IPartListener {
 		 /// Registers a listener to Eclipse to get the object of  ResultsAndfeedback in anomView
-		 // So it can be filled whenme evaluate button is pressed in the Diagnosis View
+		 // So it can be filled when evaluate button is pressed in the Diagnosis View
 		 @Override  
 	        public void partOpened(IWorkbenchPart part) {
 			 System.out.println ("Part Opened "+part.getTitle());
@@ -98,14 +87,16 @@ public class DiagnosisView extends TmfView {
 	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
-		System.out.println("In Diagnosis View");
+		//System.out.println("In Diagnosis View");
 	}
-	/**
-	 * An overriden method gets called from Eclipse when the view is initialised
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
-		init();
+		//init();
 		diagnosis=new Diagnosis(parent);
 	
         ITmfTrace trace = getActiveTrace();
@@ -139,7 +130,7 @@ public class DiagnosisView extends TmfView {
 	 */
 	@Override
 	public void setFocus() {
-		// TODO
+		
 
 	}
 
@@ -162,50 +153,13 @@ public class DiagnosisView extends TmfView {
         diagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
-	 /**
-		 * 
-		 * Initialises TotalADS
-		 * 
-		 */
-		private void init(){
-			try{
-			    Configuration.connection=DBMSFactory.INSTANCE.getDBMSInstance();
-				    
-				
-				algFactory= AlgorithmFactory.getInstance();
-				algFactory.initialize();
-				
-				trcTypeFactory=TraceTypeFactory.getInstance();
-				trcTypeFactory.initialize();
-				// Initialise the logger
-				handler=null;
-				handler= new  FileHandler("totaladslog.xml");
-		        Logger.getLogger("").addHandler(handler);	
-					
-			} catch (Exception ex) { // capture all the exceptions here, which are missed by Diagnois and Modeling classes
-				
-			   MessageBox msg=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.ICON_ERROR);
-			   if (ex.getMessage()!=null){
-			      msg.setMessage(ex.getMessage());
-			      msg.open();
-			   }
-			   Logger.getLogger(TotalADS.class.getName()).log(Level.SEVERE,null,ex);
-			}
-		}
-	/**
-	 * Disposes the view
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.ui.views.TmfView#dispose()
 	 */
 	@Override
 	public void dispose(){
 		super.dispose();
-		if (Configuration.connection.isConnected())
-			Configuration.connection.closeConnection();
-		// This code deinitializes the  Factory instance. It was necessary because
-		// if TotalADS plugin is reopened in running Eclipse, the static objects are not 
-		// deinitialized on previous close of the plugin. 
-		AlgorithmFactory.destroyInstance();
-		TraceTypeFactory.destroyInstance();
-		
-	
 	}
 }

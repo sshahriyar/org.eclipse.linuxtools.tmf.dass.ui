@@ -9,63 +9,25 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
-import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-//import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
-//import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
-//import org.eclipse.linuxtools.tmf.totalads.core.TMFTotalADSView;
-//import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException;
-//import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
-
-
-
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
-//import org.eclipse.linuxtools.tmf.totalads.ui.TotalADS;
-//import org.eclipse.linuxtools.tmf.totalads.ui.TracingTypeSelector;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ModelLoader;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.FileBrowser;
-//import org.eclipse.linuxtools.tmf.totalads.ui.modeling.StatusBar;
-import org.eclipse.linuxtools.tmf.totalads.ui.utilities.SWTResourceManager;
-//import org.eclipse.osgi.framework.internal.core.Msg;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.SWT;
-//import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-//import org.eclipse.swt.events.SelectionAdapter;
-//import org.eclipse.swt.events.SelectionEvent;
-//import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
-//import org.eclipse.swt.widgets.Button;
-//import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
-//import org.eclipse.swt.widgets.ProgressBar;
-//import org.eclipse.swt.widgets.TabItem;
-//import org.eclipse.swt.widgets.Table;
-//import org.eclipse.swt.widgets.TableColumn;
-//import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Tree;
+
 
 /**
  * This class creates the GUI elements/widgets for live diagnosis using ssh. Any host can be selected and LTTNg tracing
@@ -105,12 +67,7 @@ public class LiveMonitor {
 	 *
 	 */
 	public LiveMonitor(Composite compParent){
-		//tmfTracePath=new StringBuilder();
-		//currentlySelectedTracesPath=new StringBuilder();
-		//LiveMonitor Tab Item
-		//CTabItem tbItmLive = new CTabItem(tabFolderParent, SWT.NONE);
-		//tbItmLive.setText("Live Monitor");
-		//Making scrollable tab item 
+	
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(compParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmLive = new Composite(scrolCompAnom,SWT.NONE);
 		//tbItmLive.setControl(scrolCompAnom);
@@ -159,28 +116,6 @@ public class LiveMonitor {
 		btnDetails.setEnabled(false);
 		
 
-		
-		///////////////
-		///Creating a chart
-		///////////////
-		
-		
-		//Composite compChart = new Composite(compButtonsChartConsole,SWT.NONE);
-		//compChart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		//compChart.setLayout(new FillLayout());
-		
-		
-		/////////
-		///Creating a smaller console than the chart
-		///////
-	//	Composite compConsole = new Composite(compButtonsChartConsole,SWT.NONE);
-	//	compConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-	//	compConsole.setLayout(new GridLayout(1,false));
-		
-	//	GridData gridDataConsoleText=new GridData(SWT.FILL,SWT.FILL,true,true);
-	//	gridDataConsoleText.minimumHeight=160;
-		
-		
 		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmLive);
@@ -334,32 +269,6 @@ public class LiveMonitor {
 		btnTesting.setText("Testing");
 		btnTesting.setSelection(true);
 		
-		//////////////////
-		/////// Existing DataModel
-		//////////////
-		/*Group grpModelSelection=new Group(grpTrainingAndEval,SWT.NONE);	
-		grpModelSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,2,2));
-		grpModelSelection.setLayout(new GridLayout(1,false));
-		grpModelSelection.setText("Existing Models");
-		
-		Composite compModelSelection=new Composite(grpModelSelection, SWT.NONE);
-	    compModelSelection.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,false,false));
-		compModelSelection.setLayout(new GridLayout(2,false));
-	    	
-		   
-		Button btnSettings=new Button(compModelSelection, SWT.NONE);
-		btnSettings.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnSettings.setText(" SettingsForm ");
-		
-		Button btnDelete=new Button(compModelSelection, SWT.NONE);
-		btnDelete.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false,1,1));
-		btnDelete.setText("   Delete   ");
-		
-		Tree treeModels = new Tree(grpModelSelection, SWT.BORDER | SWT.CHECK | SWT.FULL_SELECTION| SWT.V_SCROLL | SWT.H_SCROLL);
-		treeModels.setLinesVisible(true);
-		treeModels.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		modelSelectionHandler=new ModelSelection(btnSettings, btnDelete, treeModels);*/
 		
 	}
 	
@@ -403,9 +312,7 @@ public class LiveMonitor {
 							
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
-					//IDetectionAlgorithm algorithms[]=modelSelectionHandler.getCurrentlySelectedAlgorithms();
-					//HashMap<String,String[]> modelsAndSettings=modelSelectionHandler.getModelaAndSettings();
-					
+						
 					if (modelsList.size() <=0){
 						 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 						 msgBox.setMessage("Please select a model first");
@@ -506,12 +413,7 @@ public class LiveMonitor {
 			 return false;
 	}
 	
-	/**
-	 * Closes the results form
-	 */
-	public void destroy (){
-		//this.resultsAndFeedback.destroy();
-	}
+	
 	/**
 	 * Sets the chart object
 	 * @param chart

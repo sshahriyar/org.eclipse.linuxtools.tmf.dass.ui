@@ -104,7 +104,7 @@ class KSMSyscallStateMapper {
 	 */
 	public void extractStatesAndCalls(String path) throws IOException{
 		int uniquecounter=0;
-		String line, prevElem="";
+		String line;//, prevElem="";
 		System.out.println("\n ****************Processing new file************");
 		buffReader=new BufferedReader(new FileReader(new File(path)));
 		while ((line=buffReader.readLine())!=null){

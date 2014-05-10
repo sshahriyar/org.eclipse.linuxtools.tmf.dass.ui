@@ -1,25 +1,13 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
-import java.util.*;
-
-import org.eclipse.linuxtools.tmf.totalads.core.Configuration;
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
-
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-
-
-
-
-
-
-
 import org.apache.mahout.classifier.sequencelearning.hmm.*;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -54,13 +42,13 @@ class HmmMahout {
 	 * Validates settings and saves them into the database after creating a new database if required
 	 * @param settings SettingsForm array
 	 * @param database Database name
-	 * @param connection IDBMS object
+	 * @param connection IDataAccessObject object
 	 * @param isNewSettings True if settings are inserted first time, else false if existing fields are updated
 	 * @param isNewDBTrue if new database has to be created 
 	 * @throws TotalADSGeneralException
 	 * @throws TotalADSDBMSException
 	 */
-	public void verifySaveSettingsCreateDb(String []settings, String database, IDBMS connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSGeneralException, TotalADSDBMSException{
+	public void verifySaveSettingsCreateDb(String []settings, String database, IDataAccessObject connection, Boolean isNewSettings, Boolean isNewDB) throws TotalADSGeneralException, TotalADSDBMSException{
 	
 		JsonObject settingObject=new JsonObject();
 		for (int i=0; i<settings.length;i+=2){ 
@@ -133,7 +121,7 @@ class HmmMahout {
 	 * @param connection
 	 * @return SettingsForm as an array of String 
 	 */
-	public String[] loadSettings(String database, IDBMS connection){
+	public String[] loadSettings(String database, IDataAccessObject connection){
 		String [] settings=null;
 		DBCursor cursor=connection.selectAll(database, SettingsCollection.COLLECTION_NAME.toString());
 		if (cursor!=null){
@@ -155,22 +143,6 @@ class HmmMahout {
 		}
 		return settings;
 	}
-	/**
-	 * Returns a decimal random number within a decimal range
-	 * @param start
-	 * @param end
-	 * @param random
-	 * @return
-	 */
-	private double getRandomRealNumber(double start, double end, Random random){
-		   
-		    //get the range, casting to long to avoid overflow problems
-		    double range = end - start ;
-		    // compute a fraction of the range, 0 <= frac < range
-		    double fraction = (range * random.nextDouble());
-		    double randomNumber =  fraction + start;    
-		    return randomNumber;
-	  }
 		  
 	/**
 	 * Trains an HMM on a sequence using the BaumWelch algorithm
@@ -233,7 +205,7 @@ class HmmMahout {
 	 * @param database
 	 * @throws TotalADSDBMSException
 	 */
-	public void updatePreviousModel(Integer[] sequence, IDBMS connection, String database) throws TotalADSDBMSException{
+	public void updatePreviousModel(Integer[] sequence, IDataAccessObject connection, String database) throws TotalADSDBMSException{
 		int []seq=new int[sequence.length];
 		for (int i=0; i<sequence.length;i++)
 			seq[i]=sequence[i];
@@ -262,7 +234,7 @@ class HmmMahout {
 	 * @param connection
 	 * @param database
 	 */
-	public void loadHmm(IDBMS connection, String database){
+	public void loadHmm(IDataAccessObject connection, String database){
 	   
 		DBCursor cursor=connection.selectAll(database, HmmModelCollection.COLLECTION_NAME.toString());
 		if (cursor!=null){
@@ -289,7 +261,7 @@ class HmmMahout {
 	 * @param connection
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveHMM(String database, IDBMS connection) throws TotalADSDBMSException{
+	public void saveHMM(String database, IDataAccessObject connection) throws TotalADSDBMSException{
 			   /// Inserting the states and probabilities
 			// Creating states ids
 			String key="hmm";

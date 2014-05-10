@@ -1,13 +1,9 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMS;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
-
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -81,7 +77,7 @@ class NameToIDMapper {
 	 * @param database
 	 * @throws TotalADSDBMSException
 	 */
-	public void saveMap(IDBMS connection, String database) throws TotalADSDBMSException{
+	public void saveMap(IDataAccessObject connection, String database) throws TotalADSDBMSException{
 		Gson gson =new Gson();
 		JsonElement jsonMap= gson.toJsonTree(nameToID);
 		JsonObject jsonObject= new JsonObject();
@@ -100,8 +96,8 @@ class NameToIDMapper {
 	 * @param connection
 	 * @param database
 	 */
-	@SuppressWarnings("unchecked")
-	public void loadMap(IDBMS connection, String database){
+
+	public void loadMap(IDataAccessObject connection, String database){
 		DBCursor cursor=connection.selectAll(database, NameToIDCollection.COLLECTION_NAME.toString());
 		if (cursor!=null){
 			 Gson gson =new Gson();

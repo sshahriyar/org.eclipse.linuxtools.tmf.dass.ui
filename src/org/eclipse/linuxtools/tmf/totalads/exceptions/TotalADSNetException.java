@@ -10,7 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
  * This class defines custom SSH and remote newotrk communication related exceptions
- * IDBMS configurations 
+ * IDataAccessObject configurations 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */

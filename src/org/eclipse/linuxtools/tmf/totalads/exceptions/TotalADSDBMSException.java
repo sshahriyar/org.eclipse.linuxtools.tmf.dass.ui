@@ -9,8 +9,8 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
- * This class defines custom IDBMS exceptions that are thrown when a user does not select the proper
- * IDBMS configurations 
+ * This class defines custom IDataAccessObject exceptions that are thrown when a user does not select the proper
+ * IDataAccessObject configurations 
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
