@@ -12,9 +12,9 @@ package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
 import org.eclipse.swt.SWT;
@@ -47,43 +47,43 @@ public class Modeling {
 	
 	/**
 	 * Constructor
-	 * @param tabFolderParent Parent tabFolder object  
 	 */
-	public Modeling(Composite tabFolderParent){
+	public Modeling(){
+		modelsList=new HashSet<String>();
+		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+		           ,SWT.ICON_ERROR|SWT.OK);
+	}
+	/**
+	 * Creates Modeling widgets
+	 * @param compParent
+	 */
+	public void createControls(Composite compParent){
 		
 	
 		// Create a modeling tab
 		//CTabItem tbItmModeling = new CTabItem(tabFolderParent, SWT.NONE);
 		//tbItmModeling.setText("Modeling");
 		
-		GridLayout gridTwoColumns=new GridLayout(2,true);
+		
 		
 		//Make it scrollable 
-		ScrolledComposite scrolCompModel=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledComposite scrolCompModel=new ScrolledComposite(compParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmModeling = new Composite(scrolCompModel, SWT.NONE);
 		comptbItmModeling.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true));
-		comptbItmModeling.setLayout(gridTwoColumns);
-		
-		//tbItmModeling.setControl(scrolCompModel);
+		comptbItmModeling.setLayout(new GridLayout(1,true));
 		
 		selectTracesAndTraceTypes(comptbItmModeling);
-		
-		
-		Composite compSettingAndEvaluation=new Composite(comptbItmModeling,SWT.NONE);
-	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,2,2));
-	    compSettingAndEvaluation.setLayout(new GridLayout(6, false));
-	    buildModel(compSettingAndEvaluation);
-		
-		
+				
+		buildModel(comptbItmModeling);
+	    
 	    scrolCompModel.setContent(comptbItmModeling);
 		 // Set the minimum size
-		scrolCompModel.setMinSize(600, 600);
+		scrolCompModel.setMinSize(200, 200);
 	    // Expand both horizontally and vertically
 		scrolCompModel.setExpandHorizontal(true);
 		scrolCompModel.setExpandVertical(true);
 		
-		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
-			           ,SWT.ICON_ERROR|SWT.OK);
+		
 	
 	}
 	
@@ -98,13 +98,13 @@ public class Modeling {
 		 * Group modeling type and traces
 		 */
 		Group grpTracesModeling=new Group(comptbItmModeling, SWT.NONE);
-		grpTracesModeling.setText("Select Traces and Trace Types");
+		grpTracesModeling.setText("Select Traces for Training and Validation");
 		grpTracesModeling.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,2));
-		grpTracesModeling.setLayout(new GridLayout(2,false));//gridTwoColumns);
+		grpTracesModeling.setLayout(new GridLayout(4,false));
 	
 		// creating widgets for the selection of trace type
 		Composite compTraceType=new Composite(grpTracesModeling, SWT.NONE);
-		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,1,1));
+		compTraceType.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,4,1));
 		compTraceType.setLayout(new GridLayout(2,false));
 		
 		Label lblTraceType= new Label(compTraceType, SWT.NONE);
@@ -112,7 +112,6 @@ public class Modeling {
 	    lblTraceType.setText("Select a Trace Type       ");
 		
 		traceTypeSelector=new TracingTypeSelector(compTraceType,new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
-
 		
 		/// Training Traces selection widgets
 		Label lblTrainingTraces= new Label(grpTracesModeling, SWT.NONE);
@@ -150,24 +149,21 @@ public class Modeling {
 		DirectoryBrowser traceBrowser= new DirectoryBrowser(compParent, txtValidationTraces, 
 						new GridData(SWT.LEFT,SWT.TOP,false,false));
 
-		//traceBrowser.setTextBox(txtValidationTraces);
-		
 	
-		/**
-		 * End group modeling type and traces
-		 */
 	}
 	
 	/**
 	 * Method to handle model building button
-	 * @param comptbItmModeling Modeling composite
+	 * @param compParent Composite
 	 */
 	
-	public void buildModel(Composite comptbItmModeling){
-		
-		btnBuildModel=new Button(comptbItmModeling,SWT.NONE);
-		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false,1,1));
-		btnBuildModel.setText("Start building the model");
+	public void buildModel(Composite compParent){
+		Composite compSettingAndEvaluation=new Composite(compParent,SWT.NONE);
+	    compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,4,2));
+	    compSettingAndEvaluation.setLayout(new GridLayout(1, false));
+		btnBuildModel=new Button(compSettingAndEvaluation,SWT.NONE);
+		btnBuildModel.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false,1,1));
+		btnBuildModel.setText("Start Modeling");
 		
 		//
 		//Event handler for mouse up event
@@ -177,9 +173,9 @@ public class Modeling {
 		@Override
 		public void mouseUp(MouseEvent e) {
 				
-						String selectedDB;
-						Boolean isNewDB;
-						btnBuildModel.setEnabled(false);
+					
+						
+						
 						String trainingTraces=txtTrainingTraces.getText().trim();
 						String validationTraces=txtValidationTraces.getText().trim();
 						
@@ -202,13 +198,13 @@ public class Modeling {
 							btnBuildModel.setEnabled(true);
 							return;
 						}
-						
+						btnBuildModel.setEnabled(false);
 						   // get the database name from the text box or combo
 						
 						
 						ITraceTypeReader traceReader=traceTypeSelector.getSelectedType();	 
 						BackgroundModeling modeling=new BackgroundModeling(trainingTraces, 
-												validationTraces,traceReader,	btnBuildModel);
+												validationTraces,traceReader,modelsList,	btnBuildModel);
 						ExecutorService executor = Executors.newSingleThreadExecutor();
 						executor.execute(modeling);
 						executor.shutdown();

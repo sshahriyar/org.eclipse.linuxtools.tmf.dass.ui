@@ -13,8 +13,8 @@ import java.util.HashSet;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
-import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 //import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener;
@@ -30,7 +30,7 @@ import org.eclipse.ui.part.ViewPart;
 public class LiveMonitorView extends ViewPart {
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView";
 	
-	//private AnomaliesView anomView;
+	//private ResultsView anomView;
 	private LiveMonitor liveMonitor;
 	/**
 	 * An inner class implementing the listener for other views initialised in {@link TotalAdsPerspectiveFactory} 
@@ -40,8 +40,8 @@ public class LiveMonitorView extends ViewPart {
 		 // So it can be filled when the evaluate button is pressed in the Diagnosis View
 		 @Override  
 	        public void partOpened(IWorkbenchPart part) {
-	  		   if (part instanceof AnomaliesView) {
-	  			   AnomaliesView anomView = (AnomaliesView)part;
+	  		   if (part instanceof ResultsView) {
+	  			   ResultsView anomView = (ResultsView)part;
 	  		       liveMonitor.setResultsAndFeedback(anomView.getResultsAndFeddbackInstance());
 	  		    
 	  		   } else if (part instanceof LiveChartView){
@@ -79,12 +79,12 @@ public class LiveMonitorView extends ViewPart {
 	  * Constructor
 	  */
 	public LiveMonitorView() {
-		System.out.println(" In live view");
+		liveMonitor=new LiveMonitor();
 	}
 
 	@Override
-	public void createPartControl(Composite parent) {
-		liveMonitor=new LiveMonitor(parent);
+	public void createPartControl(Composite compParent) {
+		liveMonitor.createControls(compParent);;
 		
 		/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
         getSite().getPage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
@@ -106,7 +106,6 @@ public class LiveMonitorView extends ViewPart {
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
 
 	}
 

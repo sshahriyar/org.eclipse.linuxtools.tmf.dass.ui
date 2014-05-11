@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
@@ -31,8 +32,8 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -56,7 +57,6 @@ public class BackgroundLiveMonitor implements Runnable {
 	private Integer intervalsBetweenSnapshots; // In Minutes
 	private Button btnStart;
   	private Button btnStop;
-  	private Button btnDetails;
   	private HashSet<String> modelsList;
   	private ResultsAndFeedback results;
   	private MessageBox msgBox;
@@ -92,7 +92,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	 */
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
-		  	Button btnStop, Button btnDetails,HashSet<String> modelsList,
+		  	Button btnStop,HashSet<String> modelsList,
 		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval ) {
 		
 		this.userAtHost=userAtHost;
@@ -104,7 +104,6 @@ public class BackgroundLiveMonitor implements Runnable {
 		this.intervalsBetweenSnapshots=intervalBetweenSnapshots;
 		this.btnStart=btnStart;
 		this.btnStop=btnStop;
-		this.btnDetails=btnDetails;
 		this.modelsList=modelsList;
 		this.results=results;
 		this.liveXYChart=xyChart;
@@ -186,15 +185,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					
 					}
 						results.setTotalAnomalyCount(modelsAnoms);
-					//
-					//Run on main GUI thread
-					//
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							btnDetails.setEnabled(true);
-						}
-					});
+					
 					
 					// Check if stop has been requested
 					if (isExecuting==false)
@@ -409,15 +400,6 @@ public class BackgroundLiveMonitor implements Runnable {
 		liveXYChart.drawChart();
 		
 		
-		//
-		//Run on main GUI thread
-		//
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				btnDetails.setEnabled(false);
-			}
-		});
 	}
 	
 	 /**

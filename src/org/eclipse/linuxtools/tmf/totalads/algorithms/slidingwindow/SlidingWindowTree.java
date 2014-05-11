@@ -36,14 +36,13 @@ class SlidingWindowTree {
 	}
 	
 	/**
-	 * Searches and adds a sequence in the training database. 
-	 * If a sequence already exists, it updates the counter
+	 * Searches and adds a sequence in the tree of events forming sequences
+	 * 
 	 * @param newSequence
-	 * @param database
-	 * @param connection
-	 * @throws TotalADSDBMSException
+	 * @param sysCallSequences
+	 * @param out
 	 */
-	public void searchAndAddSequence(Integer []newSequence, HashMap<Integer, Event[]> sysCallSequences){
+	public void searchAndAddSequence(Integer []newSequence, HashMap<Integer, Event[]> sysCallSequences, IAlgorithmOutStream out){
   //  public void searchAndAddSequence(String []newSequence, String database, IDataAccessObject connection) throws TotalADSDBMSException{
 		Integer seqSize=newSequence.length;
 		Event[] eventSequence= sysCallSequences.get(newSequence[0]);//load from database
@@ -55,24 +54,29 @@ class SlidingWindowTree {
 			for (int j=0;j<seqSize;j++){
 				eventSequence[j]=new Event();
 				eventSequence[j].setEvent(newSequence[j]);
+				//out.addOutputEvent(newSequence[j].toString()+ " ");
 			}
 			eventSequence[seqSize]=new Event();
 			eventSequence[seqSize].setEvent(1);
+			//out.addNewLine();
 			
 		}else{
 			
 			Boolean isFound=searchAndAppendSequence(eventSequence, newSequence);// search in tree from this node/sequence
 			
-			if (isFound==false){// if not found then add on 0 branch 
+			if (isFound==false){// if not match is found then add on 0 branch because only top event matches 
 				eventSequence[0].setBranches(new ArrayList<Event[]>());
 				Event[] newBranchSeq=new Event[seqSize+1];
 				for (int j=0;j<seqSize-1;j++){
 					newBranchSeq[j]=new Event();
 					newBranchSeq[j].setEvent(newSequence[j]);
+				//	out.addOutputEvent(newSequence[j].toString()+ " ");
 				}
 				newBranchSeq[seqSize]=new Event();
 				newBranchSeq[seqSize].setEvent(1);
 				eventSequence[0].getBranches().add(newBranchSeq);
+				//out.addNewLine();
+				
 			}
 		}
 		// putting the sequence (graph actually) to the starting event (node) as a key
@@ -117,7 +121,7 @@ class SlidingWindowTree {
 		return true;	
 	}
 	else if (matchIdx <0){
-			return false; // return null if mismatch on the first idx
+			return false; // return false if mismatch on the first idx
 	}
 	
 	else {
@@ -131,7 +135,7 @@ class SlidingWindowTree {
 					newTmpSeq[i]=newSeq[matchIdx+i+1];
 		 }
 		 newEventSeq[i]=new Event();
-		 newEventSeq[i].setEvent(1);// add 1 as a counter at the leaf
+		 newEventSeq[i].setEvent(1);// add 1 as a counter at the leaf, for the first sequence on a branch
 			
 		ArrayList<Event[]> branches= eventSeq[matchIdx].getBranches();
 	//      When there are no more branches then we shall automatically 
@@ -154,7 +158,7 @@ class SlidingWindowTree {
 		}else{
 			branches= new ArrayList<Event[]>();
 		}
-	    //We have just found out where to append a branch in the graph
+	    //We have just found out where to append a branch in the tree
 	 	  //add a new branch to the event and return the eventSeq.   
 		
 		if (isFound==false)
@@ -178,7 +182,9 @@ class SlidingWindowTree {
 	 */
 	public void saveinDatabase(IAlgorithmOutStream outStream, String database, IDataAccessObject connection,HashMap<Integer, 
 			Event[]> sysCallSequences) throws TotalADSDBMSException{
+		
 		outStream.addOutputEvent("Saving in database.....");
+		outStream.addNewLine();
 		
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
 			
@@ -254,43 +260,46 @@ class SlidingWindowTree {
 		}
 		 return event;
 	}
-	/**
-	 * Prints the graph of sequence; use for testing
-	 * @param outStream An object to display information 
-	 * @param sysCallSequences  A map containing one tree of events for every key
-	 */
-	public void printSequence(IAlgorithmOutStream outStream, String database, HashMap<Integer, Event[]> sysCallSequences) {
+/**
+ * Prints all the sequences in a tree; use for testing
+ * @param outStream An object to display information 
+ * @param sysCallSequences  A map containing one tree of events for every key
+ * @param nameToId NameToIDMapper
+ */
+	public void printSequence(IAlgorithmOutStream outStream,  HashMap<Integer, Event[]> sysCallSequences, NameToIDMapper nameToId) {
+		
 		for(Map.Entry<Integer, Event[]>nodes:  sysCallSequences.entrySet()){
-			// create root: nodes.getKey
-			
-			//console.printTextLn(JSONserialize(events[0]));
-			printRecursive(nodes.getValue(),"", outStream);
+		
+			    printRecursive(nodes.getValue(),"", outStream, nameToId);
 			}
 		
 	}
+	
 	/**
+	 * /**
 	 * This function goes through the tree of Events and print the sequences in a human readable
 	 * form.
 	 * @param nodes Root event
 	 * @param prefix Prefix of the event sequence
 	 * @param OutStream An object to display output
+	 * @param nameToId NameToId mapper
 	 */
-	private void printRecursive(Event[] nodes,String prefix, IAlgorithmOutStream outStream){
+	private void printRecursive(Event[] nodes,String prefix, IAlgorithmOutStream outStream, NameToIDMapper nameToId){
 	      
 		//Boolean isPrefixPrinted=false;
  		   for (int nodeCount=0; nodeCount<nodes.length; nodeCount++){
 			      
 				  ArrayList<Event[]> branches=nodes[nodeCount].getBranches();
 				  if (nodeCount==nodes.length-1)
-						prefix=prefix+"-:"+nodes[nodeCount].getEvent();// the last element is the count of the sequence
+						prefix=prefix+" -: Count="+nodes[nodeCount].getEvent();// the last element is the count of the sequence
 				  else	
-				  		prefix=prefix+nodes[nodeCount].getEvent()+"-";// just append the events
-				  		//create a two dimesnion key Tree as an array and node as event name 
+				  		prefix=prefix+ nameToId.getKey(nodes[nodeCount].getEvent().intValue())+" ";// just append the events
+				  		//create a two dimension key Tree as an array and node as event name 
 				  
 				  if (branches!= null){ // if there are branches on an event then keep
 					 
 					 for(int i=0;i<branches.size(); i++){
-							printRecursive(branches.get(i),prefix,outStream);
+							printRecursive(branches.get(i),prefix,outStream,nameToId);
 					   }   
 				  } else {
 				       // create tee withnull

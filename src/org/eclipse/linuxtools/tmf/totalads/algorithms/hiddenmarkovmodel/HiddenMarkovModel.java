@@ -59,7 +59,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, IDataAccessObject connection, String[] trainingSettings)throws TotalADSDBMSException, TotalADSGeneralException {
+	public void initializeModelAndSettings(String modelName, IDataAccessObject dataAccessObject, String[] trainingSettings)throws TotalADSDBMSException, TotalADSGeneralException {
 		String []setting=null;
 		
 		if (trainingSettings!=null){
@@ -84,7 +84,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		    
 		}
 		HmmMahout hmm=new HmmMahout();
-		hmm.verifySaveSettingsCreateDb(setting, modelName, connection,true,true);
+		hmm.verifySaveSettingsCreateDb(setting, modelName, dataAccessObject,true,true);
 		
 	}
 
@@ -116,9 +116,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
 	@Override
-	public String[] getTestingOptions(String database, IDataAccessObject connection) {
+	public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject) {
 		 HmmMahout hmm=new HmmMahout();
-		String []settings=hmm.loadSettings(database, connection);
+		String []settings=hmm.loadSettings(database, dataAccessObject);
 		if (settings==null)
 			return null;
 		
@@ -132,10 +132,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
    @Override
-	public void saveTestingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException
+	public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
 	{ 
 	   HmmMahout hmm=new HmmMahout();
-	   hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
+	   hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false);
 	}
  
    /*
@@ -181,6 +181,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   
 		 
 		 outStream.addOutputEvent("Extracting sequences, please wait....");
+		 outStream.addNewLine();
 		 
 		 int winWidth=0;
 		 LinkedList<Integer> newSequence=new LinkedList<Integer>();
@@ -201,6 +202,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    		  Integer[] seq=new Integer[seqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  outStream.addOutputEvent("Learning using the BaumWelch algorithm");
+	    		  outStream.addNewLine();
 	    		  trainBaumWelch(seq, connection, database);
 	    		  newSequence.remove(0);
 	    	
@@ -212,6 +214,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			 Integer[] seq=new Integer[newSequence.size()];
    		     seq=newSequence.toArray(seq);
    		     outStream.addOutputEvent("Learning on sequences using BaumWelch algorithm");
+   		     outStream.addNewLine();
    		     trainBaumWelch(seq, connection, database);
 		 }
 		 
@@ -219,9 +222,13 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	     numSymbols=nameToID.getSize();
 	    	     //hmm.initializeHMM(numSymbols, numStates);
 	 		     outStream.addOutputEvent("Training finished..");
-	    	     //hmm.learnUsingBaumWelch(numIterations);
+	 		     outStream.addNewLine();
+	    	     
 	    	  	 outStream.addOutputEvent("Saving HMM");
+	    	  	 outStream.addNewLine();
+	    	  	
 	    	  	 outStream.addOutputEvent(hmm.toString());
+	    	  	 outStream.addNewLine();
 	    	  	 //hmm.saveHMM(database, connection);
 	    	  	 nameToID.saveMap(connection, database);
 	     }
@@ -252,18 +259,21 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public void validate(ITraceIterator trace, String database,IDataAccessObject connection, 
+	public void validate(ITraceIterator trace, String database,IDataAccessObject dataAccessObject, 
 			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,validationSeqLength=seqLength;
 		Double logThreshold;
-		String []options=hmm.loadSettings(database, connection);
+		String []options=hmm.loadSettings(database, dataAccessObject);
 		logThreshold=Double.parseDouble(options[7]);
 		
 		LinkedList<Integer> newSequence=new LinkedList<Integer>();
 	   	outStream.addOutputEvent("Starting validation");
+	   	outStream.addNewLine();
+	   	
 	   	Boolean isValidated=true;
 	   	outStream.addOutputEvent("Extracting sequences, please wait...");
+	   	outStream.addNewLine();
 	   	
 		 String event=null;
 		 while (trace.advance()  ) {
@@ -294,8 +304,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		options[7]=logThreshold.toString();
 		
 		outStream.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
-		 
-		hmm.verifySaveSettingsCreateDb(options, database, connection,false,false); 
+		outStream.addNewLine();
+		
+		hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false); 
 		
 	}
 	
@@ -312,14 +323,15 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			 // console.printTextLn("Sequence likelhood: "+prob.toString());
 		  } catch (Exception ex){
 			  outStream.addOutputEvent("Unknown events in your sequences. Retrain using larger number of unique events");
-			 // ex.printStackTrace();
+			  outStream.addNewLine();
+			  // ex.printStackTrace();
 		  }
 		  
 		  if (prob<probThreshold){
 			  probThreshold=prob;
 			  //console.printTextLn(Arrays.toString(seq));
 			  outStream.addOutputEvent("Min Log Likelihood Threshold: "+probThreshold.toString());
-			 
+			  outStream.addNewLine();
 		  }
 		  return probThreshold;
 	}
@@ -328,7 +340,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database, IDataAccessObject connection,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database, IDataAccessObject dataAccessObject,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		
 		int winWidth=0,testSeqLength=seqLength;
 		String []options;
@@ -339,11 +351,11 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				hmm.verifySaveSettingsCreateDb(options, database, connection, false, false);
 				logThresholdTest=Double.parseDouble(options[1]);
 			}else{*/
-				options=hmm.loadSettings(database, connection);
+				options=hmm.loadSettings(database, dataAccessObject);
 				logThresholdTest=Double.parseDouble(options[7]);
 			//}
-			hmm.loadHmm(connection, database);
-			nameToID.loadMap(connection, database);
+			hmm.loadHmm(dataAccessObject, database);
+			nameToID.loadMap(dataAccessObject, database);
 			testNameToIDSize=nameToID.getSize();
 			isTestInitialized=true;
 		}

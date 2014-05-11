@@ -1,13 +1,13 @@
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.properties;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-public class GenericView extends ViewPart {
+public class PropertiesView extends ViewPart {
 	
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.GenericView";
 	
-	public GenericView() {
+	public PropertiesView() {
 		// TODO Auto-generated constructor stub
 	}
 

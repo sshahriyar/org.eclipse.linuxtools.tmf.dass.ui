@@ -127,7 +127,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
     */
     @Override
-    public void saveTestingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException{
+    public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException{
     	 Integer theMaxHamDis=0;
     	if (options!=null && options[0].equals(this.testingOptions[0]) ){
   		  	try {
@@ -137,9 +137,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
   		  	}
   		   
   		  	/// Get previous max window first
-  		    loadSetings(database, connection);
+  		    loadSetings(database, dataAccessObject);
   		    maxHamDis=theMaxHamDis;// change the maxHam
-  	        saveSettings(database, connection); // save maxHamm
+  	        saveSettings(database, dataAccessObject); // save maxHamm
   	     }
     	
     	  
@@ -150,8 +150,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
      */
     @Override
-    public String[] getTestingOptions(String database, IDataAccessObject connection){
-    	loadSetings(database, connection);
+    public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject){
+    	loadSetings(database, dataAccessObject);
     	testingOptions[1]=maxHamDis.toString(); 		
     	return testingOptions;
     	
@@ -163,7 +163,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.String[])
 	 */
 	@Override
-	public void initializeModelAndSettings(String modelName, IDataAccessObject connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException{
+	public void initializeModelAndSettings(String modelName, IDataAccessObject dataAccessObject, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException{
 		 
 		if (trainingSettings!=null){
 	   		  try{
@@ -184,8 +184,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		
 		String []collectionNames={TraceCollection.COLLECTION_NAME.toString(), SettingsCollection.COLLECTION_NAME.toString(),
 								  NameToIDCollection.COLLECTION_NAME.toString()};
-		connection.createDatabase(modelName, collectionNames);
-		saveSettings(modelName, connection);
+		dataAccessObject.createDatabase(modelName, collectionNames);
+		saveSettings(modelName, dataAccessObject);
 	}
 	
 	
@@ -205,11 +205,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		    	  
 	      }
 	    	  
-	    	  
+		  outStream.addOutputEvent("Starting to slide window on the trace, please wait while I process...");
+	      outStream.addNewLine();
+	      	  
 		  int  winWidth=0;
-		  int seqCount=1;
-	      LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	     String event=null;
+		  LinkedList<Integer> newSequence=new LinkedList<Integer>();
+	      String event=null;
+	      
 	      while (trace.advance()) {
 	    	  event=trace.getCurrentEvent();
 	    	  
@@ -222,19 +224,19 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	    		  winWidth--;
 	    		  Integer[] seq=new Integer[maxWin];
 	    		  seq=newSequence.toArray(seq);
-	    		  // searching and adding to db
-	    		 // System.out.println(Arrays.toString(seq));
-	    		 // console.printTextLn("Adding sequence "+seqCount+ " starting with "+seq[0]);
-	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences);
+	    		  
+	    		  treeTransformer.searchAndAddSequence(seq,sysCallSequences,outStream);
 	    		  //treeTransformer.searchAndAddSequence(seq,database,connection);
 	    		  newSequence.remove(0);
-	    		  seqCount++;
+	    		//  seqCount++;
 	    	  }
 	    		  
 	     }
 	     if (isLastTrace){ 
 	    	 // Saving events tree in database
-	    	 treeTransformer.printSequence(outStream, database, sysCallSequences);
+	    	 outStream.addOutputEvent("All unique sequences ");
+	    	 outStream.addNewLine();
+	    	 treeTransformer.printSequence(outStream,  sysCallSequences,nameToID);
 	    	 treeTransformer.saveinDatabase(outStream, database, connection, sysCallSequences);
 	    	 intialize=false;
 	    	 nameToID.saveMap(connection, database);
@@ -248,17 +250,17 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public  void validate (ITraceIterator trace, String database, IDataAccessObject connection, Boolean isLastTrace, IAlgorithmOutStream outStream) 
+	public  void validate (ITraceIterator trace, String database, IDataAccessObject dataAccessObject, Boolean isLastTrace, IAlgorithmOutStream outStream) 
 			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		 validationTraceCount++;// count the number of traces
-		 
-		 //Integer []hammAnomalies=new Integer[maxWin];
-	     Results result= evaluateTrace(trace, database, connection);
+		
+	     Results result= evaluateTrace(trace, database, dataAccessObject,outStream);
 	   
 	     if (result.getAnomaly()){
 	    	 String details=result.getDetails().toString();
 	    	 outStream.addOutputEvent(details);
+	    	 outStream.addNewLine();
 	    	 validationAnomalies++;
 	    	 
 	     }
@@ -266,17 +268,24 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	     if (isLastTrace){
 	    	 
 	    	outStream.addOutputEvent("Total traces in validation folder: "+validationTraceCount); 
+	    	outStream.addNewLine();
 	    	Double anomalyPrcentage=(validationAnomalies.doubleValue()/validationTraceCount.doubleValue())*100;
+	    	
 	    	outStream.addOutputEvent("Total anomalies at max hamming distance "+maxHamDis+ " are "+anomalyPrcentage);
+	    	outStream.addNewLine();
+	    	
 	    	Double normalPercentage=(100-anomalyPrcentage);
 	    	outStream.addOutputEvent("Total normal at max hamming distance "+maxHamDis+ " are "+normalPercentage);
-	    	
+	    	outStream.addNewLine();
 	    	// Update the settings collection for maxwin and maxhamm
-	    	 saveSettings(database, connection);
+	    	 saveSettings(database, dataAccessObject);
 	    	 outStream.addOutputEvent("Database updated..");
+	    	 outStream.addNewLine();
 	    	 
-	    	 if (!warningMessage.isEmpty())
+	    	 if (!warningMessage.isEmpty()){
 	    		 outStream.addOutputEvent(warningMessage);
+	    		 outStream.addNewLine();
+	    	 }
 	     }
 
 	}
@@ -288,20 +297,20 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test (ITraceIterator trace,  String database, IDataAccessObject connection, IAlgorithmOutStream outputStream) 
+	public Results test (ITraceIterator trace,  String database, IDataAccessObject dataAccessObject, IAlgorithmOutStream outputStream) 
 			throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		  
 	       if (!isTestStarted){
 			  testTraceCount=0;
 			  testAnomalies=0;
-	    	  initialize(connection, database); // get the trees from db
+	    	  initialize(dataAccessObject, database); // get the trees from db
 			
 			  isTestStarted=true;
-			  nameToID.loadMap(connection, database);
+			  nameToID.loadMap(dataAccessObject, database);
 			  testNameToIDSize=nameToID.getSize();
 		  }
 		  
-		  return evaluateTrace(trace, database, connection);
+		  return evaluateTrace(trace, database, dataAccessObject,outputStream);
 		  
 	}
 
@@ -313,9 +322,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @return
 	 * @throws TotalADSReaderException 
 	 */
-	 private Results evaluateTrace(ITraceIterator trace,  String database, IDataAccessObject connection) throws TotalADSReaderException{
+	 private Results evaluateTrace(ITraceIterator trace,  String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSReaderException{
 		     
-		     int winWidth=0, anomalousSequencesToReturn=0, maxAnomalousSequencesToReturn=10;
+		     int winWidth=0, anomalousSequences=0, maxAnomalousSequencesToReturn=10;
 		     int displaySeqCount=0, totalAnomalousSequences=0, largestHam=0;
 		     Results results= new Results();
 			 results.setAnomalyType("");
@@ -324,8 +333,12 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			 testTraceCount++;
 			  
 		      LinkedList<Integer> newSequence=new LinkedList<Integer>();
-		      //System.out.println(maxWin);
+		      outStream.addOutputEvent("Starting to slide window on the trace, please wait while I process...");
+		      outStream.addNewLine();
+		      outStream.addOutputEvent("Evaluating sequence: ");
+		      outStream.addNewLine();
 		      String event=null;
+		      int seqCount=0;
 		      while (trace.advance()) {
 		    	 
 		    	  event=trace.getCurrentEvent();
@@ -334,27 +347,31 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		    	  winWidth++;
 		    	      	  
 		    	  if(winWidth >= maxWin){
-		    		  		
+		    		  seqCount++;
+		    		  outStream.addOutputEvent("Seq #"+seqCount);
+		    		  
 		    		  winWidth--;
 		    		  
 		    		  Integer[] seq=new Integer[maxWin];
 		    		  seq=newSequence.toArray(seq);
-		    		 // System.out.println(Arrays.toString(seq));
-		    		 
-		    		  int counter=0;
+		    	
 		    		 //Calculate the minimum hamming distance 
-		    		 Integer hammDisForSequence=seq.length; // we assign hamming distance 
+		    		 Integer hammDisForSequence=seq.length; // we assign max hamming distance 
 		    		 for (Map.Entry<Integer, Event[]> tree: sysCallSequences.entrySet()){
-		    			 
 		    			 Event[] nodes=tree.getValue();
 		    			// just get the hamming and search with a full sequence
 		    			 Integer hammDisForTree=treeTransformer.getHammingAndSearch(nodes, seq); 
-			    	     if (hammDisForTree < hammDisForSequence)    
-			    	    	   hammDisForSequence=hammDisForTree;
-			    	     
+			    	     if (hammDisForTree < hammDisForSequence){
+			    	    	 hammDisForSequence=hammDisForTree;
+			    	     }
+			    	     if (hammDisForSequence ==0)
+			    	    	 break;//if Hamming is zero, we found a match break; don't continue further, save time
 		    		 }
-		    		// If hamming distance is greater than the set threshold then it is an anomaly
-			   		  if (hammDisForSequence > maxHamDis) {
+		    		
+		    		 outStream.addOutputEvent(" Ham="+hammDisForSequence);
+		    		 outStream.addNewLine();
+		    		 // If hamming distance is greater than the set threshold then it is an anomaly
+			   		if (hammDisForSequence > maxHamDis) {
 			   			  totalAnomalousSequences++;
 			   			 
 			   			  if (headerMsg.length()>=1){
@@ -362,9 +379,9 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			   				  results.setDetails(headerMsg);
 			   				  headerMsg="";
 			   			  }
-			   			 //Add a new sequence for display, when  all of previous events are gone
+			   			 //Add a new sequence for display, when  all of the previous events are gone
 			   			  if (displaySeqCount <= maxAnomalousSequencesToReturn)
-			   			  		if (anomalousSequencesToReturn % maxWin==0){ 
+			   			  		if (anomalousSequences % maxWin==0){ 
 			   	    				  //Convert sequence in integer ids to name
 			   	    				 StringBuilder seqName=new StringBuilder();
 			   	    				 for (int i=0;i<seq.length;i++){
@@ -380,12 +397,13 @@ public class SlidingWindow implements IDetectionAlgorithm {
 			   	    			    //Get the sequence with the largest hamming distance 
 			   	    			    
 			   	    			 }
-			   			  if (hammDisForSequence > largestHam){
-			   			    	largestHam=hammDisForSequence;
-			   			    	largestHamSeq=seq;
-			   			    }
-			   			  anomalousSequencesToReturn++;
-			   		  }// End of ham comparison
+				   			  if (hammDisForSequence > largestHam){
+				   			    	largestHam=hammDisForSequence;
+				   			    	largestHamSeq=seq;
+				   			
+				   			    }
+			   			      anomalousSequences++;
+			   		 }// End of ham comparison
 		    		 
 		    		
 		    		  newSequence.remove(0);// remove the top event and slide a window

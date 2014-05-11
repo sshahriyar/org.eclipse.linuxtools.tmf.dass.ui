@@ -9,10 +9,11 @@ import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 
 /**
- * @author efraimlopez
+ * @author <p>Efraim Lopez </p>
+ *         <p> Syed Shariyar Murtaza justssahry@htomail.com </p>
  *
  */
-class DataModelTableContentProvider	implements IStructuredContentProvider, IDBMSObserver{
+class DataModelTableContentProvider	implements IStructuredContentProvider{
 
 	private Viewer viewer = null;
 	private IDataAccessObject dao = null;
@@ -26,14 +27,9 @@ class DataModelTableContentProvider	implements IStructuredContentProvider, IDBMS
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.viewer = viewer;
-	    if(oldInput != null) {
-	    	IDataAccessObject old = (IDataAccessObject) oldInput;
-	        old.removeObserver(this);
-	    }
 	    if(newInput != null) {
 	    	dao = (IDataAccessObject) newInput;
-	    	dao.addObserver(this);
-	    }
+	     }
 	}
 
 	@Override
@@ -46,16 +42,5 @@ class DataModelTableContentProvider	implements IStructuredContentProvider, IDBMS
 			return new String[] {EMPTY_VIEW_FIELD};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver#update()
-	 */
-
-	@Override
-	public void update() {
-		if(viewer!=null)
-			this.viewer.refresh();
-		
-	}
 	
 }

@@ -95,7 +95,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#initializeModelAndSettings(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.String[])
     */
     @Override
-    public void initializeModelAndSettings(String modelName, IDataAccessObject connection, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSGeneralException{
+    public void initializeModelAndSettings(String modelName, IDataAccessObject dataAccessObject, String[] trainingSettings) throws  TotalADSDBMSException, TotalADSGeneralException{
     	
     	if (trainingSettings!=null){
   		  int trueCount=0;
@@ -122,10 +122,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     	
     	
     	String []collectionNames={TRACE_COLLECTION, SETTINGS_COLLECTION};
-    	connection.createDatabase(modelName, collectionNames);
+    	dataAccessObject.createDatabase(modelName, collectionNames);
     	String []fields={TraceCollection.FS.toString(),TraceCollection.MM.toString(),TraceCollection.KL.toString()};
-	    connection.createAscendingUniquesIndexes(modelName, TRACE_COLLECTION, fields);
-	    saveSettingsInDatabase(alpha,modelName, connection);
+	    dataAccessObject.createAscendingUniquesIndexes(modelName, TRACE_COLLECTION, fields);
+	    saveSettingsInDatabase(alpha,modelName, dataAccessObject);
     }
     
     /*
@@ -143,7 +143,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
      */
     @Override
-    public void saveTestingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException
+    public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
     {
     	try {
 			alpha= Double.parseDouble(options[1]);
@@ -151,9 +151,9 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 			throw new TotalADSGeneralException("Please, enter only decimal values.");
 		}
     	// First read settings in a class level array-- just one row
-    	getSettingsFromDatabase(database, connection);
+    	getSettingsFromDatabase(database, dataAccessObject);
 		// Now update using that class level array, to avoid any error
-    	saveSettingsInDatabase(alpha, database, connection);
+    	saveSettingsInDatabase(alpha, database, dataAccessObject);
     	
     }
 
@@ -162,8 +162,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
     */
     @Override
-    public String[] getTestingOptions(String database, IDataAccessObject connection){
-    	Double alphaVal=getSettingsFromDatabase(database, connection);
+    public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject){
+    	Double alphaVal=getSettingsFromDatabase(database, dataAccessObject);
 		if(alphaVal!=null)
 			 alpha=alphaVal;
 		testingOptions[1]=alpha.toString();
@@ -189,6 +189,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		saveTraceData(connection, database, states);
 			
 		outStream.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
+		outStream.addNewLine();
+		
 		if (isLastTrace){
 			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
 			
@@ -199,35 +201,40 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
     @Override
-	public void validate(ITraceIterator trace, String database, IDataAccessObject connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public void validate(ITraceIterator trace, String database, IDataAccessObject dataAccessObject, Boolean isLastTrace, IAlgorithmOutStream outStream) throws  TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
 		  measureStateProbabilities(trace, valTrcStates);
 		  while (alpha< maxAlpha){
-			    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates,connection,database);
+			    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates,dataAccessObject,database);
 				if (isAnomaly==false)
 							 break; // no need to increment alpha as there is no anomaly
 			    alpha+=0.02;
 			    outStream.addOutputEvent("Increasing alpha to "+alpha);
+			    outStream.addNewLine();
 			    
 		  }
 		 if (alpha>=maxAlpha)
-			 if (evaluateKSM( alpha, valTrcStates,connection,database)==true)
+			 if (evaluateKSM( alpha, valTrcStates,dataAccessObject,database)==true)
 				 validationAnomalyCount++;
 			 
 		  if (isLastTrace){
 			  	outStream.addOutputEvent("Updating database");
+			  	outStream.addNewLine();
 			  	
 				
-				saveSettingsInDatabase(alpha, database, connection);
+				saveSettingsInDatabase(alpha, database, dataAccessObject);
 				
 				  
 			  	outStream.addOutputEvent("Database updated with final alpha: "+alpha);
-				Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
+			  	outStream.addNewLine();
+			  	Double anomalyPercentage= (validationAnomalyCount.doubleValue()/validationTraceCount)*100;
 				  
 				outStream.addOutputEvent("Anomalies at alpha "+alpha + " are "+anomalyPercentage);
+				outStream.addNewLine();
 				outStream.addOutputEvent("Total traces "+validationTraceCount);
+				outStream.addNewLine();
 		  }
 	  
 	}
@@ -239,11 +246,11 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
 	 */
 	@Override
-	public Results test(ITraceIterator trace, String database,IDataAccessObject connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+	public Results test(ITraceIterator trace, String database,IDataAccessObject dataAccessObject, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 		if  (!isTestStarted){
 			testTraceCount=0;
 			testAnomalyCount=0;
-			Double alphaVal=getSettingsFromDatabase(database, connection);
+			Double alphaVal=getSettingsFromDatabase(database, dataAccessObject);
 			if(alphaVal!=null)
 					 alpha=alphaVal;
 			
@@ -254,7 +261,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		TraceStates testTrcStates= new TraceStates();
 		measureStateProbabilities(trace, testTrcStates);
 		
-		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, connection, database);
+		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, dataAccessObject, database);
 		testTraceCount++;
 		
 		if (isAnomaly)

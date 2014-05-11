@@ -24,12 +24,12 @@ public interface IDetectionAlgorithm {
 /**
  * Creates a database where an algorithm would store its model
  * @param modelName Name of the database
- * @param connection An object of IDataAccessObject
+ * @param dataAccessObject An object of IDataAccessObject
  * @param trainingSettings Training SettingsForm
  * @throws TotalADSDBMSException 
  * @throws TotalADSGeneralException TODO
  */
-public void initializeModelAndSettings(String modelName, IDataAccessObject connection, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException; 
+public void initializeModelAndSettings(String modelName, IDataAccessObject dataAccessObject, String[] trainingSettings) throws TotalADSDBMSException, TotalADSGeneralException; 
 /**
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
  * @return Array of Strings as options/settings
@@ -51,19 +51,19 @@ public void saveTrainingOptions(String [] options, String database, IDataAccessO
  * It takes database name and connection information, in case if the model is already created and previously 
  * modified settings exist in the database
  * @param database Database name
- * @param connection IDataAccessObject object
+ * @param dataAccessObject IDataAccessObject object
  * @return An array of String as options/settings
  */
-public String[] getTestingOptions(String database, IDataAccessObject connection);
+public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject);
 /**
  * Validates the testing options and saves them into the database. On error throws exception
  * @param options
  * @param database
- * @param connection
+ * @param dataAccessObject
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException 
  */
-public void saveTestingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException;
+public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException;
 /**
  * An algorithm will take a  trace through this function. Some algorithms can train on 
  * the traces as they come and some need to wait till the last trace. Caller
@@ -86,27 +86,27 @@ public void train (ITraceIterator trace, Boolean isLastTrace, String database, I
  * This function is called for every single trace in the validation set separately 
  * @param trace Trace iterator to one trace
  * @param database Database name
- * @param connection Connection name
+ * @param dataAccessObject Connection name
  * @param isLastTrace True if the trace is the last trace, else false
  * @param outStream Use this object to display the events during processing
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public  void validate (ITraceIterator trace, String database, IDataAccessObject connection, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
+public  void validate (ITraceIterator trace, String database, IDataAccessObject dataAccessObject, Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /**
  * This function evaluates an existing model in the database on the traces in the test set. It is called for every single
  * trace separately.
  * @param trace Trace iterator to a single trace
  * @param database Database name
- * @param connection IDataAccessObject object
+ * @param dataAccessObject Data accessor 
  * @param outputStream Use this object to display the events during processing
  * @return An object of type Result containing the evaluation information of a trace
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-public Results test (ITraceIterator trace, String database, IDataAccessObject connection, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
+public Results test (ITraceIterator trace, String database, IDataAccessObject dataAccessObject, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 /** Returns the summary of the results **/
 public Double getTotalAnomalyPercentage();
 /** Returns the graphical result in the form of a chart if any for a trace. Currently unimplemented. 

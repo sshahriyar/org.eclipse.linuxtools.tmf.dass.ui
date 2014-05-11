@@ -8,7 +8,7 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 
-package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
+package org.eclipse.linuxtools.tmf.totalads.ui.results;
 
 //import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import java.util.ArrayList;

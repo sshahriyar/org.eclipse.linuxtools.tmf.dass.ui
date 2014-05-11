@@ -114,7 +114,7 @@ public class TestSettingsHandler implements IHandler {
 				//Open the settings dialog
 				if (connection.isConnected()){
 						String model=selectedModels.iterator().next();	// get the only selected model
-						IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model, DBMSFactory.INSTANCE.getDataAccessObject());
+						IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model);
 						String []settings=algorithm.getTestingOptions(model,connection );
 						
 						settingsDialog= new TestSettingsDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()

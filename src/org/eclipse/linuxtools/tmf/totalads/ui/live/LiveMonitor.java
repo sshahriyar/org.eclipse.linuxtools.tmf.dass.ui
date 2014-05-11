@@ -13,7 +13,8 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
+
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -38,80 +39,72 @@ import org.eclipse.swt.widgets.Text;
  *
  */
 public class LiveMonitor {
-	//Initializes variables
-	//private TracingTypeSelector traceTypeSelector;
-	//private Text txtPassword;
+	
 	private Text txtUserAtHost;
 	private Combo cmbSnapshot;
 	private Combo cmbInterval;
-	//private Text txtPvtKey;
-	//private Button btnPvtKey;
-	//private Button btnPassword;
 	private Text txtPort;
 	private Text txtSudoPassword;
 	private ResultsAndFeedback resultsAndFeedback;
 	private Button btnStart;
-	//private AlgorithmOutStream console;
 	private Button btnStop;
 	private Button btnDetails;
 	private BackgroundLiveMonitor liveExecutor;
-	//private ModelSelection modelSelectionHandler;
 	private LiveXYChart liveChart;
 	private Button btnTrainingAndEval;
 	private Button btnTesting;
-	//private FileBrowser trcbrowser;
 	private HashSet<String> modelsList;
+	
+	 public LiveMonitor(){
+		 modelsList=new HashSet<String>();
+	 }
 	/**
-	 * Constructor of the LiveMonitor class
-	 * @param tabFolderParent TabFolder object
-	 *
+	 * Creates GUI widgets
+	 * @param compParent
 	 */
-	public LiveMonitor(Composite compParent){
+	public void createControls(Composite compParent){
 	
 		ScrolledComposite scrolCompAnom=new ScrolledComposite(compParent, SWT.H_SCROLL | SWT.V_SCROLL);
 		Composite comptbItmLive = new Composite(scrolCompAnom,SWT.NONE);
-		//tbItmLive.setControl(scrolCompAnom);
+		
 		
 		//Designing the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
 		comptbItmLive.setLayoutData(gridData);
-		comptbItmLive.setLayout(new GridLayout(2, false));
+		comptbItmLive.setLayout(new GridLayout(1, false));
 	
 		///////////////////////////////////////////////////////////////////////////
 		//Creating GUI widgets for selection of a trace type and a selection of the model
 		///////////////////////////////////////////////////////////////////
-		Composite compTraceTypeAndModel=new Composite(comptbItmLive, SWT.NONE);
-		compTraceTypeAndModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-		compTraceTypeAndModel.setLayout(new GridLayout(1, false));
+		//Composite compTraceTypeAndModel=new Composite(comptbItmLive, SWT.NONE);
+		//compTraceTypeAndModel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+		//compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
 	
 		// Create GUI elements for SSH Configuration
-		selectHostUsingSSH(compTraceTypeAndModel);
+		selectHostUsingSSH(comptbItmLive);
 			
 		//////////////////////////////////////////////////////////////////////
-		// Creating GUI widgets for charts and console
+		// Creating GUI widgets for buttons
 		//////////////////////////////////////////////////////////////////
-		Composite compButtonsChartConsole=new Composite(comptbItmLive, SWT.NONE);
-		compButtonsChartConsole.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		compButtonsChartConsole.setLayout(new GridLayout(1, false));
 		
-		Composite compButtons=new Composite(compTraceTypeAndModel, SWT.NONE);
+		Composite compButtons=new Composite(comptbItmLive, SWT.NONE);
 		compButtons.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		compButtons.setLayout(new GridLayout(5, false));
 		
 		btnStart=new Button(compButtons, SWT.BORDER);
-		btnStart.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnStart.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false,1,1));
 		btnStart.setText("Start");
 		
 		
 		btnStop=new Button(compButtons, SWT.BORDER);
-		btnStop.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnStop.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false,1,1));
 		btnStop.setText("Stop");
 		btnStop.setEnabled(false);
 		
 		btnDetails=new Button(compButtons, SWT.BORDER);
-		btnDetails.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false,1,1));
+		btnDetails.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false,1,1));
 		btnDetails.setText("Details");
 		btnDetails.setEnabled(false);
 		
@@ -120,7 +113,7 @@ public class LiveMonitor {
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmLive);
 		 // Set the minimum size
-		scrolCompAnom.setMinSize(500, 500);
+		scrolCompAnom.setMinSize(200, 200);
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
@@ -138,35 +131,35 @@ public class LiveMonitor {
 		 *  Group trace selection
 		 */
 		Group grpSSHConfig = new Group(compDiagnosis, SWT.NONE);
-		grpSSHConfig.setText("Select Configuration");
+		grpSSHConfig.setText("Select SSH Configurations");
 		
-		grpSSHConfig.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,false));
+		grpSSHConfig.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
 		grpSSHConfig.setLayout(new GridLayout(3,false));
 		
 		Label userAtHost= new Label(grpSSHConfig, SWT.NONE);
-		userAtHost.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
+		userAtHost.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false,1,1));
 		userAtHost.setText("Enter username@hostname   ");
 		
 		Label lblSudoPassword= new Label(grpSSHConfig, SWT.NONE);
-		lblSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false,1,1));
+		lblSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false,1,1));
 		lblSudoPassword.setText("Enter Password ");
 		
 		Label lblPort= new Label(grpSSHConfig, SWT.NONE);
-		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		lblPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		lblPort.setText("Enter Port");
 			
 		txtUserAtHost=new Text(grpSSHConfig, SWT.BORDER);
 		txtUserAtHost.setEnabled(true);
-		txtUserAtHost.setLayoutData(new GridData(SWT.FILL,SWT.TOP,false,false));
+		txtUserAtHost.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false));
 		txtUserAtHost.setText(System.getProperty("user.name")+"@localhost");
-		txtUserAtHost.setText("shary@172.30.103.143");
+		//txtUserAtHost.setText("shary@172.30.103.143");
 		
 		txtSudoPassword=new Text(grpSSHConfig,SWT.BORDER|SWT.PASSWORD);
-		txtSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		txtSudoPassword.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtSudoPassword.setText("grt_654321");
 		
 		txtPort=new Text(grpSSHConfig,SWT.BORDER);
-		txtPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		txtPort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		txtPort.setText("22");
 		/////////
 		///SSH Password and Private Key: Currently disabling this to provide it in the next version
@@ -206,7 +199,7 @@ public class LiveMonitor {
 		// Duration and Port
 		//////////
 		Composite compDurationPort=new Composite(grpSSHConfig, SWT.NONE);
-		compDurationPort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,3,2));
+		compDurationPort.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,3,2));
 		compDurationPort.setLayout(new GridLayout(2,false));
 		
 		Label lblSnapshotDuration= new Label(compDurationPort, SWT.NONE);
@@ -323,7 +316,7 @@ public class LiveMonitor {
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
-									  	btnStop, btnDetails,modelsList,resultsAndFeedback,liveChart,
+									  	btnStop, modelsList,resultsAndFeedback,liveChart,
 									  	isTrainAndEval);
 					 ExecutorService executor = Executors.newSingleThreadExecutor();
 					 executor.execute(liveExecutor);
@@ -342,15 +335,7 @@ public class LiveMonitor {
 				liveExecutor.stopMonitoring();
 			}
 		});
-		/**
-		 * details event handler
-		 
-		btnDetails.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				//resultsAndFeedback.showForm();	
-			}
-		});*/
+		
 		
 		//**** Pvt key button handler: Will be enabled in the next version
 		/*btnPvtKey.addSelectionListener(new SelectionAdapter() {

@@ -18,13 +18,13 @@ package org.eclipse.linuxtools.tmf.totalads.core;
 
 
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
-import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
-import org.eclipse.linuxtools.tmf.totalads.ui.GenericView;
-import org.eclipse.linuxtools.tmf.totalads.ui.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView;
+import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.properties.PropertiesView;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -56,7 +56,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         
         IFolderLayout bottomRightFolder = layout.createFolder(
                 "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightFolder"); 
-        bottomRightFolder.addView(GenericView.ID);
+        bottomRightFolder.addView(PropertiesView.ID);
         //bottomRightFolder.addView(IPageLayout.ID_PROP_SHEET);
         
 		// Create Left folders
@@ -78,7 +78,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         
         IFolderLayout centerMiddleFolder = layout.createFolder(
                 "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); 
-        centerMiddleFolder.addView(AnomaliesView.ID);
+        centerMiddleFolder.addView(ResultsView.ID);
        centerMiddleFolder.addView(LiveChartView.VIEW_ID);
         
         IFolderLayout centerBottomFolder = layout.createFolder(

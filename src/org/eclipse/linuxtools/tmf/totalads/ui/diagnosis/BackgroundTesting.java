@@ -27,6 +27,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;

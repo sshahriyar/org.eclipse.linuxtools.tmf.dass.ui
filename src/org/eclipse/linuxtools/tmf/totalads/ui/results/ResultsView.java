@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.eclipse.linuxtools.tmf.totalads.ui;
+package org.eclipse.linuxtools.tmf.totalads.ui.results;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -9,7 +9,6 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -20,7 +19,7 @@ import org.eclipse.ui.part.ViewPart;
  * @author efraimlopez
  *
  */
-public class AnomaliesView extends ViewPart {
+public class ResultsView extends ViewPart {
 	private ResultsAndFeedback results;
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.AnomaliesView";
 	//private AnomaliesTable anomaliesTable = null;
@@ -86,7 +85,7 @@ public class AnomaliesView extends ViewPart {
 		}
 	}*/
 	
-	public AnomaliesView() {
+	public ResultsView() {
 		
 	}
 

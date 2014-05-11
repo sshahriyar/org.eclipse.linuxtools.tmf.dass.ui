@@ -19,7 +19,6 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 
 /**
  * Utility class to execute algorithms by implementing common recurring tasks required for algorithms.
@@ -51,11 +50,10 @@ public  class AlgorithmUtility {
 	/**
 	 * Returns the algorithm for a given model name
 	 * @param modelName Name of the model
-	 * @param connection IDataAccessObject connection object
 	 * @return An object of type IDetectionAlgorithm
 	 * @throws TotalADSGeneralException 
 	 */
-	public static IDetectionAlgorithm getAlgorithmFromModelName(String modelName, IDataAccessObject connection) throws TotalADSGeneralException{
+	public static IDetectionAlgorithm getAlgorithmFromModelName(String modelName) throws TotalADSGeneralException{
 		
 		String []modelParts=modelName.split("_");
 		if (modelParts==null  || modelParts.length <2)
@@ -82,15 +80,11 @@ public  class AlgorithmUtility {
 	 * @throws TotalADSReaderException
 	 */
 	public static void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,
-					IDetectionAlgorithm selectedAlgorithm, String modelName )
-							throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+					IDetectionAlgorithm selectedAlgorithm, String modelName, IAlgorithmOutStream  outStream,
+					IDataAccessObject dataAcessObject)
+					throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 
-		ProgressConsole console=new ProgressConsole("Modeling");
-		AlgorithmOutStream outStream=new AlgorithmOutStream();
-		outStream.addObserver(console);
-		       
 		Boolean isLastTrace=false;
-		IDetectionAlgorithm algorithm=selectedAlgorithm.createInstance();
 				
 		////////////////////
 		///File verifications of traces
@@ -114,14 +108,13 @@ public  class AlgorithmUtility {
 			throw new TotalADSGeneralException(message);
 		}
 	   
-		IDataAccessObject dataAcessObject=DBMSFactory.INSTANCE.getDataAccessObject();
+		
 				
 		///////////					
 		//Second, start training
 		////
-		console.clearConsole();
-		console.println("Training the model....");
-		
+		outStream.addOutputEvent("Training the model....");
+		outStream.addNewLine();
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
 	
 			if (trcCnt==fileList.length-1)
@@ -129,12 +122,13 @@ public  class AlgorithmUtility {
 			 
 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 	 		
-			console.println("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
-	 		algorithm.train(trace, isLastTrace, modelName,dataAcessObject, outStream);
+			outStream.addOutputEvent("Processing  training trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
+			outStream.addNewLine();
+			selectedAlgorithm.train(trace, isLastTrace, modelName,dataAcessObject, outStream);
 		
 		}
 		//Fourth, start validation
-		validateModels(validationFileList, traceReader,algorithm, modelName, outStream);
+		validateModels(validationFileList, traceReader,selectedAlgorithm, modelName, outStream, dataAcessObject);
 		
 	}
 
@@ -150,13 +144,13 @@ public  class AlgorithmUtility {
 	 * @throws TotalADSDBMSException
 	 */
 	private static void validateModels(File []fileList, ITraceTypeReader traceReader, IDetectionAlgorithm algorithm,
-			String database,AlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSReaderException, 
+			String database,IAlgorithmOutStream outStream, IDataAccessObject dao) throws TotalADSGeneralException, TotalADSReaderException, 
 			TotalADSDBMSException {
 		
 				
 		// process now
 		outStream.addOutputEvent("Starting validation....");
-		
+		outStream.addNewLine();
 		Boolean isLastTrace=false;
 		
 		for (int trcCnt=0; trcCnt<fileList.length; trcCnt++){
@@ -167,13 +161,11 @@ public  class AlgorithmUtility {
 	 			ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);
 	 		
 	 			outStream.addOutputEvent("Processing  validation trace #"+(trcCnt+1)+": "+fileList[trcCnt].getName());
-	 			
-		 		algorithm.validate(trace, database, DBMSFactory.INSTANCE.getDataAccessObject(), isLastTrace, outStream );
+	 			outStream.addNewLine();
+		 		algorithm.validate(trace, database,dao, isLastTrace, outStream );
 
 		}
-		
-		
-		
+			
 	}
 	
 	

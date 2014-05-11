@@ -10,6 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.util.HashSet;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.core.signal.TmfSignalHandler;
 import org.eclipse.linuxtools.tmf.core.signal.TmfTraceSelectedSignal;
@@ -17,13 +18,15 @@ import org.eclipse.linuxtools.tmf.core.trace.ITmfTrace;
 import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
-import org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 /**
  * This class creates the Diagnosis view
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
@@ -35,11 +38,9 @@ public class DiagnosisView extends TmfView {
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
 	private ResultsAndFeedback resultsAndFeedback;
-	//private AlgorithmFactory algFactory;
-	//private TraceTypeFactory trcTypeFactory;
-	//private Handler handler;
 	
-	private AnomaliesView anomView;
+	
+	private ResultsView anomView;
 	/**
 	 * An inner class implementing the listener for other views initialised in {@link TotalAdsPerspectiveFactory} 
 	 */
@@ -49,8 +50,8 @@ public class DiagnosisView extends TmfView {
 		 @Override  
 	        public void partOpened(IWorkbenchPart part) {
 			 System.out.println ("Part Opened "+part.getTitle());
-	  		   if (part instanceof AnomaliesView) {
-	  		    anomView = (AnomaliesView)part;
+	  		   if (part instanceof ResultsView) {
+	  		    anomView = (ResultsView)part;
 	  		    resultsAndFeedback=anomView.getResultsAndFeddbackInstance();
 	  		    diagnosis.setResultsAndFeedbackInstance(resultsAndFeedback);
 	  		   }
@@ -87,7 +88,9 @@ public class DiagnosisView extends TmfView {
 	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
-		//System.out.println("In Diagnosis View");
+		diagnosis=new Diagnosis();
+		
+	
 	}
 	
 	/*
@@ -95,16 +98,17 @@ public class DiagnosisView extends TmfView {
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public void createPartControl(Composite parent) {
-		//init();
-		diagnosis=new Diagnosis(parent);
+	public void createPartControl(Composite compParent) {
+		
+		diagnosis.createControl(compParent);
 	
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
         } 
+      
         
-        /// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
+    	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
         getSite().getPage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -119,6 +123,7 @@ public class DiagnosisView extends TmfView {
         
         /// Registers a listener to Eclipse to get the object of another view      		
   		getSite().getWorkbenchWindow().getPartService().addPartListener(new PerspectiveViewsListener());
+        
 
 	}
 

@@ -15,12 +15,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.DirectoryBrowser;
 import org.eclipse.linuxtools.tmf.totalads.ui.io.TracingTypeSelector;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
@@ -59,12 +61,20 @@ public class Diagnosis {
 	private HashSet<String> modelsList;
 	private MessageBox msgBox;
 	private Button btnEvaluateModels;
+	
 	/**
-	 * Constructor of the Diagnosis class
-	 * @param tabFolderParent TabFolder object
-	 *
+	 * Constructor
 	 */
-	public Diagnosis(Composite tabFolderParent){
+	public  Diagnosis(){
+		modelsList=new HashSet<String>();
+		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+		
+	}
+	/**
+	 * Creates GUI widgets
+	 * @param compParent Composite
+	 */
+	public void createControl(Composite compParent){
 		tmfTracePath=new StringBuilder();
 		currentlySelectedTracesPath=new StringBuilder();
 
@@ -78,16 +88,16 @@ public class Diagnosis {
 
 		//Making scrollable tab item 
 		
-		ScrolledComposite scrolCompAnom=new ScrolledComposite(tabFolderParent, SWT.H_SCROLL | SWT.V_SCROLL);
-		Composite comptbItmDiagnosis = new Composite(scrolCompAnom,SWT.NONE);
+		ScrolledComposite scrolCompDiag=new ScrolledComposite(compParent, SWT.H_SCROLL | SWT.V_SCROLL);
+		Composite compDiagnosis = new Composite(scrolCompDiag,SWT.NONE);
 		
 		//tbItmDiagnosis.setControl(scrolCompAnom);
 		
 		//Desiging the Layout of the GUI Items  for the LiveMonitor Tab Item
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalSpan=1;
-		comptbItmDiagnosis.setLayoutData(gridData);
-		comptbItmDiagnosis.setLayout(new GridLayout(1, false));
+		compDiagnosis.setLayoutData(gridData);
+		compDiagnosis.setLayout(new GridLayout(1, false));
 	
 		///////////////////////////////////////////////////////////////////////////
 		//Creating GUI widgets for selection of a trace type and a selection of the model
@@ -97,9 +107,8 @@ public class Diagnosis {
 		//compTraceTypeAndModel.setLayout(new GridLayout(1, false));
 		
 	
-		selectTraceTypeAndTraces(comptbItmDiagnosis);
-		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
-		addEvaluateButton(comptbItmDiagnosis);
+		selectTraceTypeAndTraces(compDiagnosis);
+		addEvaluateButton(compDiagnosis);
 		// Create GUI elements for a selection of a trace
 		
 		
@@ -107,12 +116,12 @@ public class Diagnosis {
 		
 		
 		//Adjust settings for scrollable LiveMonitor Tab Item
-		scrolCompAnom.setContent(comptbItmDiagnosis);
+		scrolCompDiag.setContent(compDiagnosis);
 		 // Set the minimum size
-		scrolCompAnom.setMinSize(200, 200);
+		scrolCompDiag.setMinSize(200, 200);
 	    // Expand both horizontally and vertically
-		scrolCompAnom.setExpandHorizontal(true);
-		scrolCompAnom.setExpandVertical(true);
+		scrolCompDiag.setExpandHorizontal(true);
+		scrolCompDiag.setExpandVertical(true);
 	}
 
 	
@@ -126,7 +135,7 @@ public class Diagnosis {
 		 *  Group trace selection
 		 */
 		Group grpTraceSelection = new Group(compDiagnosis, SWT.NONE);
-		grpTraceSelection.setText("Select Traces and Trace Type");
+		grpTraceSelection.setText("Select Traces for Testing");
 		
 		grpTraceSelection.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
 		grpTraceSelection.setLayout(new GridLayout(4,false));

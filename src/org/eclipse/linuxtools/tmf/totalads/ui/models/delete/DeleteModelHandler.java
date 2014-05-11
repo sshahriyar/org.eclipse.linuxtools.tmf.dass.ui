@@ -100,15 +100,18 @@ public class DeleteModelHandler implements IHandler {
 			String message="Do you really want to delete ";
 			int count=1;
 			while (it.hasNext()){
-				 if (count==1)
-					message=it.next();
+				 if (count==1 && selectedModels.size() <=2)
+					 message+=it.next()+" ";
+				 else if (count==1 && selectedModels.size()>2)
+					 message+=it.next()+", ";
 				 else if (count>1 && count <selectedModels.size())
 				      message+=it.next()+", ";
-				 else
-					 message+="and "+it.next()+"?";
+				else if (count>1 && count==selectedModels.size())
+					 message+="and "+it.next() ;
+					 
 				 count++;
 			}
-					
+		    message+="?";			
 			msgBoxYesNo.setMessage(message);
 			
 			if (msgBoxYesNo.open()==SWT.YES){

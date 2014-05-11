@@ -16,14 +16,14 @@
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ui.AnomaliesView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView"
              id="org.eclipse.linuxtools.tmf.totalads.AnomaliesView"
              name="Anomalies"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ui.ModelingView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.modeling.ModelingView"
              id="org.eclipse.linuxtools.tmf.totalads.ModelingView"
              name="Modeling"
              restorable="true">
@@ -37,7 +37,7 @@
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ui.GenericView"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.properties.PropertiesView"
              id="org.eclipse.linuxtools.tmf.totalads.GenericView"
              name="Generic View"
              restorable="true">

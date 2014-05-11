@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.ui.views.TmfView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -45,12 +47,15 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	private ListenerList listeners ; 
 	private HashSet<String> selection; 
 	
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+	// Inner class
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * 
-	 * Inner class representing a Table for ModelsList
+	 * Inner class representing a Table for models
 	 *
 	 */
-	private  class ModelsList{
+	private  class ModelsList implements IDBMSObserver{
 		CheckboxTableViewer viewer = null;
 		Table table=null;
 		/**
@@ -71,8 +76,10 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 			modelName.getColumn().setText("Models");
 			
 			viewer.setLabelProvider(new DataModelLabelProvider());
-			viewer.setContentProvider(new DataModelTableContentProvider());			
-			viewer.setInput(DBMSFactory.INSTANCE.getDataAccessObject());
+			viewer.setContentProvider(new DataModelTableContentProvider());	
+			IDataAccessObject dao=DBMSFactory.INSTANCE.getDataAccessObject();
+			viewer.setInput(dao);
+			dao.addObserver(this);
 			
 			// Event handler for check marks (selection) in the Table
 			viewer.addCheckStateListener(new ICheckStateListener() {
@@ -83,6 +90,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 				}
 			});// end of event handler
 			
+		
 		}
 		/**
 		 * Handles the check state of the table
@@ -144,8 +152,26 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		    		     break;
 		    	}
 		}
-	}
+		
+		/*
+		 * (non-Javadoc)
+		 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver#update()
+		 */
 
+		@Override
+		public void update() {
+			if(viewer!=null){
+				this.viewer.getTable().removeAll();
+				this.viewer.refresh();
+				selection.clear();
+				
+				setSelection(new StructuredSelection(selection.clone()));
+			}
+		}
+	}
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+	// Inner class ends
+	//////////////////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * Constructor
 	 */

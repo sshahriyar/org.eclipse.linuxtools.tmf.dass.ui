@@ -10,14 +10,21 @@
 
 package org.eclipse.linuxtools.tmf.totalads.ui.modeling;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
+import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
+import org.eclipse.linuxtools.tmf.totalads.ui.io.ProgressConsole;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -30,10 +37,10 @@ import org.eclipse.swt.widgets.MessageBox;
  */
 
 public class BackgroundModeling implements Runnable{
-	String trainingTraces;
-	String validationTraces;
-	ITraceTypeReader traceReader;
-	
+	private String trainingTraces;
+	private String validationTraces;
+	private ITraceTypeReader traceReader;
+	private HashSet<String> modelsList;
 	Button btnMain;
 	/**
 	 *  Constructor 
@@ -45,10 +52,11 @@ public class BackgroundModeling implements Runnable{
 	 * @param btnBuild Button to enable
 	 */
 	public BackgroundModeling(String trainingTraces,
-				String validationTraces,ITraceTypeReader traceReader,  Button btnBuild){
+				String validationTraces,ITraceTypeReader traceReader, HashSet<String> models, Button btnBuild){
 		this.trainingTraces=trainingTraces;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
+		this.modelsList=models;
 		this.btnMain=btnBuild;
 	}
 	/**
@@ -59,9 +67,21 @@ public class BackgroundModeling implements Runnable{
 			String msg=null;
 			
 			try {
+				 
+				ProgressConsole console=new ProgressConsole("Modeling");
+				console.clearConsole();
+				AlgorithmOutStream outStream=new AlgorithmOutStream();
+				outStream.addObserver(console);
+				IDataAccessObject dao=DBMSFactory.INSTANCE.getDataAccessObject();
+				Iterator<String> it=modelsList.iterator();
 				
-					AlgorithmUtility.trainAndValidateModels(trainingTraces, validationTraces, traceReader,null,null);
-							
+				 while (it.hasNext()){
+					String modelName=it.next();
+					console.println("Modeling "+modelName+" on traces");
+					IDetectionAlgorithm algorithm= AlgorithmUtility.getAlgorithmFromModelName(modelName);
+					AlgorithmUtility.trainAndValidateModels(trainingTraces, validationTraces, traceReader,
+							  algorithm,modelName,outStream,dao);
+				 }
 			} 
 			catch(TotalADSGeneralException ex){// handle UI exceptions here
 				if (ex.getMessage()==null)
@@ -71,7 +91,7 @@ public class BackgroundModeling implements Runnable{
 			}
 			catch(TotalADSDBMSException ex){// handle IDataAccessObject exceptions here
 				if (ex.getMessage()==null)
-					msg="IDataAccessObject error: see log.";
+					msg="Database error: see log";
 				else
 					msg=ex.getMessage(); 
 				Logger.getLogger(BackgroundModeling.class.getName()).log(Level.WARNING,msg,ex);
@@ -79,7 +99,7 @@ public class BackgroundModeling implements Runnable{
 			}
 			catch(TotalADSReaderException ex){// handle Reader exceptions here
 				if (ex.getMessage()==null){
-					msg="Reader error: see log.";
+					msg="Reader error: see log";
 				}
 				else
 					msg=ex.getMessage();  
@@ -90,7 +110,7 @@ public class BackgroundModeling implements Runnable{
 									//UI exceptions are simply notifications--no need to log them
 									
 				if (ex.getMessage()==null)
-					msg="Severe error: see log.";	
+					msg="Severe error: see log";	
 				else
 					msg=ex.getMessage();
 				 //ex.printStackTrace();
@@ -111,13 +131,20 @@ public class BackgroundModeling implements Runnable{
 					
 					 @Override
 					public void run() {
+						 
 						if (exception!=null){ // if there has been any exception then show its message
 							MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
 							           ,SWT.ICON_ERROR|SWT.OK);
 							msgBox.setMessage(exception);
 							msgBox.open();
 							
+						}else{
+							MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell()
+							           ,SWT.ICON_WORKING);
+							msgBox.setMessage("Modeling finished successfully");
+							msgBox.open();
 						}
+							
 						btnMain.setEnabled(true);
 						
 					}
