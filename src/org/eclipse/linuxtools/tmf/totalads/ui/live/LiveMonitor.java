@@ -48,7 +48,7 @@ public class LiveMonitor {
 	private ResultsAndFeedback resultsAndFeedback;
 	private Button btnStart;
 	private Button btnStop;
-	private Button btnDetails;
+	//private Button btnDetails;
 	private BackgroundLiveMonitor liveExecutor;
 	private LiveXYChart liveChart;
 	private Button btnTrainingAndEval;
@@ -103,17 +103,14 @@ public class LiveMonitor {
 		btnStop.setText("Stop");
 		btnStop.setEnabled(false);
 		
-		btnDetails=new Button(compButtons, SWT.BORDER);
-		btnDetails.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false,1,1));
-		btnDetails.setText("Details");
-		btnDetails.setEnabled(false);
+		
 		
 
 		
 		//Adjust settings for scrollable LiveMonitor Tab Item
 		scrolCompAnom.setContent(comptbItmLive);
 		 // Set the minimum size
-		scrolCompAnom.setMinSize(200, 200);
+		scrolCompAnom.setMinSize(250, 250);
 	    // Expand both horizontally and vertically
 		scrolCompAnom.setExpandHorizontal(true);
 		scrolCompAnom.setExpandVertical(true);
@@ -249,16 +246,16 @@ public class LiveMonitor {
 		///Training and Evaluation
 		/////////
 		Group grpTrainingAndEval = new Group(compParent, SWT.NONE);
-		grpTrainingAndEval.setText("DataModel Selection");
-		grpTrainingAndEval.setLayoutData(new GridData(SWT.FILL,SWT.FILL,false,true));
+		grpTrainingAndEval.setText("Select Evaluation Type");
+		grpTrainingAndEval.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
 		grpTrainingAndEval.setLayout(new GridLayout(2,false));
 		
 		btnTrainingAndEval=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
-		btnTrainingAndEval.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		btnTrainingAndEval.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		btnTrainingAndEval.setText("Training and Testing");
 		
 		btnTesting=new Button(grpTrainingAndEval, SWT.NONE|SWT.RADIO);
-		btnTesting.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false,1,1));
+		btnTesting.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false,1,1));
 		btnTesting.setText("Testing");
 		btnTesting.setSelection(true);
 		
@@ -278,7 +275,7 @@ public class LiveMonitor {
 				
 				if (findInvalidSSettings()==false){
 					resultsAndFeedback.clearData();
-					btnDetails.setEnabled(false);
+					//btnDetails.setEnabled(false);
 					
 					String password=""; 
 					String privateKey="";
@@ -306,13 +303,6 @@ public class LiveMonitor {
 					btnStart.setEnabled(false);
 					btnStop.setEnabled(true);
 						
-					if (modelsList.size() <=0){
-						 MessageBox msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
-						 msgBox.setMessage("Please select a model first");
-						 msgBox.open();
-						 return;
-					}
-
 					liveExecutor= new BackgroundLiveMonitor
 							  (txtUserAtHost.getText(), password, txtSudoPassword.getText(), 
 									  privateKey, port,snapshotDuration,snapshotIntervals, btnStart,
@@ -380,6 +370,9 @@ public class LiveMonitor {
 		//	msg="SSH password cannot be empty";
 		//else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
          //  msg="Private key path cannot be empty";
+		else if (modelsList.size() <=0){
+			 msg="Please select a model first";
+		}
 		
 		else {
 				try{ 

@@ -236,7 +236,7 @@ public class BackgroundLiveMonitor implements Runnable {
 		}
 		finally{
 			ssh.close();
-			progConsole.closeConsole();
+			
 			outStreamAlg.addOutputEvent("SSH connection terminated");
 			outStreamAlg.addOutputEvent("Monitor stopped");
 			final String err=exception;
@@ -258,6 +258,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					
 				}
 			});
+			progConsole.closeConsole();
 			
 		}
 		
@@ -268,9 +269,9 @@ public class BackgroundLiveMonitor implements Runnable {
 	 */
 	public void stopMonitoring(){
 		isExecuting=false;
-		outStreamAlg.addOutputEvent("Stopping monitor");
-		outStreamAlg.addOutputEvent("It could take few minutes to safely stop the monitor");
-		outStreamAlg.addOutputEvent("Please wait...");		
+		progConsole.println("Stopping monitor");
+		progConsole.println("It could take few minutes to safely stop the monitor");
+		progConsole.println("Please wait...");		
 	}
 	/**
 	 * This is a key function that evaluates traces on models and trains the model on those traces if needed
@@ -294,8 +295,8 @@ public class BackgroundLiveMonitor implements Runnable {
 				
 				
 				
-				outStreamAlg.addOutputEvent("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
-				outStreamAlg.addOutputEvent("Please wait while the trace is evaluated....");
+				progConsole.println("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
+				progConsole.println("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 				Results results=algorithm.test(traceIterator,model , DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
@@ -315,26 +316,26 @@ public class BackgroundLiveMonitor implements Runnable {
 									// database has already been created and settings for test are only passed to this threa
 									// in the constructor. Also, this will always be a last trace, and new db is false
 					
-					outStreamAlg.addOutputEvent("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
-					outStreamAlg.addOutputEvent("Please wait while the model is updated....");
+					progConsole.println("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
+					progConsole.println("Please wait while the model is updated....");
 					traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
 					algorithm.train(traceIterator, true, model, DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
 				} 
 				
-				outStreamAlg.addOutputEvent("Execution  finished for "+model);
+				progConsole.println("Execution  finished for "+model);
 				
 				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
 				if (results.getAnomaly()){
 							anomalies.add(1.0);
-							outStreamAlg.addOutputEvent("It is an anomaly");
+							progConsole.println("It is an anomaly");
 							
 				}
 				else{
 							anomalies.add(0.0);
-							outStreamAlg.addOutputEvent("It is not an anomaly");
+							progConsole.println("It is not an anomaly");
 				}
 				
-				outStreamAlg.addOutputEvent("Plotting anomaly on the chart");
+				progConsole.println("Plotting anomaly on the chart");
 				
 				if (anomalyIdx>maxPoints){
 					anomalies.remove();//remove head

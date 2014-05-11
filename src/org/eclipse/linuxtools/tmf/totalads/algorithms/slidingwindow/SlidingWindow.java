@@ -9,8 +9,8 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -20,7 +20,6 @@ import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
@@ -29,7 +28,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.swtchart.Chart;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+//import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -328,7 +327,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		     int displaySeqCount=0, totalAnomalousSequences=0, largestHam=0;
 		     Results results= new Results();
 			 results.setAnomalyType("");
-			 String headerMsg="First "+maxAnomalousSequencesToReturn+" or less anomalous sequences with non-overlapping  events at Ham:"+maxHamDis+"\n\n";
+			 String headerMsg="First "+maxAnomalousSequencesToReturn+" or less anomalous sequences with non-overlapping  events at Ham > "+maxHamDis+"\n\n";
 			 Integer []largestHamSeq=null;
 			 testTraceCount++;
 			  
@@ -419,7 +418,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 
 	 
 	 /**
-	  * Adds additional information to the reuslts
+	  * Adds additional information to the results
 	  * @param largestHam
 	  * @param largestHamSeq
 	  * @param results

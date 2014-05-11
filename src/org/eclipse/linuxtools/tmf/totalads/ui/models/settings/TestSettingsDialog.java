@@ -44,7 +44,7 @@ public class TestSettingsDialog extends TitleAreaDialog {
 	@Override
 	  public void create() {
 	    super.create();
-	    setTitle("Adjust SettingsForm for Testing");
+	    setTitle("Adjust Settings for Testing");
 	   
 	  }
 	

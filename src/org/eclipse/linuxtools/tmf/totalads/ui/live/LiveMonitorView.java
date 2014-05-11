@@ -19,7 +19,10 @@ import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 /**
@@ -99,8 +102,26 @@ public class LiveMonitorView extends ViewPart {
 				}
 		});
         
-        /// Registers a listener to Eclipse to get the object of another view      		
+        /// Registers a listener to Eclipse to get an object of another view      		
   		getSite().getWorkbenchWindow().getPartService().addPartListener(new PerspectiveViewsListener());
+  		
+    //PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("");
+
+      try {
+		
+	    IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.ID);
+		ResultsView resView=(ResultsView)viewRes;
+		liveMonitor.setResultsAndFeedback(resView.getResultsAndFeddbackInstance());
+      
+		IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveChartView.VIEW_ID);
+		LiveChartView liveChartView = (LiveChartView)viewChart;
+	    liveMonitor.setLiveChart(liveChartView.getLiveChart());
+	    
+		
+      } catch (PartInitException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 
 	}
 
