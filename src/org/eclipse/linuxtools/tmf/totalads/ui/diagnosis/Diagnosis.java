@@ -66,6 +66,7 @@ public class Diagnosis {
 	 * Constructor
 	 */
 	public  Diagnosis(){
+		System.out.println ("In constructor");
 		modelsList=new HashSet<String>();
 		msgBox= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
 		

@@ -17,8 +17,8 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView"
-             id="org.eclipse.linuxtools.tmf.totalads.AnomaliesView"
-             name="Anomalies"
+             id="org.eclipse.linuxtools.tmf.totalads.ResultsView"
+             name="Results"
              restorable="true">
        </view>
        <view

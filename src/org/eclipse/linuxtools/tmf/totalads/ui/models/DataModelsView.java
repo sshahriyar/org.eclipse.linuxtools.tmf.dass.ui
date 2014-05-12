@@ -4,6 +4,7 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.models;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -56,8 +57,8 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	 *
 	 */
 	private  class ModelsList implements IDBMSObserver{
-		CheckboxTableViewer viewer = null;
-		Table table=null;
+		private CheckboxTableViewer viewer = null;
+		private Table table=null;
 		/**
 		 * Constructor
 		 * @param parent
@@ -106,26 +107,26 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 				
 				//Don't let user select no connection message
 				if (modelName.equals(DataModelTableContentProvider.EMPTY_VIEW_FIELD)){
-					uncheckedSelectedModel(modelName, viewer);
+					uncheckedSelectedModel(modelName);
 					return;
 				}//See if more than 5 models are slected
 				else if (selection.size()>=5){
 					msgBox.setMessage("Please select less than six models only");
 				    msgBox.open();
-				    uncheckedSelectedModel(modelName, viewer);
+				    uncheckedSelectedModel(modelName);
 				    return;
 				} //Making sure that it is not a database that already exist in the db 
 				 else if(modelAcronym==null ||  modelAcronym.length<2){
 					msgBox.setMessage(modelName+ " is not a valid model created by TotalADS!");
 					msgBox.open();
-					uncheckedSelectedModel(modelName, viewer);
+					uncheckedSelectedModel(modelName);
 					return;
 					
 				}//Make sure the algorithm is there in the list
 				 else if (AlgorithmFactory.getInstance().getAlgorithmByAcronym(modelAcronym[1])==null){
 						msgBox.setMessage(modelName +" is not a valid model created by TotalADS!");
 						msgBox.open();
-						uncheckedSelectedModel(modelName, viewer);
+						uncheckedSelectedModel(modelName);
 						return;
 				}
 				
@@ -145,7 +146,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		 * @param modelName
 		 * @param viewer
 		 */
-		private void uncheckedSelectedModel(String modelName, CheckboxTableViewer viewer ){
+		private void uncheckedSelectedModel(String modelName ){
 			for (int i=0;i<viewer.getTable().getItemCount(); i++)
 		    	if (viewer.getTable().getItem(i).getText().equals(modelName)){
 		    		     viewer.getTable().getItem(i).setChecked(false);
@@ -199,25 +200,44 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		
 
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		listeners.add(listener);  
+		/// Uncheck all the models because  a view could be closed and opened in the middle
+		//Iterator<String> it= selection.iterator();
+		
+		//while (it.hasNext())
+		  //   modelListViewer.uncheckedSelectedModel(it.next());
+		//selection.clear();
+		
 		
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
+	 */
 	@Override
 	public ISelection getSelection() {
 		  return new StructuredSelection(selection);  
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
+	 */
 	@Override
 	public void removeSelectionChangedListener(
 			ISelectionChangedListener listener) {
 		listeners.remove(listener);  
 		
 	}
-
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
+	 */
 	@Override
 	public void setSelection(ISelection selection) {
 		 Object[] list = listeners.getListeners();  
@@ -227,8 +247,12 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		  }  
 		
 	}
-	
-	
+	/**
+	 * Refreshes the viewer and its contents
+	 */
+	public void refresh(){
+		this.modelListViewer.update();
+	}
 
 
 }

@@ -120,7 +120,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 		// This is for lab experiments only
-		return "Text-Syscall ID to Name (lab)";
+		return "Text-Syscall VIEW_ID to Name (lab)";
 	}
 
 	 /**

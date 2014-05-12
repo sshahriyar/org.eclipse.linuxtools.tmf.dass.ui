@@ -10,19 +10,18 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.live;
 
 import java.util.HashSet;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.linuxtools.tmf.totalads.core.TotalAdsPerspectiveFactory;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
-//import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.ResultsAndFeedback;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IPartListener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 /**
@@ -33,101 +32,82 @@ import org.eclipse.ui.part.ViewPart;
 public class LiveMonitorView extends ViewPart {
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView";
 	
-	//private ResultsView anomView;
 	private LiveMonitor liveMonitor;
-	/**
-	 * An inner class implementing the listener for other views initialised in {@link TotalAdsPerspectiveFactory} 
-	 */
-	 private class PerspectiveViewsListener implements IPartListener {
-		 /// Registers a listener to Eclipse to get the object of  ResultsAndfeedback in anomView
-		 // So it can be filled when the evaluate button is pressed in the Diagnosis View
-		 @Override  
-	        public void partOpened(IWorkbenchPart part) {
-	  		   if (part instanceof ResultsView) {
-	  			   ResultsView anomView = (ResultsView)part;
-	  		       liveMonitor.setResultsAndFeedback(anomView.getResultsAndFeddbackInstance());
-	  		    
-	  		   } else if (part instanceof LiveChartView){
-	  			    LiveChartView chartView = (LiveChartView)part;
-		  		    liveMonitor.setLiveChart(chartView.getLiveChart());
-	  		   }
-	  		   
-	  		  }
+	private SelectionListener listener;
+	/////////////////////////////////////////
+	///Inner class implementing a listener for another view
+	////////////////////////////////////////
+	private class SelectionListener implements ISelectionListener {
+		@Override
+		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 	
-			@Override
-			public void partActivated(IWorkbenchPart part) {
-				// TODO 
-				
+			 if (part instanceof DataModelsView) {  
+				   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
+				   HashSet<String> modelList= (HashSet<String>)obj;
+				   liveMonitor.updateOnModelSelction(modelList); 
+			    }  
 			}
-	
-			@Override
-			public void partBroughtToTop(IWorkbenchPart part) {
-				// TODO 
-				
-			}
-	
-			@Override
-			public void partClosed(IWorkbenchPart part) {
-				// TODO 
-				
-			}
-	
-			@Override
-			public void partDeactivated(IWorkbenchPart part) {
-				// TODO 
-				
-			}
-  	}
+	}
 	 /**
 	  * Constructor
 	  */
 	public LiveMonitorView() {
 		liveMonitor=new LiveMonitor();
+		listener=new SelectionListener();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
+	 */
 	@Override
 	public void createPartControl(Composite compParent) {
 		liveMonitor.createControls(compParent);;
 		
 		/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
-        getSite().getPage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
-			@Override
-			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		
-				 if (part instanceof DataModelsView) {  
-					   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
-					   HashSet<String> modelList= (HashSet<String>)obj;
-					   liveMonitor.updateOnModelSelction(modelList); 
-				    }  
-				}
-		});
+        getSite().getPage().addSelectionListener(DataModelsView.ID,	listener );
         
-        /// Registers a listener to Eclipse to get an object of another view      		
-  		getSite().getWorkbenchWindow().getPartService().addPartListener(new PerspectiveViewsListener());
-  		
-    //PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("");
 
-      try {
+       try {
 		
-	    IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.ID);
-		ResultsView resView=(ResultsView)viewRes;
-		liveMonitor.setResultsAndFeedback(resView.getResultsAndFeddbackInstance());
-      
-		IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveChartView.VIEW_ID);
-		LiveChartView liveChartView = (LiveChartView)viewChart;
-	    liveMonitor.setLiveChart(liveChartView.getLiveChart());
-	    
-		
-      } catch (PartInitException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+		    IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
+			ResultsView resView=(ResultsView)viewRes;
+			liveMonitor.setResultsAndFeedback(resView.getResultsAndFeddbackInstance());
+	      
+			IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveChartView.VIEW_ID);
+			LiveChartView liveChartView = (LiveChartView)viewChart;
+		    liveMonitor.setLiveChart(liveChartView.getLiveChart());
+		    
+			
+	    } catch (PartInitException e) {
+	    	    MessageBox msgBox=new MessageBox(getSite().getShell(),SWT.OK);
+				if(e.getMessage()!=null){
+					msgBox.setMessage(e.getMessage());
+				}else
+					msgBox.setMessage("Unable to launch a view");
+				msgBox.open();
+				Logger.getLogger(LiveMonitor.class.getName()).log(Level.SEVERE,null,e);
+	
+	    }
 
 	}
-
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
+	 */
 	@Override
 	public void setFocus() {
 
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
+	 */
+	@Override
+	public void dispose(){
+		getSite().getPage().removeSelectionListener(DataModelsView.ID,	 listener);
 	}
 
 }

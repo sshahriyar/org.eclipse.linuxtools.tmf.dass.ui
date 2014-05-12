@@ -78,7 +78,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         
         IFolderLayout centerMiddleFolder = layout.createFolder(
                 "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); 
-        centerMiddleFolder.addView(ResultsView.ID);
+        centerMiddleFolder.addView(ResultsView.VIEW_ID);
        centerMiddleFolder.addView(LiveChartView.VIEW_ID);
         
         IFolderLayout centerBottomFolder = layout.createFolder(

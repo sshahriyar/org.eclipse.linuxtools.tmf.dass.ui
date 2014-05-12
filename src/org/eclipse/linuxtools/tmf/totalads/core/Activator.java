@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractUIPlugin {
 
-	// The plug-in ID
+	// The plug-in VIEW_ID
 	public static final String PLUGIN_ID = "org.eclipse.linuxtools.tmf.totalads.ui"; //$NON-NLS-1$
 
 	// The shared instance

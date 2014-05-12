@@ -177,7 +177,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					processTraceOnModels(tracePath, xVals);
 					totalTraces++;
 					results.setTotalTraceCount(totalTraces.toString());	
-					//calcualte percentages
+					//calculate percentages
 					HashMap <String, Double> modelsAnoms=new HashMap<String,Double>();
 					for (int i=0;i<this.seriesNames.length;i++){
 						Double anoms=(modelsAndAnomalyCount.get(seriesNames[i])/totalTraces)*100;

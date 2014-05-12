@@ -13,7 +13,6 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.SWT;
