@@ -62,12 +62,18 @@ public class LiveMonitorView extends ViewPart  implements ISelectionListener,ILi
        try {
 		
 		          
-			IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveResultsView.VIEW_ID);
-			LiveResultsView liveView = (LiveResultsView)viewChart;
+			IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(LiveResultsView.VIEW_ID);
+			LiveResultsView liveView = (LiveResultsView)viewRes;
 			
 		    liveMonitor.setLiveChart(liveView.getLiveChart());
 		    liveMonitor.setResultsAndFeedback(liveView.getResults());
 		    
+		 // Trying to clear the already selected instances in the models view when this view is opened in the middle of execution
+	         // If the view is opened in the middle, already selected models are not available using the event handler	
+	         IViewPart dataModelsView= getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
+	         if (dataModelsView instanceof DataModelsView)
+	        	 ((DataModelsView)dataModelsView).refresh();
+	      
 			
 	    } catch (PartInitException e) {
 	    	    MessageBox msgBox=new MessageBox(getSite().getShell(),SWT.OK);

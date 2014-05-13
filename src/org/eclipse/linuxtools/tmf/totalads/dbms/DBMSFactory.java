@@ -128,7 +128,7 @@ public enum DBMSFactory{
 	 public String verifyConnection(){
 		 String err="";
 		 synchronized (this){
-			 if (daoRef.isConnected()) // Don't open multiple connections
+			 if (daoRef!=null && daoRef.isConnected()) // Don't open multiple connections
 					connRef.closeConnection();
 			 if (host.isEmpty())
 				 err="Before using verifyConnection, first open a connection";

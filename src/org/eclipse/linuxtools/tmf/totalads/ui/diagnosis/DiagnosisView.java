@@ -74,7 +74,8 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	         // Trying to clear the already selected instances in the models view when this view is opened in the middle of execution
 	         // If the view is opened in the middle, already selected models are not available using the event handler	
 	         IViewPart dataModelsView= getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
-	         ((DataModelsView)dataModelsView).refresh();
+	         if (dataModelsView instanceof DataModelsView)
+	        	 ((DataModelsView)dataModelsView).refresh();
 	      
 	     	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
 	         getSite().getPage().addSelectionListener(DataModelsView.ID, this);	

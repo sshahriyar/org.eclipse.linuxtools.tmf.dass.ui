@@ -77,8 +77,10 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 			modelName.getColumn().setText("Models");
 			
 			viewer.setLabelProvider(new DataModelLabelProvider());
-			viewer.setContentProvider(new DataModelTableContentProvider());	
+			viewer.setContentProvider(new DataModelTableContentProvider());
+			
 			IDataAccessObject dao=DBMSFactory.INSTANCE.getDataAccessObject();
+			DBMSFactory.INSTANCE.verifyConnection();
 			viewer.setInput(dao);
 			dao.addObserver(this);
 			
@@ -162,11 +164,14 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 		@Override
 		public void update() {
 			if(viewer!=null){
-				this.viewer.getTable().removeAll();
-				this.viewer.refresh();
-				selection.clear();
+				Table table= this.viewer.getTable();
+				if (table!=null && !table.isDisposed()){
+					table.removeAll();
+				    this.viewer.refresh();
+				    selection.clear();
+					setSelection(new StructuredSelection(selection.clone()));
+				}
 				
-				setSelection(new StructuredSelection(selection.clone()));
 			}
 		}
 	}
