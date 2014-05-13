@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 //import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * This class evaluates an already created algorithm by running in background as thread. it is instantiated and executed 
@@ -132,10 +133,15 @@ public class BackgroundTesting implements Runnable{
 					public void run() {
 						
 						if (exception!=null){ // if there has been any exception then show its message
-							MessageBox msgBox=new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR|SWT.OK);
+							MessageBox msgBox=new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_ERROR);
 							msgBox.setMessage(exception);
 							msgBox.open();
+						}else{
+							MessageBox msgBox=new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,SWT.ICON_WORKING);
+							msgBox.setMessage("Diagnosis Finished");
+							msgBox.open();
 						}
+							
 						btnAnalysisEvaluateModels.setEnabled(true);
 						//statusBar.initialState();
 					}
@@ -198,20 +204,23 @@ public class BackgroundTesting implements Runnable{
 				
 				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
 						
-					    console.println("Executing the model: "+database[modelCnt]);
+					    console.println("Evaluating the model: "+database[modelCnt]);
 						int counter=trcCnt+1;
 											 
 						ITraceIterator trace=traceReader.getTraceIterator(fileList[trcCnt]);// get the trace
 				 					
 				 		Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStreamAlg);
+				 		
+				 		
 				 		modelResults.put(database[modelCnt],results);
 				 	
 				 		 // Third, print summary
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
 						modelsAndAnomalyCount.put(database[modelCnt],totalAnoms);
 						resultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
+						resultsAndFeedback.addTraceResult(traceName, modelResults);
 				}
-			resultsAndFeedback.addTraceResult(traceName, modelResults);		
+				
 		  }
 	       
 	    resultsAndFeedback.setTotalTraceCount(totalFiles.toString());

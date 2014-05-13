@@ -5,7 +5,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class PropertiesView extends ViewPart {
 	
-	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.GenericView";
+	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.PropertiesView";
 	
 	public PropertiesView() {
 		// TODO Auto-generated constructor stub

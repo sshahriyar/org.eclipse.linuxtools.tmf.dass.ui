@@ -35,41 +35,22 @@ import org.eclipse.jface.viewers.StructuredSelection;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class DiagnosisView extends TmfView {
+public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelectionListener{
 
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView";
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
-	private ResultsAndFeedback resultsAndFeedback;
-	private ResultsView anomView;
-	private DiagnosisSelectionListener selectionListener;
 	private HashSet<String> modelList;
-	
-	////////////////////////////
-	// Inner class implementing a listener for another view
-	///////////////////////////////
-	private class DiagnosisSelectionListener implements ISelectionListener {
-		@Override
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-	
-			 if (part instanceof DataModelsView) {  
-				   Object obj = ((StructuredSelection) selection).getFirstElement();
-				   modelList= (HashSet<String>)obj;
-				   if (modelList!=null && modelList.size()>0)
-					   System.out.println(modelList.iterator().next());
-				   diagnosis.updateonModelSelection(modelList); 
-			    }  
-			}
-	}
-	
- 
+	private DiagnosisPartListener partListener;
+	 
 	/**
 	 * Constructor
 	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
-		
-	
+		diagnosis=new Diagnosis();
+		partListener=new DiagnosisPartListener();
+		partListener.addObserver(this);
 	}
 	
 	/*
@@ -79,8 +60,7 @@ public class DiagnosisView extends TmfView {
 	@Override
 	public void createPartControl(Composite compParent) {
 		
-		diagnosis=new Diagnosis();
-		selectionListener= new DiagnosisSelectionListener();
+		
 		diagnosis.createControl(compParent);
 	
         ITmfTrace trace = getActiveTrace();
@@ -91,18 +71,20 @@ public class DiagnosisView extends TmfView {
                
         try {
   		
-         // Trying to clear the already selected instances in the models view when this view is opened in the middle of execution
-         // If the view is opened in the middle, already selected models are not available using the event handler	
-         IViewPart dataModelsView= getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
-         ((DataModelsView)dataModelsView).refresh();
-      
-     	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
-         getSite().getPage().addSelectionListener(DataModelsView.ID, selectionListener);	
-  	    
-        IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
-  		ResultsView resView=(ResultsView)viewRes;
-  		diagnosis.setResultsAndFeedbackInstance(resView.getResultsAndFeddbackInstance());
-  		
+	         // Trying to clear the already selected instances in the models view when this view is opened in the middle of execution
+	         // If the view is opened in the middle, already selected models are not available using the event handler	
+	         IViewPart dataModelsView= getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
+	         ((DataModelsView)dataModelsView).refresh();
+	      
+	     	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
+	         getSite().getPage().addSelectionListener(DataModelsView.ID, this);	
+	  	    
+	        IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
+	  		ResultsView resView=(ResultsView)viewRes;
+	  		diagnosis.setResultsAndFeedbackInstance(resView.getResultsAndFeddbackInstance());
+	  		
+	  		//Registers a part listener
+	  		getSite().getPage().addPartListener(partListener);
   	    
   		
         } catch (PartInitException e) {
@@ -114,12 +96,11 @@ public class DiagnosisView extends TmfView {
 				msgBox.setMessage("Unable to launch a view");
 			msgBox.open();
 			Logger.getLogger(DiagnosisView.class.getName()).log(Level.SEVERE,null,e);
-  	}
+     	}
         
 
 	}
 
-	
 	
 	
 	/**
@@ -158,6 +139,35 @@ public class DiagnosisView extends TmfView {
 	@Override
 	public void dispose(){
 		super.dispose();
-		getSite().getPage().removeSelectionListener(DataModelsView.ID,	 selectionListener);
+		getSite().getPage().removeSelectionListener(DataModelsView.ID, this);
+		partListener.removeObserver(this);
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.IDiagnosisObserver#update(org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback)
+	 */
+	@Override
+	public void update(ResultsAndFeedback results) {
+		diagnosis.setResultsAndFeedbackInstance(results);
+		
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 */
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+
+		 if (part instanceof DataModelsView) {  
+			   Object obj = ((StructuredSelection) selection).getFirstElement();
+			   modelList= (HashSet<String>)obj;
+			   if (modelList!=null && modelList.size()>0)
+				   System.out.println(modelList.iterator().next());
+			   diagnosis.updateonModelSelection(modelList); 
+		    }  
+		}
+
 }

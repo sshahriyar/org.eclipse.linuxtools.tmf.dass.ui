@@ -148,25 +148,6 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
 								 
-				/* if (options!=null){
-					 if (isNewDB){// add all settings to the db if this is a new database
-						 String []setting=new String[options.length+6];
-						 setting[0]=SettingsCollection.KEY.toString(); 
-						 setting[1]="hmm";
-						 for (int i=0;i<options.length;i++)
-							 setting[i+2]=options[i];
-						 setting[options.length+2]=SettingsCollection.LOG_LIKELIHOOD.toString();
-						 setting[options.length+3]="0.0";
-						 setting[options.length+4]=SettingsCollection.SEQ_LENGTH.toString();
-						 setting[options.length+5]=seqLength.toString();
-						 hmm.verifySaveSettingsCreateDb(setting, database, connection,true,true);
-					 }else
-						 hmm.verifySaveSettingsCreateDb(options, database, connection,false,false);
-				 }					 
-				 else{
-					 if (isNewDB) 
-						initializeModelAndSettings(database, connection, null); // with default settings if no settings selected
-				 } */
 				 String []options=hmm.loadSettings(database, connection);// get settings from db
 				 numStates=Integer.parseInt(options[1]);
 				 numSymbols=Integer.parseInt(options[3]);
@@ -305,7 +286,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 		outStream.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
 		outStream.addNewLine();
-		
+		outStream.addOutputEvent("Finished validation");
+		outStream.addNewLine();
 		hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false); 
 		
 	}
@@ -335,6 +317,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		  }
 		  return probThreshold;
 	}
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
@@ -347,13 +331,9 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		
 		if (!isTestInitialized){
 			hmm=new HmmMahout();
-			/*if (options!=null){
-				hmm.verifySaveSettingsCreateDb(options, database, connection, false, false);
-				logThresholdTest=Double.parseDouble(options[1]);
-			}else{*/
-				options=hmm.loadSettings(database, dataAccessObject);
-				logThresholdTest=Double.parseDouble(options[7]);
-			//}
+			options=hmm.loadSettings(database, dataAccessObject);
+			logThresholdTest=Double.parseDouble(options[7]);
+			
 			hmm.loadHmm(dataAccessObject, database);
 			nameToID.loadMap(dataAccessObject, database);
 			testNameToIDSize=nameToID.getSize();
@@ -365,22 +345,34 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   	Boolean isTested=true;
 	    totalTestTraces++;
 	    String event=null;
-	   	while (trace.advance() ) {
-	   		event=trace.getCurrentEvent();
-	   		 newSequence.add(nameToID.getId(event));
+	    
+	    outputStream.addOutputEvent("Extracting Sequences");
+	    outputStream.addNewLine();
+	    int seqCount=1;
+	    while (trace.advance() ) {
+	   		
+	    	  event=trace.getCurrentEvent();
+	   		  newSequence.add(nameToID.getId(event));
 	    	  winWidth++;
 	    	  isTested=false;    	  
+	    	  
 	    	  if(winWidth >= testSeqLength){
+	    		  
 	    		  isTested=true;		
 	    		  winWidth--;
 	    		  Integer[] seq=new Integer[testSeqLength];
 	    		  seq=newSequence.toArray(seq);
-	    		  // searching and adding to db
+	    		  
+	    		  if (seqCount%10000==0){
+	    			  outputStream.addOutputEvent("Executing "+seqCount+"th sequence");
+	    			  outputStream.addNewLine();
+	    		  }
+	    		  
 	    		  if (testEvaluation(results, logThresholdTest, seq)==true)
 	 				break;
 	    		  //testEvaluation(results, logThreshold, seq);
 	    		  newSequence.remove(0);
-	    		  
+	    		  seqCount++;
 	    	  }
 	    		  
 	     }
@@ -389,7 +381,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    		  	 seq=newSequence.toArray(seq);
 			 testEvaluation(results, logThresholdTest, seq);
 		}
-		
+		outputStream.addOutputEvent("Finished evaluating the trace");
+		outputStream.addNewLine();
 		
 		return results; 
 		
@@ -399,7 +392,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param result
 	 * @param probThreshold
 	 * @param seq
-	 * @return Return true if anomaly else false
+	 * @return Return true if anomaly, else returns false
 	 */
 	private boolean testEvaluation(Results result, Double probThreshold, Integer []seq){
 		  Double prob=1.0;

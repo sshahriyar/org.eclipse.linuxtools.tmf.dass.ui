@@ -25,9 +25,13 @@ enum SettingsCollection{
 	 */
 	MAX_WIN("maxWIN"),
 	/**
-	 * MAx hamming distance field in the collection
+	 * Max hamming distance field in the collection
 	 */
 	MAX_HAM_DIS("maxHamDis"),
+	/**
+	 * Detailed Analysis field in the collection
+	 */
+	DETAILED_ANALYSIS("detailedAnalysis"),
 	/**
 	 * The name of collection itself
 	 */

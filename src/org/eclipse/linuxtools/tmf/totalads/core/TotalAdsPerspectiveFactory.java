@@ -19,7 +19,7 @@ package org.eclipse.linuxtools.tmf.totalads.core;
 
 import org.eclipse.linuxtools.internal.lttng2.ui.views.control.ControlView;
 import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
-import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView;
+import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveResultsView;
 import org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView;
 import org.eclipse.linuxtools.tmf.totalads.ui.modeling.ModelingView;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
@@ -79,7 +79,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         IFolderLayout centerMiddleFolder = layout.createFolder(
                 "centerMiddleFolder", IPageLayout.BOTTOM, 0.25f,"centerTopFolder"); 
         centerMiddleFolder.addView(ResultsView.VIEW_ID);
-       centerMiddleFolder.addView(LiveChartView.VIEW_ID);
+       centerMiddleFolder.addView(LiveResultsView.VIEW_ID);
         
         IFolderLayout centerBottomFolder = layout.createFolder(
                 "centerBottomFolder", IPageLayout.BOTTOM, 0.70f,"centerMiddleFolder"); 

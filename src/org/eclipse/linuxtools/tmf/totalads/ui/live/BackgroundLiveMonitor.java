@@ -20,7 +20,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.mahout.math.Arrays;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
@@ -70,6 +72,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	private LinkedList<Double> xSeries;
 	private boolean isTrainAndEval;
 	private Integer totalTraces;
+	private String directoryToStoreTraces;
 	private volatile boolean isExecuting=true;
 	private HashMap <String, Double> modelsAndAnomalyCount;
 	
@@ -93,7 +96,7 @@ public class BackgroundLiveMonitor implements Runnable {
 	public BackgroundLiveMonitor(String userAtHost, String password,String sudoPassowrd, String pathToPrivateKey,
 			Integer port, Integer snapshotDuration,Integer intervalBetweenSnapshots, Button btnStart,
 		  	Button btnStop,HashSet<String> modelsList,
-		  	ResultsAndFeedback results,	LiveXYChart xyChart,Boolean isTrainEval ) {
+		  	ResultsAndFeedback results,	LiveXYChart xyChart, String traceStorageDirectory, Boolean isTrainEval ) {
 		
 		this.userAtHost=userAtHost;
 		this.password=password;
@@ -107,15 +110,17 @@ public class BackgroundLiveMonitor implements Runnable {
 		this.modelsList=modelsList;
 		this.results=results;
 		this.liveXYChart=xyChart;
-		this.maxPoints=intervalBetweenSnapshots*30;
+		this.directoryToStoreTraces=traceStorageDirectory;
 		this.isTrainAndEval=isTrainEval;
-		
+		//Setting up the maximum threshold beyond which the number of points would start
+		// getting reduced on the chart. In other words the chart would move right
+		this.maxPoints=30;
 		
 		progConsole=new ProgressConsole("Live Monitor");
 		outStreamAlg=new AlgorithmOutStream();
 		outStreamAlg.addObserver(progConsole);
 		
-		LinkedList<Double> anomalyCounts=new LinkedList<Double>();
+		
 		modelsAndAnomaliesOnChart=new HashMap<String, LinkedList<Double>>();
 		modelsAndAnomalyCount=new HashMap<String, Double>();
 		
@@ -125,6 +130,7 @@ public class BackgroundLiveMonitor implements Runnable {
 		Iterator<String> it=modelsList.iterator();
 		while (it.hasNext()){
 			String model=it.next();
+			LinkedList<Double> anomalyCounts=new LinkedList<Double>();
 			this.modelsAndAnomaliesOnChart.put(model, anomalyCounts);
 			seriesNames[idx]=model;
 			modelsAndAnomalyCount.put(seriesNames[idx], 0.0);
@@ -158,16 +164,20 @@ public class BackgroundLiveMonitor implements Runnable {
 		
 			while (isExecuting){//keep running untill the stop function is called
 						//Getting a trace from remote system
-					String tracePath=ssh.collectATrace(sudoPassword);
+					String tracePath=ssh.collectATrace(sudoPassword,directoryToStoreTraces);
 					//String tracePath=ssh.getTrace();
 					//System.out.println(anomalyIdx + " "+maxPoints);
 					if (xSeries.isEmpty())
 						xSeries.add(0.0);
 						
 					else{
+						System.out.println (anomalyIdx + " "+maxPoints);
 						if (anomalyIdx>maxPoints)
 							xSeries.remove();// remove first point on the series
-						xSeries.add(intervalsBetweenSnapshots.doubleValue()+xSeries.getLast());
+						Double interval=1.0;
+						if (intervalsBetweenSnapshots.doubleValue()!=0)
+							interval=intervalsBetweenSnapshots.doubleValue();
+						xSeries.add(interval+xSeries.getLast());
 						liveXYChart.setXRange(xSeries.getFirst().intValue(), xSeries.getLast().intValue(),100);
 					}
 					//Convert it into a series for plotting a chart
@@ -175,6 +185,7 @@ public class BackgroundLiveMonitor implements Runnable {
 					xVals=xSeries.toArray(xVals);
 					
 					processTraceOnModels(tracePath, xVals);
+					
 					totalTraces++;
 					results.setTotalTraceCount(totalTraces.toString());	
 					//calculate percentages
@@ -184,20 +195,22 @@ public class BackgroundLiveMonitor implements Runnable {
 						modelsAnoms.put(seriesNames[i],anoms);
 					
 					}
-						results.setTotalAnomalyCount(modelsAnoms);
+					results.setTotalAnomalyCount(modelsAnoms);
 					
 					
 					// Check if stop has been requested
 					if (isExecuting==false)
 						break;// break out of the loop 
-					
-					outStreamAlg.addOutputEvent("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
-									+ " the remote host "+userAtHost.replaceAll(".*@","" ));
-					try{
-						TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
-						//TimeUnit.SECONDS.sleep(2);
-						
-					} catch (InterruptedException ex){}
+
+					// if there is more than 0 interval duration
+					if (intervalsBetweenSnapshots >10){
+						outStreamAlg.addOutputEvent("Pausing for "+intervalsBetweenSnapshots+ " min to restart tracing on"
+										+ " the remote host "+userAtHost.replaceAll(".*@","" ));
+						try{
+							TimeUnit.MINUTES.sleep(intervalsBetweenSnapshots);
+												
+						} catch (InterruptedException ex){}
+					}
 			
 		  }// End of while
 		
@@ -221,10 +234,13 @@ public class BackgroundLiveMonitor implements Runnable {
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
 	
 		}catch (Exception ex){
-			exception=ex.getMessage();
+			if (ex.getMessage()!=null)
+				exception=ex.getMessage();
+			else
+				exception="Unknown error: check LTTng on the remote system, log might be helpful too";
 			
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,exception, ex);
-			//ex.printStackTrace();
+			ex.printStackTrace();
 			// An exception could be thrown due to unavailability of the db, 
 			// make sure that the connection is not lost
 			DBMSFactory.INSTANCE.verifyConnection();
@@ -237,8 +253,8 @@ public class BackgroundLiveMonitor implements Runnable {
 		finally{
 			ssh.close();
 			
-			outStreamAlg.addOutputEvent("SSH connection terminated");
-			outStreamAlg.addOutputEvent("Monitor stopped");
+			progConsole.println("SSH connection terminated");
+			progConsole.println("Monitor stopped");
 			final String err=exception;
 			//
 			//Run on main GUI thread
@@ -291,14 +307,13 @@ public class BackgroundLiveMonitor implements Runnable {
 				String model=it.next();
 				
 				
-				IDetectionAlgorithm algorithm=algFac.getAlgorithmByAcronym(model.split("_")[1]);
-				
-				
+				IDetectionAlgorithm algorithm=AlgorithmUtility.getAlgorithmFromModelName(model);
 				
 				progConsole.println("Evaluting trace on the model "+model+ " created using "+algorithm.getName()+" algorithm");
 				progConsole.println("Please wait while the trace is evaluated....");
 				//Getting a trace iterator
 				ITraceIterator 	traceIterator = lttngSyscallReader.getTraceIterator(new File(tracePath));
+				//Testing it
 				Results results=algorithm.test(traceIterator,model , DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
 				
 				Double anomCount=modelsAndAnomalyCount.get(model);
@@ -311,10 +326,8 @@ public class BackgroundLiveMonitor implements Runnable {
 				modelsAndResults.put(model, results);
 				
 				
-				if (isTrainAndEval){//if it is both training and evaluation, then first train it
-									// we are nit passing settings here because the assumption is that 
-									// database has already been created and settings for test are only passed to this threa
-									// in the constructor. Also, this will always be a last trace, and new db is false
+				if (isTrainAndEval){//if it is both training and evaluation
+						 
 					
 					progConsole.println("Now taking the trace to update the model "+model+ " via  "+algorithm.getName()+" algorithm");
 					progConsole.println("Please wait while the model is updated....");
@@ -323,6 +336,7 @@ public class BackgroundLiveMonitor implements Runnable {
 				} 
 				
 				progConsole.println("Execution  finished for "+model);
+				
 				
 				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
 				if (results.getAnomaly()){
@@ -349,10 +363,12 @@ public class BackgroundLiveMonitor implements Runnable {
 			
 				ySeries=anomalies.toArray(ySeries);
 				
+				
 				liveXYChart.addYSeriesValues(ySeries, model);
 				liveXYChart.addXSeriesValues(xVals, model);
+				
 				liveXYChart.drawChart();
-
+		
 			}
 		
 		if (isAnomCountThres)// only increment or decrement this once for all algorithms
@@ -364,9 +380,9 @@ public class BackgroundLiveMonitor implements Runnable {
 		String traceToDelete=results.addTraceResult(traceName, modelsAndResults);
 		
 		if (!traceToDelete.isEmpty()){
-			// decrease total traces when a trace is removed from the reuslts
+			// decrease total traces when a trace is removed from the results
 			totalTraces--;
-			//Also decrease the count of total anoamlies for each model
+			//Also decrease the count of total anomalies for each model
 			Set<String> keys= modelsAndAnomalyCount.keySet();
 			Iterator<String> iter=keys.iterator();
 			while (iter.hasNext()){
@@ -374,8 +390,9 @@ public class BackgroundLiveMonitor implements Runnable {
 				Double anom=modelsAndAnomalyCount.get(key);
 				modelsAndAnomalyCount.put(key,--anom);;
 			}
-			
-			String folderName=tracePath.substring(0,tracePath.lastIndexOf(File.separator));
+		//This code will be enabled if it is necessary to delete traces on the folder after 
+		// piling up a certain number of them	
+		//	String folderName=tracePath.substring(0,tracePath.lastIndexOf(File.separator));
 		//	deleteLTTngTrace(new File(folderName+traceName));
 		}
 	}

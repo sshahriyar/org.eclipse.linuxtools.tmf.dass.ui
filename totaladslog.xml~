@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2014-05-12T19:04:05</date>
+  <millis>1399935845583</millis>
+  <sequence>0</sequence>
+  <logger>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</logger>
+  <level>SEVERE</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+  <method>run</method>
+  <thread>10</thread>
+  <exception>
+    <message>java.lang.NullPointerException</message>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.SSHConnector</class>
+      <method>downloadTrace</method>
+      <line>261</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.SSHConnector</class>
+      <method>collectATrace</method>
+      <line>165</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+      <method>run</method>
+      <line>163</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor</class>
+      <method>runWorker</method>
+      <line>1146</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor$Worker</class>
+      <method>run</method>
+      <line>615</line>
+    </frame>
+    <frame>
+      <class>java.lang.Thread</class>
+      <method>run</method>
+      <line>701</line>
+    </frame>
+  </exception>
+</record>
+<record>
+  <date>2014-05-12T19:07:27</date>
+  <millis>1399936047664</millis>
+  <sequence>1</sequence>
+  <logger>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</logger>
+  <level>SEVERE</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+  <method>run</method>
+  <thread>11</thread>
+  <message>SSH Communication Error
+java.net.ConnectException: Connection timed out</message>
+  <exception>
+    <message>org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSNetException: SSH Communication Error
+java.net.ConnectException: Connection timed out</message>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.SSHConnector</class>
+      <method>openSSHConnectionUsingPassword</method>
+      <line>95</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+      <method>initialise</method>
+      <line>397</line>
+    </frame>
+    <frame>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.live.BackgroundLiveMonitor</class>
+      <method>run</method>
+      <line>159</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor</class>
+      <method>runWorker</method>
+      <line>1146</line>
+    </frame>
+    <frame>
+      <class>java.util.concurrent.ThreadPoolExecutor$Worker</class>
+      <method>run</method>
+      <line>615</line>
+    </frame>
+    <frame>
+      <class>java.lang.Thread</class>
+      <method>run</method>
+      <line>701</line>
+    </frame>
+  </exception>
+</record>

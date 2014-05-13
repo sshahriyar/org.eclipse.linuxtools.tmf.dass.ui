@@ -131,11 +131,12 @@ public class SSHConnector {
 		}
 	/**
 	 * Executes LTTng commands on a remote system and downloads the trace in a local folder
-	 * @param session
-	 * @param console
-	 * @param sudoPassword
+	 * @param sudoPassword  Sudo password
+	 * @param traceStorageDir Trace directory
+	 * @return Path of the trace
+	 * @throws TotalADSNetException
 	 */
-	public String collectATrace( String sudoPassword) throws TotalADSNetException{
+	public String collectATrace( String sudoPassword, String traceStorageDir) throws TotalADSNetException{
 		
 	      String totalADSRemoteDir="/tmp/totalads";
 	      String totalADSRemoteTrace=totalADSRemoteDir+"/kernel/";
@@ -158,7 +159,7 @@ public class SSHConnector {
 	      executeSudoCommand("sudo -S -p  '' chmod -R 777 "+totalADSRemoteDir, sudoPassword);
 	      
 	      String trace="trace-"+getCurrentTimeStamp(); 
-	      File localDir=new File(totalADSLocalDir+File.separator+trace);
+	      File localDir=new File(traceStorageDir+File.separator+trace);
 	      localDir.mkdir();
 	      
 	      downloadTrace(session,totalADSRemoteTrace , localDir.getPath());
@@ -243,10 +244,11 @@ public class SSHConnector {
 	private void downloadTrace(Session session, String remoteFolder, String localDownloadFolder) throws TotalADSNetException {
 		ChannelSftp sftpChannel=null;
 		  try{
+			  
 				sftpChannel = (ChannelSftp) session.openChannel("sftp");
-		        sftpChannel.connect();
-		        sftpChannel.cd(remoteFolder);
-		        java.util.Vector<ChannelSftp.LsEntry> list= sftpChannel.ls("*");
+				sftpChannel.connect();
+				sftpChannel.cd(remoteFolder);
+			    java.util.Vector<ChannelSftp.LsEntry> list= sftpChannel.ls("*");
 		        
 		        for (ChannelSftp.LsEntry entry : list){
 		        	console.println("Processing remote "+ entry.getFilename()); // actually downloading
@@ -255,15 +257,15 @@ public class SSHConnector {
 		        }
 		  
 			}
-		 
-		  catch(SftpException e){
-		 		 console.println("Error: "+e.getCause().getMessage()); // Exception printed
-		 		throw new TotalADSNetException(e );// Don't continue further
+		   catch(SftpException e){
+		 		console.println("Error: "+e.getCause().getMessage()); // Exception printed
+		  		throw new TotalADSNetException(e);// Don't continue further
 		   }
 		   catch(JSchException e){
 		   		console.println("Error: "+e.getCause().getMessage()); // Exception printed
 		   		throw new TotalADSNetException(e);// Don't continue further
-		   	}finally{
+		   }		  
+		    finally{
 		   		if (sftpChannel!=null)
 		   			sftpChannel.exit();
 		   	}

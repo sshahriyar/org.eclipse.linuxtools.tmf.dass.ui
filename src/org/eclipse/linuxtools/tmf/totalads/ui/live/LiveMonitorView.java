@@ -12,8 +12,10 @@ package org.eclipse.linuxtools.tmf.totalads.ui.live;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
+import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -29,31 +31,19 @@ import org.eclipse.ui.part.ViewPart;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-public class LiveMonitorView extends ViewPart {
+public class LiveMonitorView extends ViewPart  implements ISelectionListener,ILiveObserver{
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView";
-	
 	private LiveMonitor liveMonitor;
-	private SelectionListener listener;
-	/////////////////////////////////////////
-	///Inner class implementing a listener for another view
-	////////////////////////////////////////
-	private class SelectionListener implements ISelectionListener {
-		@Override
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+	private LivePartListener partListener;
 	
-			 if (part instanceof DataModelsView) {  
-				   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
-				   HashSet<String> modelList= (HashSet<String>)obj;
-				   liveMonitor.updateOnModelSelction(modelList); 
-			    }  
-			}
-	}
+	
 	 /**
 	  * Constructor
 	  */
 	public LiveMonitorView() {
 		liveMonitor=new LiveMonitor();
-		listener=new SelectionListener();
+		partListener=new LivePartListener();
+		partListener.addObserver(this);
 	}
 
 	/*
@@ -62,21 +52,21 @@ public class LiveMonitorView extends ViewPart {
 	 */
 	@Override
 	public void createPartControl(Composite compParent) {
-		liveMonitor.createControls(compParent);;
+		liveMonitor.createControls(compParent);
 		
 		/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
-        getSite().getPage().addSelectionListener(DataModelsView.ID,	listener );
+        getSite().getPage().addSelectionListener(DataModelsView.ID,	this );
         
-
+        //Registers a part listener to Eclipse
+        getSite().getPage().addPartListener(partListener);
        try {
 		
-		    IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
-			ResultsView resView=(ResultsView)viewRes;
-			liveMonitor.setResultsAndFeedback(resView.getResultsAndFeddbackInstance());
-	      
-			IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveChartView.VIEW_ID);
-			LiveChartView liveChartView = (LiveChartView)viewChart;
-		    liveMonitor.setLiveChart(liveChartView.getLiveChart());
+		          
+			IViewPart viewChart= getSite().getWorkbenchWindow().getActivePage().showView(LiveResultsView.VIEW_ID);
+			LiveResultsView liveView = (LiveResultsView)viewChart;
+			
+		    liveMonitor.setLiveChart(liveView.getLiveChart());
+		    liveMonitor.setResultsAndFeedback(liveView.getResults());
 		    
 			
 	    } catch (PartInitException e) {
@@ -107,7 +97,33 @@ public class LiveMonitorView extends ViewPart {
 	 */
 	@Override
 	public void dispose(){
-		getSite().getPage().removeSelectionListener(DataModelsView.ID,	 listener);
+		getSite().getPage().removeSelectionListener(DataModelsView.ID,this);
+		partListener.removeObserver(this);
 	}
+	
+	/*
+	 * 
+	 */
+	@Override
+	public void update(ResultsAndFeedback results) {
+		liveMonitor.setResultsAndFeedback(results);
+		
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 */
+	@Override
+	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+	
+			 if (part instanceof DataModelsView) {  
+				   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
+				   HashSet<String> modelList= (HashSet<String>)obj;
+				   liveMonitor.updateOnModelSelction(modelList); 
+			    }  
+	}
+
+	
 
 }

@@ -9,15 +9,7 @@
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.ui.results;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView;
-import org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ViewPart;
 
 /**
@@ -45,19 +37,7 @@ public class ResultsView extends ViewPart {
 	public void createPartControl(Composite parent) {
 		
 		 results=new ResultsAndFeedback(parent, false);
-		 try {
-			 //Shows a Diagnosis View
-			getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
-			
-		} catch (PartInitException e) {
-			MessageBox msgBox=new MessageBox(getSite().getShell(),SWT.OK);
-			if(e.getMessage()!=null){
-				msgBox.setMessage(e.getMessage());
-			}else
-				msgBox.setMessage("Unable to launch a view");
-			msgBox.open();
-			Logger.getLogger(ResultsView.class.getName()).log(Level.SEVERE,null,e);
-		}
+		
 	}
 
 	/* (non-Javadoc)
@@ -85,14 +65,8 @@ public class ResultsView extends ViewPart {
 	 */
 	@Override
 	public void dispose(){
-		//Hiding Diagnosis View
 		
-		IViewReference []refs= getSite().getWorkbenchWindow().getActivePage().getViewReferences();
-			for (int i=0; i< refs.length; i++){
-				if (refs[i].getId().equals(DiagnosisView.VIEW_ID))
-					getSite().getWorkbenchWindow().getActivePage().hideView(refs[i]);
-			}
-		}
+	}
 	
 	
 }

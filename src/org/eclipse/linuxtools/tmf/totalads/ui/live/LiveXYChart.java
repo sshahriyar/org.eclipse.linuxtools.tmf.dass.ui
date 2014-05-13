@@ -237,7 +237,7 @@ public void drawChart(){
 		@Override
 		public void run() {
 			// adjust the axis range
-			xyChart.getAxisSet().adjustRange();
+			//xyChart.getAxisSet().adjustRange();
 			xyChart.redraw();
 			
 			//nxyChart.getParent().redraw();
@@ -245,7 +245,7 @@ public void drawChart(){
 		}
 	 });
 }
-/*
+/**
  * Clears the chart
  */
 public void clearChart(){

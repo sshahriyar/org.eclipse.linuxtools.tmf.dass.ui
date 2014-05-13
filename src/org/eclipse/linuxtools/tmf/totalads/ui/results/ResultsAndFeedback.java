@@ -43,7 +43,7 @@ import org.eclipse.swt.widgets.TreeItem;
  */
 public class ResultsAndFeedback {
 	private Tree treeTraceResults;
-	private Text txtAnalysisCurrentAnomaly;
+	private Text txtAnomalyType;
 	private Text txtAnomalySummary;
 	private Text txtAnalysisDetails;
 	private Label lblAnalysisCurrentAnomaly;
@@ -63,12 +63,12 @@ public class ResultsAndFeedback {
 	private HashMap<String,Double> modelAndAnomalyCount;
 	private Display display;
 	private	 Shell dialogShel;
-	private String traceToDeleted;
+	private String traceToDelete;
 
 	/**
 	 * Constructor
 	 * @param parent Composite object
-	 * @param isDiagnosis false if model combobox is to be made visible
+	 * @param isDiagnosis false if model combo box is to be made visible
 	 */
 	public ResultsAndFeedback(Composite parent, Boolean isDiagnois) {
 		detailsAndFeedBack(parent,isDiagnois);
@@ -261,9 +261,9 @@ public class ResultsAndFeedback {
 		lblAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultLabels);
 		lblAnalysisCurrentAnomaly.setText("Anomaly ");
 		
-		txtAnalysisCurrentAnomaly= new Text(grpAnalysisResults,SWT.BORDER);
-		txtAnalysisCurrentAnomaly.setEditable(false);
-		txtAnalysisCurrentAnomaly.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultText);
+		txtAnomalyType= new Text(grpAnalysisResults,SWT.BORDER);
+		txtAnomalyType.setEditable(false);
+		txtAnomalyType.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));//gridDataResultText);
 			
 		lblDetails=new Label(grpAnalysisResults,SWT.NONE);
 		lblDetails.setLayoutData(new GridData(SWT.LEFT,SWT.TOP,true,false,2,1));
@@ -300,9 +300,9 @@ public class ResultsAndFeedback {
 					
 					//currentTraceResults=results;
 					if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
-						txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
+						txtAnomalyType.setText(results.getAnomalyType());
 					else
-						txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
+						txtAnomalyType.setText(booleanAnomalyToString(results.getAnomaly()));
 					
 				 txtAnalysisDetails.setText(results.getDetails().toString());	
 				}
@@ -317,9 +317,15 @@ public class ResultsAndFeedback {
 				public void widgetSelected(SelectionEvent e) {
 					String item=cmbModels.getItem(cmbModels.getSelectionIndex());
 					if (item!=null && !item.isEmpty()){
-						Double anomalies=modelAndAnomalyCount.get(item);
-						if (anomalies!=null)
-							txtAnomalySummary.setText(anomalies.toString());
+						if (modelAndAnomalyCount!=null){
+							Double anomalies=modelAndAnomalyCount.get(item);
+							if (anomalies!=null){
+								txtAnomalySummary.setText(anomalies.toString());
+								txtAnalysisDetails.setText("");
+								txtAnomalyType.setText("");
+								
+							}
+						}
 					}
 					
 				}
@@ -352,33 +358,7 @@ public class ResultsAndFeedback {
 	 public void  setMaxAllowableTrace(Integer maxTraces){
 		 maxAllowableTraces=maxTraces;
 	 }
-	 /**
-	 * Assigns a trace and its results to appropriate widgets for viewing in Results and Feedback Section.
-	  * @param traceName Trace name
-	 * @param results Results object
-	 
-	public void addTraceResult(String traceName, Results results){
-		
-		if (!traceName.isEmpty() && results!=null){
-		
-			TreeItem item= new TreeItem(treeTraceResults, SWT.NONE);
-			item.setText(traceName);
-			item.setData(results);
-			
-			if (treeTraceResults.getItemCount()==1){
-				
-				if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
-					txtAnalysisCurrentAnomaly.setText(results.getAnomalyType());
-				else
-					txtAnalysisCurrentAnomaly.setText(booleanAnomalyToString(results.getAnomaly()));
-				
-				
-				txtAnalysisDetails.setText(results.getDetails().toString());
-			}
-				
-		}
-		
-	}*/
+
 	
 	/**
 	 * Assigns a trace and its results to appropriate widgets for viewing in Results Section.
@@ -388,36 +368,39 @@ public class ResultsAndFeedback {
 	 * @param modelResults Results of all the models as a HashMap
 	 * @return Name of the trace removed or empty if none is removed
 	 */
-	public String addTraceResult(final String traceName, 	final HashMap<String,Results> modelResults){
+	public String addTraceResult(final String traceName, final HashMap<String,Results> modelResults){
 		
 		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
 		
-				traceToDeleted="";
+				traceToDelete="";
 				
 				if (!traceName.isEmpty() && modelResults !=null){
-					
+					//Check if the same name already exists
+					TreeItem []allItems=treeTraceResults.getItems();
+					for (int j=0; j<allItems.length;j++)
+						if (allItems[j].getText().equalsIgnoreCase(traceName))
+							return; // if it exists do not add it again
+							
+					//Add if no such name is there						
 					TreeItem item= new TreeItem(treeTraceResults, SWT.NONE);
 					item.setText(traceName);
 					item.setData(modelResults);
 				
 					if (treeTraceResults.getItemCount() >maxAllowableTraces){
-						traceToDeleted=treeTraceResults.getItem(0).getText();
+						traceToDelete=treeTraceResults.getItem(0).getText();
 						treeTraceResults.getItem(0).dispose();
 					}
 					
-					/*if (treeTraceResults.getItemCount()==1){
-						txtAnalysisCurrentAnomaly.setText("Select a trace");
-						txtAnalysisDetails.setText("Select a trace to see details");
-					} */
+				
 						
 				}
 			}
 		});
 		
-		return traceToDeleted;
+		return traceToDelete;
 	}
 	
 	/**
@@ -442,7 +425,7 @@ public class ResultsAndFeedback {
 			public void run() {
 		
 				treeTraceResults.removeAll();
-				txtAnalysisCurrentAnomaly.setText("");
+				txtAnomalyType.setText("");
 				txtAnalysisDetails.setText("");
 				txtAnomalySummary.setText("");
 				txtTraceSummary.setText("");

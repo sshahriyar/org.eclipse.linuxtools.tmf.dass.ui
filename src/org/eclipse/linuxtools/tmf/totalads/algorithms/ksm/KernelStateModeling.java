@@ -184,13 +184,19 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	     }
     				
     	TraceStates states= new TraceStates();
-		measureStateProbabilities(trace, states);
+    	
+    	outStream.addOutputEvent("Measuring states' probabilities");
+		outStream.addNewLine();
+    	
+		measureStateProbabilities(trace, states,outStream);
 		// if everything is fine up till now then carry on and insert it into the database
 		saveTraceData(connection, database, states);
-			
-		outStream.addOutputEvent("Key States: FS= "+states.FS + ", MM= "+states.MM + ", KL= " +states.KL);
-		outStream.addNewLine();
 		
+		
+		outStream.addOutputEvent("FS="+states.FS +" KL "+states.KL+" MM "+states.MM+
+				" AC "+states.AC+" IPC "+states.IPC+" NT "+states.NT+" SC "
+			    +states.SC+" UN "+states.UN);	outStream.addNewLine();
+		outStream.addNewLine();
 		if (isLastTrace){
 			initialize=false; // may not be necessary because an instance of the algorithm is always created on every selction
 			
@@ -205,7 +211,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	  
 		  validationTraceCount++;
 		  TraceStates valTrcStates=new TraceStates();
-		  measureStateProbabilities(trace, valTrcStates);
+		  measureStateProbabilities(trace, valTrcStates,outStream);
 		  while (alpha< maxAlpha){
 			    Boolean isAnomaly=evaluateKSM( alpha, valTrcStates,dataAccessObject,database);
 				if (isAnomaly==false)
@@ -247,7 +253,10 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	 */
 	@Override
 	public Results test(ITraceIterator trace, String database,IDataAccessObject dataAccessObject, IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+		
 		if  (!isTestStarted){
+			outputStream.addOutputEvent("Starting testing");
+			outputStream.addNewLine();
 			testTraceCount=0;
 			testAnomalyCount=0;
 			Double alphaVal=getSettingsFromDatabase(database, dataAccessObject);
@@ -259,7 +268,15 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		}
 		
 		TraceStates testTrcStates= new TraceStates();
-		measureStateProbabilities(trace, testTrcStates);
+		outputStream.addOutputEvent("Measuring probabilities of states in the trace");
+		
+		outputStream.addNewLine();
+		measureStateProbabilities(trace, testTrcStates,outputStream);
+		
+		outputStream.addOutputEvent("FS="+testTrcStates.FS +" KL "+testTrcStates.KL+" MM "+testTrcStates.MM+
+					" AC "+testTrcStates.AC+" IPC "+testTrcStates.IPC+" NT "+testTrcStates.NT+" SC "
+				    +testTrcStates.SC+" UN "+testTrcStates.UN);
+		outputStream.addNewLine();
 		
 		Boolean isAnomaly=evaluateKSM(alpha, testTrcStates, dataAccessObject, database);
 		testTraceCount++;
@@ -279,6 +296,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		results.setDetails("SC "+testTrcStates.SC+"\n");
 		results.setDetails("UN "+testTrcStates.UN+"\n");
 		
+		outputStream.addOutputEvent("Finished evaluating the trace");
+		outputStream.addNewLine();
 		return results;
 				
 	}
@@ -402,28 +421,35 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 	}
 	
 	/**
-	 * Measure probabilities
+	 * Measure probabilities of states
 	 * @param trace
 	 * @param states
-	 * @throws TotalADSReaderException 
+	 * @param out
 	 * @throws TotalADSGeneralException
+	 * @throws TotalADSReaderException
 	 */
-	private void measureStateProbabilities(ITraceIterator trace, TraceStates states) throws TotalADSGeneralException, TotalADSReaderException{
+	private void measureStateProbabilities(ITraceIterator trace, TraceStates states, IAlgorithmOutStream out) throws TotalADSGeneralException, TotalADSReaderException{
 		
 		Double totalSysCalls=0.0;
-		
+		int sysCount=1;
 		while (trace.advance()){
 			 	String systemCall= trace.getCurrentEvent();
 			 	
+			 	if (sysCount%100000==0){
+			 		out.addOutputEvent("Executing "+sysCount+"th system call");
+			 		out.addNewLine();
+			 	}
+			 		
 			 	if (systemCall != null)
 			 		mapStates(systemCall,states);
+			 	sysCount++;
 		}
 			
 		
 		totalSysCalls=states.MM+states.FS+states.KL+states.NT+states.IPC+states.SC+states.AC+states.UN;
 		// If correct system call names do not exist in the trace, throw an exception
 		if (totalSysCalls<=0 || totalSysCalls.equals(states.UN))
-			throw new TotalADSGeneralException("No system call names found in the last trace. Further processing aborted!");
+			throw new TotalADSGeneralException("KSM: No system call names found in the last trace. Further processing aborted!");
 		
 		states.FS= round(states.FS/totalSysCalls,2);
 		states.MM=round(states.MM/totalSysCalls,2);
@@ -433,6 +459,8 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		states.SC=round(states.SC/totalSysCalls,2);
 		states.AC=round(states.AC/totalSysCalls,2);
 		states.UN=round(states.UN/totalSysCalls,2);
+		
+		
 	}
 	
 	/**

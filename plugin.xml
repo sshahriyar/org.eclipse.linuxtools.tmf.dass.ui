@@ -5,11 +5,12 @@
    		   point="org.eclipse.ui.views"> 
        <category
             id="org.eclipse.linuxtools.tmf.totalads"
-            name="Automated Anomaly Detection">
+            name="Total Anomaly Detection">
       </category>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"
+             icon="icons/diagnosis.ico"
              id="org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"
              name="Diagnosis"
              restorable="true">
@@ -17,6 +18,7 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView"
+             icon="icons/results.ico"
              id="org.eclipse.linuxtools.tmf.totalads.ResultsView"
              name="Results"
              restorable="true">
@@ -24,6 +26,7 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.modeling.ModelingView"
+             icon="icons/modeling.ico"
              id="org.eclipse.linuxtools.tmf.totalads.ModelingView"
              name="Modeling"
              restorable="true">
@@ -31,6 +34,7 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.models.DataModelsView"
+             icon="icons/models.ico"
              id="org.eclipse.linuxtools.tmf.totalads.ModelsView"
              name="Models DB"
              restorable="true">
@@ -38,22 +42,25 @@
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.properties.PropertiesView"
-             id="org.eclipse.linuxtools.tmf.totalads.GenericView"
-             name="Generic View"
+             icon="icons/properties.ico"
+             id="org.eclipse.linuxtools.tmf.totalads.PropertiesView"
+             name="Properties"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
              class="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView"
+             icon="icons/livemonitor.ico"
              id="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveMonitorView"
              name="LiveMonitor"
              restorable="true">
        </view>
        <view
              category="org.eclipse.linuxtools.tmf.totalads"
-             class="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView"
-             id="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveChartView"
-             name="LiveChart"
+             class="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveResultsView"
+             icon="icons/liveresults.ico"
+             id="org.eclipse.linuxtools.tmf.totalads.ui.live.LiveResultsView"
+             name="Live Results"
              restorable="true">
        </view>
    
