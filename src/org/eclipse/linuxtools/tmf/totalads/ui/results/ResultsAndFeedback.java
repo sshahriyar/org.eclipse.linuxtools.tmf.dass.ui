@@ -297,14 +297,18 @@ public class ResultsAndFeedback {
 					HashMap<String,Results> modelResults=(HashMap<String,Results>)item.getData();
 					
 					Results results=modelResults.get(modelName);
-					
+					if (results!=null){
 					//currentTraceResults=results;
-					if ( results.getAnomaly()!=null && results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
-						txtAnomalyType.setText(results.getAnomalyType());
-					else
-						txtAnomalyType.setText(booleanAnomalyToString(results.getAnomaly()));
-					
-				 txtAnalysisDetails.setText(results.getDetails().toString());	
+						if ( results.getAnomaly()!=null && results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
+							txtAnomalyType.setText(results.getAnomalyType());
+						else
+							txtAnomalyType.setText(booleanAnomalyToString(results.getAnomaly()));
+						
+					      txtAnalysisDetails.setText(results.getDetails().toString());
+					}else{
+						txtAnomalyType.setText("Evaluating....");
+						txtAnalysisDetails.setText("Evaluating....");
+					}
 				}
 			});
 			

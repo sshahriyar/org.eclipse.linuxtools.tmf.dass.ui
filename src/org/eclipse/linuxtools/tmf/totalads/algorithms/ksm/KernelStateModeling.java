@@ -543,7 +543,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				//connection.insert(states, database,TRACE_COLLECTION);
 
 		}catch (TotalADSDBMSException ex){
-			if (ex!=null && !ex.getMessage().contains("E11000 duplicate name"))// if it is a duplicate name error do nothing
+			if (ex!=null && (!ex.getMessage().contains("E11000") || !ex.getMessage().contains("duplicate")))// if it is a duplicate name error do nothing
 				throw new TotalADSDBMSException(ex);
 		}
 	}

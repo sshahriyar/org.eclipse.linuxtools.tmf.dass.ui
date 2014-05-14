@@ -16,8 +16,8 @@ public class AlgorithmSettingsPage extends WizardPage {
 	private Composite compSettings;
 	private SettingsForm settingForm;
 	public AlgorithmSettingsPage() {
-		super("Algorithm SettingsForm");
-		setTitle("Adjust SettingsForm of the Algorithm");
+		super("Algorithm Settings");
+		setTitle("Adjust Settings of the Algorithm");
 		
 	}
 
