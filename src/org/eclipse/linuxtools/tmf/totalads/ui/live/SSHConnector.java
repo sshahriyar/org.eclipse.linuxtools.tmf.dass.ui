@@ -97,7 +97,7 @@ public class SSHConnector {
 	}
 	
 	/**
-	 * Connects with an SSH server using a private Key file present on the hard disk (Public key
+	 * Connects with an SSH server using a private Key file present on the hard disk (Public name
 	 * should be present on the server)
 	 * @param userAtHost
 	 * @param pathToPrivateKey

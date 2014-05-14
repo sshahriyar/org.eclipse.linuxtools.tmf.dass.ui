@@ -10,6 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
 import java.util.LinkedList;
+
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmFactory;
@@ -34,14 +35,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private boolean isTrainIntialized=false,  isTestInitialized=false;
 	private int numStates, numSymbols, numIterations, testNameToIDSize;
 	private Double totalTestAnomalies=0.0, totalTestTraces=0.0, logThresholdTest=0.0;;
-	
+	private LinkedList<Integer> batchLargeTrainingSeq;
 	/**
 	 * Constructor
 	 */
 	public HiddenMarkovModel() {
 		
 		nameToID=new NameToIDMapper();	
-		seqLength=10000000;
+		seqLength=100;
 		
 	}
 
@@ -93,8 +94,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
 	 */
 	@Override
-	public String[] getTrainingOptions() {
-		//if (isNewDatabase){
+	public String[] getTrainingSettings() {
+	
 			String [] trainingSettings=new String[6];
 			trainingSettings[0]=SettingsCollection.NUM_STATES.toString();
 			trainingSettings[1]="5";
@@ -103,20 +104,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 			trainingSettings[4]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
 			trainingSettings[5]="10";
 			return trainingSettings;
-		/*}else{
-			String [] trainingSettings=new String[2];
-			trainingSettings[0]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
-			trainingSettings[1]="10";
-			return trainingSettings;
-		}*/
-			
+					
 	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
 	@Override
-	public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject) {
+	public String[] getTestSettings(String database, IDataAccessObject dataAccessObject) {
 		 HmmMahout hmm=new HmmMahout();
 		String []settings=hmm.loadSettings(database, dataAccessObject);
 		if (settings==null)
@@ -132,7 +127,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
 	 */
    @Override
-	public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
+	public void saveTestSettings(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
 	{ 
 	   HmmMahout hmm=new HmmMahout();
 	   hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false);
@@ -140,11 +135,39 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
  
    /*
     * (non-Javadoc)
+    * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getSettingsToDisplay()
+    */
+   @Override
+   public String[] getSettingsToDisplay(String database, IDataAccessObject dataAccessObject){
+	    HmmMahout hmm=new HmmMahout();
+		String []settings=hmm.loadSettings(database, dataAccessObject);
+		return settings;
+   }
+   
+   /*
+    * (non-Javadoc)
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
     */
     @Override
 	public void train(ITraceIterator trace, Boolean isLastTrace, String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 	   
+	  batchTraining(trace, isLastTrace, database, connection, outStream);
+		
+	}
+    
+    /**
+     * Trains an HMM on a collection of traces at once; i.e., in a batch
+     * @param trace
+     * @param isLastTrace
+     * @param database
+     * @param connection
+     * @param outStream
+     * @throws TotalADSGeneralException
+     * @throws TotalADSDBMSException
+     * @throws TotalADSReaderException
+     */
+    private void batchTraining(ITraceIterator trace, Boolean isLastTrace, String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+ 	   
 	    if (!isTrainIntialized){
 				 hmm=new HmmMahout();
 								 
@@ -152,10 +175,368 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				 numStates=Integer.parseInt(options[1]);
 				 numSymbols=Integer.parseInt(options[3]);
 				 numIterations=Integer.parseInt(options[5]);
-				// if (isNewDB)
-				//	 hmm.initializeHMM(numSymbols, numStates);
-				// else
-				//	 hmm.loadHmm(connection, database);	
+				 nameToID.loadMap(connection, database);
+				 isTrainIntialized=true;
+				 batchLargeTrainingSeq=new LinkedList<Integer>();
+		 }	
+	   
+		 
+		 outStream.addOutputEvent("Extracting sequences, please wait....");
+		 outStream.addNewLine();
+		 	 
+	   	 String event=null;
+		
+	   	 while (trace.advance()  ) {
+			  event=trace.getCurrentEvent();
+			  batchLargeTrainingSeq.add(nameToID.getId(event));
+	    		  
+	     }
+		  
+	     if (isLastTrace){ 
+	    	     numSymbols=nameToID.getSize();
+	    	     
+	    	     outStream.addOutputEvent("Training using BaumWelch..can take really long depending on the size and number of traces");
+	 		     outStream.addNewLine();
+	    	        Integer[] seq=new Integer[batchLargeTrainingSeq.size()];
+	    		 seq=batchLargeTrainingSeq.toArray(seq);
+	    	     trainBaumWelch(seq, connection, database);
+	 		     
+	    	  	 outStream.addOutputEvent("Saving HMM to the database");
+	    	  	 outStream.addNewLine();
+	    	  	 hmm.saveHMM(database, connection);
+	    	  	 
+	    	  	 outStream.addOutputEvent(hmm.toString());
+	    	  	 outStream.addNewLine();
+	    	  	 //hmm.saveHMM(database, connection);
+	    	  	 nameToID.saveMap(connection, database);
+	     }
+		 
+		
+	}
+   /**
+    * Trains Using BaumWelch
+    * @param seq
+    * @throws TotalADSGeneralException
+    */
+   private void trainBaumWelch(Integer []seq, IDataAccessObject dao, String database) throws TotalADSGeneralException{
+	   try{
+		         hmm.initializeHMM(numSymbols, numStates);
+		    	 hmm.learnUsingBaumWelch(numIterations, seq);
+		    	// hmm.updatePreviousModel(seq, connection, database);
+		    	 hmm.saveHMM(database, dao);
+		    	 
+		     } catch (Exception ex){
+		    	 if (nameToID.getSize()>numSymbols)
+		    		 throw new  TotalADSGeneralException("More events were found in the trace than you mentioned."
+		    		 		+ " Please, select larger number of unique events and start fresh with a new model. HMM model cannot be built!");
+		    	 else
+		    		 throw new TotalADSGeneralException(ex);
+		     }
+   }
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 */
+	@Override
+	public void validate(ITraceIterator trace, String database,IDataAccessObject dataAccessObject, 
+			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+		
+		int winWidth=0,validationSeqLength=seqLength;
+		Double logThreshold;
+		String []options=hmm.loadSettings(database, dataAccessObject);
+		logThreshold=Double.parseDouble(options[7]);
+		
+		LinkedList<Integer> newSequence=new LinkedList<Integer>();
+	   	outStream.addOutputEvent("Starting validation");
+	   	outStream.addNewLine();
+	   	
+	   	Boolean isValidated=false;
+	   	outStream.addOutputEvent("Extracting sequences, please wait...");
+	   	outStream.addNewLine();
+	   	
+		 String event=null;
+		 while (trace.advance()  ) {
+			 event=trace.getCurrentEvent();
+	    	  newSequence.add(nameToID.getId(event));
+	    	 
+	    	  winWidth++;
+	    	  isValidated=false;    	  
+	    	  if(winWidth >= validationSeqLength){
+	    		  isValidated=true;		
+	    		  winWidth--;
+	    		  Integer[] seq=new Integer[validationSeqLength];
+	    		  seq=newSequence.toArray(seq);
+	    		  // searching and adding to db
+	    		   logThreshold= validationEvaluation(outStream, logThreshold, seq);
+	    		
+	    		  newSequence.remove(0);
+	    	
+	    	  }
+	    		  
+	     }
+		if (!isValidated){
+			 Integer[] seq=new Integer[newSequence.size()];
+   		  	 seq=newSequence.toArray(seq);
+			 logThreshold=validationEvaluation(outStream, logThreshold, seq);
+		}
+		
+		options[7]=logThreshold.toString();
+		
+		outStream.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
+		outStream.addNewLine();
+		outStream.addOutputEvent("Finished validation");
+		outStream.addNewLine();
+		hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false); 
+		
+	}
+	
+	/**
+	 * Performs the evaluation for a likelihood of a sequence during validation
+	 * @param outStream
+	 * @param logThreshold
+	 * @param seq
+	 */
+	private Double validationEvaluation(IAlgorithmOutStream outStream, Double logThreshold, Integer []seq){
+		  Double prob=1.0;
+		  try{
+			  prob=hmm.observationLikelihood(seq);
+			 // console.printTextLn("Sequence likelhood: "+prob.toString());
+		  } catch (Exception ex){
+			  outStream.addOutputEvent("Unknown events in your validation traces: Though HMM model is succefully built, consider retraining using larger number of unique events");
+			  outStream.addNewLine();
+			  // ex.printStackTrace();
+		  }
+		  
+		  if (prob<logThreshold){
+			  logThreshold=prob;
+			  //console.printTextLn(Arrays.toString(seq));
+			  outStream.addOutputEvent("Min Log Likelihood Threshold: "+logThreshold.toString());
+			  outStream.addNewLine();
+		  }
+		  return logThreshold;
+	}
+	
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
+	 */
+	@Override
+	public Results test(ITraceIterator trace, String database, IDataAccessObject dataAccessObject,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+		
+		int winWidth=0,testSeqLength=seqLength;
+		String []options;
+		
+		if (!isTestInitialized){
+			hmm=new HmmMahout();
+			options=hmm.loadSettings(database, dataAccessObject);
+			logThresholdTest=Double.parseDouble(options[7]);
+			
+			hmm.loadHmm(dataAccessObject, database);
+			nameToID.loadMap(dataAccessObject, database);
+			testNameToIDSize=nameToID.getSize();
+			isTestInitialized=true;
+		}
+		
+		Results results=new Results();
+		LinkedList<Integer> newSequence=new LinkedList<Integer>();
+	   	Boolean isTested=false;
+	    totalTestTraces++;
+	    String event=null;
+	    
+	    outputStream.addOutputEvent("Extracting Sequences");
+	    outputStream.addNewLine();
+	    int seqCount=1;
+	    while (trace.advance() ) {
+	   		
+	    	  event=trace.getCurrentEvent();
+	   		  newSequence.add(nameToID.getId(event));
+	    	  winWidth++;
+	    	  isTested=false;    	  
+	    	  
+	    	  if(winWidth >= testSeqLength){
+	    		  
+	    		  isTested=true;		
+	    		  winWidth--;
+	    		  Integer[] seq=new Integer[testSeqLength];
+	    		  seq=newSequence.toArray(seq);
+	    		  
+	    		  if (seqCount%10000==0){
+	    			  outputStream.addOutputEvent("Executing "+seqCount+"th sequence");
+	    			  outputStream.addNewLine();
+	    		  }
+	    		  
+	    		  if (testEvaluation(results, logThresholdTest, seq)==true)
+	 				break;
+	    		  //testEvaluation(results, logThreshold, seq);
+	    		  newSequence.remove(0);
+	    		  seqCount++;
+	    	  }
+	    		  
+	     }
+		if (!isTested){
+			 Integer[] seq=new Integer[newSequence.size()];
+   		  	 seq=newSequence.toArray(seq);
+			 testEvaluation(results, logThresholdTest, seq);
+		}
+		outputStream.addOutputEvent("Finished evaluating the trace");
+		outputStream.addNewLine();
+		if (results.getAnomaly()==true)
+			totalTestAnomalies++;
+		return results; 
+		
+	}
+	/**
+	 * Helper function for testing
+	 * @param result
+	 * @param logThreshold
+	 * @param seq
+	 * @return Return true if anomaly, else returns false
+	 */
+	private boolean testEvaluation(Results result, Double logThreshold, Integer []seq){
+		  Double loglikelihood=1.0;
+		  try{
+			  loglikelihood=hmm.observationLikelihood(seq);
+			
+		  } catch (Exception ex){
+				 result.setAnomaly(true);
+				 if (nameToID.getSize() > testNameToIDSize){
+					 Integer diff=nameToID.getSize()-testNameToIDSize;
+					 
+					 if (diff >100)
+						 result.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
+					 else
+						 result.setDetails("\nUnknown events: \n");
+					 int eventCount=0;
+					 for (int i=testNameToIDSize; i<testNameToIDSize+diff;i++){// All these events are unknown
+						   result.setDetails(nameToID.getKey(i)+", ");
+						   eventCount++;
+						   if ((eventCount)%10==0)
+							   result.setDetails("\n");   
+					 }
+					 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
+				 }
+			//totalTestAnomalies++; 
+			return true;	 
+		  }
+		  
+		  if (loglikelihood<logThreshold){
+			  logThreshold=loglikelihood;
+			  result.setDetails("Anomalous pattern of events found in the sequence: \n");
+			  
+			  int firstRange=10;
+			   if (seq.length <10)
+				  firstRange=seq.length;
+			  for (int id=0; id<firstRange;id++)
+			    	result.setDetails(nameToID.getKey(seq[id])+", ");
+			  
+			  int secondRange=seq.length/2;
+			  if (secondRange+10<seq.length){
+				  result.setDetails("\n.........................................................\n");
+				  for (int id=secondRange; id<secondRange+10;id++)
+					  result.setDetails(nameToID.getKey(seq[id])+", ");
+			  }
+			
+			  int thirdRange=seq.length;  
+			  if (thirdRange-10>secondRange+10){
+				  result.setDetails("\n.........................................................\n");	
+				  for (int id=secondRange; id<secondRange+10;id++)
+					  result.setDetails(nameToID.getKey(seq[id])+", ");
+			  }
+			  result.setAnomaly(true);
+			  //totalTestAnomalies++;
+			  return true;
+		  }else{
+			  result.setAnomaly(false);
+			  return false;
+		  }
+		  
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTotalAnomalyPercentage()
+	 */
+	@Override
+	public Double getTotalAnomalyPercentage() {
+	
+		 Double anomalyPercentage= (totalTestAnomalies/totalTestTraces) *100;
+		 return anomalyPercentage;
+	}
+	
+	
+	@Override
+	public Chart graphicalResults(ITraceIterator traceIterator) {
+	
+		return null;
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#createInstance()
+	 */
+	@Override
+	public IDetectionAlgorithm createInstance() {
+	
+		return new HiddenMarkovModel();
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getName()
+	 */
+	@Override
+	public String getName() {
+		
+		return "Hidden Markov Model (HMM)";
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getAcronym()
+	 */
+	@Override
+	public String getAcronym() {
+		
+		return "HMM";
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getDescription()
+	 */
+	@Override
+	public String getDescription(){
+		return "HMM is a stochastic model for sequential data and hence it is naturally suitable for modeling temporal order of "
+				+ "system call sequences. The process is determined by a latent Markov chain having a finite number of "
+				+ "states, N, and a set of output observation probability distributions, B, associated with each state. "
+				+ "Starting from an initial state No, the process transits from one state to another according to the matrix "
+				+ "of transition probability distribution, A, and then emits an observation symbol Ok from a finite alphabet "
+				+ "(i.e., M distinct observable events) according to the output probability distribution, Bj(Ok), of the current"
+				+ " state Nj. HMM is typically parameterized by the initial state distribution probabilities (Π), "
+				+ "output (emission) probabilities (B), and state transition probabilities (A). Baulm-Welch algorithm is used "
+				+ "to train the model parameters to fit the sequences of observations, T.  During the validation phase,"
+				+ " HMM adjusts the decision threshold (log likelihood) of prediction of anomalous alarms on T sequences "
+				+ "from traces. In the testing phase, if the probability value of any sequence in a trace is below the "
+				+ "selected threshold, then we consider the trace as anomalous otherwise we consider it as normal";
+	}
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#isOnlineLearningSupported()
+	 */
+	@Override
+	public boolean isOnlineLearningSupported() {
+		
+		return false;
+	}
+	//////////////////////////////////////////////////
+	//Test code for incremental HMM
+	////////////////////
+	private void incrementalHMM(ITraceIterator trace, Boolean isLastTrace, String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
+		   
+	    if (!isTrainIntialized){
+				 hmm=new HmmMahout();
+								 
+				 String []options=hmm.loadSettings(database, connection);// get settings from db
+				 numStates=Integer.parseInt(options[1]);
+				 numSymbols=Integer.parseInt(options[3]);
+				 numIterations=Integer.parseInt(options[5]);
 				 nameToID.loadMap(connection, database);
 				 isTrainIntialized=true;
 		 }	
@@ -170,7 +551,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   	 String event=null;
 		
 	   	 while (trace.advance()  ) {
-			 event=trace.getCurrentEvent();
+			  event=trace.getCurrentEvent();
 	    	  newSequence.add(nameToID.getId(event));
 	    	 // newSequence.add(1);
 	    	  winWidth++;
@@ -216,315 +597,5 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		 
 		
 	}
-   /**
-    * Trains Using BaumWelch
-    * @param seq
-    * @throws TotalADSGeneralException
-    */
-   private void trainBaumWelch(Integer []seq, IDataAccessObject connection, String database) throws TotalADSGeneralException{
-	   try{
-		         hmm.initializeHMM(numSymbols, numStates);
-		    	 hmm.learnUsingBaumWelch(numIterations, seq);
-		    	 hmm.updatePreviousModel(seq, connection, database);
-		    	 
-		     } catch (Exception ex){
-		    	 if (nameToID.getSize()>numSymbols)
-		    		 throw new  TotalADSGeneralException("More events were found in the trace than you mentioned."
-		    		 		+ " Please, select larger number of unique events and start fresh with a new model");
-		    	 else
-		    		 throw new TotalADSGeneralException(ex);
-		     }
-   }
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#validate(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, java.lang.Boolean, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
-	 */
-	@Override
-	public void validate(ITraceIterator trace, String database,IDataAccessObject dataAccessObject, 
-			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
-		
-		int winWidth=0,validationSeqLength=seqLength;
-		Double logThreshold;
-		String []options=hmm.loadSettings(database, dataAccessObject);
-		logThreshold=Double.parseDouble(options[7]);
-		
-		LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	   	outStream.addOutputEvent("Starting validation");
-	   	outStream.addNewLine();
-	   	
-	   	Boolean isValidated=true;
-	   	outStream.addOutputEvent("Extracting sequences, please wait...");
-	   	outStream.addNewLine();
-	   	
-		 String event=null;
-		 while (trace.advance()  ) {
-			 event=trace.getCurrentEvent();
-	    	  newSequence.add(nameToID.getId(event));
-	    	 
-	    	  winWidth++;
-	    	  isValidated=false;    	  
-	    	  if(winWidth >= validationSeqLength){
-	    		  isValidated=true;		
-	    		  winWidth--;
-	    		  Integer[] seq=new Integer[validationSeqLength];
-	    		  seq=newSequence.toArray(seq);
-	    		  // searching and adding to db
-	    		   logThreshold= validationEvaluation(outStream, logThreshold, seq);
-	    		
-	    		  newSequence.remove(0);
-	    	
-	    	  }
-	    		  
-	     }
-		if (!isValidated){
-			 Integer[] seq=new Integer[newSequence.size()];
-   		  	 seq=newSequence.toArray(seq);
-			 logThreshold=validationEvaluation(outStream, logThreshold, seq);
-		}
-		
-		options[7]=logThreshold.toString();
-		
-		outStream.addOutputEvent("Minimum Log Likelihood Threshold: "+logThreshold.toString());
-		outStream.addNewLine();
-		outStream.addOutputEvent("Finished validation");
-		outStream.addNewLine();
-		hmm.verifySaveSettingsCreateDb(options, database, dataAccessObject,false,false); 
-		
-	}
-	
-	/**
-	 * Performs the evaluation for a likelihood of a sequence during validation
-	 * @param outStream
-	 * @param probThreshold
-	 * @param seq
-	 */
-	private Double validationEvaluation(IAlgorithmOutStream outStream, Double probThreshold, Integer []seq){
-		  Double prob=1.0;
-		  try{
-			  prob=hmm.observationLikelihood(seq);
-			 // console.printTextLn("Sequence likelhood: "+prob.toString());
-		  } catch (Exception ex){
-			  outStream.addOutputEvent("Unknown events in your sequences. Retrain using larger number of unique events");
-			  outStream.addNewLine();
-			  // ex.printStackTrace();
-		  }
-		  
-		  if (prob<probThreshold){
-			  probThreshold=prob;
-			  //console.printTextLn(Arrays.toString(seq));
-			  outStream.addOutputEvent("Min Log Likelihood Threshold: "+probThreshold.toString());
-			  outStream.addNewLine();
-		  }
-		  return probThreshold;
-	}
-	
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#test(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
-	 */
-	@Override
-	public Results test(ITraceIterator trace, String database, IDataAccessObject dataAccessObject,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
-		
-		int winWidth=0,testSeqLength=seqLength;
-		String []options;
-		
-		if (!isTestInitialized){
-			hmm=new HmmMahout();
-			options=hmm.loadSettings(database, dataAccessObject);
-			logThresholdTest=Double.parseDouble(options[7]);
-			
-			hmm.loadHmm(dataAccessObject, database);
-			nameToID.loadMap(dataAccessObject, database);
-			testNameToIDSize=nameToID.getSize();
-			isTestInitialized=true;
-		}
-		
-		Results results=new Results();
-		LinkedList<Integer> newSequence=new LinkedList<Integer>();
-	   	Boolean isTested=true;
-	    totalTestTraces++;
-	    String event=null;
-	    
-	    outputStream.addOutputEvent("Extracting Sequences");
-	    outputStream.addNewLine();
-	    int seqCount=1;
-	    while (trace.advance() ) {
-	   		
-	    	  event=trace.getCurrentEvent();
-	   		  newSequence.add(nameToID.getId(event));
-	    	  winWidth++;
-	    	  isTested=false;    	  
-	    	  
-	    	  if(winWidth >= testSeqLength){
-	    		  
-	    		  isTested=true;		
-	    		  winWidth--;
-	    		  Integer[] seq=new Integer[testSeqLength];
-	    		  seq=newSequence.toArray(seq);
-	    		  
-	    		  if (seqCount%10000==0){
-	    			  outputStream.addOutputEvent("Executing "+seqCount+"th sequence");
-	    			  outputStream.addNewLine();
-	    		  }
-	    		  
-	    		  if (testEvaluation(results, logThresholdTest, seq)==true)
-	 				break;
-	    		  //testEvaluation(results, logThreshold, seq);
-	    		  newSequence.remove(0);
-	    		  seqCount++;
-	    	  }
-	    		  
-	     }
-		if (!isTested){
-			 Integer[] seq=new Integer[newSequence.size()];
-   		  	 seq=newSequence.toArray(seq);
-			 testEvaluation(results, logThresholdTest, seq);
-		}
-		outputStream.addOutputEvent("Finished evaluating the trace");
-		outputStream.addNewLine();
-		
-		return results; 
-		
-	}
-	/**
-	 * Helper function for testing
-	 * @param result
-	 * @param probThreshold
-	 * @param seq
-	 * @return Return true if anomaly, else returns false
-	 */
-	private boolean testEvaluation(Results result, Double probThreshold, Integer []seq){
-		  Double prob=1.0;
-		  try{
-			  prob=hmm.observationLikelihood(seq);
-			
-		  } catch (Exception ex){
-				 result.setAnomaly(true);
-				 if (nameToID.getSize() > testNameToIDSize){
-					 Integer diff=nameToID.getSize()-testNameToIDSize;
-					 
-					 if (diff >100)
-						 result.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
-					 else
-						 result.setDetails("\nUnknown events: \n");
-					 int eventCount=0;
-					 for (int i=testNameToIDSize; i<testNameToIDSize+diff;i++){// All these events are unknown
-						   result.setDetails(nameToID.getKey(i)+", ");
-						   eventCount++;
-						   if ((eventCount)%10==0)
-							   result.setDetails("\n");   
-					 }
-					 testNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
-				 }
-			totalTestAnomalies++; 
-			return true;	 
-		  }
-		  
-		  if (prob<probThreshold){
-			  probThreshold=prob;
-			  result.setDetails("Anomalous pattern of events found in the sequence: \n");
-			  
-			  int firstRange=10;
-			   if (seq.length <10)
-				  firstRange=seq.length;
-			  for (int id=0; id<firstRange;id++)
-			    	result.setDetails(nameToID.getKey(seq[id])+", ");
-			  
-			  int secondRange=seq.length/2;
-			  if (secondRange+10<seq.length){
-				  result.setDetails("\n.........................................................\n");
-				  for (int id=secondRange; id<secondRange+10;id++)
-					  result.setDetails(nameToID.getKey(seq[id])+", ");
-			  }
-			
-			  int thirdRange=seq.length;  
-			  if (thirdRange-10>secondRange+10){
-				  result.setDetails("\n.........................................................\n");	
-				  for (int id=secondRange; id<secondRange+10;id++)
-					  result.setDetails(nameToID.getKey(seq[id])+", ");
-			  }
-			  result.setAnomaly(true);
-			  totalTestAnomalies++;
-			  return true;
-		  }else{
-			  result.setAnomaly(false);
-			  return false;
-		  }
-		  
-	}
-	
-	/*
-	 * Returns the total anomalies found during testing
-	 */
-	@Override
-	public Double getTotalAnomalyPercentage() {
-	
-		 Double anomalyPercentage= (totalTestAnomalies/totalTestTraces) *100;
-		 return anomalyPercentage;
-	}
-	
-	
-	@Override
-	public Chart graphicalResults(ITraceIterator traceIterator) {
-	
-		return null;
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#createInstance()
-	 */
-	@Override
-	public IDetectionAlgorithm createInstance() {
-	
-		return new HiddenMarkovModel();
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getName()
-	 */
-	@Override
-	public String getName() {
-		
-		return "Hidden Markov DataModel (HMM)";
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getAcronym()
-	 */
-	@Override
-	public String getAcronym() {
-		
-		return "HMM";
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getDescription()
-	 */
-	@Override
-	public String getDescription(){
-		return "HMM is a stochastic model for sequential data and hence it is naturally suitable for modeling temporal order of "
-				+ "system call sequences. The process is determined by a latent Markov chain having a finite number of "
-				+ "states, N, and a set of output observation probability distributions, B, associated with each state. "
-				+ "Starting from an initial state No, the process transits from one state to another according to the matrix "
-				+ "of transition probability distribution, A, and then emits an observation symbol Ok from a finite alphabet "
-				+ "(i.e., M distinct observable events) according to the output probability distribution, Bj(Ok), of the current"
-				+ " state Nj. HMM is typically parameterized by the initial state distribution probabilities (Π), "
-				+ "output (emission) probabilities (B), and state transition probabilities (A). Baulm-Welch algorithm is used "
-				+ "to train the model parameters to fit the sequences of observations, T.  During the validation phase,"
-				+ " HMM adjusts the decision threshold (log likelihood) of prediction of anomalous alarms on T sequences "
-				+ "from traces. In the testing phase, if the probability value of any sequence in a trace is below the "
-				+ "selected threshold, then we consider the trace as anomalous otherwise we consider it as normal";
-	}
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#isOnlineLearningSupported()
-	 */
-	@Override
-	public boolean isOnlineLearningSupported() {
-		
-		return false;
-	}
-
 	
 }

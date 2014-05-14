@@ -41,7 +41,7 @@ public class DiagnosisPartListener implements IPartListener {
 				IViewPart viewRes=PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
 			  	ResultsView resultsView=(ResultsView)viewRes;
 				notifyObservers(resultsView.getResultsAndFeddbackInstance());
-				System.out.println ("In Results part for Diag");
+			
 			}
 	  } catch (PartInitException e) {
 		  	

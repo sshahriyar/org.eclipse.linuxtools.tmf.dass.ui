@@ -5,6 +5,7 @@ package org.eclipse.linuxtools.tmf.totalads.ui.models;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -46,7 +47,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	public static final String ID = "org.eclipse.linuxtools.tmf.totalads.ModelsView";
 	private ModelsList modelListViewer = null;
 	private ListenerList listeners ; 
-	private HashSet<String> selection; 
+	private LinkedHashSet<String> selection; 
 	
     ///////////////////////////////////////////////////////////////////////////////////////////////
 	// Inner class
@@ -59,6 +60,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	private  class ModelsList implements IDBMSObserver{
 		private CheckboxTableViewer viewer = null;
 		private Table table=null;
+		private IDataAccessObject dao;
 		/**
 		 * Constructor
 		 * @param parent
@@ -79,8 +81,9 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 			viewer.setLabelProvider(new DataModelLabelProvider());
 			viewer.setContentProvider(new DataModelTableContentProvider());
 			
-			IDataAccessObject dao=DBMSFactory.INSTANCE.getDataAccessObject();
+			dao=DBMSFactory.INSTANCE.getDataAccessObject();
 			DBMSFactory.INSTANCE.verifyConnection();
+			
 			viewer.setInput(dao);
 			dao.addObserver(this);
 			
@@ -174,6 +177,13 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 				
 			}
 		}
+		
+		/**
+		 * Disposes the object
+		 */
+		public void dispose(){
+			dao.removeObserver(this);
+		}
 	}
     ///////////////////////////////////////////////////////////////////////////////////////////////
 	// Inner class ends
@@ -183,7 +193,7 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	 */
 	public DataModelsView() {
 		listeners = new ListenerList(); 
-		selection=new HashSet<String>(); 
+		selection=new LinkedHashSet<String>(); 
 	}
 	
 	
@@ -257,6 +267,17 @@ public class DataModelsView extends  ViewPart implements ISelectionProvider{
 	 */
 	public void refresh(){
 		this.modelListViewer.update();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
+	 */
+	@Override
+	public void dispose(){
+		
+		modelListViewer.dispose();
+		super.dispose();
 	}
 
 

@@ -171,7 +171,7 @@ public class BackgroundLiveMonitor implements Runnable {
 						xSeries.add(0.0);
 						
 					else{
-						System.out.println (anomalyIdx + " "+maxPoints);
+						//System.out.println (anomalyIdx + " "+maxPoints);
 						if (anomalyIdx>maxPoints)
 							xSeries.remove();// remove first point on the series
 						Double interval=1.0;
@@ -290,7 +290,7 @@ public class BackgroundLiveMonitor implements Runnable {
 		progConsole.println("Please wait...");		
 	}
 	/**
-	 * This is a key function that evaluates traces on models and trains the model on those traces if needed
+	 * This is a name function that evaluates traces on models and trains the model on those traces if needed
 	 * @param tracePath
 	 * @param xVals
 	 * @throws TotalADSReaderException 
@@ -316,8 +316,11 @@ public class BackgroundLiveMonitor implements Runnable {
 				//Testing it
 				Results results=algorithm.test(traceIterator,model , DBMSFactory.INSTANCE.getDataAccessObject(), outStreamAlg);
 				
+				if (results==null)// if an algorithm returns null then make it default to avoid a crash
+					results=new Results();
+				
 				Double anomCount=modelsAndAnomalyCount.get(model);
-				if (results.getAnomaly()==true)
+				if (results.getAnomaly()==null || results.getAnomaly()==true)
 								if (anomCount==null)
 									modelsAndAnomalyCount.put(model, 1.0);
 								else
@@ -339,7 +342,7 @@ public class BackgroundLiveMonitor implements Runnable {
 				
 				
 				LinkedList<Double> anomalies=modelsAndAnomaliesOnChart.get(model);
-				if (results.getAnomaly()){
+				if (results.getAnomaly()==null || results.getAnomaly()){
 							anomalies.add(1.0);
 							progConsole.println("It is an anomaly");
 							

@@ -27,6 +27,7 @@ public class Results {
 	public Results() {
 		details=new StringBuilder();
 		isAnomaly=false;
+		anomalyType="";
 	}
 	/**
 	 * Returns whether a trace is an anomaly or not

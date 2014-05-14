@@ -80,15 +80,15 @@ public IDetectionAlgorithm[] getAlgorithms(AlgorithmTypes algorithmTypes){
 	}
 }
 /**
- * This function registers an algorithm by using its acronym as a key
- * @param key Acronym of the algorithm
+ * This function registers an algorithm by using its acronym as a name
+ * @param name Acronym of the algorithm
  * @param detectionAlgorithm The Algorithm to register
  * @throws TotalADSGeneralException 
  */
 private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detectionAlgorithm) throws TotalADSGeneralException{
 	
 	if (key.isEmpty())
-		throw new TotalADSGeneralException("Empty key/acronym!");
+		throw new TotalADSGeneralException("Empty name/acronym!");
 	else if (key.contains("_"))
 			throw new TotalADSGeneralException("Acronym cannot contain underscore");
 	else {
@@ -97,7 +97,7 @@ private void registerAlgorithmWithAcronym(String key, IDetectionAlgorithm detect
 		if (model==null) 
 			acronymModels.put(key, detectionAlgorithm);
 		else
-			throw new TotalADSGeneralException("Duplicate key/acronym!");
+			throw new TotalADSGeneralException("Duplicate name/acronym!");
 	}
 		
 		
@@ -124,7 +124,7 @@ public void registerModelWithFactory(AlgorithmTypes algorithmType,  IDetectionAl
 }
 /**
  * Get an algorithm by acronym
- * @param key
+ * @param name
  * @return an instance of the algorithm
  */
 public IDetectionAlgorithm getAlgorithmByAcronym(String key){

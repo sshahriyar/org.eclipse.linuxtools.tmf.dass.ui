@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 /**
  * This class automatically generates a form at runtime for training or testing settings of an algorithm
- * by using an options array as a key value pair of elements. Even fields in options array becomes
+ * by using an options array as a name value pair of elements. Even fields in options array becomes
  * labels and odd fields become values.
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
@@ -38,7 +38,7 @@ public class SettingsForm {
 	 */
 	public SettingsForm(String []options, Composite compParent) throws TotalADSGeneralException{
 		if (options.length % 2==1)
-			 throw new TotalADSGeneralException("Options must be even: key and value pairs.");
+			 throw new TotalADSGeneralException("Settings must be even: name and value pairs.");
 	
 		createForm(options, compParent);
 	}

@@ -41,7 +41,7 @@ public class LivePartListener implements IPartListener {
 				IViewPart viewRes=PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(LiveResultsView.VIEW_ID);
 			  	LiveResultsView liveResultsView=(LiveResultsView)viewRes;
 				notifyObservers(liveResultsView.getResults());
-				System.out.println ("In Live Results part for Diag");
+			
 			}
 	  } catch (PartInitException e) {
 		  	

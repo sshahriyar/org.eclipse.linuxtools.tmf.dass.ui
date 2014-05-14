@@ -299,7 +299,7 @@ public class ResultsAndFeedback {
 					Results results=modelResults.get(modelName);
 					
 					//currentTraceResults=results;
-					if (results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
+					if ( results.getAnomaly()!=null && results.getAnomaly() && (results.getAnomalyType()!=null && !results.getAnomalyType().isEmpty()))
 						txtAnomalyType.setText(results.getAnomalyType());
 					else
 						txtAnomalyType.setText(booleanAnomalyToString(results.getAnomaly()));
@@ -409,8 +409,10 @@ public class ResultsAndFeedback {
 	 * @return A String value to be displayed
 	 */
 	private String booleanAnomalyToString(Boolean anomaly){
-		if (anomaly)
-			return "Yes, an anomaly.";
+		if (anomaly==null)
+			return "Yes, an anomaly";
+		else if (anomaly)
+			return "Yes, an anomaly";
 		else
 			return "No, not an anomaly";
 	}

@@ -22,7 +22,7 @@ enum TraceCollection{
 	 */
 	COLLECTION_NAME("trace_data"),
 	/**
-	 * key
+	 * name
 	 */
 	KEY("_id"),
 	/**

@@ -86,7 +86,7 @@ public class TestSettingsDialog extends TitleAreaDialog {
 	     try {
 			
 	    	settingsForAlgorithm= settingsForm.getSettings();
-			algorithm.saveTestingOptions(settingsForAlgorithm, modelName, DBMSFactory.INSTANCE.getDataAccessObject());
+			algorithm.saveTestSettings(settingsForAlgorithm, modelName, DBMSFactory.INSTANCE.getDataAccessObject());
 		
 	     } catch (TotalADSGeneralException ex) {
 			setErrorMessage(ex.getMessage());

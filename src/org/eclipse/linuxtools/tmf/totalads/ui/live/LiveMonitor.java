@@ -204,7 +204,7 @@ public class LiveMonitor {
 		trcbrowser.disableBrowsing();
 		*/
 		//////////
-		///End SSH password and private key
+		///End SSH password and private name
 		//////
 		///////////////
 		// Duration and Port
@@ -366,7 +366,7 @@ public class LiveMonitor {
 		});
 		
 		
-		//**** Pvt key button handler: Will be enabled in the next version
+		//**** Pvt name button handler: Will be enabled in the next version
 		/*btnPvtKey.addSelectionListener(new SelectionAdapter() {
 					
 			@Override
@@ -378,7 +378,7 @@ public class LiveMonitor {
 			}
 			});*/
 		
-		//**** Password button key handler
+		//**** Password button name handler
 		/* btnPassword.addSelectionListener(new SelectionAdapter() {
 							
 					@Override
@@ -408,7 +408,7 @@ public class LiveMonitor {
 	//	else if (btnPassword.getSelection() && txtPassword.getText().isEmpty())
 		//	msg="SSH password cannot be empty";
 		//else if (btnPvtKey.getSelection() && txtPvtKey.getText().isEmpty())
-         //  msg="Private key path cannot be empty";
+         //  msg="Private name path cannot be empty";
 		else if (modelsList.size() <=0){
 			 msg="Please select a model first";
 		}
@@ -492,7 +492,7 @@ public class LiveMonitor {
 	 * @param results
 	 */
 	public void setResultsAndFeedback(ResultsAndFeedback results){
-		System.out.println("Results in live Monitor");
+		
 		this.resultsAndFeedback=results;
 	}
 

@@ -118,7 +118,7 @@ public class DirectoryBrowser {
 		}
 	}
 	
-	/**Inner class for key press event on the button     */
+	/**Inner class for name press event on the button     */
 	private class KeyPressEvent extends KeyAdapter{
 		@Override
 		public void keyPressed(KeyEvent e) {

@@ -34,17 +34,7 @@ public void initializeModelAndSettings(String modelName, IDataAccessObject dataA
  * Returns the training settings/options of an algorithm as setting name at index i and value at index i+1.
  * @return Array of Strings as options/settings
  */
-public String[] getTrainingOptions();
-/**
- * Validates the training options and saves them into the database. On error throws exception
- * @param options SettingsForm array
- * @param database Database name
- * @param connection Database connection object
- * @throws TotalADSGeneralException
- * @throws TotalADSDBMSException TODO
- 
-public void saveTrainingOptions(String [] options, String database, IDataAccessObject connection) throws TotalADSGeneralException, TotalADSDBMSException;
-*/
+public String[] getTrainingSettings();
 
 /**
  * Returns the testing options/settings of an algorithm as option name at index i and value ate index i+1.
@@ -54,16 +44,24 @@ public void saveTrainingOptions(String [] options, String database, IDataAccessO
  * @param dataAccessObject IDataAccessObject object
  * @return An array of String as options/settings
  */
-public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject);
+public String[] getTestSettings(String database, IDataAccessObject dataAccessObject);
 /**
  * Validates the testing options and saves them into the database. On error throws exception
- * @param options
- * @param database
- * @param dataAccessObject
+ * @param options Settings array
+ * @param database Model(database name)
+ * @param dataAccessObject An object to access database
  * @throws TotalADSGeneralException
  * @throws TotalADSDBMSException 
  */
-public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException;
+public void saveTestSettings(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException;
+/**
+ * Returns settings selected for a model by a user during training and testing. These would be displayed in the properties view. 
+ * @param database Model(database) name
+ * @param dataAccessObject An object to access database
+ * @return An array of selected settings
+ */
+public String[] getSettingsToDisplay(String database, IDataAccessObject dataAccessObject);
+
 /**
  * An algorithm will take a  trace through this function. Some algorithms can train on 
  * the traces as they come and some need to wait till the last trace. Caller
@@ -78,7 +76,6 @@ public void saveTestingOptions(String [] options, String database, IDataAccessOb
  * @throws TotalADSDBMSException
  * @throws TotalADSReaderException
  */
-
 public void train (ITraceIterator trace, Boolean isLastTrace, String database, IDataAccessObject connection, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException;
 
 /**

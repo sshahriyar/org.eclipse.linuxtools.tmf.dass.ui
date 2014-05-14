@@ -56,7 +56,7 @@ public class TotalAdsPerspectiveFactory implements IPerspectiveFactory {
         
         IFolderLayout bottomRightFolder = layout.createFolder(
                 "bottomRightFolder", IPageLayout.BOTTOM, 0.50f,"topRightFolder"); 
-        bottomRightFolder.addView(PropertiesView.ID);
+        bottomRightFolder.addView(PropertiesView.VIEW_ID);
         //bottomRightFolder.addView(IPageLayout.ID_PROP_SHEET);
         
 		// Create Left folders

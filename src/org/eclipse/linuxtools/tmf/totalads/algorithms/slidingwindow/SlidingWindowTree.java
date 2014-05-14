@@ -79,7 +79,7 @@ class SlidingWindowTree {
 				
 			}
 		}
-		// putting the sequence (graph actually) to the starting event (node) as a key
+		// putting the sequence (graph actually) to the starting event (node) as a name
 		sysCallSequences.put(newSequence[0],eventSequence);//add to database
 		//saveTreeInDatabase( database, connection, eventSequence, HmmModelCollection.COLLECTION_NAME.toString());
 	}
@@ -176,7 +176,7 @@ class SlidingWindowTree {
 	 * @param coutStream An object to display output
 	 * @param database Database name
 	 * @param connection IDataAccessObject object
-	 * @param sysCallSequences  A map containing one tree of events for every key
+	 * @param sysCallSequences  A map containing one tree of events for every name
 	 * @param collectionName Collection name
 	 * @throws TotalADSDBMSException
 	 */
@@ -224,7 +224,7 @@ class SlidingWindowTree {
 		
 		 
 		
-		 	Integer key=tree[0].getEvent(); // top node is the key
+		 	Integer key=tree[0].getEvent(); // top node is the name
 			
 			com.google.gson.Gson gson = new com.google.gson.Gson();
 			
@@ -263,7 +263,7 @@ class SlidingWindowTree {
 /**
  * Prints all the sequences in a tree; use for testing
  * @param outStream An object to display information 
- * @param sysCallSequences  A map containing one tree of events for every key
+ * @param sysCallSequences  A map containing one tree of events for every name
  * @param nameToId NameToIDMapper
  */
 	public void printSequence(IAlgorithmOutStream outStream,  HashMap<Integer, Event[]> sysCallSequences, NameToIDMapper nameToId) {
@@ -294,7 +294,7 @@ class SlidingWindowTree {
 						prefix=prefix+" -: Count="+nodes[nodeCount].getEvent();// the last element is the count of the sequence
 				  else	
 				  		prefix=prefix+ nameToId.getKey(nodes[nodeCount].getEvent().intValue())+" ";// just append the events
-				  		//create a two dimension key Tree as an array and node as event name 
+				  		//create a two dimension name Tree as an array and node as event name 
 				  
 				  if (branches!= null){ // if there are branches on an event then keep
 					 

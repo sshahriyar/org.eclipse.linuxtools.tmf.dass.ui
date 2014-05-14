@@ -56,7 +56,7 @@ public class TraceTypeFactory {
 			traceTypes=null;
 	}
 	/**
-	 * Returns a trace type reader based on the key
+	 * Returns a trace type reader based on the name
 	 * @return A reader of a selected type
 	 */
 	public ITraceTypeReader getTraceReader(String key){
@@ -94,7 +94,7 @@ public class TraceTypeFactory {
 	}
 	/**
 	 * Registers a trace reader with the factory
-	 * @param key Key for the trace reader
+	 * @param name Key for the trace reader
 	 * @param traceReader Instance of the trace reader
 	 * @throws TotalADSGeneralException Exception 
 	 */

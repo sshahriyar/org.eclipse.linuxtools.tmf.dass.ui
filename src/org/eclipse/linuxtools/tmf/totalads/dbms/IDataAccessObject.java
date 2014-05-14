@@ -78,7 +78,7 @@ public interface IDataAccessObject extends IDBMSSubject {
 	/**
 	 * Inserts or updates (if already exists) an object in the form of JSON representation into the database. Any kind of complex
 	 *  data structure can be converted to JSON using gson library and passed to this function. This function replaces the entire document with a new
-	 *  document of a matching key. E.g., If a document {"_id": 1, a:4, b:6} is updated with {b:8} then the new document would be {"_id":1, b:8} 
+	 *  document of a matching name. E.g., If a document {"_id": 1, a:4, b:6} is updated with {b:8} then the new document would be {"_id":1, b:8} 
 	 * @param database Database name
 	 * @param keytoSearch The indexed field and its value as a JSON object which is to be searched
 	 * @param jsonObjectToUpdate The datastructure as a JSON object which is to be updated
@@ -101,7 +101,7 @@ public interface IDataAccessObject extends IDBMSSubject {
 	
 	/**
 	 * Selects a max value from a collection (table)
-	 * @param key Field name to return the max of. Use an index key otherwise the results will be slow
+	 * @param name Field name to return the max of. Use an index name otherwise the results will be slow
 	 * @param database Database name
 	 * @param collection Collection name
 	 * @return Maximum value as a string
@@ -110,8 +110,8 @@ public interface IDataAccessObject extends IDBMSSubject {
 	public String selectMax(String key, String database, String collection);
 	
 	/**
-	 * Returns a set of documents based on a key search
-	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
+	 * Returns a set of documents based on a name search
+	 * @param name Field name in the document of a collection. Should be an indexed name for faster processing.
 	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
 	 * @param value Double value of the field
 	 * @param database Database name
@@ -121,8 +121,8 @@ public interface IDataAccessObject extends IDBMSSubject {
 	public DBCursor select(String key, String operator, Double value,String database, String collection );
 	
 	/**
-	 * Returns a set of documents based on a key search
-	 * @param key Field name in the document of a collection. Should be an indexed key for faster processing.
+	 * Returns a set of documents based on a name search
+	 * @param name Field name in the document of a collection. Should be an indexed name for faster processing.
 	 * @param operator Comparison operators if any. Leave it empty if exact match is needed
 	 * @param value String value of the field
 	 * @param database Database name

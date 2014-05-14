@@ -18,11 +18,13 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
+
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Arrays;
+
 import com.google.gson.JsonObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -133,7 +135,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
      */
     @Override
-    public String[] getTrainingOptions(){
+    public String[] getTrainingSettings(){
    			return trainingOptions;
   
     }
@@ -143,7 +145,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
      */
     @Override
-    public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
+    public void saveTestSettings(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException
     {
     	try {
 			alpha= Double.parseDouble(options[1]);
@@ -162,7 +164,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
     */
     @Override
-    public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject){
+    public String[] getTestSettings(String database, IDataAccessObject dataAccessObject){
     	Double alphaVal=getSettingsFromDatabase(database, dataAccessObject);
 		if(alphaVal!=null)
 			 alpha=alphaVal;
@@ -170,6 +172,22 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 		return testingOptions;
     }
     
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getSettingsToDisplay()
+     */
+    @Override
+	public String[] getSettingsToDisplay(String database, IDataAccessObject dataAccessObject){
+		// First read settings in a class level array-- just one row
+		Double alphaVal=getSettingsFromDatabase(database, dataAccessObject);
+		String []settings=new String[trainingOptions.length+2];
+		int j;
+		for (j=0;j<trainingOptions.length;j++)
+			settings[j]=trainingOptions[j];
+		settings[j]="Alpha";
+		settings[j+1]=alphaVal.toString();
+		return settings;
+	}
     /*
      * (non-Javadoc)
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
@@ -525,7 +543,7 @@ public class KernelStateModeling implements IDetectionAlgorithm {
 				//connection.insert(states, database,TRACE_COLLECTION);
 
 		}catch (TotalADSDBMSException ex){
-			if (ex!=null && !ex.getMessage().contains("E11000 duplicate key"))// if it is a duplicate key error do nothing
+			if (ex!=null && !ex.getMessage().contains("E11000 duplicate name"))// if it is a duplicate name error do nothing
 				throw new TotalADSDBMSException(ex);
 		}
 	}

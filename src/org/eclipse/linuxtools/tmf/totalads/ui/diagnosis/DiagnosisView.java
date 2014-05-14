@@ -165,8 +165,6 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 		 if (part instanceof DataModelsView) {  
 			   Object obj = ((StructuredSelection) selection).getFirstElement();
 			   modelList= (HashSet<String>)obj;
-			   if (modelList!=null && modelList.size()>0)
-				   System.out.println(modelList.iterator().next());
 			   diagnosis.updateonModelSelection(modelList); 
 		    }  
 		}

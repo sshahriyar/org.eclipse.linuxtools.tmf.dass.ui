@@ -26,7 +26,7 @@ enum NameToIDCollection{
 	 */
 	 KEY("_id"),
 	 /**
-	  * Mapper name, this field will contain the map of key to ids
+	  * Mapper name, this field will contain the map of name to ids
 	  * it can be converted to a hashmap directly
 	  */
 	 MAP("map");

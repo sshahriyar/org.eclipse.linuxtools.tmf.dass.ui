@@ -75,7 +75,7 @@ public class CreateModelWizard extends Wizard {
 		if (page.equals(pageAlgoSelection)){
 			
 			IDetectionAlgorithm alg= pageAlgoSelection.getSelectedAlgorithm();
-			String []settings=alg.getTrainingOptions();
+			String []settings=alg.getTrainingSettings();
 			pageAlgoSettings.setSettings(settings);
 			
 		}

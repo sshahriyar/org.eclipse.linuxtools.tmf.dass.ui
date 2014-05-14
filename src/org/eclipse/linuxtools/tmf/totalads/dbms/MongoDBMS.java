@@ -50,32 +50,34 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	@Override
 	public String connect(String host, Integer port) {
 		String message="";
-		try {
-			
-			
-			mongoClient = new MongoClient( host , port );
-			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+		synchronized (this){
+				try {
 					
-			mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
-											// Unfortunately,mongoClient doesn't tell whether there is a DB or not
-		} catch (UnknownHostException ex) {
-			isConnected=false;
-			message=ex.getMessage();
-			notifyObservers();
-			return message;
-		} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
-			isConnected=false;
-			message="Unable to connect to MongoDB.";
-			notifyObservers();
-			return message;
+					mongoClient = new MongoClient( host , port );
+					mongoClient.setWriteConcern(WriteConcern.JOURNALED);
+							
+					mongoClient.getDatabaseNames(); // if this doesn't work then there is no running DB. 
+													// Unfortunately,mongoClient doesn't tell whether there is a DB or not
+				} catch (UnknownHostException ex) {
+					isConnected=false;
+					message=ex.getMessage();
+					notifyObservers();
+					return message;
+				} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
+					isConnected=false;
+					message="Unable to connect to MongoDB.";
+					notifyObservers();
+					return message;
+				}
+				
+				
+				isConnected=true;// if it reaches here then it is connected
+				notifyObservers();
 		}
-		
-		
-		isConnected=true;// if it reaches here then it is connected
-		notifyObservers();
 		return message;
 		
 	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSConnection#connect(java.lang.String, java.lang.Integer, java.lang.String, java.lang.String, java.lang.String)
@@ -84,40 +86,42 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	public String connect(String host, Integer port, String username, String password, String database) {
 		
 		String message="";
-		try {
+		synchronized (this) {
+			try {
+							
+					mongoClient = new MongoClient( host , port );
+					mongoClient.setWriteConcern(WriteConcern.JOURNALED);
 					
-			mongoClient = new MongoClient( host , port );
-			mongoClient.setWriteConcern(WriteConcern.JOURNALED);
-			
-			DB db=mongoClient.getDB(database);
-			
-			if (db.authenticate(username, password.toCharArray())==false){
-				isConnected=false;
-				message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
-			}
-			else{
-				isConnected=true;// if it reaches here then everything is fine
+					DB db=mongoClient.getDB(database);
+					
+					if (db.authenticate(username, password.toCharArray())==false){
+						isConnected=false;
+						message="Authentication failed with MongoDB using user id "+username +" and database "+database+".";
+					}
+					else{
+						isConnected=true;// if it reaches here then everything is fine
+						
+					}
+					
+				} catch (UnknownHostException ex) {
+					isConnected=false;
+					message=ex.getMessage();
+					//notifyObservers();
+					//return message;
+				} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
+					isConnected=false;
+					message="Unable to connect to MongoDB";
+					//notifyObservers();
+					//return message;
+				}finally{
 				
-			}
-		//}
-	
-		} catch (UnknownHostException ex) {
-			isConnected=false;
-			message=ex.getMessage();
-			//notifyObservers();
-			//return message;
-		} catch (Exception ex){ // Just capture an exception and don't let the system crash when db is not there
-			isConnected=false;
-			message="Unable to connect to MongoDB";
-			//notifyObservers();
-			//return message;
-		}finally{
-		
-			
-		  notifyObservers();
-		
+					
+				  notifyObservers();
+				
+				}
 		}
 		return message;
+		
 	}
 	
 	/*
@@ -135,12 +139,12 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public List<String> getDatabaseList(){
-		List <String> dbList=mongoClient.getDatabaseNames();
-		// remove system databases
-		dbList.remove("admin");
-		dbList.remove("local");
-		return dbList;
-		
+		synchronized (this){
+			List <String> dbList=mongoClient.getDatabaseNames();
+			dbList.remove("admin");
+			dbList.remove("local");
+			return dbList;
+		}
 	}
 	
 	/*
@@ -163,24 +167,25 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void createDatabase(String dataBase, String[] collectionNames) throws TotalADSDBMSException{
-	
-	 if (datbaseExists(dataBase)){
-		 	if (isConnected==false){// This code snippet is a check for the breakage of connection during the excution
-		 		isConnected=true;   // if reconnection occurs  during execution it will notify all obervers
-		 		notifyObservers();
-		 	}
-			throw new TotalADSDBMSException("Database already exists!");
-			
-	 }
-		
-		DB db=mongoClient.getDB(dataBase);
-		DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
-		 
-		for (int j=0; j<collectionNames.length;j++)
-			db.createCollection(collectionNames[j], options);
-		//db.createCollection(Configuration.settingsCollection, options);
-		isConnected=true; // if this code is executed after the breakage of connection, make sure isConnected is true if it h
-		notifyObservers();
+		synchronized (this){
+			  if (datbaseExists(dataBase)){
+				 	if (isConnected==false){// This code snippet is a check for the breakage of connection during the excution
+				 		isConnected=true;   // if reconnection occurs  during execution it will notify all obervers
+				 		notifyObservers();
+				 	}
+					throw new TotalADSDBMSException("Database already exists!");
+					
+			   }
+				
+				DB db=mongoClient.getDB(dataBase);
+				DBObject options = com.mongodb.BasicDBObjectBuilder.start().add("capped", false).get();
+				 
+				for (int j=0; j<collectionNames.length;j++)
+					db.createCollection(collectionNames[j], options);
+				//db.createCollection(Configuration.settingsCollection, options);
+				isConnected=true; // if this code is executed after the breakage of connection, make sure isConnected is true if it h
+				notifyObservers();
+		}
 	}
 	
 	/*
@@ -189,6 +194,7 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void createAscendingUniquesIndexes(String dataBase, String collection, String []fields){
+		
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
 		DBObject fieldsDB=new BasicDBObject();
 		for (int j=0; j<fields.length;j++){
@@ -204,6 +210,7 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void createDescendingUniquesIndexes(String dataBase, String collection, String []fields){
+	
 		DBCollection coll = mongoClient.getDB(dataBase).getCollection(collection);
 		DBObject fieldsDB=new BasicDBObject();
 		for (int j=0; j<fields.length;j++){
@@ -211,6 +218,7 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 		}
 			
 		coll.ensureIndex(fieldsDB,new BasicDBObject("unique", true));
+		
 	}
 	/*
 	 * (non-Javadoc)
@@ -218,8 +226,10 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void closeConnection(){
-		isConnected=false;
-		mongoClient.close();
+		synchronized (this){
+			isConnected=false;
+			mongoClient.close();
+		}
 	}
 	
 	/*
@@ -228,9 +238,10 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void deleteDatabase(String database){
-		
-		mongoClient.dropDatabase(database);
-		notifyObservers();
+		synchronized(this){
+			mongoClient.dropDatabase(database);
+			notifyObservers();
+		}
 		
 	}
 	/**
@@ -245,20 +256,20 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 			
 		  for (Field field : record.getClass().getDeclaredFields()) {
 					
-					 String key=field.getName();
+					 String name=field.getName();
 					 field.setAccessible(true);
 					 if (field.getType()==String.class){
 						 String val=(String)field.get(record);
-						 document.append(key, val);
+						 document.append(name, val);
 					 } else if (field.getType()==Integer.class){
 						 Integer val=(Integer)field.get(record);
-						 document.append(key, val);
+						 document.append(name, val);
 					 } else if (field.getType()==Double.class){
 						 Double val=(Double)field.get(record);
-						 document.append(key, val);
+						 document.append(name, val);
 					 }else if (field.getType()==Boolean.class){
 						 Boolean val=(Boolean)field.get(record);
-						 document.append(key, val);
+						 document.append(name, val);
 					 }
 			}
 	}
@@ -435,15 +446,17 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public DBCursor selectAll(String database, String collection ){
-		DBCursor cursor;
-				
-		DB db =mongoClient.getDB(database);
-		DBCollection coll = db.getCollection(collection);
-				
-		cursor= coll.find();
-		if (!cursor.hasNext())
-			cursor=null;
-		return cursor;
+		
+			DBCursor cursor;
+					
+			DB db =mongoClient.getDB(database);
+			DBCollection coll = db.getCollection(collection);
+					
+			cursor= coll.find();
+			if (!cursor.hasNext())
+				cursor=null;
+			return cursor;
+		
 	}
 	/**
 	 * This function is used to update the values of individual fields--specified by the replacementFieldsAndValue object--
@@ -490,7 +503,9 @@ class MongoDBMS implements  IDataAccessObject, IDBMSConnection {
 	 */
 	@Override
 	public void addObserver(IDBMSObserver observer){
+		
 		observers.add(observer);
+		
 		
 	}
 	/*

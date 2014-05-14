@@ -114,7 +114,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTrainingOptions()
 	 */
     @Override
-    public String[] getTrainingOptions(){
+    public String[] getTrainingSettings(){
     	   
     	 return trainingOptions;
     	     	
@@ -126,7 +126,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
     * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#saveTestingOptions(java.lang.String[], java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
     */
     @Override
-    public void saveTestingOptions(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException{
+    public void saveTestSettings(String [] options, String database, IDataAccessObject dataAccessObject) throws TotalADSGeneralException, TotalADSDBMSException{
       
     	Integer theMaxHamDis=0;
         Boolean detailAnalysis=false;
@@ -163,7 +163,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
      * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getTestingOptions(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
      */
     @Override
-    public String[] getTestingOptions(String database, IDataAccessObject dataAccessObject){
+    public String[] getTestSettings(String database, IDataAccessObject dataAccessObject){
     	loadSetings(database, dataAccessObject);
     	testingOptions[1]=maxHamDis.toString(); 	
     	testingOptions[3]=detailedAnalysis.toString(); 	
@@ -212,7 +212,19 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		saveSettings(modelName, dataAccessObject);
 	}
 	
-	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#getSettingsToDisplay(java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject)
+	 */
+	@Override
+	public String[] getSettingsToDisplay(String database, IDataAccessObject dataAccessObject){
+		loadSetings(database, dataAccessObject);
+		String []settings=trainingOptions.clone();
+		settings[1]=maxWin.toString();
+		settings[3]=maxHamDis.toString();
+		settings[5]=detailedAnalysis.toString();
+		return settings;
+	}
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm#train(org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator, java.lang.Boolean, java.lang.String, org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject, org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream)
@@ -368,7 +380,7 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		     
 			 String headerMsg="First "+maxAnomalousSequencesToReturn+" or less distinct anomalous sequences with non-overlapping  events at Ham > "+maxHamDis+"\n\n";
 			 results.setAnomalyType("");
-			 
+			 results.setAnomaly(false);
 			 testTraceCount++;
 			  
 		      LinkedList<Integer> newSequence=new LinkedList<Integer>();
@@ -459,7 +471,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
 		    	  }
 		    		  
 		     }
-		     
+		    if (seqCount==0)// if no system call sequences are found then it is an anomaly
+		    	results.setAnomaly(true);
 		    additionalInforForResults(largestHam, largestHamSeq, results, totalAnomalousSequences);
 		  		
 		    return results;  
@@ -476,14 +489,17 @@ public class SlidingWindow implements IDetectionAlgorithm {
 	  */
 	 private void additionalInforForResults(int largestHam, Integer [] largestHamSeq, Results results, int totalAnomalousSequences){
 		  
-		     if (results.getAnomaly() && detailedAnalysis){
-		    	 testAnomalies++;
+		 	if (results.getAnomaly())
+		 		testAnomalies++;
+		    
+		 	if (results.getAnomaly() && detailedAnalysis){
+		    	 
 		    	 results.setDetails("\n\nLargest Hamming distance: "+ largestHam+"\n");
 		    	 results.setDetails("Last sequence with the largest Hamming distance:\n ");
 		    	 for (int i=0;i<largestHamSeq.length;i++)
 		    		 results.setDetails(nameToID.getKey(largestHamSeq[i])+" ");
 		    	 results.setDetails("\n\nTotal anomalous sequences "+ totalAnomalousSequences);
-		      }
+		      } 
 		     
 		     ////  get unknown events
 		     if (nameToID.getSize() > testNameToIDSize){

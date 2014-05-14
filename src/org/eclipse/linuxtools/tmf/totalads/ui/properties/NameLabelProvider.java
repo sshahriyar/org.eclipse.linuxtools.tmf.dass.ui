@@ -17,11 +17,11 @@ import org.eclipse.swt.graphics.Image;
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
-class PropertiesLabelProvider extends ColumnLabelProvider {
+class NameLabelProvider extends ColumnLabelProvider {
 	/*
 	 * Constructor
 	 */
-	public PropertiesLabelProvider() {
+	public NameLabelProvider() {
 		
 	}
 	
@@ -31,8 +31,8 @@ class PropertiesLabelProvider extends ColumnLabelProvider {
 	 */
 	@Override
 	public String getText(Object element) {
-		String model = (String) element;
-		return model;
+		NameVal keyVal = (NameVal) element;
+		return keyVal.getName();
 	}
 	
 	/*
