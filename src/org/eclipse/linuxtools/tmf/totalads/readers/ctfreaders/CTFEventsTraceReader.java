@@ -17,14 +17,17 @@ import java.io.File;
 //import org.eclipse.linuxtools.ctf.core.trace.CTFTrace;
 //import org.eclipse.linuxtools.internal.lttng2.kernel.core.Attributes;
 //import org.eclipse.linuxtools.internal.lttng2.kernel.core.LttngStrings;
-import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfIterator;
-import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
-import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
+//import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfIterator;
+//import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfEvent;
+//import org.eclipse.linuxtools.tmf.core.ctfadaptor.CtfTmfTrace;
 //import org.eclipse.linuxtools.tmf.core.event.ITmfEventField;
 import org.eclipse.linuxtools.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.linuxtools.tmf.ctf.core.CtfIterator;
+import org.eclipse.linuxtools.tmf.ctf.core.CtfTmfEvent;
+import org.eclipse.linuxtools.tmf.ctf.core.CtfTmfTrace;
+import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 //import org.eclipse.linuxtools.tmf.core.tests.shared.CtfTmfTestTrace;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
-import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
@@ -32,61 +35,62 @@ import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 /**
  * Class to read every event of  CTF traces not just system calls
  * by using {@link CtfTmfTrace} class. This is not used right now.
- * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p> 
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  */
 public class CTFEventsTraceReader implements ITraceTypeReader   {
 	 // ------------------------------------------------------------------------
-     // Inner class: Implments an iterator   
+     // Inner class: Implments an iterator
 	 // ------------------------------------------------------------------------
-     private class CTFEventsIterator implements ITraceIterator {   
+     private class CTFEventsIterator implements ITraceIterator {
     	 private CtfIterator traceIterator=null;
     	 private CtfTmfTrace  trace=null;
     	 private Boolean isDispose=false;
     	  /**
     	   * Constructor
-    	   * @param tmfTrace
+    	   * @param tmfTrace TmfTrace
     	   */
     	 public CTFEventsIterator(CtfTmfTrace  tmfTrace){
     		   trace=tmfTrace;
     		   traceIterator=tmfTrace.createIterator();
     	   }
-    	  /** Moves Iterator to the next event, and returns true if the iterator can advance or false if the iterator cannot advance **/ 
+    	  /** Moves Iterator to the next event, and returns true if the iterator can advance or false if the iterator cannot advance **/
     	   @Override
     	    public boolean advance(){
     			boolean isAdvance=traceIterator.advance();
-    		
+
     			if (!isAdvance){
     				isDispose=true;
     				trace.dispose();
     			}
-    				
+
     			return isAdvance;
-    					
+
     		}
-    		/** Returns the event for the location of the iterator  **/ 
+    		/** Returns the event for the location of the iterator  **/
     		@Override
     	    public String getCurrentEvent(){
-    			
+
     			CtfTmfEvent event = traceIterator.getCurrentEvent();
-    			String eventName=event.getEventName().trim();
-        		System.out.println(eventName);
-    			if (eventName.isEmpty())
-    				return null;
-    			else 
-    				return null;
-    			
+    			String eventName=event.getType().getName();
+
+    			if (eventName.isEmpty()) {
+                    return null;
+                }
+                return eventName;
+
     		}
-    	
+
     		/** Closes the iterator stream **/
     		@Override
     		public void close(){
-    			if (!isDispose)
-    				trace.dispose();
+    			if (!isDispose) {
+                    trace.dispose();
+                }
     		}
-      
+
 
      }
-     
+
     // ------------------------------------------------------------------------
     // Constructor
     // ------------------------------------------------------------------------
@@ -104,14 +108,14 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
      */
    @Override
     public ITraceTypeReader createInstance(){
-	   
+
     	return new CTFEventsTraceReader();
     }
    /**
     * Registers a Trace type reader
     * @throws TotalADSGeneralException
     */
-    
+
     public static void registerTraceTypeReader() throws TotalADSGeneralException{
     	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
     	CTFEventsTraceReader kernelTraceReader=new CTFEventsTraceReader();
@@ -122,36 +126,40 @@ public class CTFEventsTraceReader implements ITraceTypeReader   {
      */
     @Override
     public String getName(){
-    	return "CTF All Events Reader";
+    	return "CTF All Events Reader"; //$NON-NLS-1$
     }
     /**
      * Returns the acronym of the Kernel space reader
      */
+    @Override
     public String getAcronym(){
-    	
-    	return "EVN";
+
+    	return "EVN"; //$NON-NLS-1$
     }
 	/**
 	 * Return the iterator to go over the trace file
-	 * @param file File obkect
+	 * @param file File object
 	 * @return The Iterator to iterate through a trace
 	 */
+    @Override
     public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException{
-    	
+
     	 String filePath=file.getPath();
-		 CtfTmfTrace  fTrace = new CtfTmfTrace();
-	
+
 		 try {
+		        CtfTmfTrace  fTrace = new CtfTmfTrace();
+
 	            fTrace.initTrace(null, filePath, CtfTmfEvent.class);
-	            
+	            return new CTFEventsIterator(fTrace);
+
 	      } catch (TmfTraceException e) {
 	            /* Should not happen if tracesExist() passed */
 	            throw new TotalADSReaderException(e);
 	      }
-		 
-		 return new CTFEventsIterator(fTrace);
+
+
     }
-  
-   
+
+
 }
 

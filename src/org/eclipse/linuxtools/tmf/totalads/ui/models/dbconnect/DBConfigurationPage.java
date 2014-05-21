@@ -44,34 +44,34 @@ public class DBConfigurationPage extends WizardPage {
 		setDescription("Press Finish to connect or press Next for advance authentication");
 		isEmpty=false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createControl(Composite compParent) {
-	
+
 		Composite compConfigure=new Composite(compParent, SWT.NONE);
 		compConfigure.setLayoutData(new GridData(GridData.FILL_BOTH));
 		compConfigure.setLayout(new GridLayout(2, false));
-		
+
 		lblHost= new Label(compConfigure,SWT.NONE);
 		lblHost.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
 		lblHost.setText("Host ");
-		
+
 		txtHost=new Text(compConfigure, SWT.BORDER);
 		txtHost.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
 		txtHost.setText(HOST);
-		
+
 		lblPort= new Label(compConfigure,SWT.NONE);
 		lblPort.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
 		lblPort.setText("Port ");
-		
+
 		txtPort=new Text(compConfigure, SWT.BORDER);
 		txtPort.setLayoutData(new GridData(SWT.FILL,SWT.BOTTOM,true,false));
 		txtPort.setText(PORT);
-		
+
 		setControl(compConfigure);
 		setPageComplete(true);
 		//eventhandlers
@@ -87,8 +87,8 @@ public class DBConfigurationPage extends WizardPage {
 				}
 			}
 		});
-		
-		
+
+
 		txtPort.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -101,7 +101,7 @@ public class DBConfigurationPage extends WizardPage {
 				}
 			}
 		});
-		
+
 	}
 
 	/*
@@ -110,13 +110,13 @@ public class DBConfigurationPage extends WizardPage {
 	 */
 	@Override
 	public boolean canFlipToNextPage() {
-		if (!isEmpty)
-				return true;
-		else
-			return false;
-		
+		if (!isEmpty) {
+            return true;
+        }
+        return false;
+
 	}
-	
+
 	/**
 	 * Returns the name of the host
 	 * @return
@@ -124,7 +124,7 @@ public class DBConfigurationPage extends WizardPage {
 	public String getHost(){
 		return txtHost.getText();
 	}
-	
+
 	/**
 	 * Returns the name of the port
 	 * @return
@@ -132,5 +132,5 @@ public class DBConfigurationPage extends WizardPage {
 	public String getPort(){
 		return txtPort.getText();
 	}
-	
+
 }

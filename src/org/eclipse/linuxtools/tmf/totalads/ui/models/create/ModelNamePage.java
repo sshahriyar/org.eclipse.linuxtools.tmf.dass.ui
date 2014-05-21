@@ -1,13 +1,8 @@
 package org.eclipse.linuxtools.tmf.totalads.ui.models.create;
 
 
-import org.eclipse.core.internal.localstore.IsSynchronizedVisitor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
+
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmTypes;
-import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
@@ -41,7 +36,7 @@ public class ModelNamePage extends WizardPage {
 		isModelOK=false;
 		msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
-		
+
 	}
 	//
 	//Creates GUI widgets
@@ -51,22 +46,22 @@ public class ModelNamePage extends WizardPage {
 		compModel=new Composite(compParent, SWT.NONE);
 		compModel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		compModel.setLayout(new GridLayout(3,false));
-		
+
 		lblModelName= new Label(compModel,SWT.NONE);
 		lblModelName.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false,false));
 		lblModelName.setText("Model Name");
-		
+
 		txtModelName=new Text(compModel, SWT.BORDER);
 		txtModelName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,false));
 		txtModelName.setTextLimit(10);
-		
+
 		// Empty labels used for styling
 		Label lbl1=new Label (compModel,SWT.NONE);
 		lbl1.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,false));
 		Label lbl2=new Label (compModel,SWT.NONE);
 		lbl2.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,false,3,2));
-		
-		
+
+
 		txtDescription= new StyledText(compModel,SWT.NONE|SWT.MULTI|SWT.READ_ONLY| SWT.WRAP|SWT.V_SCROLL);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false,3,8));
 		txtDescription.setJustify(true);
@@ -76,47 +71,48 @@ public class ModelNamePage extends WizardPage {
 				+ " A model is built when an algorithm is trained on the the normal execution traces (or logs).\n"
 				+ "This is done  in the modeling view or the live monitor (training and testing) view."
 				);
-		
-		
+
+
 		setControl(compModel);
 		setPageComplete(false);
-		
+
 		//Event handler
 		txtModelName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				
-				
+
+
 				if (txtModelName.getText().matches(".*[@;:,!~`()*&^%_<>\"{}|_=+\\\\?\\/\\[\\]].*")	){
 					msgBoxErr.setMessage("A model name cannot contain underscore or special characters");
 					msgBoxErr.open();
 					txtModelName.setText(txtModelName.getText().substring(0,txtModelName.getText().length()-1));
 					txtModelName.setSelection(txtModelName.getText().length());
 					isModelOK=true;
-				} 
-				
+				}
+
 				if (txtModelName.getText().isEmpty()){
 					isModelOK=false;
-				}else
-					isModelOK=true;
-				
+				} else {
+                    isModelOK=true;
+                }
+
 				setPageComplete(true);
 			}
 		});
 	}
-	
+
 	//
 	//This function enables next button
 	//
 	@Override
 	public boolean canFlipToNextPage() {
-		if (isModelOK)
-				return true;
-		else
-				return false;
+		if (isModelOK) {
+            return true;
+        }
+        return false;
 	}
-	
-	
+
+
 	/**
 	 * Returns the name of the model typed by the user
 	 * @return Model name

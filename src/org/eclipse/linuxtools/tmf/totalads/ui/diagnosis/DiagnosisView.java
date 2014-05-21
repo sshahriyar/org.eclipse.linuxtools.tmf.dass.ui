@@ -37,12 +37,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
  */
 public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelectionListener{
 
-	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView";
+	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"; //$NON-NLS-1$
 	private ITmfTrace currentTrace;
 	private Diagnosis diagnosis;
 	private HashSet<String> modelList;
 	private DiagnosisPartListener partListener;
-	 
+
 	/**
 	 * Constructor
 	 */
@@ -52,64 +52,66 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 		partListener=new DiagnosisPartListener();
 		partListener.addObserver(this);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public void createPartControl(Composite compParent) {
-		
-		
+
+
 		diagnosis.createControl(compParent);
-	
+
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
             traceSelected(new TmfTraceSelectedSignal(this, trace));
-        } 
-      
-               
+        }
+
+
         try {
-  		
+
 	         // Trying to clear the already selected instances in the models view when this view is opened in the middle of execution
-	         // If the view is opened in the middle, already selected models are not available using the event handler	
+	         // If the view is opened in the middle, already selected models are not available using the event handler
 	         IViewPart dataModelsView= getSite().getWorkbenchWindow().getActivePage().showView(DataModelsView.ID);
-	         if (dataModelsView instanceof DataModelsView)
-	        	 ((DataModelsView)dataModelsView).refresh();
-	      
-	     	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
-	         getSite().getPage().addSelectionListener(DataModelsView.ID, this);	
-	  	    
+	         if (dataModelsView instanceof DataModelsView) {
+                ((DataModelsView)dataModelsView).refresh();
+            }
+
+	     	/// Registers a listener to Eclipse to get the list of models selected (checked) by the user
+	         getSite().getPage().addSelectionListener(DataModelsView.ID, this);
+
 	        IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
 	  		ResultsView resView=(ResultsView)viewRes;
 	  		diagnosis.setResultsAndFeedbackInstance(resView.getResultsAndFeddbackInstance());
-	  		
+
 	  		//Registers a part listener
 	  		getSite().getPage().addPartListener(partListener);
-  	    
-  		
+
+
         } catch (PartInitException e) {
-  	
+
         	MessageBox msgBox=new MessageBox(getSite().getShell(),SWT.OK);
 			if(e.getMessage()!=null){
 				msgBox.setMessage(e.getMessage());
-			}else
-				msgBox.setMessage("Unable to launch a view");
+			} else {
+                msgBox.setMessage("Unable to launch a view");
+            }
 			msgBox.open();
 			Logger.getLogger(DiagnosisView.class.getName()).log(Level.SEVERE,null,e);
      	}
-        
+
 
 	}
 
-	
-	
+
+
 	/**
 	 * Sets the focus
 	 */
 	@Override
 	public void setFocus() {
-		
+
 
 	}
 
@@ -119,10 +121,9 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	 */
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
-      
+
         currentTrace = signal.getTrace();
-     
-            
+
         //ITmfTrace trace = signal.getTrace();
     	// Right now we are not sure how to determine whether a trace is a user space trace or kernel space trace
         // so we are only considering kernel space traces
@@ -132,7 +133,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
         diagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.linuxtools.tmf.ui.views.TmfView#dispose()
@@ -151,8 +152,8 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	@Override
 	public void update(ResultsAndFeedback results) {
 		diagnosis.setResultsAndFeedbackInstance(results);
-		
-		
+
+
 	}
 
 	/*
@@ -162,11 +163,11 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 
-		 if (part instanceof DataModelsView) {  
+		 if (part instanceof DataModelsView) {
 			   Object obj = ((StructuredSelection) selection).getFirstElement();
 			   modelList= (HashSet<String>)obj;
-			   diagnosis.updateonModelSelection(modelList); 
-		    }  
+			   diagnosis.updateonModelSelection(modelList);
+		    }
 		}
 
 }

@@ -8,7 +8,7 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.readers.textreaders;
-import java.util.HashMap;;
+import java.util.HashMap;
 /**
  * This class is only used for lab experiments. It is a mapping of system call id to name
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
@@ -18,16 +18,17 @@ public class MapSysCallIDToName {
 
 private static HashMap< Integer, String> sysCallIDToName;
 
+/**
+ * Returns the system call name from an id
+ * @param id Id of system call
+ * @return the name of the system call
+ */
 public static String getSysCallName(Integer id){
 	return sysCallIDToName.get(id);
 }
-//System calll list not foudn on http://syscalls.kernelgrok.com/ but created during testing.
-	// The numbers are assigned after 500 to such system calls
-	
-	// System call list extracted from http://syscalls.kernelgrok.com/
  /*static{
 	sysCallIDToName=new HashMap<Integer, String>();
-	
+
 	sysCallIDToName.put(0,"sys_restart_syscall");
 	sysCallIDToName.put(1,"sys_exit");
 	sysCallIDToName.put(2,"sys_fork");
@@ -366,15 +367,15 @@ public static String getSysCallName(Integer id){
 	sysCallIDToName.put(335,"sys_rt_tgsigqueueinfo");
 	sysCallIDToName.put(336,"sys_perf_event_open");
 	sysCallIDToName.put(337,"sys_recvmmsg");
-	
-	
+
+
  } */
  /**
   * 64 bit system call mapping
   */
- 
+
  static {
-	 sysCallIDToName=new HashMap<Integer, String>();
+	 sysCallIDToName=new HashMap<>();
 	 sysCallIDToName.put(0,"sys_read");
 	 sysCallIDToName.put(1,"sys_write");
 	 sysCallIDToName.put(2,"sys_open");

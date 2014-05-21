@@ -41,7 +41,7 @@ public class CreateModelWizard extends Wizard {
 		super();
 		setNeedsProgressMonitor(true);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#getWindowTitle()
@@ -63,9 +63,9 @@ public class CreateModelWizard extends Wizard {
 		addPage(pageAlgoSelection);
 		addPage(modelPage);
 		addPage(pageAlgoSettings);
-		
+
 	  }
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
@@ -73,13 +73,13 @@ public class CreateModelWizard extends Wizard {
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page.equals(pageAlgoSelection)){
-			
+
 			IDetectionAlgorithm alg= pageAlgoSelection.getSelectedAlgorithm();
 			String []settings=alg.getTrainingSettings();
 			pageAlgoSettings.setSettings(settings);
-			
+
 		}
-		
+
 		return super.getNextPage(page);
 	}
 
@@ -93,41 +93,39 @@ public class CreateModelWizard extends Wizard {
 		IDetectionAlgorithm alg= pageAlgoSelection.getSelectedAlgorithm();
 		String modelName=modelPage.gettheModel();
 		String []settings=pageAlgoSettings.getSettingsSelectedByTheUser();
-		
+
 		MessageBox msgBoxErr= new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
-		
-		
+
+
 		String exception="";
 		if (settings==null)
 		{
 			return false;
 		}
-		else{	
-			try {
-				AlgorithmUtility.createModel(modelName, alg, DBMSFactory.INSTANCE.getDataAccessObject(), settings);
-				
-			} catch (TotalADSDBMSException e) {
-				exception=e.getMessage();
-			} catch (TotalADSGeneralException e) {
-				exception=e.getMessage();
-			}catch (Exception ex){
-				exception=ex.getMessage();
-				Logger.getLogger(TestSettingsHandler.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
-				//Check if connection still exists and all the views are notified of the presence and absence of connection
-				DBMSFactory.INSTANCE.verifyConnection();
-			}
-		
-			if (exception!=null && !exception.isEmpty()){
-				msgBoxErr.setMessage(exception);
-				msgBoxErr.open();
-				return false;
-			}else
-				return true;
-		}
-		
-		
+        try {
+        	AlgorithmUtility.createModel(modelName, alg, DBMSFactory.INSTANCE.getDataAccessObject(), settings);
+
+        } catch (TotalADSDBMSException e) {
+        	exception=e.getMessage();
+        } catch (TotalADSGeneralException e) {
+        	exception=e.getMessage();
+        }catch (Exception ex){
+        	exception=ex.getMessage();
+        	Logger.getLogger(TestSettingsHandler.class.getName()).log(Level.SEVERE,ex.getMessage(), ex);
+        	//Check if connection still exists and all the views are notified of the presence and absence of connection
+        	DBMSFactory.INSTANCE.verifyConnection();
+        }
+
+        if (exception!=null && !exception.isEmpty()){
+        	msgBoxErr.setMessage(exception);
+        	msgBoxErr.open();
+        	return false;
+        }
+        return true;
+
+
 	}
-	
-	
+
+
 }

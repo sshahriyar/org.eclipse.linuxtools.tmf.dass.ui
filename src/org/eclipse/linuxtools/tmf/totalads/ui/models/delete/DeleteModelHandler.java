@@ -27,7 +27,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 /**
- * This class implements the delete command (icon on the {@link DataModelsView}). Its object is executed by Eclipse 
+ * This class implements the delete command (icon on the {@link DataModelsView}). Its object is executed by Eclipse
  * automatically whenever the delete icon is clicked.
  * * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
@@ -38,22 +38,22 @@ public class DeleteModelHandler implements IHandler {
 	 * Constructor
 	 */
 	public DeleteModelHandler(){
-		selectedModels=new HashSet<String>();
-		 /// Registers a listener to Eclipse to get the list of models selected (checked) by the user 
+		selectedModels=new HashSet<>();
+		 /// Registers a listener to Eclipse to get the list of models selected (checked) by the user
 		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().addSelectionListener(DataModelsView.ID,	new ISelectionListener() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		
-				 if (part instanceof DataModelsView) {  
+
+				 if (part instanceof DataModelsView) {
 					   Object obj = ((org.eclipse.jface.viewers.StructuredSelection) selection).getFirstElement();
 					    selectedModels= (HashSet<String>)obj;
-					   
-				    }  
+
+				    }
 				}
 		});
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.core.commands.IHandler#addHandlerListener(org.eclipse.core.commands.IHandlerListener)
@@ -80,14 +80,14 @@ public class DeleteModelHandler implements IHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
 		MessageBox msgBoxErr= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_ERROR);
 		MessageBox msgBoxYesNo= new MessageBox(org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell() ,
 				SWT.ICON_INFORMATION|SWT.YES|SWT.NO);
-	
+
 		try{
-			// checking if a model is selected 
+
+			// checking if a model is selected
 			if (selectedModels.size() <=0){
 				msgBoxErr.setMessage("Please select a model first");
 				msgBoxErr.open();
@@ -100,20 +100,21 @@ public class DeleteModelHandler implements IHandler {
 			String message="Do you really want to delete ";
 			int count=1;
 			while (it.hasNext()){
-				 if (count==1 && selectedModels.size() <=2)
-					 message+=it.next()+" ";
-				 else if (count==1 && selectedModels.size()>2)
-					 message+=it.next()+", ";
-				 else if (count>1 && count <selectedModels.size())
-				      message+=it.next()+", ";
-				else if (count>1 && count==selectedModels.size())
-					 message+="and "+it.next() ;
-					 
+				 if (count==1 && selectedModels.size() <=2) {
+                    message+=it.next()+" ";
+                } else if (count==1 && selectedModels.size()>2) {
+                    message+=it.next()+", ";
+                } else if (count>1 && count <selectedModels.size()) {
+                    message+=it.next()+", ";
+                } else if (count>1 && count==selectedModels.size()) {
+                    message+="and "+it.next() ;
+                }
+
 				 count++;
 			}
-		    message+="?";			
+		    message+="?";
 			msgBoxYesNo.setMessage(message);
-			
+
 			if (msgBoxYesNo.open()==SWT.YES){
 			   //Delete models now
 				it=selectedModels.iterator();
@@ -126,48 +127,49 @@ public class DeleteModelHandler implements IHandler {
 						}
 				}
 			}
-			
+
 		} catch (Exception ex) {
-			if (ex.getMessage()!=null)
-				msgBoxErr.setMessage(ex.getMessage());
-			else
-				msgBoxErr.setMessage("Error deleting model(s).");
+			if (ex.getMessage()!=null) {
+                msgBoxErr.setMessage(ex.getMessage());
+            } else {
+                msgBoxErr.setMessage("Error deleting model(s).");
+            }
 			msgBoxErr.open();
 			Logger.getLogger(DeleteModelHandler.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
 			//Check if connection still exists and all the views are notified of the presence and absence of connection
 			DBMSFactory.INSTANCE.verifyConnection();
 		}
-	
+
 	    return null;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.core.commands.IHandler#isEnabled()
 	 */
 	@Override
 	public boolean isEnabled() {
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.core.commands.IHandler#isHandled()
 	 */
 	@Override
 	public boolean isHandled() {
-		
+
 		return true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.core.commands.IHandler#removeHandlerListener(org.eclipse.core.commands.IHandlerListener)
 	 */
 	@Override
 	public void removeHandlerListener(IHandlerListener handlerListener) {
-		
+
 
 	}
 

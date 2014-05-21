@@ -10,29 +10,55 @@
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
 /**
  * This class defines custom SSH and remote newotrk communication related exceptions
- * IDataAccessObject configurations 
+ * IDataAccessObject configurations
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
 public class TotalADSNetException extends Exception {
 
-	public TotalADSNetException() {
-		
-	}
+    /**
+     * Serializable id
+     */
+    private static final long serialVersionUID = 1L;
 
-	public TotalADSNetException(String message) {
+    /**
+     * Default Constructor
+     */
+    public TotalADSNetException() {
+
+	}
+    /**
+     * Creates an exception with a message
+     *
+     * @param message
+     *            Message for the exception
+     */
+    public TotalADSNetException(String message) {
 		super(message);
-		
+
 	}
 
-	public TotalADSNetException(Throwable cause) {
+	 /**
+     * Creates an exception with an object of type Throwable
+     *
+     * @param cause
+     *            An object of type Throwable
+     */
+   public TotalADSNetException(Throwable cause) {
 		super(cause);
-		
-	}
 
+	}
+	/**
+     * Creates an exception with a message and a Throwable object
+     *
+     * @param message
+     *            Message for the exception
+     * @param cause
+     *            An object of type Throwable
+     */
 	public TotalADSNetException(String message, Throwable cause) {
 		super(message, cause);
-		
+
 	}
 
 }

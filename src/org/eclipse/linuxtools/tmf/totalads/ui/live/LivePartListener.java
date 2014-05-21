@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
-import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IPartListener;
@@ -21,14 +18,14 @@ import org.eclipse.ui.PlatformUI;
  *
  */
 public class LivePartListener implements IPartListener {
-	private List <ILiveObserver> observers;
+	private List <ILiveObserver> fObservers;
 	/**
 	 * Constructor to create the part listener
 	 */
 	public LivePartListener() {
-		observers=new ArrayList<ILiveObserver>();
+		fObservers=new ArrayList<>();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
@@ -41,15 +38,16 @@ public class LivePartListener implements IPartListener {
 				IViewPart viewRes=PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(LiveResultsView.VIEW_ID);
 			  	LiveResultsView liveResultsView=(LiveResultsView)viewRes;
 				notifyObservers(liveResultsView.getResults());
-			
+
 			}
 	  } catch (PartInitException e) {
-		  	
+
       	   MessageBox msgBox=new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.OK);
 			if(e.getMessage()!=null){
 				msgBox.setMessage(e.getMessage());
-			}else
-				msgBox.setMessage("Unable to launch a view");
+			} else {
+                msgBox.setMessage("Unable to launch a view");
+            }
 			msgBox.open();
 			Logger.getLogger(LivePartListener.class.getName()).log(Level.SEVERE,null,e);
 	  }
@@ -62,26 +60,26 @@ public class LivePartListener implements IPartListener {
 	 */
 	@Override
 	public void partBroughtToTop(IWorkbenchPart part) {
-		
+
 
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-	
+
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
 	public void partDeactivated(IWorkbenchPart part) {
-		
+
 
 	}
 
@@ -91,35 +89,36 @@ public class LivePartListener implements IPartListener {
 	 */
 	@Override
 	public void partOpened(IWorkbenchPart part) {
-		
+
 
 	}
-	
+
 	/**
 	 * Adds an observer
 	 * @param observer
 	 */
 	public void addObserver(ILiveObserver observer){
-		observers.add(observer);
-		
+		fObservers.add(observer);
+
 	}
-    
+
 	/**
 	 * Removes an observer
 	 * @param observer
 	 */
 	public void removeObserver(ILiveObserver observer){
-		observers.remove(observer);
-		
+		fObservers.remove(observer);
+
 	}
 	/**
-	 * Notifies the observers
+	 * Notifies the fObservers
 	 * @param results
 	 */
 	private void notifyObservers(ResultsAndFeedback results){
-		for (ILiveObserver ob: observers)
-			ob.update(results);
+		for (ILiveObserver ob: fObservers) {
+            ob.update(results);
+        }
 	}
-	
+
 
 }

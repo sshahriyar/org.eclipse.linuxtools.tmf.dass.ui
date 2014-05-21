@@ -27,18 +27,18 @@ import org.eclipse.ui.console.IConsole;
  *
  */
 public class ProgressConsole implements IAlgorithmOutObserver {
-	
+
 	private MessageConsoleStream out;
 	private MessageConsole myConsole;
 	/**
-	 * 
+	 *
 	 * Constructor
-	 * 
+	 *
 	 */
 	public ProgressConsole(String consoleName) {
 		myConsole = findConsole(consoleName);
 		out = myConsole.newMessageStream();
-		
+
 	}
 	/**
 	 * Prints a message with a new line
@@ -56,32 +56,34 @@ public class ProgressConsole implements IAlgorithmOutObserver {
 	}
 
   /**
-   * Gets the console object 	
+   * Gets the console object
    * @param name Name of the console
-   * @return   
+   * @return
    */
   private MessageConsole findConsole(String name) {
-		
+
 	  	ConsolePlugin plugin = org.eclipse.ui.console.ConsolePlugin.getDefault();
 		IConsoleManager conMan = plugin.getConsoleManager();
 		IConsole[] existing = conMan.getConsoles();
-	   
-		for (int i = 0; i < existing.length; i++)
-	         if (name.equals(existing[i].getName()))
-	            return (org.eclipse.ui.console.MessageConsole) existing[i];
-	     
+
+		for (int i = 0; i < existing.length; i++) {
+            if (name.equals(existing[i].getName())) {
+                return (org.eclipse.ui.console.MessageConsole) existing[i];
+            }
+        }
+
 		  //No console found, so create a new one
-	      org.eclipse.ui.console.MessageConsole myConsole = new org.eclipse.ui.console.MessageConsole(name, null);
+	      org.eclipse.ui.console.MessageConsole console = new org.eclipse.ui.console.MessageConsole(name, null);
 	      conMan.addConsoles(new IConsole[]{myConsole});
-	      return myConsole;
+	      return console;
 	   }
 
   /**
-   * Closes the console streaming 
+   * Closes the console streaming
    * @throws IOException
    */
   public void closeConsole() {
-	  
+
 		try {
 			out.close();
 		} catch (IOException ex) {
@@ -101,7 +103,7 @@ public class ProgressConsole implements IAlgorithmOutObserver {
    @Override
    public void updateOutput(String message) {
 		print(message);
-		
+
    }
-  
+
 }

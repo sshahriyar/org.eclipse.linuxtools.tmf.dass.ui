@@ -13,15 +13,20 @@ import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 
 /**
  *
- * Observer interface to be implemented by the {@link LiveMonitorView} so that it could be updated by the 
- * {@link LivePartListener} 
- *  @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ * Observer interface to be implemented by the {@link LiveMonitorView} so that
+ * it could be updated by the {@link LivePartListener}
+ *
+ * @author <p>
+ *         Syed Shariyar Murtaza justsshary@hotmail.com
+ *         </p>
  */
 public interface ILiveObserver {
-	   /**
-	    * Updates the Live observer
-	    */
-       public void update(ResultsAndFeedback results);
-       
+    /**
+     * Updates the Live observer
+     *
+     * @param results
+     *            An object of type {@link ResultsAndFeedback}
+     */
+    public void update(ResultsAndFeedback results);
 
 }

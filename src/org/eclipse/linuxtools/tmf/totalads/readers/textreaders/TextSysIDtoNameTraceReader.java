@@ -33,9 +33,9 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	//-------------------------------------------------------------
 	private class TextLineIterator implements ITraceIterator{
 		private BufferedReader bufferedReader;
-		private String event="";
+		private String event=""; //$NON-NLS-1$
 		private Boolean isClose=false;
-		
+
 		public TextLineIterator(BufferedReader  bReader){
 			bufferedReader=bReader;
 		}
@@ -46,8 +46,8 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 		public boolean advance() throws TotalADSReaderException {
 		   boolean isAdvance=false;
 		   try {
-			   String syscall="";
-				do { 
+			   String syscall=""; //$NON-NLS-1$
+				do {
 					event=bufferedReader.readLine();
 					 if (event==null){
 						  bufferedReader.close();
@@ -64,14 +64,14 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 						 }catch (NumberFormatException ex){
 							 syscall=null;
 						 }
-						
+
 					 }
 				}while (syscall==null);
-				
+
 			} catch (IOException e) {
-				
+
 				throw new TotalADSReaderException(e.getMessage());
-			} 
+			}
 		   return isAdvance;
 		}
 		/**
@@ -79,7 +79,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 		 */
 		@Override
 		public String getCurrentEvent() {
-			
+
 			return event;
 		}
 		/**
@@ -88,15 +88,16 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 		@Override
 		public void close() throws TotalADSReaderException {
 			try {
-				if (!isClose)
-					bufferedReader.close();
+				if (!isClose) {
+                    bufferedReader.close();
+                }
 			} catch (IOException e) {
 				throw new TotalADSReaderException(e.getMessage());
 			}
-			
+
 		}
-		
-		
+
+
 	}
 	//-------------------------------------------------------------------------------
 	// Inner class ends
@@ -105,7 +106,7 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	 * Constructor
 	 */
 	public TextSysIDtoNameTraceReader() {
-	
+
 	}
 	/**
 	 *  Creates an instance by implementing the ITraceTypeReader interface
@@ -120,22 +121,23 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 		// This is for lab experiments only
-		return "Text-Syscall VIEW_ID to Name (lab)";
+		return "Text-Syscall VIEW_ID to Name (lab)"; //$NON-NLS-1$
 	}
 
 	 /**
      * Returns the acronym of the text reader
      */
+    @Override
     public String getAcronym(){
-    	
-    	return "TXT";
+
+    	return "TXT"; //$NON-NLS-1$
     }
     /**
      * Returns the trace iterator
      */
 	@Override
 	public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException {
-		
+
 		BufferedReader bufferReader;
 		try {
 			bufferReader = new BufferedReader(new FileReader(file));
@@ -147,8 +149,12 @@ public class TextSysIDtoNameTraceReader implements ITraceTypeReader {
 	}
 
 
-	
-	 public static void registerTraceTypeReader() throws TotalADSGeneralException{
+
+    /**
+    * Static function to register a trace type reader with the factory
+    * @throws TotalADSGeneralException A validation exception
+    */
+	public static void registerTraceTypeReader() throws TotalADSGeneralException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	TextSysIDtoNameTraceReader textFileReader=new TextSysIDtoNameTraceReader();
 	    	trcTypFactory.registerTraceReaderWithFactory(textFileReader.getName(), textFileReader);

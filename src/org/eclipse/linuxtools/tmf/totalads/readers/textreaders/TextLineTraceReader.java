@@ -23,34 +23,41 @@ import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 /**
  * This class reads a text file and returns whatever is written on a line.
- * Every line is transformed into a line
+ * Every line is transformed into an event
  * @author <Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class TextLineTraceReader implements ITraceTypeReader {
-	//--------------------------------------------------------------------------- 
-	//Inner class: Implemnts the iterator to iterate through the text file
+	//---------------------------------------------------------------------------
+	//Inner class: Implements the iterator to iterate through the text file
 	//---------------------------------------------------------------------------
 	private class TextLineIterator implements ITraceIterator{
 		private BufferedReader bufferedReader;
-		private String event="";
+		private String event=""; //$NON-NLS-1$
 		private Boolean isClose=false;
-		private String regEx="";
+		//private String regEx=""; //$NON-NLS-1$
+
+		/**
+		 * Constructor
+		 * @param bReader A BufferReader object
+		 */
 		public TextLineIterator(BufferedReader  bReader){
 			bufferedReader=bReader;
-			regEx=""; //[| ]+([a-zA-Z0-9_:-]+)[ ]+.*"; //function call extraction pattern
+			//regEx=""; //[| ]+([a-zA-Z0-9_:-]+)[ ]+.*"; //function call extraction pattern
 		}
-		/**
-		 * Advance
-		 * @throws TotalADSReaderException 
+
+
+
+		/*
+		 *Advances the iterator
 		 */
 		@Override
 		public boolean advance() throws TotalADSReaderException  {
 		   boolean isAdvance=false;
 		   try {
-				do { 
+				do {
 				   	event=bufferedReader.readLine();
-					 
+
 					 if (event==null){
 						  bufferedReader.close();
 						  isClose=true;
@@ -58,45 +65,48 @@ public class TextLineTraceReader implements ITraceTypeReader {
 					 }
 					 else{
 						 isAdvance=true;
-						 if(!regEx.isEmpty())
-							 event= event.replaceAll(regEx, "$1");
+						 //if(!regEx.isEmpty())
+							// event= event.replaceAll(regEx, "$1"); //$NON-NLS-1$
 						 event=event.trim();
 					 }
 				}while(event!=null && event.isEmpty());// if there are empty lines or there is no match on regex on a line, no need to send an event.
 										// keep looping till the end of file.
-				 
-				
+
+
 			} catch (IOException e) {
-				
+
 				throw new TotalADSReaderException(e.getMessage());
-			} 
+			}
 		   return isAdvance;
 		}
-		/**
+
+		/*
 		 * Returns the Current event
 		 */
 		@Override
 		public String getCurrentEvent() {
-			
+
 			return event;
 		}
+
 		/**
 		 * Closes the iterator
-		 * @throws TotalADSReaderException 
+		 * @throws TotalADSReaderException An exception about reading errors
 		 */
 		@Override
 		public void close() throws TotalADSReaderException {
 			try {
-				if (!isClose)
-					bufferedReader.close();
+				if (!isClose) {
+                    bufferedReader.close();
+                }
 			} catch (IOException e) {
-				
+
 				throw new TotalADSReaderException(e.getMessage());
 			}
-			
+
 		}
-		
-		
+
+
 	}
 	//--------------------------------------------------------------------------------
 	// Inner class ends
@@ -105,48 +115,51 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	 * Constructor
 	 */
 	public TextLineTraceReader() {
-	
+
 	}
-	
+
 	@Override
 	public ITraceTypeReader createInstance(){
 		return new TextLineTraceReader();
 	}
+
+
 	@Override
 	public String getName() {
-	
-		return "Text File (TXT)";
+
+		return "Text File (TXT)"; //$NON-NLS-1$
 	}
 
-	 /**
-     * Returns the acronym of the text reader
-     */
+	/**
+    * Returns the acronym of the text reader
+    */
+    @Override
     public String getAcronym(){
-    	
-    	return "TXT";
+
+    	return "TXT"; //$NON-NLS-1$
     }
+
     /**
      * Returns the trace iterator
      */
 	@Override
 	public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException {
-		
+
 		BufferedReader bufferReader;
 		try {
 			bufferReader = new BufferedReader(new FileReader(file));
 			TextLineIterator textLineIterator=new TextLineIterator(bufferReader);
 			return textLineIterator;
-			
+
 		} catch (FileNotFoundException e) {
 			throw new TotalADSReaderException(e.getMessage());
 		}
 	}
 
 	/**
-	 * Registers Itself with the Trace Type Reader 
-	 * @throws TotalADSGeneralException
+	 * Registers Itself with the Trace Type Reader
+	 * @throws TotalADSGeneralException A general exception from TotalADS
 	 */
-	
 	 public static void registerTraceTypeReader() throws TotalADSGeneralException{
 	    	TraceTypeFactory trcTypFactory=TraceTypeFactory.getInstance();
 	    	TextLineTraceReader textFileReader=new TextLineTraceReader();

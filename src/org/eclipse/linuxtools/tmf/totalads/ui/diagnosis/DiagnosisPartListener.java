@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.eclipse.linuxtools.tmf.totalads.dbms.IDBMSObserver;
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsAndFeedback;
 import org.eclipse.linuxtools.tmf.totalads.ui.results.ResultsView;
 import org.eclipse.swt.SWT;
@@ -15,6 +13,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+
 /**
  * Implements an Eclipse Part Listener for Diagnosis View
  * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
@@ -26,9 +25,9 @@ public class DiagnosisPartListener implements IPartListener {
 	 * Constructor to create the part listener
 	 */
 	public DiagnosisPartListener() {
-		observers=new ArrayList<IDiagnosisObserver>();
+		observers=new ArrayList<>();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
@@ -41,15 +40,17 @@ public class DiagnosisPartListener implements IPartListener {
 				IViewPart viewRes=PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
 			  	ResultsView resultsView=(ResultsView)viewRes;
 				notifyObservers(resultsView.getResultsAndFeddbackInstance());
-			
+
 			}
 	  } catch (PartInitException e) {
-		  	
+
       	   MessageBox msgBox=new MessageBox(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),SWT.OK);
 			if(e.getMessage()!=null){
 				msgBox.setMessage(e.getMessage());
-			}else
-				msgBox.setMessage("Unable to launch a view");
+			}
+            else {
+                msgBox.setMessage("Unable to launch a view"); //$NON-NLS-1$
+            }
 			msgBox.open();
 			Logger.getLogger(DiagnosisPartListener.class.getName()).log(Level.SEVERE,null,e);
 	  }
@@ -62,26 +63,26 @@ public class DiagnosisPartListener implements IPartListener {
 	 */
 	@Override
 	public void partBroughtToTop(IWorkbenchPart part) {
-		
+
 
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-	
+
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 	 */
 	@Override
 	public void partDeactivated(IWorkbenchPart part) {
-		
+
 
 	}
 
@@ -91,35 +92,36 @@ public class DiagnosisPartListener implements IPartListener {
 	 */
 	@Override
 	public void partOpened(IWorkbenchPart part) {
-		
+
 
 	}
-	
+
 	/**
 	 * Adds an observer
-	 * @param observer
+	 * @param observer An observer
 	 */
 	public void addObserver(IDiagnosisObserver observer){
 		observers.add(observer);
-		
+
 	}
-    
+
 	/**
 	 * Removes an observer
-	 * @param observer
+	 * @param observer An observer
 	 */
 	public void removeObserver(IDiagnosisObserver observer){
 		observers.remove(observer);
-		
+
 	}
 	/**
-	 * Notifies the observers
-	 * @param results
+	 * Notifies the observers about the {@link ResultsAndFeedback} object
+	 * @param results An object to display results
 	 */
 	private void notifyObservers(ResultsAndFeedback results){
-		for (IDiagnosisObserver ob: observers)
-			ob.update(results);
+		for (IDiagnosisObserver ob: observers) {
+            ob.update(results);
+        }
 	}
-	
+
 
 }

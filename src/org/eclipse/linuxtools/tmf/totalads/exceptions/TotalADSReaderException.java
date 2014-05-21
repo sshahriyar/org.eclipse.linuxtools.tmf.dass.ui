@@ -8,32 +8,63 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.exceptions;
+
 /**
- * This class defines custom reader exceptions that are thrown when  trace reading 
- * encounters a problem 
- * 
- * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ * This class defines custom reader exceptions that are thrown when trace
+ * reading encounters a problem
+ *
+ * @author <p>
+ *         Syed Shariyar Murtaza justsshary@hotmail.com
+ *         </p>
  *
  */
 public class TotalADSReaderException extends Exception {
 
-	public TotalADSReaderException() {
-		
-	}
+    /**
+     * Serializable id
+     */
+    private static final long serialVersionUID = 1L;
 
-	public TotalADSReaderException(String message) {
-		super(message);
-		
-	}
+    /**
+     * Default Constructor
+     */
+    public TotalADSReaderException() {
 
-	public TotalADSReaderException(Throwable cause) {
-		super(cause);
-		
-	}
+    }
 
-	public TotalADSReaderException(String message, Throwable cause) {
-		super(message, cause);
-		
-	}
+    /**
+     * Creates an exception with a message
+     *
+     * @param message
+     *            Message for the exception
+     */
+    public TotalADSReaderException(String message) {
+        super(message);
+
+    }
+
+    /**
+     * Creates an exception with an object of type Throwable
+     *
+     * @param cause
+     *            An object of type Throwable
+     */
+    public TotalADSReaderException(Throwable cause) {
+        super(cause);
+
+    }
+
+    /**
+     * Creates an exception with a message and a Throwable object
+     *
+     * @param message
+     *            Message for the exception
+     * @param cause
+     *            An object of type Throwable
+     */
+    public TotalADSReaderException(String message, Throwable cause) {
+        super(message, cause);
+
+    }
 
 }

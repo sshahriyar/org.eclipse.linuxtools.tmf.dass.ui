@@ -8,15 +8,29 @@
  *    Syed Shariyar Murtaza
  **********************************************************************************************/
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
+
 /**
- * This class provides choices of Algorithm Types that must
- * be used to register an algorithm with {@link AlgorithmFactory} or
- * to retrieve a list of algorithms from {@link AlgorithmFactory}
- * 
- * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com</p>
+ * This class provides choices of Algorithm Types that must be used to register
+ * an algorithm with {@link AlgorithmFactory} or to retrieve a list of
+ * algorithms from {@link AlgorithmFactory}
+ *
+ * @author <p>
+ *         Syed Shariyar Murtaza justsshary@hotmail.com
+ *         </p>
  *
  */
 public enum AlgorithmTypes {
-	ANOMALY, CLASSIFCATION;
-	
+    /**
+     * Represents Anomaly Detection Algorithms
+     */
+    ANOMALY,
+    /**
+     * Represents Classification Algorithms
+     */
+    CLASSIFCATION,
+    /**
+     * Represents Clustering Algorithms
+     */
+    CLUSTERING;
+
 }
