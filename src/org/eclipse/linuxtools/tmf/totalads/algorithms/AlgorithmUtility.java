@@ -10,6 +10,7 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
@@ -19,6 +20,8 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceTypeReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
+
+import com.google.common.base.Stopwatch;
 
 /**
  * Utility class to execute algorithms by implementing common recurring tasks
@@ -94,10 +97,8 @@ public class AlgorithmUtility {
      *            Validation Directory
      * @param traceReader
      *            Trace Reader
-     * @param selectedAlgorithm
-     *            Algorithm for training
-     * @param modelName
-     *            Model name
+     * @param modelsNames
+     *           Names of models as an array
      * @param outStream
      *            Output stream where the algorithm would display its output
      * @param dataAcessObject
@@ -110,57 +111,75 @@ public class AlgorithmUtility {
      *             An exception related to the trace reader
      */
     public static void trainAndValidateModels(String trainDirectory, String validationDirectory, ITraceTypeReader traceReader,
-            IDetectionAlgorithm selectedAlgorithm, String modelName, IAlgorithmOutStream outStream,
+             String []modelsNames, IAlgorithmOutStream outStream,
             IDataAccessObject dataAcessObject)
             throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 
-        Boolean isLastTrace = false;
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
-        // //////////////////
-        // /File verifications of traces
-        // /////////////////
-        // Check for valid trace type reader and training traces before creating a database
-        // Get a file handler
+        for (int i = 0; i < modelsNames.length; i++) {
+            Boolean isLastTrace = false;
+            String modelName = modelsNames[i];
+            outStream.addOutputEvent("Modeling "+modelName+" on traces");
+            outStream.addNewLine();
 
-        File fileList[] = getDirectoryHandler(trainDirectory, traceReader);
-        try (ITraceIterator it = traceReader.getTraceIterator(fileList[0])){
+            // //////////////////
+            // /File verifications of traces
+            // /////////////////
+            // Check for valid trace type reader and training traces before
+            // creating a database
+            // Get a file handler
 
-        } catch (TotalADSReaderException ex) {
-            String message = "Invalid training traces and the trace reader.\n" + ex.getMessage();
-            throw new TotalADSGeneralException(message);
+            File fileList[] = getDirectoryHandler(trainDirectory, traceReader);
+            try (ITraceIterator it = traceReader.getTraceIterator(fileList[0])) {
+
+            } catch (TotalADSReaderException ex) {
+                stopwatch.stop();
+                String message = "Invalid training traces and the trace reader.\n" + ex.getMessage();
+                throw new TotalADSGeneralException(message);
+            }
+
+            // Check for valid trace type reader and validation traces before
+            // creating a database
+            File validationFileList[] = getDirectoryHandler(validationDirectory, traceReader);
+            try (ITraceIterator it = traceReader.getTraceIterator(validationFileList[0]);) {
+
+            } catch (TotalADSReaderException ex) {
+                stopwatch.stop();
+                String message = "Invalid validation traces and the trace reader.\n" + ex.getMessage();
+                throw new TotalADSGeneralException(message);
+            }
+
+            // /////////
+            // Start training
+            // //
+            outStream.addOutputEvent("Training the model....");
+            outStream.addNewLine();
+
+            IDetectionAlgorithm algorithm=getAlgorithmFromModelName(modelName);
+
+            for (int trcCnt = 0; trcCnt < fileList.length; trcCnt++) {
+
+                if (trcCnt == fileList.length - 1) {
+                    isLastTrace = true;
+                }
+                // Get the trace
+                try (ITraceIterator trace = traceReader.getTraceIterator(fileList[trcCnt])) {
+
+                    outStream.addOutputEvent("Processing  training trace #" + (trcCnt + 1) + ": " + fileList[trcCnt].getName());
+                    outStream.addNewLine();
+                    algorithm.train(trace, isLastTrace, modelName, dataAcessObject, outStream);
+                }
+            }
+            // Start validation
+            validateModels(validationFileList, traceReader, algorithm, modelName, outStream, dataAcessObject);
         }
 
-
-        // Check for valid trace type reader and validation traces before creating a database
-        File validationFileList[] = getDirectoryHandler(validationDirectory, traceReader);
-        try(ITraceIterator it= traceReader.getTraceIterator(validationFileList[0]);) {
-
-        } catch (TotalADSReaderException ex) {
-            String message = "Invalid validation traces and the trace reader.\n" + ex.getMessage();
-            throw new TotalADSGeneralException(message);
-        }
-
-        // /////////
-        // Start training
-        // //
-        outStream.addOutputEvent("Training the model....");
+        stopwatch.stop();
+        Long elapsedMins=stopwatch.elapsed(TimeUnit.MINUTES);
+        Long elapsedSecs=stopwatch.elapsed(TimeUnit.SECONDS);
+        outStream.addOutputEvent("Total time of execution: "+elapsedMins.toString() + " mins or "+elapsedSecs+ " secs" );
         outStream.addNewLine();
-        for (int trcCnt = 0; trcCnt < fileList.length; trcCnt++) {
-
-            if (trcCnt == fileList.length - 1) {
-                isLastTrace = true;
-            }
-         // Get the trace
-            try (ITraceIterator trace = traceReader.getTraceIterator(fileList[trcCnt])){
-
-                outStream.addOutputEvent("Processing  training trace #" + (trcCnt + 1) + ": " + fileList[trcCnt].getName());
-                outStream.addNewLine();
-                selectedAlgorithm.train(trace, isLastTrace, modelName, dataAcessObject, outStream);
-            }
-        }
-        // Fourth, start validation
-        validateModels(validationFileList, traceReader, selectedAlgorithm, modelName, outStream, dataAcessObject);
-
     }
 
     /**

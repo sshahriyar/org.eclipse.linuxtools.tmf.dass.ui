@@ -295,8 +295,7 @@ public class Diagnosis {
 		});
 	}
 	/**
-	 * This function gets called from {@link TotalADS} and {@link TMFTotalADSView} to notify which
-	 * trace is selected by a user in the TMF
+	 * This function gets updated when a user selects a trace in TMF Views
 	 * @param traceLocation
 	 * @param traceTypeName
 	 */
@@ -333,8 +332,10 @@ public class Diagnosis {
 	 */
 	private void setTMFTraceToCurrentTracePath(){
 		txtTestTraceDir.setText(""); //$NON-NLS-1$
-		System.out.println(tmfTracePath.toString());
-		String traceName=tmfTracePath.substring(tmfTracePath.toString().lastIndexOf(File.separator)+1, tmfTracePath.length());
+
+		File file=new File (tmfTracePath.toString());
+		String traceName=file.getName();
+		        //tmfTracePath.substring(tmfTracePath.toString().lastIndexOf(File.separator)+1, tmfTracePath.length());
 
 		txtTMFTraceID.setText(""); //$NON-NLS-1$
 

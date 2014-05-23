@@ -28,16 +28,16 @@ import org.eclipse.ui.console.IConsole;
  */
 public class ProgressConsole implements IAlgorithmOutObserver {
 
-	private MessageConsoleStream out;
-	private MessageConsole myConsole;
+	private MessageConsoleStream fOutStream;
+	private MessageConsole fConsole;
 	/**
 	 *
 	 * Constructor
 	 *
 	 */
 	public ProgressConsole(String consoleName) {
-		myConsole = findConsole(consoleName);
-		out = myConsole.newMessageStream();
+		fConsole = findConsole(consoleName);
+		fOutStream = fConsole.newMessageStream();
 
 	}
 	/**
@@ -45,14 +45,14 @@ public class ProgressConsole implements IAlgorithmOutObserver {
 	 * @param message Message as a String object
 	 */
 	public void println(String message){
-		out.println(message);
+		fOutStream.println(message);
 	}
 	/**
 	 * Prints a message
 	 * @param message Message as a String object
 	 */
 	public void print(String message){
-		out.print(message);
+		fOutStream.print(message);
 	}
 
   /**
@@ -60,7 +60,7 @@ public class ProgressConsole implements IAlgorithmOutObserver {
    * @param name Name of the console
    * @return
    */
-  private MessageConsole findConsole(String name) {
+  private static MessageConsole findConsole(String name) {
 
 	  	ConsolePlugin plugin = org.eclipse.ui.console.ConsolePlugin.getDefault();
 		IConsoleManager conMan = plugin.getConsoleManager();
@@ -74,7 +74,7 @@ public class ProgressConsole implements IAlgorithmOutObserver {
 
 		  //No console found, so create a new one
 	      org.eclipse.ui.console.MessageConsole console = new org.eclipse.ui.console.MessageConsole(name, null);
-	      conMan.addConsoles(new IConsole[]{myConsole});
+	      conMan.addConsoles(new IConsole[]{console});
 	      return console;
 	   }
 
@@ -85,7 +85,7 @@ public class ProgressConsole implements IAlgorithmOutObserver {
   public void closeConsole() {
 
 		try {
-			out.close();
+			fOutStream.close();
 		} catch (IOException ex) {
 			Logger.getLogger(BackgroundLiveMonitor.class.getName()).log(Level.SEVERE,null, ex);
 			ex.printStackTrace();
@@ -95,7 +95,7 @@ public class ProgressConsole implements IAlgorithmOutObserver {
    * Clears the console
    */
   public void clearConsole(){
-	  myConsole.clearConsole();
+	  fConsole.clearConsole();
   }
   /**
    * Implements a method of {@link IAlgorithmOutObserver}

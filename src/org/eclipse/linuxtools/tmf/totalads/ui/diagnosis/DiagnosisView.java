@@ -38,19 +38,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelectionListener{
 
 	public static final String VIEW_ID = "org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.DiagnosisView"; //$NON-NLS-1$
-	private ITmfTrace currentTrace;
-	private Diagnosis diagnosis;
-	private HashSet<String> modelList;
-	private DiagnosisPartListener partListener;
+	//private ITmfTrace fCurrentTrace;
+	private Diagnosis fDiagnosis;
+//	private HashSet<String> fModelList;
+	private DiagnosisPartListener fPartListener;
 
 	/**
 	 * Constructor
 	 */
 	public DiagnosisView() {
 		super(VIEW_ID);
-		diagnosis=new Diagnosis();
-		partListener=new DiagnosisPartListener();
-		partListener.addObserver(this);
+		fDiagnosis=new Diagnosis();
+		fPartListener=new DiagnosisPartListener();
+		fPartListener.addObserver(this);
 	}
 
 	/*
@@ -61,7 +61,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	public void createPartControl(Composite compParent) {
 
 
-		diagnosis.createControl(compParent);
+		fDiagnosis.createControl(compParent);
 
         ITmfTrace trace = getActiveTrace();
         if (trace != null) {
@@ -83,10 +83,10 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 
 	        IViewPart viewRes= getSite().getWorkbenchWindow().getActivePage().showView(ResultsView.VIEW_ID);
 	  		ResultsView resView=(ResultsView)viewRes;
-	  		diagnosis.setResultsAndFeedbackInstance(resView.getResultsAndFeddbackInstance());
+	  		fDiagnosis.setResultsAndFeedbackInstance(resView.getResultsAndFeddbackInstance());
 
 	  		//Registers a part listener
-	  		getSite().getPage().addPartListener(partListener);
+	  		getSite().getPage().addPartListener(fPartListener);
 
 
         } catch (PartInitException e) {
@@ -122,7 +122,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	@TmfSignalHandler
     public void traceSelected(final TmfTraceSelectedSignal signal) {
 
-        currentTrace = signal.getTrace();
+	    ITmfTrace currentTrace = signal.getTrace();
 
         //ITmfTrace trace = signal.getTrace();
     	// Right now we are not sure how to determine whether a trace is a user space trace or kernel space trace
@@ -130,7 +130,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
         Boolean isKernelSpace=true;
 		ITraceTypeReader traceReader=TraceTypeFactory.getInstance().getCTFKernelorUserReader(isKernelSpace);
 
-        diagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
+        fDiagnosis.updateOnTraceSelection(currentTrace.getPath(), traceReader.getName());
         // trace.sendRequest(req);
     }
 
@@ -142,7 +142,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	public void dispose(){
 		super.dispose();
 		getSite().getPage().removeSelectionListener(DataModelsView.ID, this);
-		partListener.removeObserver(this);
+		fPartListener.removeObserver(this);
 	}
 
 	/*
@@ -151,7 +151,7 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 	 */
 	@Override
 	public void update(ResultsAndFeedback results) {
-		diagnosis.setResultsAndFeedbackInstance(results);
+		fDiagnosis.setResultsAndFeedbackInstance(results);
 
 
 	}
@@ -165,8 +165,8 @@ public class DiagnosisView extends TmfView implements IDiagnosisObserver, ISelec
 
 		 if (part instanceof DataModelsView) {
 			   Object obj = ((StructuredSelection) selection).getFirstElement();
-			   modelList= (HashSet<String>)obj;
-			   diagnosis.updateonModelSelection(modelList);
+			   HashSet<String> modelsList= (HashSet<String>)obj;
+			   fDiagnosis.updateonModelSelection(modelsList);
 		    }
 		}
 

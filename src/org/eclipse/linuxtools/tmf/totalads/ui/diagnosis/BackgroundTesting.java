@@ -11,10 +11,12 @@ package org.eclipse.linuxtools.tmf.totalads.ui.diagnosis;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmOutStream;
+import org.eclipse.linuxtools.tmf.totalads.algorithms.IAlgorithmOutStream;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.IDetectionAlgorithm;
 import org.eclipse.linuxtools.tmf.totalads.algorithms.Results;
 import org.eclipse.linuxtools.tmf.totalads.dbms.DBMSFactory;
@@ -35,6 +37,8 @@ import org.eclipse.swt.widgets.Display;
 //import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
+
+import com.google.common.base.Stopwatch;
 
 /**
  * This class evaluates an already created algorithm by running in background as thread.
@@ -78,10 +82,21 @@ public class BackgroundTesting implements Runnable{
 	@Override
 	public void run(){
 			String msg=null;
-
+			Stopwatch stopwatch = Stopwatch.createStarted();
 			try {
 
-				testTheModel(fTestDirectory, fTraceReader, fAlgorithm, fDatabase);
+	                ProgressConsole console= new ProgressConsole(Messages.BackgroundTesting_ConsoleTitle);
+	                console.println(Messages.BackgroundTesting_ConsoleStartMessage);
+	                AlgorithmOutStream outStreamAlg=new AlgorithmOutStream();
+	                outStreamAlg.addObserver(console);
+
+
+			        testTheModel(fTestDirectory, fTraceReader, fAlgorithm, fDatabase, outStreamAlg);
+			        stopwatch.stop();
+			        Long elapsedMins=stopwatch.elapsed(TimeUnit.MINUTES);
+			        Long elapsedSecs=stopwatch.elapsed(TimeUnit.SECONDS);
+			        console.println("Total time of execution: "+elapsedMins.toString() + " mins or "+elapsedSecs+ " secs" );
+
 
 			}
 			catch(TotalADSGeneralException ex){// handle UI exceptions here
@@ -146,7 +161,9 @@ public class BackgroundTesting implements Runnable{
 					}
 				});
 
-
+				 if (stopwatch.isRunning()) {
+                    stopwatch.stop();
+                }
 			}//End of finally
 	}// end of function
 
@@ -156,13 +173,14 @@ public class BackgroundTesting implements Runnable{
 	 * @param traceReader Trace reader
 	 * @param algorithm Algorithm of the algorithm
 	 * @param database Database
+	 * @param outStream Output stream to print the output
 	 * @throws TotalADSGeneralException General exception (usually validation errors)
 	 * @throws TotalADSReaderException Exception related to trace reading
 	 * @throws TotalADSDBMSException Exception related to database
 	 *
 	 */
     public void testTheModel(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm[] algorithm,
-            String[] database) throws TotalADSGeneralException, TotalADSReaderException, TotalADSDBMSException {
+            String[] database, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSReaderException, TotalADSDBMSException {
 
 			// First verify selections
 			//Boolean isLastTrace=false;
@@ -184,34 +202,41 @@ public class BackgroundTesting implements Runnable{
 
 			}catch (TotalADSReaderException ex){
 			    // this is just a validation error, cast it to UI exception
-				String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());
-				throw new TotalADSGeneralException(message);
+				//String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());
+				//throw new TotalADSGeneralException(message);
 			}
 
-			ProgressConsole console= new ProgressConsole(Messages.BackgroundTesting_ConsoleTitle);
-			console.println(Messages.BackgroundTesting_ConsoleStartMessage);
-			AlgorithmOutStream outStreamAlg=new AlgorithmOutStream();
-			outStreamAlg.addObserver(console);
 			// Second, start testing
 			totalFiles=fileList.length;
+			File []copyList=fileList.clone();
 			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<>();
+			int anomCount=0;
+			for (int k=0; k<totalFiles;k++){
+			    fileList=copyList[k].listFiles();
+			    int total=fileList.length;
+			    boolean anomaly=false;
 			// for each trace
-			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
+			for (int trcCnt=0; trcCnt<total; trcCnt++){
 
-				console.println(NLS.bind(Messages.BackgroundTesting_TraceCountMessage, trcCnt,fileList[trcCnt]));
+				outStream.addOutputEvent(NLS.bind(Messages.BackgroundTesting_TraceCountMessage, trcCnt,fileList[trcCnt]));
+				outStream.addNewLine();
 				// for each selected model
 				HashMap<String,Results> modelResults=new HashMap<>();
 				final String traceName=fileList[trcCnt].getName();
 
 				for (int modelCnt=0; modelCnt<database.length; modelCnt++){
 
-					    console.println(NLS.bind(Messages.BackgroundTesting_ModelEval,database[modelCnt]));
+				        outStream.addOutputEvent(NLS.bind(Messages.BackgroundTesting_ModelEval,database[modelCnt]));
+				        outStream.addNewLine();
 
 						try (ITraceIterator trace=
 						        traceReader.getTraceIterator(fileList[trcCnt]) ) {// get the trace
 
-						        Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStreamAlg);
+						        Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStream);
         				 		modelResults.put(database[modelCnt],results);
+        				 		if (results.getAnomaly()) {
+                                    anomaly=true;
+                                }
 						}
 				 		 // Third, print summary
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
@@ -221,7 +246,14 @@ public class BackgroundTesting implements Runnable{
 				}
 
 		  }
+			if(anomaly) {
+                anomCount++;
+            }
 
+        }//deelte this
+			outStream.addNewLine();
+			outStream.addOutputEvent("anoms "+ anomCount);
+			outStream.addNewLine();
 	    fResultsAndFeedback.setTotalTraceCount(totalFiles.toString());
 
 
@@ -258,26 +290,26 @@ public class BackgroundTesting implements Runnable{
 		File []fileList;
 
 		if (traces.isDirectory()){ // if it is a directory return the list of all files
-			    Boolean isAllFiles=false, isAllFolders=false;
+			  //  Boolean isAllFiles=false, isAllFolders=false;
 			    fileList=traces.listFiles();
-			    for (File file: fileList){
+			    /*for (File file: fileList){
 
-				   if (file.isDirectory()) {
+				   if (file.isDirectory())
                     isAllFolders=true;
-                } else if (file.isFile()) {
+                 else if (file.isFile())
                     isAllFiles=true;
-                }
 
-				   if (isAllFolders) {
-                    throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_FolderContainsDir, traces.getName()));
-                }
+
+				   if (isAllFolders)
+				     throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_FolderContainsDir, traces.getName()));
+
 
 
 			    }
 
-			    if (!isAllFiles && !isAllFolders) {
+			    if (!isAllFiles && !isAllFolders)
                     throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_EmptyDirectory, traces.getName()));
-                }
+                */
 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached
