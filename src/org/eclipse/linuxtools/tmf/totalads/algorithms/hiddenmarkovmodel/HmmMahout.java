@@ -146,10 +146,10 @@ class HmmMahout {
                 IDBRecord dbObject = cursor.next();
                 settings[0] = SettingsCollection.NUM_STATES.toString();
                 settings[1] = dbObject.get(SettingsCollection.NUM_STATES.toString()).toString();
-                settings[2] = SettingsCollection.NUM_SYMBOLS.toString();
-                settings[3] = dbObject.get(SettingsCollection.NUM_SYMBOLS.toString()).toString();
-                settings[4] = SettingsCollection.NUMBER_OF_ITERATIONS.toString();
-                settings[5] = dbObject.get(SettingsCollection.NUMBER_OF_ITERATIONS.toString()).toString();
+                settings[2] = SettingsCollection.NUMBER_OF_ITERATIONS.toString();
+                settings[3] = dbObject.get(SettingsCollection.NUMBER_OF_ITERATIONS.toString()).toString();
+                settings[4] = SettingsCollection.NUM_SYMBOLS.toString();
+                settings[5] = dbObject.get(SettingsCollection.NUM_SYMBOLS.toString()).toString();
                 settings[6] = SettingsCollection.LOG_LIKELIHOOD.toString();
                 settings[7] = dbObject.get(SettingsCollection.LOG_LIKELIHOOD.toString()).toString();
                 settings[8] = SettingsCollection.SEQ_LENGTH.toString();

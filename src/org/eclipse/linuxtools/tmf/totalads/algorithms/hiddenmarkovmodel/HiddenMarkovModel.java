@@ -23,7 +23,7 @@ import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
 import org.eclipse.linuxtools.tmf.totalads.readers.ITraceIterator;
 import org.swtchart.Chart;
 /**
- * This class implements a Hidden Markov Model
+ * This class implements the Hidden Markov Model for anomaly detection
  * @author <p>Syed Shariyar Murtaza justsshary@hotmail.com</p>
  *
  */
@@ -64,23 +64,26 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 		String []setting=null;
 
 		if (trainingSettings!=null){
-			 setting=new String[trainingSettings.length+6];
+			 setting=new String[trainingSettings.length+8];
 			 setting[0]=SettingsCollection.KEY.toString();
 			 setting[1]="HMM"; //$NON-NLS-1$
 			 for (int i=0;i<trainingSettings.length;i++) {
                 setting[i+2]=trainingSettings[i];
             }
-			 setting[trainingSettings.length+2]=SettingsCollection.LOG_LIKELIHOOD.toString();
-			 setting[trainingSettings.length+3]="0.0"; //$NON-NLS-1$
-			 setting[trainingSettings.length+4]=SettingsCollection.SEQ_LENGTH.toString();
-			 setting[trainingSettings.length+5]=fSeqLength.toString();
+			 int idx=trainingSettings.length+1;
+			 setting[++idx]=SettingsCollection.NUM_SYMBOLS.toString();
+             setting[++idx]="0"; //$NON-NLS-1$
+             setting[++idx]=SettingsCollection.LOG_LIKELIHOOD.toString();
+			 setting[++idx]="0.0"; //$NON-NLS-1$
+			 setting[++idx]=SettingsCollection.SEQ_LENGTH.toString();
+			 setting[++idx]=fSeqLength.toString();
 		}else{
 
 		    String []settings={ SettingsCollection.KEY.toString(),"Hmm", //$NON-NLS-1$
 							SettingsCollection.NUM_STATES.toString(),"5", //$NON-NLS-1$
-						    SettingsCollection.NUM_SYMBOLS.toString(), "300", //$NON-NLS-1$
 						    SettingsCollection.NUMBER_OF_ITERATIONS.toString(),"10", //$NON-NLS-1$
-							SettingsCollection.LOG_LIKELIHOOD.toString(),"0.0", //$NON-NLS-1$
+						    SettingsCollection.NUM_SYMBOLS.toString(), "0", //$NON-NLS-1$
+                             SettingsCollection.LOG_LIKELIHOOD.toString(),"0.0", //$NON-NLS-1$
 						    SettingsCollection.SEQ_LENGTH.toString(),fSeqLength.toString()};
 		    setting=settings;
 
@@ -97,13 +100,13 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public String[] getTrainingSettings() {
 
-			String [] trainingSettings=new String[6];
+			String [] trainingSettings=new String[4];
 			trainingSettings[0]=SettingsCollection.NUM_STATES.toString();
 			trainingSettings[1]="5"; //$NON-NLS-1$
-			trainingSettings[2]= SettingsCollection.NUM_SYMBOLS.toString();
-			trainingSettings[3]="300"; //$NON-NLS-1$
-			trainingSettings[4]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
-			trainingSettings[5]="10"; //$NON-NLS-1$
+			//trainingSettings[2]= SettingsCollection.NUM_SYMBOLS.toString();
+			//trainingSettings[3]="300"; //$NON-NLS-1$
+			trainingSettings[2]=SettingsCollection.NUMBER_OF_ITERATIONS.toString();
+			trainingSettings[3]="10"; //$NON-NLS-1$
 			return trainingSettings;
 
 	}
@@ -175,8 +178,8 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 				 String []options=fHmm.loadSettings(database, connection);// get settings from db
 				 fNumStates=Integer.parseInt(options[1]);
-				 fNumSymbols=Integer.parseInt(options[3]);
-				 fNumIterations=Integer.parseInt(options[5]);
+				// fNumSymbols=Integer.parseInt(options[3]);
+				 fNumIterations=Integer.parseInt(options[3]);
 				 fNameToID.loadMap(connection, database);
 				 fIsTrainIntialized=true;
 				 fBatchLargeTrainingSeq=new LinkedList<>();
@@ -207,6 +210,12 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	  	 outStream.addNewLine();
 	    	  	 fHmm.saveHMM(database, connection);
 
+	    	  	 //Get settings n update them
+	    	  	 String []settings=new String[2];
+	    	  	 settings[0]=SettingsCollection.NUM_SYMBOLS.toString();
+	             settings[1]=Integer.toString(fNumSymbols);
+	             fHmm.verifySaveSettingsCreateDb(settings, database, connection, false, false);
+
 	    	  	 outStream.addOutputEvent(fHmm.toString());
 	    	  	 outStream.addNewLine();
 	    	  	 //fHmm.saveHMM(database, connection);
@@ -224,7 +233,6 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	   try{
 		         fHmm.initializeHMM(fNumSymbols, fNumStates);
 		    	 fHmm.learnUsingBaumWelch(fNumIterations, seq);
-		    	// fHmm.updatePreviousModel(seq, connection, database);
 		    	 fHmm.saveHMM(database, dao);
 
 		     } catch (Exception ex){

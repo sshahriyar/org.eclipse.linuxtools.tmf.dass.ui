@@ -191,7 +191,7 @@ public class BackgroundTesting implements Runnable{
 
 			File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 
-			if (fileList.length >5000) {
+			if (fileList.length >15000) {
                 throw new TotalADSGeneralException(Messages.BackgroundTesting_TraceLimit);
             }
 
@@ -202,21 +202,21 @@ public class BackgroundTesting implements Runnable{
 
 			}catch (TotalADSReaderException ex){
 			    // this is just a validation error, cast it to UI exception
-				//String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());
-				//throw new TotalADSGeneralException(message);
+				String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());
+				throw new TotalADSGeneralException(message);
 			}
 
 			// Second, start testing
 			totalFiles=fileList.length;
-			File []copyList=fileList.clone();
+			//File []copyList=fileList.clone();
 			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<>();
 			int anomCount=0;
-			for (int k=0; k<totalFiles;k++){
-			    fileList=copyList[k].listFiles();
-			    int total=fileList.length;
-			    boolean anomaly=false;
+			//for (int k=0; k<totalFiles;k++){
+			 //   fileList=copyList[k].listFiles();
+			  //  int total=fileList.length;
+			   // boolean anomaly=false;
 			// for each trace
-			for (int trcCnt=0; trcCnt<total; trcCnt++){
+			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
 
 				outStream.addOutputEvent(NLS.bind(Messages.BackgroundTesting_TraceCountMessage, trcCnt,fileList[trcCnt]));
 				outStream.addNewLine();
@@ -234,9 +234,9 @@ public class BackgroundTesting implements Runnable{
 
 						        Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStream);
         				 		modelResults.put(database[modelCnt],results);
-        				 		if (results.getAnomaly()) {
-                                    anomaly=true;
-                                }
+        				 	//	if (results.getAnomaly()) {
+                              //      anomaly=true;
+                               // }
 						}
 				 		 // Third, print summary
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
@@ -246,11 +246,11 @@ public class BackgroundTesting implements Runnable{
 				}
 
 		  }
-			if(anomaly) {
-                anomCount++;
-            }
+		//	if(anomaly) {
+        //        anomCount++;
+        //    }
 
-        }//deelte this
+      //  }//deelte this
 			outStream.addNewLine();
 			outStream.addOutputEvent("anoms "+ anomCount);
 			outStream.addNewLine();
@@ -290,26 +290,29 @@ public class BackgroundTesting implements Runnable{
 		File []fileList;
 
 		if (traces.isDirectory()){ // if it is a directory return the list of all files
-			  //  Boolean isAllFiles=false, isAllFolders=false;
+			    Boolean isAllFiles=false, isAllFolders=false;
 			    fileList=traces.listFiles();
-			    /*for (File file: fileList){
+			    for (File file: fileList){
 
-				   if (file.isDirectory())
+				   if (file.isDirectory()) {
                     isAllFolders=true;
-                 else if (file.isFile())
+                } else if (file.isFile()) {
                     isAllFiles=true;
+                }
 
 
-				   if (isAllFolders)
-				     throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_FolderContainsDir, traces.getName()));
+				   if (isAllFolders) {
+                    throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_FolderContainsDir, traces.getName()));
+                }
 
 
 
 			    }
 
-			    if (!isAllFiles && !isAllFolders)
+			    if (!isAllFiles && !isAllFolders) {
                     throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_EmptyDirectory, traces.getName()));
-                */
+                /**/
+                }
 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached
