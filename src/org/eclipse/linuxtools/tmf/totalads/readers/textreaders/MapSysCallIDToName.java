@@ -26,8 +26,8 @@ private static HashMap< Integer, String> sysCallIDToName;
 public static String getSysCallName(Integer id){
 	return sysCallIDToName.get(id);
 }
- /*static{
-	sysCallIDToName=new HashMap<Integer, String>();
+ static{
+	sysCallIDToName=new HashMap<>();
 
 	sysCallIDToName.put(0,"sys_restart_syscall");
 	sysCallIDToName.put(1,"sys_exit");
@@ -369,12 +369,12 @@ public static String getSysCallName(Integer id){
 	sysCallIDToName.put(337,"sys_recvmmsg");
 
 
- } */
+ }
  /**
   * 64 bit system call mapping
   */
 
- static {
+/*static {
 	 sysCallIDToName=new HashMap<>();
 	 sysCallIDToName.put(0,"sys_read");
 	 sysCallIDToName.put(1,"sys_write");
@@ -690,6 +690,6 @@ public static String getSysCallName(Integer id){
 	 sysCallIDToName.put(311,"sys_process_vm_writev");
 
 
- }
+ }*/
 
 }

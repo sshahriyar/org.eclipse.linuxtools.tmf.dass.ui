@@ -51,6 +51,7 @@ public class BackgroundTesting implements Runnable{
     private IDetectionAlgorithm[] fAlgorithm;
     private String[] fDatabase;
     private Button fBtnAnalysisEvaluateModels;
+    private Button fBtnStop;
     private ResultsAndFeedback fResultsAndFeedback;
 
 
@@ -61,15 +62,17 @@ public class BackgroundTesting implements Runnable{
 	 * @param algorithm Algorithm
 	 * @param database Database
 	 * @param btnEvaluate Evaluate button
+	 * @param btnStop Stop Button
 	 * @param resultsAndFeedback An object to display results
 	 */
 	public BackgroundTesting(String testDirectory, ITraceTypeReader traceReader, IDetectionAlgorithm []algorithm, String []database,
-				  Button btnEvaluate, ResultsAndFeedback resultsAndFeedback	){
+				  Button btnEvaluate, Button btnStop, ResultsAndFeedback resultsAndFeedback	){
 		this.fTestDirectory=testDirectory;
 		this.fTraceReader=traceReader;
 		this.fAlgorithm=algorithm;
 		this.fDatabase=database;
 		this.fBtnAnalysisEvaluateModels=btnEvaluate;
+		this.fBtnStop=btnStop;
 		this.fResultsAndFeedback=resultsAndFeedback;
 		this.fResultsAndFeedback.registerAllModelNames(database);
 
@@ -158,6 +161,7 @@ public class BackgroundTesting implements Runnable{
 						}
 
 						fBtnAnalysisEvaluateModels.setEnabled(true);
+						fBtnStop.setEnabled(false);
 					}
 				});
 
@@ -186,8 +190,6 @@ public class BackgroundTesting implements Runnable{
 			//Boolean isLastTrace=false;
 			Integer totalFiles;
 
-	       //if (fTestDirectory.isEmpty())
-	    	//   throw new TotalADSGeneralException("Please, first select a trace!");
 
 			File fileList[]=getDirectoryHandler(testDirectory,traceReader);// Get a file and a db handler
 
@@ -202,21 +204,22 @@ public class BackgroundTesting implements Runnable{
 
 			}catch (TotalADSReaderException ex){
 			    // this is just a validation error, cast it to UI exception
-				String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());
-				throw new TotalADSGeneralException(message);
+			//	String message= NLS.bind(Messages.BackgroundTesting_InvalidTrace,ex.getMessage());//--
+				//throw new TotalADSGeneralException(message);//--
 			}
 
 			// Second, start testing
 			totalFiles=fileList.length;
-			//File []copyList=fileList.clone();
+			File []copyList=fileList.clone();//--
 			HashMap <String, Double> modelsAndAnomalyCount=new HashMap<>();
 			int anomCount=0;
-			//for (int k=0; k<totalFiles;k++){
-			 //   fileList=copyList[k].listFiles();
-			  //  int total=fileList.length;
-			   // boolean anomaly=false;
+			for (int k=0; k<totalFiles;k++){ ///**---
+			    fileList=copyList[k].listFiles();
+			    int total=fileList.length;
+			   boolean anomaly=false; ///**---
+			   Double minLogForFolder=00.0;
 			// for each trace
-			for (int trcCnt=0; trcCnt<totalFiles; trcCnt++){
+			for (int trcCnt=0; trcCnt<total; trcCnt++){//totalFiles
 
 				outStream.addOutputEvent(NLS.bind(Messages.BackgroundTesting_TraceCountMessage, trcCnt,fileList[trcCnt]));
 				outStream.addNewLine();
@@ -234,25 +237,48 @@ public class BackgroundTesting implements Runnable{
 
 						        Results results= algorithm[modelCnt].test(trace, database[modelCnt], connection,outStream);
         				 		modelResults.put(database[modelCnt],results);
-        				 	//	if (results.getAnomaly()) {
-                              //      anomaly=true;
-                               // }
+        				 		if (results.getAnomaly()) { ///**---
+                                   anomaly=true;
+                                }
+
+        				 		//Double log=Double.parseDouble(results.getDetails().toString().replaceAll("(?s).*(Log Likelihood.*).*","$1").
+        				 		//                replaceAll("Log Likelihood:", "").trim());
+        				 		//if (log<minLogForFolder)
+                                // {
+                              //      minLogForFolder=log;
+                              //  }///**---
+
 						}
 				 		 // Third, print summary
 						Double totalAnoms=algorithm[modelCnt].getTotalAnomalyPercentage();
 						modelsAndAnomalyCount.put(database[modelCnt],totalAnoms);
 						fResultsAndFeedback.setTotalAnomalyCount(modelsAndAnomalyCount);
 						fResultsAndFeedback.addTraceResult(traceName, modelResults);
+
+						// Check if Executor has been stopped by the user
+					    if (Thread.currentThread().isInterrupted()) {
+                            break;
+                        }
+
+
 				}
 
-		  }
-		//	if(anomaly) {
-        //        anomCount++;
-        //    }
+			    // Check if Executor has been stopped by the user
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
 
-      //  }//deelte this
+
+		  }
+			if(anomaly) { ///**---
+               anomCount++;
+            }
+			outStream.addOutputEvent("\n Folder Log Likelihood: "+ minLogForFolder + "\n");
+			 ///**---
+
+        }//deelte this //---
 			outStream.addNewLine();
-			outStream.addOutputEvent("anoms "+ anomCount);
+			outStream.addOutputEvent("anomalies "+ anomCount);
 			outStream.addNewLine();
 	    fResultsAndFeedback.setTotalTraceCount(totalFiles.toString());
 
@@ -290,9 +316,9 @@ public class BackgroundTesting implements Runnable{
 		File []fileList;
 
 		if (traces.isDirectory()){ // if it is a directory return the list of all files
-			    Boolean isAllFiles=false, isAllFolders=false;
+			  //  Boolean isAllFiles=false, isAllFolders=false; ///---
 			    fileList=traces.listFiles();
-			    for (File file: fileList){
+			  /* for (File file: fileList){  ///**---
 
 				   if (file.isDirectory()) {
                     isAllFolders=true;
@@ -311,8 +337,8 @@ public class BackgroundTesting implements Runnable{
 
 			    if (!isAllFiles && !isAllFolders) {
                     throw new TotalADSGeneralException(NLS.bind(Messages.BackgroundTesting_EmptyDirectory, traces.getName()));
-                /**/
-                }
+                }*/ ///**---
+
 
 		}
 	    else{// if it is a single file return the single file; however, this code will never be reached

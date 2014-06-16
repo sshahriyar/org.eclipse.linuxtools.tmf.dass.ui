@@ -170,9 +170,18 @@ public class AlgorithmUtility {
                     outStream.addNewLine();
                     algorithm.train(trace, isLastTrace, modelName, dataAcessObject, outStream);
                 }
+                //Check if user has asked to stop modeling
+                if(Thread.currentThread().isInterrupted()) {
+                    break;
+                }
             }
+
             // Start validation
             validateModels(validationFileList, traceReader, algorithm, modelName, outStream, dataAcessObject);
+            //Check if user has asked to stop modeling
+            if(Thread.currentThread().isInterrupted()) {
+                break;
+            }
         }
 
         stopwatch.stop();
@@ -212,6 +221,11 @@ public class AlgorithmUtility {
         Boolean isLastTrace = false;
 
         for (int trcCnt = 0; trcCnt < fileList.length; trcCnt++) {
+            //Check if user has asked to stop modeling
+            if(Thread.currentThread().isInterrupted()) {
+                break;
+            }
+
             // get the trace
             if (trcCnt == fileList.length - 1) {
                 isLastTrace = true;
@@ -222,6 +236,7 @@ public class AlgorithmUtility {
                 outStream.addNewLine();
                 algorithm.validate(trace, database, dao, isLastTrace, outStream);
            }
+
         }
 
     }

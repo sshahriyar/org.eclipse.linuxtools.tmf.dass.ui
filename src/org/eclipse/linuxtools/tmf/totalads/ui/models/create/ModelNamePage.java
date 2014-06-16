@@ -53,7 +53,7 @@ public class ModelNamePage extends WizardPage {
 
 		txtModelName=new Text(compModel, SWT.BORDER);
 		txtModelName.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true,false));
-		txtModelName.setTextLimit(10);
+		txtModelName.setTextLimit(20);
 
 		// Empty labels used for styling
 		Label lbl1=new Label (compModel,SWT.NONE);

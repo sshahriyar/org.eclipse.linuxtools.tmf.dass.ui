@@ -44,6 +44,8 @@ public class Modeling {
     private MessageBox fMsgBox;
     private Button fBtnBuildModel;
     private HashSet<String> fModelsList;
+    private Button fBtnStop;
+    private ExecutorService executor;
 
     /**
      * Constructor
@@ -154,11 +156,15 @@ public class Modeling {
     public void buildModel(Composite compParent) {
         Composite compSettingAndEvaluation = new Composite(compParent, SWT.NONE);
         compSettingAndEvaluation.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 4, 2));
-        compSettingAndEvaluation.setLayout(new GridLayout(1, false));
+        compSettingAndEvaluation.setLayout(new GridLayout(2, false));
         fBtnBuildModel = new Button(compSettingAndEvaluation, SWT.NONE);
         fBtnBuildModel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false, 1, 1));
         fBtnBuildModel.setText("Start Modeling");
 
+        fBtnStop = new Button(compSettingAndEvaluation, SWT.NONE);
+        fBtnStop.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false, 1, 1));
+        fBtnStop.setText("Stop Modeling");
+        fBtnStop.setEnabled(false);
         //
         // Event handler for mouse up event
         //
@@ -190,15 +196,28 @@ public class Modeling {
                     return;
                 }
                 fBtnBuildModel.setEnabled(false);
+                fBtnStop.setEnabled(true);
                 // get the database name from the text box or combo
 
                 ITraceTypeReader traceReader = fTraceTypeSelector.getSelectedType();
                 BackgroundModeling modeling = new BackgroundModeling(trainingTraces,
-                        validationTraces, traceReader, fModelsList, fBtnBuildModel);
-                ExecutorService executor = Executors.newSingleThreadExecutor();
+                        validationTraces, traceReader, fModelsList, fBtnBuildModel,fBtnStop);
+                executor = Executors.newSingleThreadExecutor();
                 executor.execute(modeling);
                 executor.shutdown();
 
+            }
+        });
+
+        //
+        // Stop event handler
+        //
+        fBtnStop.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseUp(MouseEvent e) {
+                executor.shutdownNow();
+                fBtnStop.setEnabled(false);
             }
         });
     }

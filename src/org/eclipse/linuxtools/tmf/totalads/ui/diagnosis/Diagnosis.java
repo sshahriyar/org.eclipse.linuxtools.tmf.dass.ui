@@ -61,7 +61,8 @@ public class Diagnosis {
 	private HashSet<String> modelsList;
 	private MessageBox msgBox;
 	private Button btnEvaluateModels;
-
+	private Button fBtnStop;
+	private ExecutorService executor;
 	/**
 	 * Constructor
 	 */
@@ -228,10 +229,19 @@ public class Diagnosis {
 	 * @param compParent Composite
 	 */
 	private void addEvaluateButton(Composite compParent){
-		btnEvaluateModels=new Button(compParent, SWT.NONE);
-		btnEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false));
-		btnEvaluateModels.setText("    Evaluate    ");
+	    // Creating widgets for the selection of a trace type
+        Composite compButtons=new Composite(compParent, SWT.NONE);
+        compButtons.setLayoutData(new GridData(SWT.FILL,SWT.TOP,true,false,4,1));
+        compButtons.setLayout(new GridLayout(2,false));
 
+		btnEvaluateModels=new Button(compButtons, SWT.NONE);
+		btnEvaluateModels.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,true,false));
+		btnEvaluateModels.setText("    Start Evaluation   ");
+
+		fBtnStop=new Button(compButtons, SWT.NONE);
+        fBtnStop.setLayoutData(new GridData(SWT.RIGHT,SWT.TOP,false,false));
+        fBtnStop.setText("    Stop  Evaluation  ");
+        fBtnStop.setEnabled(false);
 		/**
 		 * Event handler for the evaluate button
 		 */
@@ -283,16 +293,29 @@ public class Diagnosis {
 					resultsAndFeedback.clearData();
 
 				btnEvaluateModels.setEnabled(false);
-
+				fBtnStop.setEnabled(true);
 
 				BackgroundTesting testTheModel=new BackgroundTesting(currentlySelectedTracesPath.toString(), traceReader,
-						    algorithm, database, btnEvaluateModels, resultsAndFeedback );
-				 ExecutorService executor = Executors.newSingleThreadExecutor();
+						    algorithm, database, btnEvaluateModels,fBtnStop, resultsAndFeedback );
+				 executor = Executors.newSingleThreadExecutor();
 				 executor.execute(testTheModel);
-				 executor.shutdown();
+
+
 
 			}
 		});
+
+		//
+		// Event handler for the stop button
+		//
+		fBtnStop.addMouseListener(new MouseAdapter() {
+		    @Override
+            public void mouseUp(MouseEvent e) {
+		        fBtnStop.setEnabled(false);
+		        executor.shutdownNow();
+		     }
+        });
+
 	}
 	/**
 	 * This function gets updated when a user selects a trace in TMF Views
@@ -345,7 +368,7 @@ public class Diagnosis {
 		if (!traceName.isEmpty()){
 			txtTMFTraceID.setText("Trace in TMF: "+traceName);
 			currentlySelectedTracesPath.append(tmfTracePath.toString());
-			// Make sure that only Lttng sytemc call trace reader is selected for TMF traces
+			// Make sure that only LTTng system call trace reader is selected for TMF traces
 			CTFLTTngSysCallTraceReader lttngReader=new CTFLTTngSysCallTraceReader();
 			traceTypeSelector.selectTraceType(lttngReader.getName());
 		}

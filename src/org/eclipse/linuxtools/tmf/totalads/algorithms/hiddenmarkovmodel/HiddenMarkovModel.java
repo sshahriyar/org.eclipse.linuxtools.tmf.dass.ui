@@ -36,13 +36,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	private int fNumStates, fNumSymbols, fNumIterations, fTestNameToIDSize;
 	private Double fTotalTestAnomalies=0.0, fTotalTestTraces=0.0, fLogThresholdTest=0.0;
 	private LinkedList<Integer> fBatchLargeTrainingSeq;
+	private Double fTestTraceMinThreshold;
 	/**
 	 * Constructor
 	 */
 	public HiddenMarkovModel() {
 
 		fNameToID=new NameToIDMapper();
-		fSeqLength=100;
+		fSeqLength=1000;
 
 	}
 
@@ -116,15 +117,17 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 */
 	@Override
 	public String[] getTestSettings(String database, IDataAccessObject dataAccessObject) throws TotalADSDBMSException {
-		 HmmMahout hmm=new HmmMahout();
+		HmmMahout hmm=new HmmMahout();
 		String []settings=hmm.loadSettings(database, dataAccessObject);
 		if (settings==null) {
             return null;
         }
 
-		String []testingSettings=new String[2];
+		String []testingSettings=new String[4];
 		testingSettings[0]=SettingsCollection.LOG_LIKELIHOOD.toString();
 		testingSettings[1]=settings[7]; // probability
+		testingSettings[2]=SettingsCollection.SEQ_LENGTH.toString();
+        testingSettings[3]=settings[9]; // probability
 		return testingSettings;
 	}
 	/*
@@ -183,6 +186,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 				 fNameToID.loadMap(connection, database);
 				 fIsTrainIntialized=true;
 				 fBatchLargeTrainingSeq=new LinkedList<>();
+
 		 }
 
 
@@ -202,9 +206,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	    	     outStream.addOutputEvent("Training using BaumWelch..can take really long depending on the size and number of traces");
 	 		     outStream.addNewLine();
-	    	        Integer[] seq=new Integer[fBatchLargeTrainingSeq.size()];
-	    		 seq=fBatchLargeTrainingSeq.toArray(seq);
-	    	     trainBaumWelch(seq, connection, database);
+
+	 		     int[] seq=new int[fBatchLargeTrainingSeq.size()];
+	    		 for (int i=0;i<fBatchLargeTrainingSeq.size();i++) {
+                    seq[i]=fBatchLargeTrainingSeq.get(i);
+                }
+       		    fBatchLargeTrainingSeq.clear();// clear memory
+
+	    		 fHmm=trainBaumWelch(seq, fNumStates, fNumSymbols, fNumIterations);
 
 	    	  	 outStream.addOutputEvent("Saving HMM to the database");
 	    	  	 outStream.addNewLine();
@@ -224,19 +233,25 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 
 	}
-   /**
-    * Trains Using BaumWelch
-    * @param seq
-    * @throws TotalADSGeneralException
-    */
-   private void trainBaumWelch(Integer []seq, IDataAccessObject dao, String database) throws TotalADSGeneralException{
+
+     /**
+      *  Trains Using BaumWelch
+      * @param seq
+      * @param numStates
+      * @param numSymbols
+      * @param numIterations
+      * @return
+      * @throws TotalADSGeneralException
+      */
+    private HmmMahout trainBaumWelch(int []seq, int numStates, int numSymbols, int numIterations) throws TotalADSGeneralException{
 	   try{
-		         fHmm.initializeHMM(fNumSymbols, fNumStates);
-		    	 fHmm.learnUsingBaumWelch(fNumIterations, seq);
-		    	 fHmm.saveHMM(database, dao);
+	             HmmMahout hmm=new HmmMahout();
+		         hmm.initializeHMMWithCustomizeInitialValues(numSymbols, numStates);
+		    	 hmm.learnUsingBaumWelch(numIterations, seq);
+		    	 return hmm;
 
 		     } catch (Exception ex){
-		    	 if (fNameToID.getSize()>fNumSymbols) {
+		    	 if (fNameToID.getSize()>numSymbols) {
                     throw new  TotalADSGeneralException("More events were found in the trace than you mentioned."
 		    		 		+ " Please, select larger number of unique events and start fresh with a new model. HMM model cannot be built!");
                 }
@@ -251,17 +266,18 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	public void validate(ITraceIterator trace, String database,IDataAccessObject dataAccessObject,
 			Boolean isLastTrace, IAlgorithmOutStream outStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 
-		int winWidth=0,validationSeqLength=fSeqLength;
+		int winWidth=0;
 		Double logThreshold;
 		String []options=fHmm.loadSettings(database, dataAccessObject);
 		logThreshold=Double.parseDouble(options[7]);
+		fSeqLength=Integer.parseInt(options[9]);
 
 		LinkedList<Integer> newSequence=new LinkedList<>();
 	   	outStream.addOutputEvent("Starting validation");
 	   	outStream.addNewLine();
 
 	   	Boolean isValidated=false;
-	   	outStream.addOutputEvent("Extracting sequences, please wait...");
+	   	outStream.addOutputEvent("Evaluating sequences, please wait...");
 	   	outStream.addNewLine();
 
 		 String event=null;
@@ -271,10 +287,10 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	    	  winWidth++;
 	    	  isValidated=false;
-	    	  if(winWidth >= validationSeqLength){
+	    	  if(winWidth >= fSeqLength){
 	    		  isValidated=true;
 	    		  winWidth--;
-	    		  Integer[] seq=new Integer[validationSeqLength];
+	    		  Integer[] seq=new Integer[fSeqLength];
 	    		  seq=newSequence.toArray(seq);
 	    		  // searching and adding to db
 	    		   logThreshold= validationEvaluation(outStream, logThreshold, seq);
@@ -335,14 +351,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	@Override
 	public Results test(ITraceIterator trace, String database, IDataAccessObject dataAccessObject,	IAlgorithmOutStream outputStream) throws TotalADSGeneralException, TotalADSDBMSException, TotalADSReaderException {
 
-		int winWidth=0,testSeqLength=fSeqLength;
+		int winWidth=0;
 		String []options;
 
 		if (!fIsTestInitialized){
 			fHmm=new HmmMahout();
 			options=fHmm.loadSettings(database, dataAccessObject);
 			fLogThresholdTest=Double.parseDouble(options[7]);
-
+			fSeqLength=Integer.parseInt(options[9]);
 			fHmm.loadHmm(dataAccessObject, database);
 			fNameToID.loadMap(dataAccessObject, database);
 			fTestNameToIDSize=fNameToID.getSize();
@@ -358,6 +374,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    outputStream.addOutputEvent("Extracting Sequences");
 	    outputStream.addNewLine();
 	    int seqCount=1;
+	    fTestTraceMinThreshold=0.0;
 	    while (trace.advance() ) {
 
 	    	  event=trace.getCurrentEvent();
@@ -365,11 +382,11 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	  winWidth++;
 	    	  isTested=false;
 
-	    	  if(winWidth >= testSeqLength){
+	    	  if(winWidth >= fSeqLength){
 
 	    		  isTested=true;
 	    		  winWidth--;
-	    		  Integer[] seq=new Integer[testSeqLength];
+	    		  Integer[] seq=new Integer[fSeqLength];
 	    		  seq=newSequence.toArray(seq);
 
 	    		  if (seqCount%10000==0){
@@ -391,8 +408,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
    		  	 seq=newSequence.toArray(seq);
 			 testEvaluation(results, fLogThresholdTest, seq);
 		}
+
+		results.setDetails("\nLog Likelihood: "+fTestTraceMinThreshold +"\n");
+		outputStream.addOutputEvent("Log Likelihood: "+fTestTraceMinThreshold);
+		outputStream.addNewLine();
+
 		outputStream.addOutputEvent("Finished evaluating the trace");
 		outputStream.addNewLine();
+
 		if (results.getAnomaly()==true) {
             fTotalTestAnomalies++;
         }
@@ -406,71 +429,82 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param seq
 	 * @return Return true if anomaly, else returns false
 	 */
-	private boolean testEvaluation(Results result, Double logThreshold, Integer []seq){
-		  Double loglikelihood=1.0;
-		  Double logThresholdValue=logThreshold;
-		  try{
-			  loglikelihood=fHmm.observationLikelihood(seq);
+    private boolean testEvaluation(Results result, Double logThreshold, Integer[] seq) {
+        Double loglikelihood = 1.0;
+        Double logThresholdValue = logThreshold;
+        try {
+            loglikelihood = fHmm.observationLikelihood(seq);
 
-		  } catch (Exception ex){
-				 result.setAnomaly(true);
-				 if (fNameToID.getSize() > fTestNameToIDSize){
-					 Integer diff=fNameToID.getSize()-fTestNameToIDSize;
+        } catch (Exception ex) {
+            result.setAnomaly(true);
+            if (fNameToID.getSize() > fTestNameToIDSize) {
+                Integer diff = fNameToID.getSize() - fTestNameToIDSize;
 
-					 if (diff >100) {
-                        result.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
-                    } else {
-                        result.setDetails("\nUnknown events: \n");
+                if (diff > 100) {
+                    result.setDetails("\nMore than 100 unknown events, only 100 are shown here: \n");
+                } else {
+                    result.setDetails("\nUnknown events: \n");
+                }
+                int eventCount = 0;
+                for (int i = fTestNameToIDSize; i < fTestNameToIDSize + diff; i++) {// All
+                                                                                    // these
+                                                                                    // events
+                                                                                    // are
+                                                                                    // unknown
+                    result.setDetails(fNameToID.getKey(i) + ", ");
+                    eventCount++;
+                    if ((eventCount) % 10 == 0) {
+                        result.setDetails("\n");
                     }
-					 int eventCount=0;
-					 for (int i=fTestNameToIDSize; i<fTestNameToIDSize+diff;i++){// All these events are unknown
-						   result.setDetails(fNameToID.getKey(i)+", ");
-						   eventCount++;
-						   if ((eventCount)%10==0) {
-                            result.setDetails("\n");
-                        }
-					 }
-					 fTestNameToIDSize+=diff;//don't display this for the second trace unless or untill there are additional events
-				 }
-			//fTotalTestAnomalies++;
-			return true;
-		  }
-
-		  if (loglikelihood<logThresholdValue){
-			  logThresholdValue=loglikelihood;
-			  result.setDetails("Anomalous pattern of events found in the sequence: \n");
-
-			  int firstRange=10;
-			   if (seq.length <10) {
-                firstRange=seq.length;
-            }
-			  for (int id=0; id<firstRange;id++) {
-                result.setDetails(fNameToID.getKey(seq[id])+", ");
-            }
-
-			  int secondRange=seq.length/2;
-			  if (secondRange+10<seq.length){
-				  result.setDetails("\n.........................................................\n");
-				  for (int id=secondRange; id<secondRange+10;id++) {
-                    result.setDetails(fNameToID.getKey(seq[id])+", ");
                 }
-			  }
+                fTestNameToIDSize += diff;// don't display this for the second
+                                          // trace unless or untill there are
+                                          // additional events
+            }
+            // fTotalTestAnomalies++;
+            return true;
+        }
 
-			  int thirdRange=seq.length;
-			  if (thirdRange-10>secondRange+10){
-				  result.setDetails("\n.........................................................\n");
-				  for (int id=secondRange; id<secondRange+10;id++) {
-                    result.setDetails(fNameToID.getKey(seq[id])+", ");
+        if (loglikelihood < fTestTraceMinThreshold){
+            fTestTraceMinThreshold=loglikelihood;
+        }
+
+
+        if (loglikelihood < logThresholdValue) {
+            logThresholdValue = loglikelihood;
+            result.setDetails("Anomalous pattern of events found in the sequence: \n");
+
+            int firstRange = 10;
+            if (seq.length < 10) {
+                firstRange = seq.length;
+            }
+            for (int id = 0; id < firstRange; id++) {
+                result.setDetails(fNameToID.getKey(seq[id]) + ", ");
+            }
+
+            int secondRange = seq.length / 2;
+            if (secondRange + 10 < seq.length) {
+                result.setDetails("\n.........................................................\n");
+                for (int id = secondRange; id < secondRange + 10; id++) {
+                    result.setDetails(fNameToID.getKey(seq[id]) + ", ");
                 }
-			  }
-			  result.setAnomaly(true);
-			  //fTotalTestAnomalies++;
-			  return true;
-		  }
-          result.setAnomaly(false);
-          return false;
+            }
 
-	}
+            int thirdRange = seq.length;
+            if (thirdRange - 10 > secondRange + 10) {
+                result.setDetails("\n.........................................................\n");
+                for (int id = secondRange; id < secondRange + 10; id++) {
+                    result.setDetails(fNameToID.getKey(seq[id]) + ", ");
+                }
+            }
+            result.setAnomaly(true);
+            // fTotalTestAnomalies++;
+            return true;
+        }
+        result.setAnomaly(false);
+        return false;
+
+    }
 
 	/*
 	 * (non-Javadoc)

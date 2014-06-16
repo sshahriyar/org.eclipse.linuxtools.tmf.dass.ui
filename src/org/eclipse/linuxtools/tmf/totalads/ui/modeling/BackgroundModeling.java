@@ -38,23 +38,26 @@ public class BackgroundModeling implements Runnable{
 	private String validationTraces;
 	private ITraceTypeReader traceReader;
 	private HashSet<String> modelsList;
-	Button btnMain;
+	private Button fBtnModelStart;
+	private Button fBtnModelStop;
 	/**
 	 *  Constructor
 	 * @param trainingTraces Training traces
 	 * @param validationTraces Validation trace folder
 	 * @param traceReader Trace reader selected by the user
-	 * @param modelSel ModelSelector object
-	 * @param progConsole AlgorithmOutStream object
-	 * @param btnBuild Button to enable
+	 * @param models Models
+	 * @param btnBuild Evaluation Button
+	 * @param btnStop Stop Button
 	 */
 	public BackgroundModeling(String trainingTraces,
-				String validationTraces,ITraceTypeReader traceReader, HashSet<String> models, Button btnBuild){
+				String validationTraces,ITraceTypeReader traceReader, HashSet<String> models, Button btnBuild
+				, Button btnStop){
 		this.trainingTraces=trainingTraces;
 		this.validationTraces=validationTraces;
 		this.traceReader=traceReader;
 		this.modelsList=models;
-		this.btnMain=btnBuild;
+		this.fBtnModelStart=btnBuild;
+		this.fBtnModelStop=btnStop;
 	}
 	/**
 	 * Implementation of the thread
@@ -145,7 +148,8 @@ public class BackgroundModeling implements Runnable{
 							msgBox.open();
 						}
 
-						btnMain.setEnabled(true);
+						fBtnModelStart.setEnabled(true);
+						fBtnModelStop.setEnabled(false);
 
 					}
 				});

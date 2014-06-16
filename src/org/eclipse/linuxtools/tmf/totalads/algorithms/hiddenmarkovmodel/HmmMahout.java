@@ -1,13 +1,18 @@
 package org.eclipse.linuxtools.tmf.totalads.algorithms.hiddenmarkovmodel;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDBCursor;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDBRecord;
 import org.eclipse.linuxtools.tmf.totalads.dbms.IDataAccessObject;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSDBMSException;
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
 import org.apache.mahout.classifier.sequencelearning.hmm.*;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.DenseVector;
@@ -38,6 +43,85 @@ class HmmMahout {
 
         hmm = new HmmModel(numStates, numSymbols);
 
+    }
+
+    /**
+     * Initializes HMM with the customized transition, emission and Initial probabilities rather than
+     * using Mahout's initialization. Specially this function makes sure that initial probabilities are equal.
+     * @param numSymbols Number of Symbols
+     * @param numStates Number of States
+     */
+    public void initializeHMMWithCustomizeInitialValues(int numSymbols, int numStates) {
+        // Generating transition probabilities with random numbers
+        Random random = new Random();
+        double start = 0.0001;
+        double end = 1.0000;
+        DenseMatrix tansitionProbabilities=new DenseMatrix(numStates, numStates);
+
+      //  Measuring Transition Probabilities
+        double[] rowSums = new double[numStates];
+        Arrays.fill(rowSums, 0.0);
+
+        for (int row = 0; row < numStates; row++) {
+            for (int col = 0; col < numStates; col++) {
+                tansitionProbabilities.set(row, col, getRandomRealNumber(start, end, random));
+                rowSums[row] += tansitionProbabilities.get(row,col);
+            }
+        }
+
+        for (int row = 0; row < numStates; row++) {
+            for (int col = 0; col < numStates; col++) {
+                tansitionProbabilities.set(row,col,  (tansitionProbabilities.get(row,col) / rowSums[row]));
+            }
+        }
+
+        // Assigning initial state probabilities Pi; i.e. probabilities at time 1
+        DenseVector initialProbabilities=new DenseVector(numStates);
+        double initialProb= 1/((double)numStates);
+           for (int idx = 0; idx < numStates; idx++) {
+            initialProbabilities.set(idx,initialProb );
+        }
+
+
+        // Measuring Emission probabilities of each symbol
+        DenseMatrix emissionProbabilities = new DenseMatrix(numStates,numSymbols);
+        Arrays.fill(rowSums, 0.0);// Utilizing the same rowSums variable
+        random = new Random();
+
+        for (int row = 0; row < numStates; row++) {
+            for (int col = 0; col < numSymbols; col++) {
+                emissionProbabilities.set(row,col, getRandomRealNumber(start, end, random));
+                rowSums[row] +=emissionProbabilities.get(row,col);
+            }
+        }
+
+        for (int row = 0; row < numStates; row++) {
+            for (int col = 0; col < numSymbols; col++) {
+                emissionProbabilities.set(row,col, emissionProbabilities.get(row,col) / rowSums[row]);
+            }
+        }
+
+
+        hmm = new HmmModel( tansitionProbabilities,emissionProbabilities,initialProbabilities);
+
+    }
+
+    /**
+     * Returns a decimal random number within a decimal range
+     *
+     * @param start
+     * @param end
+     * @param random
+     * @return
+     */
+    private static double getRandomRealNumber(double start, double end, Random random) {
+
+        // get the range, casting to long to avoid overflow problems
+        double range = end - start;
+        // compute a fraction of the range, 0 <= frac < range
+        double fraction = (range * random.nextDouble());
+        double randomNumber = fraction + start;
+        return randomNumber;
     }
 
     /**
@@ -188,7 +272,7 @@ class HmmMahout {
     }
 
     /**
-     * Returns the Observation probability of a sequences based on a model
+     * Returns the Observation log likelihood  of a sequences based on a model
      *
      * @param sequence
      *            Integer array of sequences
