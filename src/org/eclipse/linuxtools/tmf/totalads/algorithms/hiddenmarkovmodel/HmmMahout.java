@@ -278,12 +278,9 @@ class HmmMahout {
      *            Integer array of sequences
      * @return
      */
-    public double observationLikelihood(Integer[] sequence) {
-        int[] seq = new int[sequence.length];
-        for (int i = 0; i < sequence.length; i++) {
-            seq[i] = sequence[i];
-        }
-        Matrix m = HmmAlgorithms.forwardAlgorithm(hmm, seq, true);
+    public double observationLikelihood(int[] sequence) {
+
+        Matrix m = HmmAlgorithms.forwardAlgorithm(hmm, sequence, true);
         int lastCol = m.numCols() - 1;
         int numRows = m.numRows();
         double sum = 0.0;
@@ -292,7 +289,6 @@ class HmmMahout {
         }
 
         return sum;
-        // System.out.println(HmmAlgorithms.forwardAlgorithm(hmm, seq, true));
         // return HmmEvaluator.modelLikelihood(hmm, seq, true);
     }
 

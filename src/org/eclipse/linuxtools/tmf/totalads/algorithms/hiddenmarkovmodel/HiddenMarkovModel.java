@@ -290,9 +290,14 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	    	  if(winWidth >= fSeqLength){
 	    		  isValidated=true;
 	    		  winWidth--;
-	    		  Integer[] seq=new Integer[fSeqLength];
-	    		  seq=newSequence.toArray(seq);
-	    		  // searching and adding to db
+	    		  int[] seq=new int[fSeqLength];
+	    		  for (int i=0;i<newSequence.size();i++) {
+                    seq[i]=newSequence.get(i);
+                }
+
+	               newSequence.clear();// clear memory
+
+	    		   // searching and adding to db
 	    		   logThreshold= validationEvaluation(outStream, logThreshold, seq);
 
 	    		  newSequence.remove(0);
@@ -301,8 +306,12 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	     }
 		if (!isValidated){
-			 Integer[] seq=new Integer[newSequence.size()];
-   		  	 seq=newSequence.toArray(seq);
+		    int[] seq=new int[fSeqLength];
+            for (int i=0;i<newSequence.size();i++) {
+                seq[i]=newSequence.get(i);
+            }
+            newSequence.clear();// clear memory
+
 			 logThreshold=validationEvaluation(outStream, logThreshold, seq);
 		}
 
@@ -322,7 +331,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param logThreshold
 	 * @param seq
 	 */
-	private Double validationEvaluation(IAlgorithmOutStream outStream, Double logThreshold, Integer []seq){
+	private Double validationEvaluation(IAlgorithmOutStream outStream, Double logThreshold, int []seq){
 		  Double prob=1.0;
 		  Double logLikelihood=logThreshold;
 		  try{
@@ -386,10 +395,13 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	    		  isTested=true;
 	    		  winWidth--;
-	    		  Integer[] seq=new Integer[fSeqLength];
-	    		  seq=newSequence.toArray(seq);
+	    		  int[] seq=new int[fSeqLength];
+                  for (int i=0;i<newSequence.size();i++) {
+                    seq[i]=newSequence.get(i);
+                  }
+                   newSequence.clear();// clear memory
 
-	    		  if (seqCount%10000==0){
+                   if (seqCount%10000==0){
 	    			  outputStream.addOutputEvent("Executing "+seqCount+"th sequence");
 	    			  outputStream.addNewLine();
 	    		  }
@@ -404,8 +416,12 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 
 	     }
 		if (!isTested){
-			 Integer[] seq=new Integer[newSequence.size()];
-   		  	 seq=newSequence.toArray(seq);
+		    int[] seq=new int[fSeqLength];
+            for (int i=0;i<newSequence.size();i++) {
+                seq[i]=newSequence.get(i);
+            }
+             newSequence.clear();// clear memory
+
 			 testEvaluation(results, fLogThresholdTest, seq);
 		}
 
@@ -429,7 +445,7 @@ public class HiddenMarkovModel implements IDetectionAlgorithm {
 	 * @param seq
 	 * @return Return true if anomaly, else returns false
 	 */
-    private boolean testEvaluation(Results result, Double logThreshold, Integer[] seq) {
+    private boolean testEvaluation(Results result, Double logThreshold, int[] seq) {
         Double loglikelihood = 1.0;
         Double logThresholdValue = logThreshold;
         try {
