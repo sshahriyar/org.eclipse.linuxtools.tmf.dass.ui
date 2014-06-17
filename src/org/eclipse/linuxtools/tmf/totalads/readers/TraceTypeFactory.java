@@ -13,9 +13,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSGeneralException;
+import org.eclipse.linuxtools.tmf.totalads.reader.tmfreaders.CustomTmfReaderInitializer;
 import org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader;
 import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextLineTraceReader;
-import org.eclipse.linuxtools.tmf.totalads.readers.textreaders.TextSysIDtoNameTraceReader;
 
 /**
  * This class registers all the trace readers with itself by following a factory
@@ -164,7 +164,8 @@ public class TraceTypeFactory {
         // versions
         CTFLTTngSysCallTraceReader.registerTraceTypeReader();
         TextLineTraceReader.registerTraceTypeReader();
-        TextSysIDtoNameTraceReader.registerTraceTypeReader();
+        //TextSysIDtoNameTraceReader.registerTraceTypeReader();
+        CustomTmfReaderInitializer.registerAllCustomTmfTextTReaders();
     }
 
 }
