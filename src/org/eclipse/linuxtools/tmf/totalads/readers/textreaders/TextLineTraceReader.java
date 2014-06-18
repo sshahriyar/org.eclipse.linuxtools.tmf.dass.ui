@@ -24,7 +24,7 @@ import org.eclipse.linuxtools.tmf.totalads.readers.TraceTypeFactory;
 /**
  * This class reads a text file and returns whatever is written on a line.
  * Every line is transformed into an event
- * @author <Syed Shariyar Murtaza justsshary@hotmail.com </p>
+ * @author <p> Syed Shariyar Murtaza justsshary@hotmail.com </p>
  *
  */
 public class TextLineTraceReader implements ITraceTypeReader {
@@ -35,15 +35,14 @@ public class TextLineTraceReader implements ITraceTypeReader {
 		private BufferedReader bufferedReader;
 		private String event=""; //$NON-NLS-1$
 		private Boolean isClose=false;
-		//private String regEx=""; //$NON-NLS-1$
 
 		/**
 		 * Constructor
-		 * @param bReader A BufferReader object
+		 * @param file File object
+		 * @throws FileNotFoundException An exception about file
 		 */
-		public TextLineIterator(BufferedReader  bReader){
-			bufferedReader=bReader;
-			//regEx=""; //[| ]+([a-zA-Z0-9_:-]+)[ ]+.*"; //function call extraction pattern
+		public TextLineIterator(File  file) throws FileNotFoundException{
+			bufferedReader= new BufferedReader(new FileReader(file));
 		}
 
 
@@ -65,9 +64,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 					 }
 					 else{
 						 isAdvance=true;
-						 //if(!regEx.isEmpty())
-							// event= event.replaceAll(regEx, "$1"); //$NON-NLS-1$
-						 event=event.trim();
+						  event=event.trim();
 					 }
 				}while(event!=null && event.isEmpty());// if there are empty lines or there is no match on regex on a line, no need to send an event.
 										// keep looping till the end of file.
@@ -127,7 +124,7 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	@Override
 	public String getName() {
 
-		return "Text File (TXT)"; //$NON-NLS-1$
+		return "Simple Text File"; //$NON-NLS-1$
 	}
 
 	/**
@@ -145,10 +142,10 @@ public class TextLineTraceReader implements ITraceTypeReader {
 	@Override
 	public ITraceIterator getTraceIterator(File file) throws TotalADSReaderException {
 
-		BufferedReader bufferReader;
+
 		try {
-			bufferReader = new BufferedReader(new FileReader(file));
-			TextLineIterator textLineIterator=new TextLineIterator(bufferReader);
+
+			TextLineIterator textLineIterator=new TextLineIterator(file);
 			return textLineIterator;
 
 		} catch (FileNotFoundException e) {

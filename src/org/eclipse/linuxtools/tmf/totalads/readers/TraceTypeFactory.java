@@ -166,6 +166,7 @@ public class TraceTypeFactory {
         TextLineTraceReader.registerTraceTypeReader();
         //TextSysIDtoNameTraceReader.registerTraceTypeReader();
         CustomTmfReaderInitializer.registerAllCustomTmfTextTReaders();
+        CustomTmfReaderInitializer.registerAllCustomTmfXmlReaders();
     }
 
 }

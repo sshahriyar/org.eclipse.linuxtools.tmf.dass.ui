@@ -59,7 +59,7 @@ public class CTFLTTngSysCallTraceReader implements ITraceTypeReader {
      */
     @Override
     public String getName() {
-        return "LTTng System Call (SYS)"; //$NON-NLS-1$
+        return "LTTng System Call"; //$NON-NLS-1$
     }
 
     /**
