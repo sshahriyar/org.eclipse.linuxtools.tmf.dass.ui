@@ -2,175 +2,33 @@
 <!DOCTYPE log SYSTEM "logger.dtd">
 <log>
 <record>
-  <date>2014-06-18T18:06:11</date>
-  <millis>1403129171720</millis>
+  <date>2014-06-26T19:07:51</date>
+  <millis>1403824071792</millis>
   <sequence>0</sequence>
   <logger>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</logger>
-  <level>SEVERE</level>
-  <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+  <level>WARNING</level>
+  <class>org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting</class>
   <method>run</method>
-  <thread>47</thread>
-  <message>Document field names can't have a . in them. (Bad Key: 'com.mongodb.Mongo')</message>
+  <thread>86</thread>
+  <message>Reader error: {0}Cannot find metadata file!
+ File: txt</message>
   <exception>
-    <message>java.lang.IllegalArgumentException: Document field names can't have a . in them. (Bad Key: 'com.mongodb.Mongo')</message>
+    <message>org.eclipse.linuxtools.tmf.totalads.exceptions.TotalADSReaderException: Cannot find metadata file!
+ File: txt</message>
     <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>validateKey</method>
-      <line>1450</line>
+      <class>org.eclipse.linuxtools.tmf.totalads.readers.ctfreaders.CTFLTTngSysCallTraceReader</class>
+      <method>getTraceIterator</method>
+      <line>95</line>
     </frame>
     <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkKeys</method>
-      <line>1410</line>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting</class>
+      <method>testTheModel</method>
+      <line>259</line>
     </frame>
     <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkValue</method>
-      <line>1433</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkKeys</method>
-      <line>1411</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkObject</method>
-      <line>1397</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBApiLayer$MyCollection</class>
-      <method>update</method>
-      <line>318</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>update</method>
-      <line>178</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>update</method>
-      <line>209</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.dbms.MongoDBMS</class>
-      <method>insertOrUpdateUsingJSON</method>
-      <line>335</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.NameToIDMapper</class>
-      <method>saveMap</method>
-      <line>105</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow</class>
-      <method>train</method>
-      <line>320</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility</class>
-      <method>trainAndValidateModels</method>
-      <line>171</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
+      <class>org.eclipse.linuxtools.tmf.totalads.ui.diagnosis.BackgroundTesting</class>
       <method>run</method>
-      <line>82</line>
-    </frame>
-    <frame>
-      <class>java.util.concurrent.ThreadPoolExecutor</class>
-      <method>runWorker</method>
-      <line>1145</line>
-    </frame>
-    <frame>
-      <class>java.util.concurrent.ThreadPoolExecutor$Worker</class>
-      <method>run</method>
-      <line>615</line>
-    </frame>
-    <frame>
-      <class>java.lang.Thread</class>
-      <method>run</method>
-      <line>724</line>
-    </frame>
-  </exception>
-</record>
-<record>
-  <date>2014-06-18T18:33:38</date>
-  <millis>1403130818401</millis>
-  <sequence>1</sequence>
-  <logger>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</logger>
-  <level>SEVERE</level>
-  <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
-  <method>run</method>
-  <thread>93</thread>
-  <message>Document field names can't have a . in them. (Bad Key: 'com.mongodb.Mongo')</message>
-  <exception>
-    <message>java.lang.IllegalArgumentException: Document field names can't have a . in them. (Bad Key: 'com.mongodb.Mongo')</message>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>validateKey</method>
-      <line>1450</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkKeys</method>
-      <line>1410</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkValue</method>
-      <line>1433</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkKeys</method>
-      <line>1411</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>_checkObject</method>
-      <line>1397</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBApiLayer$MyCollection</class>
-      <method>update</method>
-      <line>318</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>update</method>
-      <line>178</line>
-    </frame>
-    <frame>
-      <class>com.mongodb.DBCollection</class>
-      <method>update</method>
-      <line>209</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.dbms.MongoDBMS</class>
-      <method>insertOrUpdateUsingJSON</method>
-      <line>335</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.NameToIDMapper</class>
-      <method>saveMap</method>
-      <line>105</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.slidingwindow.SlidingWindow</class>
-      <method>train</method>
-      <line>320</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.algorithms.AlgorithmUtility</class>
-      <method>trainAndValidateModels</method>
-      <line>171</line>
-    </frame>
-    <frame>
-      <class>org.eclipse.linuxtools.tmf.totalads.ui.modeling.BackgroundModeling</class>
-      <method>run</method>
-      <line>82</line>
+      <line>108</line>
     </frame>
     <frame>
       <class>java.util.concurrent.ThreadPoolExecutor</class>

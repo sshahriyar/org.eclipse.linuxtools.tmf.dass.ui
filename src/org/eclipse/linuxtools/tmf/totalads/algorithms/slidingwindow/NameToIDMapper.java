@@ -85,7 +85,7 @@ class NameToIDMapper {
     }
 
     /**
-     * Stores the map into db for reuse
+     * Stores the map into database for reuse
      *
      * @param dataAccessObject
      * @param database
@@ -93,15 +93,17 @@ class NameToIDMapper {
      */
     public void saveMap(IDataAccessObject dataAccessObject, String database) throws TotalADSDBMSException {
         Gson gson = new Gson();
-        JsonElement jsonMap = gson.toJsonTree(fNameToID);
+        JsonElement jsonMap = gson.toJsonTree(fNameToID.inverse());// Store as integer id and string value
+                                                                   // because if there is a dot in the field name
+                                                                   //mongodb would result in error
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(NameToIDCollection.KEY.toString(), "nametoid");
+        jsonObject.addProperty(NameToIDCollection.KEY.toString(), "nametoid");// we add a key here because it could
+                                                                              // be the first time insertion
         jsonObject.add(NameToIDCollection.MAP.toString(), jsonMap);
 
         JsonObject jsonKey = new JsonObject();
         jsonKey.addProperty(NameToIDCollection.KEY.toString(), "nametoid");
 
-        // console.printTextLn(jsonObject.toString());
         dataAccessObject.insertOrUpdateUsingJSON(database, jsonKey, jsonObject, NameToIDCollection.COLLECTION_NAME.toString());
 
     }
@@ -118,17 +120,24 @@ class NameToIDMapper {
 
         try (IDBCursor cursor = dataAccessObject.selectAll(database,
                 NameToIDCollection.COLLECTION_NAME.toString())) {
+
             if (cursor.hasNext()) {
                 Gson gson = new Gson();
                 IDBRecord record = cursor.next();
                 Object obj = record.get(NameToIDCollection.MAP.toString());
+
                 if (obj != null) {
-                    Type stringIntMap = new TypeToken<HashBiMap<String, Integer>>() {
-                    }.getType();
+                    Type stringIntMap = new TypeToken<HashBiMap<Integer, String>>() { }.getType();
                     // gson doesn't recognize bimap and always return a map,
                     // which can not be casted to a bimap, strangely
-                    Map<String, Integer> guavaLinkedMap = gson.fromJson(obj.toString(), stringIntMap);
-                    fNameToID.putAll(guavaLinkedMap);
+                    Map<Integer, String> guavaLinkedMap = gson.fromJson(obj.toString(), stringIntMap);
+                    // Transform id to name mapping to name to id
+                    // We used id to name mapping to avoid errors while storing in mongodb
+                    for (Map.Entry<Integer,String> keyVal:guavaLinkedMap.entrySet()){
+                     // Insert string as a key and id a value in the map
+                        fNameToID.put(keyVal.getValue(), keyVal.getKey());
+                    }
+
                     guavaLinkedMap.clear();// now get rid of it
                     guavaLinkedMap = null;
 

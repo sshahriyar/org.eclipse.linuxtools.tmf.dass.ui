@@ -63,6 +63,8 @@ public class SlidingWindow implements IDetectionAlgorithm {
     private int fMaxWinLimit = 25;
     private NameToIDMapper fNameToID;
     private int fTestNameToIDSize;
+    private  Boolean isValidationStarted = false;
+
 
     /**
      * Constructor
@@ -314,7 +316,16 @@ public class SlidingWindow implements IDetectionAlgorithm {
             // Saving events tree in database
             outStream.addOutputEvent("All unique sequences ");
             outStream.addNewLine();
-            fTreeTransformer.printSequence(outStream, fSysCallSequences, fNameToID);
+            if (fSysCallSequences.size() > 0) {
+                fTreeTransformer.printSequence(outStream, fSysCallSequences, fNameToID);
+            } else{
+                String err="No sequences of length "+fMaxWin + " found in traces";
+                outStream.addOutputEvent(err);
+                outStream.addNewLine();
+                throw new TotalADSGeneralException(err);
+
+            }
+
             fTreeTransformer.saveinDatabase(outStream, database, dataAccessObject, fSysCallSequences);
             fIsintialize = false;
             fNameToID.saveMap(dataAccessObject, database);
@@ -322,7 +333,6 @@ public class SlidingWindow implements IDetectionAlgorithm {
 
     }
 
-    Boolean isValidationStarted = false;
 
     /*
      * (non-Javadoc)

@@ -343,12 +343,11 @@ class SlidingWindowTree {
                                                                                    // sequence
             }
             else {
-                thePrefix = thePrefix + nameToId.getKey(nodes[nodeCount].getEvent().intValue()) + " ";// just
+                thePrefix = thePrefix + "\""+nameToId.getKey(nodes[nodeCount].getEvent().intValue()) + "\" ";// just
                                                                                                       // append
                                                                                                       // the
                                                                                                       // events
-                // create a two dimension name Tree as an array and node as
-                // event name
+
             }
 
             if (branches != null) { // if there are branches on an event then
@@ -358,7 +357,7 @@ class SlidingWindowTree {
                     printRecursive(branches.get(i), thePrefix, outStream, nameToId);
                 }
             } else {
-                // create tee withnull
+
                 // Print only when we reach a leaf of a branch
                 if (nodeCount == nodes.length - 1) {
                     outStream.addOutputEvent(thePrefix);
